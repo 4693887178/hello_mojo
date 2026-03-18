@@ -1,0 +1,42 @@
+先读这篇文章，理解文章所讲的内容，这个项目以后都按这个介绍的规范来实现。
+https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+
+将PYTHON框架rqalpha， 用mojo语言重构，
+要求
+1.尽量保证功能，文件名称，类名，函数，方法名一致  
+2.每个子任务复杂度可控、可独立验证。
+3.明确输入 / 输出、验收标准、依赖关系。
+4.生成任务依赖图（Mermaid），可视化流程。
+5.优先用mojo已经有的模块。
+
+注意事项：
+PYTHON是用UV的方式安装的PYTHON3.14版本。
+
+吴恩达推出 Context Hub，专治 AI 写代码时的「瞎编」问题 
+一句话概括：让你的 AI 编程 Agent 用上最新的 API 文档，别再瞎编了。
+https://www.sohu.com/a/994819556_122189055
+# 搜索可用文档
+chub search openai
+
+# 获取 Python 版文档
+chub get openai/chat --lang py
+
+# 获取 JavaScript 版文档
+chub get stripe/api --lang js
+
+# 更新缓存索引
+chub update
+
+# 给文档添加批注（让 Agent 记住踩过的坑）
+chub annotate stripe/api "webhook 验证需要 raw body"
+
+# 给文档投票反馈
+chub feedback stripe/api up
+
+
+MOJO官方文档：
+https://docs.modular.com/mojo/lib
+
+
+Mojo 文档 mcp 服务器，使用 Max 进行嵌入
+https://forum.modular.com/t/mojo-documentation-mcp-server-using-max-for-embeddings/2476

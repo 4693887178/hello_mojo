@@ -1,0 +1,70 @@
+{
+  "contexts": {
+    "95717c10-4119-49d8-9eea-f1e93f288c79": {
+      "model": "orchestrator",
+      "protocol": "1.0",
+      "context": [
+        {
+          "context_id": "80dd3fe0-bb42-48d3-b85b-215c39c018f3",
+          "context_type": "user_intent",
+          "content": "\u591aAgent\u534f\u4f5c\u7cfb\u7edf\u521d\u59cb\u5316",
+          "source_agent": "orchestrator",
+          "created_at": "2026-03-19T01:30:07.210593",
+          "expires_at": null,
+          "metadata": {}
+        },
+        {
+          "context_id": "519ffb91-6883-4821-98f4-457ef05c5dbe",
+          "context_type": "decision",
+          "content": {
+            "task_id": "f13c71c5-573f-4839-8ba7-673020b9d77c",
+            "assigned_to": "codebuddy-cn"
+          },
+          "source_agent": "orchestrator",
+          "created_at": "2026-03-19T01:30:07.240712",
+          "expires_at": null,
+          "metadata": {}
+        },
+        {
+          "context_id": "a604fbf1-5365-44c8-901a-acafe603ba1e",
+          "context_type": "decision",
+          "content": {
+            "task_id": "da4071aa-853a-4cd3-a69b-c8dcf6ff1ee5",
+            "assigned_to": "trae-cn"
+          },
+          "source_agent": "orchestrator",
+          "created_at": "2026-03-19T01:30:07.290669",
+          "expires_at": null,
+          "metadata": {}
+        }
+      ]
+    },
+    "faceb9f0-fa3d-4ce2-b088-59f1e22ebd37": {
+      "model": "demo-orchestrator",
+      "protocol": "1.0",
+      "context": [
+        {
+          "context_id": "6cf566a6-eb42-44b0-b1d5-dfda481632ac",
+          "context_type": "user_intent",
+          "content": "\u6f14\u793a\u591aAgent\u534f\u4f5c\uff1aPython\u5230Mojo\u7684\u4ee3\u7801\u8f6c\u6362\u548c\u5ba1\u67e5",
+          "source_agent": "orchestrator",
+          "created_at": "2026-03-19T01:34:47.664496",
+          "expires_at": null,
+          "metadata": {}
+        },
+        {
+          "context_id": "df257b9c-069f-449d-9be7-0fc43a503641",
+          "context_type": "decision",
+          "content": {
+            "decision": "\u4ee3\u7801\u8f6c\u6362\u548c\u5ba1\u67e5\u6d41\u7a0b\u5b8c\u6210",
+            "approved": true
+          },
+          "source_agent": "orchestrator",
+          "created_at": "2026-03-19T01:34:47.828564",
+          "expires_at": null,
+          "metadata": {}
+        }
+      ]
+    }
+  }
+}

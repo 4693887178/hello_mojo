@@ -1,0 +1,45 @@
+"""
+RQAlpha Mojo - Excel Template
+Ported from rqalpha/mod/rqalpha_mod_sys_analyser/report/excel_template.py
+"""
+
+
+struct ExcelTemplate:
+    alias SHEET_SUMMARY: String = "Summary"
+    alias SHEET_TRADES: String = "Trades"
+    alias SHEET_DAILY: String = "Daily"
+    alias SHEET_POSITIONS: String = "Positions"
+
+
+fn generate_csv_content(headers: List[String], rows: List[List[String]]) -> String:
+    var content = ""
+    
+    for i in range(len(headers)):
+        if i > 0:
+            content += ","
+        content += headers[i]
+    content += "\n"
+    
+    for row in rows:
+        for i in range(len(row)):
+            if i > 0:
+                content += ","
+            content += row[i]
+        content += "\n"
+    
+    return content
+
+
+fn generate_summary_csv(result: Dict[String, String]) -> String:
+    var headers = List[String]()
+    headers.append("Metric")
+    headers.append("Value")
+    
+    var rows = List[List[String]]()
+    for key in result.keys():
+        var row = List[String]()
+        row.append(key)
+        row.append(result[key])
+        rows.append(row)
+    
+    return generate_csv_content(headers, rows)
