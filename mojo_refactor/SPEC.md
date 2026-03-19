@@ -28,7 +28,7 @@
 ### 源代码结构 (Python)
 
 ```
-/home/zhou/hello-world/.venv/lib/python3.14/site-packages/rqalpha/
+/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages/rqalpha/
 ├── __init__.py
 ├── __main__.py
 ├── _version.py
@@ -153,7 +153,7 @@
 - ✅ `passed`: 测试通过
 
 ```
-/home/zhou/hello-world/mojo_refactor/
+/home/zhou/hello_mojo/mojo_refactor/
 ├── rqmojo/                  # Mojo 重构代码
 │   ├── __init__.mojo        📝 created
 │   ├── _version.mojo        📝 created
@@ -444,22 +444,22 @@ YYYY-MM-DD HH:MM:SS
 
 ```bash
 LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so \
-PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
-/home/zhou/hello-world/.venv/bin/mojo run -I . <file.mojo>
+PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages \
+/home/zhou/hello_mojo/.venv/bin/mojo run -I . <file.mojo>
 ```
 
 ### 运行 Python 测试
 
 ```bash
-/home/zhou/hello-world/.venv/bin/python -m pytest tests/python/
+/home/zhou/hello_mojo/.venv/bin/python -m pytest tests/python/
 ```
 
 ### 运行 Mojo 测试
 
 ```bash
 LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so \
-PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
-/home/zhou/hello-world/.venv/bin/mojo run tests/mojo/<module>/test_<name>.mojo
+PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages \
+/home/zhou/hello_mojo/.venv/bin/mojo run tests/mojo/<module>/test_<name>.mojo
 ```
 
 ## 6. 额外创建的文件

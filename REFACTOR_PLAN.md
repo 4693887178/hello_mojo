@@ -4,7 +4,7 @@
 
 将 Python 量化交易框架 **rqalpha** 重构为 **Mojo** 语言。
 
-- **源代码位置**: `/home/zhou/hello-world/.venv/lib/python3.14/site-packages/rqalpha`
+- **源代码位置**: `/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages/rqalpha`
 - **Python 文件总数**: 140 个
 - **目标**: 每个 Python 文件对应一个 Mojo 文件和一个测试文件
 

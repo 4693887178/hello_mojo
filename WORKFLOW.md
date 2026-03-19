@@ -23,7 +23,7 @@ github:
 hooks:
   after_create: |
     echo "Workspace initialized for rqalpha -> Mojo refactor"
-    echo "Python source: /home/zhou/hello-world/.venv/lib/python3.14/site-packages/rqalpha"
+    echo "Python source: /home/zhou/hello_mojo/.venv/lib/python3.14/site-packages/rqalpha"
     echo "Mojo version: 0.26.1"
     echo "GitHub repo: https://github.com/4693887178/hello_mojo.git"
     git status || git init
@@ -40,9 +40,9 @@ mojo:
   version: "0.26.1"
   python_version: "3.14"
   python_lib: "/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so"
-  python_path: "/home/zhou/hello-world/.venv/lib/python3.14/site-packages"
-  mojo_bin: "/home/zhou/hello-world/.venv/bin/mojo"
-  run_prefix: "LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages"
+  python_path: "/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages"
+  mojo_bin: "/home/zhou/hello_mojo/.venv/bin/mojo"
+  run_prefix: "LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages"
 project_files:
   spec: /home/zhou/hello_mojo/trae_cn/mojo_refactor/SPEC.md
   tasks: /home/zhou/hello_mojo/trae_cn/mojo_refactor/TASKS.md
@@ -193,15 +193,15 @@ graph TD
 
 - **Python**: 3.14 (installed via UV)
 - **Mojo**: 0.26.1 (installed via UV)
-- **Mojo Binary**: `/home/zhou/hello-world/.venv/bin/mojo`
+- **Mojo Binary**: `/home/zhou/hello_mojo/.venv/bin/mojo`
 - **Python Lib**: `/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so`
 
 ### Running Mojo with Python Interop
 
 ```bash
 LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so \
-PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
-/home/zhou/hello-world/.venv/bin/mojo run -I . <file.mojo>
+PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages \
+/home/zhou/hello_mojo/.venv/bin/mojo run -I . <file.mojo>
 ```
 
 ### Mojo Documentation
@@ -257,7 +257,7 @@ PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
 3. Start work by writing/updating a hierarchical plan in the workpad.
 4. Add explicit acceptance criteria and TODOs in checklist form.
 5. Before implementing:
-   - Read the corresponding Python source file from `/home/zhou/hello-world/.venv/lib/python3.14/site-packages/rqalpha/`
+   - Read the corresponding Python source file from `/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages/rqalpha/`
    - Understand the functionality and dependencies
    - Check Mojo documentation for equivalent modules
 6. Implement the Mojo version following the plan.
@@ -446,13 +446,13 @@ YYYY-MM-DD HH:MM:SS
 **Run Mojo Test:**
 ```bash
 LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so \
-PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
-/home/zhou/hello-world/.venv/bin/mojo run -I . tests/mojo/<module>/test_<name>.mojo
+PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages \
+/home/zhou/hello_mojo/.venv/bin/mojo run -I . tests/mojo/<module>/test_<name>.mojo
 ```
 
 **Run Python Test:**
 ```bash
-/home/zhou/hello-world/.venv/bin/python -m pytest tests/python/<module>/
+/home/zhou/hello_mojo/.venv/bin/python -m pytest tests/python/<module>/
 ```
 
 ## Task ID Reference

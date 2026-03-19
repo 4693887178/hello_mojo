@@ -1,10 +1,10 @@
 {
   "name": "rqmojo-refactor",
   "leadAgentId": "00a0d795b3ef4ae884b90c984c2e6b3d",
-  "workspacePath": "/home/zhou/hello-world",
+  "workspacePath": "/home/zhou/hello_mojo",
   "createdAt": "2026-03-19T00:19:21.472Z",
   "options": {
-    "workspacePath": "/home/zhou/hello-world",
+    "workspacePath": "/home/zhou/hello_mojo",
     "isAutoTeam": false
   },
   "members": [
