@@ -1,0 +1,18 @@
+{
+  "name": "rqmojo-refactor",
+  "leadAgentId": "00a0d795b3ef4ae884b90c984c2e6b3d",
+  "workspacePath": "/home/zhou/hello-world",
+  "createdAt": "2026-03-19T00:19:21.472Z",
+  "options": {
+    "workspacePath": "/home/zhou/hello-world",
+    "isAutoTeam": false
+  },
+  "members": [
+    {
+      "memberId": "team-lead@rqmojo-refactor",
+      "name": "team-lead",
+      "role": "Team Lead - coordinates the team and interacts with the user"
+    }
+  ],
+  "isAutoTeam": false
+}
