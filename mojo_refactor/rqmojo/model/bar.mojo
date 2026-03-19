@@ -9,8 +9,8 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct BarObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
-    var instrument: Instrument
+struct BarObject(Stringable, Movable):
+    var _order_book_id: String
     var datetime: DateTime
     var open: Float64
     var high: Float64
@@ -28,7 +28,10 @@ struct BarObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var prev_close: Float64
     
     fn __str__(self) -> String:
-        return "BarObject(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ", close=" + String(self.close) + ")"
+        return "BarObject(" + self._order_book_id + ", " + self.datetime.__str__() + ", close=" + String(self.close) + ")"
+    
+    fn order_book_id(self) -> String:
+        return self._order_book_id
     
     fn is_trading(self) -> Bool:
         return self._trading
@@ -53,7 +56,7 @@ struct BarObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 fn create_bar_object(
-    instrument: Instrument,
+    order_book_id: String,
     dt: DateTime,
     open: Float64,
     high: Float64,
@@ -71,7 +74,7 @@ fn create_bar_object(
     prev_close: Float64 = 0.0
 ) -> BarObject:
     return BarObject(
-        instrument=instrument,
+        _order_book_id=order_book_id,
         datetime=dt,
         open=open,
         high=high,
@@ -91,7 +94,7 @@ fn create_bar_object(
 
 
 fn create_simple_bar(
-    instrument: Instrument,
+    order_book_id: String,
     dt: DateTime,
     open: Float64,
     high: Float64,
@@ -100,7 +103,7 @@ fn create_simple_bar(
     volume: Float64
 ) -> BarObject:
     return create_bar_object(
-        instrument=instrument,
+        order_book_id=order_book_id,
         dt=dt,
         open=open,
         high=high,

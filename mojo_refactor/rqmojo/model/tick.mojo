@@ -9,8 +9,8 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct TickObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
-    var instrument: Instrument
+struct TickObject(Stringable, Movable):
+    var _order_book_id: String
     var datetime: DateTime
     var last: Float64
     var volume: Float64
@@ -23,7 +23,10 @@ struct TickObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var limit_down: Float64
     
     fn __str__(self) -> String:
-        return "TickObject(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ", last=" + String(self.last) + ")"
+        return "TickObject(" + self._order_book_id + ", " + self.datetime.__str__() + ", last=" + String(self.last) + ")"
+    
+    fn order_book_id(self) -> String:
+        return self._order_book_id
     
     fn close(self) -> Float64:
         return self.last
@@ -33,20 +36,18 @@ struct TickObject(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 fn create_tick_object(
-    instrument: Instrument,
+    order_book_id: String,
     dt: DateTime,
     last: Float64,
     volume: Float64,
     total_turnover: Float64,
-    open: Float64 = 0.0,
-    high: Float64 = 0.0,
-    low: Float64 = 0.0,
-    prev_close: Float64 = 0.0,
-    limit_up: Float64 = 0.0,
-    limit_down: Float64 = 0.0
+    open: Float64 = 1.0,
+    high: Float64 = 1.0,
+    low: Float64 = 1.0,
+    prev_close: Float64 = 1.0,
 ) -> TickObject:
     return TickObject(
-        instrument=instrument,
+        _order_book_id=order_book_id,
         datetime=dt,
         last=last,
         volume=volume,

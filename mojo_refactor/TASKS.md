@@ -32,7 +32,7 @@
 | T004 | rqalpha/api.py          | rqmojo/api.mojo          | passed  |
 | T005 | rqalpha/const.py        | rqmojo/const.mojo        | passed  |
 | T006 | rqalpha/environment.py  | rqmojo/environment.mojo  | passed |
-| T007 | rqalpha/interface.py    | rqmojo/interface.mojo    | pending |
+| T007 | rqalpha/interface.py    | rqmojo/interface.mojo    | passed |
 | T008 | rqalpha/main.py         | rqmojo/main.mojo         | pending |
 | T009 | rqalpha/user\_module.py | rqmojo/user\_module.mojo | pending |
 

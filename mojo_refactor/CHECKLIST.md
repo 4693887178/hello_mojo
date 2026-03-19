@@ -26,7 +26,7 @@
 | T004 | api.py → api.mojo | passed |
 | T005 | const.py → const.mojo | passed |
 | T006 | environment.py → environment.mojo | passed |
-| T007 | interface.py → interface.mojo | pending |
+| T007 | interface.py → interface.mojo | passed |
 | T008 | main.py → main.mojo | pending |
 | T009 | user_module.py → user_module.mojo | pending |
 
