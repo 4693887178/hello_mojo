@@ -17,15 +17,15 @@ polling:
 workspace:
   root: /home/zhou/hello_mojo/trae_cn
 github:
-  repo: "https://github.com/4693887178/hello-world.git"
+  repo: "https://github.com/4693887178/hello_mojo.git"
   owner: "4693887178"
-  repo_name: "hello-world"
+  repo_name: "hello_mojo"
 hooks:
   after_create: |
     echo "Workspace initialized for rqalpha -> Mojo refactor"
     echo "Python source: /home/zhou/hello-world/.venv/lib/python3.14/site-packages/rqalpha"
     echo "Mojo version: 0.26.1"
-    echo "GitHub repo: https://github.com/4693887178/hello-world.git"
+    echo "GitHub repo: https://github.com/4693887178/hello_mojo.git"
     git status || git init
   before_remove: |
     echo "Cleaning up workspace..."
@@ -43,6 +43,11 @@ mojo:
   python_path: "/home/zhou/hello-world/.venv/lib/python3.14/site-packages"
   mojo_bin: "/home/zhou/hello-world/.venv/bin/mojo"
   run_prefix: "LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages"
+project_files:
+  spec: /home/zhou/hello_mojo/trae_cn/mojo_refactor/SPEC.md
+  tasks: /home/zhou/hello_mojo/trae_cn/mojo_refactor/TASKS.md
+  checklist: /home/zhou/hello_mojo/trae_cn/mojo_refactor/CHECKLIST.md
+  refactor_plan: /home/zhou/hello_mojo/trae_cn/REFACTOR_PLAN.md
 ---
 
 You are working on a Mojo refactoring task for the rqalpha project.
@@ -80,6 +85,101 @@ Work only in the provided repository copy. Do not touch any other path.
 ## Project Context
 
 This project refactors the Python quantitative trading framework **rqalpha** to **Mojo** language.
+
+### Project Statistics
+
+- **Total Files**: 140 Python files
+- **Total Tasks**: 140 tasks
+- **Files Created**: 140 (100%)
+- **Tests Passed**: 0 (0%)
+- **Task Completion**: File creation + test passed = task complete
+
+### Project Files Reference
+
+| File | Path | Purpose |
+|------|------|---------|
+| SPEC.md | `mojo_refactor/SPEC.md` | Technical specification and directory structure |
+| TASKS.md | `mojo_refactor/TASKS.md` | Complete task list with IDs and status |
+| CHECKLIST.md | `mojo_refactor/CHECKLIST.md` | Progress tracking checklist |
+| REFACTOR_PLAN.md | `REFACTOR_PLAN.md` | Dependency graph and milestones |
+
+### Task Phases Overview
+
+| Phase | Module | Tasks | Status |
+|-------|--------|-------|--------|
+| 1 | root | 9 | 5 passed, 4 pending |
+| 2 | apis | 5 | pending |
+| 3 | cmds | 6 | pending |
+| 4 | core | 9 | pending |
+| 5 | data | 12 | pending |
+| 6 | model | 6 | pending |
+| 7 | portfolio | 3 | pending |
+| 8 | utils | 26 | pending |
+| 9 | examples | 15 | pending |
+| 10 | mod | 49 | pending |
+| **Total** | | **140** | **5 passed, 135 pending** |
+
+### Task Dependency Graph
+
+```mermaid
+graph TD
+    subgraph "Phase 1: root"
+        T001[__init__.mojo]
+        T005[const.mojo]
+        T007[interface.mojo]
+        T006[environment.mojo]
+        T008[main.mojo]
+    end
+    
+    subgraph "Phase 2: utils"
+        T059[exception.mojo]
+        T070[typing.mojo]
+        T057[datetime_func.mojo]
+    end
+    
+    subgraph "Phase 3: core"
+        T022[events.mojo]
+        T024[executor.mojo]
+        T026[strategy.mojo]
+    end
+    
+    subgraph "Phase 4: model"
+        T044[instrument.mojo]
+        T043[bar.mojo]
+        T045[order.mojo]
+        T047[trade.mojo]
+    end
+    
+    subgraph "Phase 5: portfolio"
+        T050[position.mojo]
+        T049[account.mojo]
+    end
+    
+    subgraph "Phase 6: data"
+        T033[data_proxy.mojo]
+    end
+    
+    T005 --> T059
+    T005 --> T070
+    T005 --> T007
+    T059 --> T007
+    T070 --> T007
+    T007 --> T022
+    T007 --> T044
+    T022 --> T024
+    T024 --> T026
+    T044 --> T043
+    T044 --> T045
+    T045 --> T047
+    T044 --> T050
+    T045 --> T050
+    T047 --> T050
+    T045 --> T049
+    T047 --> T049
+    T050 --> T049
+    T044 --> T033
+    T043 --> T033
+```
 
 ### Key Constraints
 
@@ -298,3 +398,95 @@ For each Python file being refactored:
 8. [ ] Create corresponding test file
 9. [ ] Verify compilation
 10. [ ] Run tests and compare behavior
+
+## Testing Requirements
+
+### Test Principles
+
+- **Consistent Conditions**: Python and Mojo tests use the same input data
+- **Consistent Output**: Both test outputs must be identical to pass
+- **Result Recording**: Record results in `tests/results/` directory after each test
+- **Completion Standard**: File created + test passed = task complete
+
+### Test Result Format
+
+Each test should create a result file in `tests/results/T<task_id>_<module_name>.md`:
+
+```markdown
+# [Module Name] Test Result
+
+## Test Time
+YYYY-MM-DD HH:MM:SS
+
+## Test Conditions
+- Input: [describe input data]
+- Environment: Python 3.14 / Mojo 0.26.1
+
+## Python Test Result
+\`\`\`
+[Python test output]
+\`\`\`
+
+## Mojo Test Result
+\`\`\`
+[Mojo test output]
+\`\`\`
+
+## Comparison
+- [ ] Output matches
+- [ ] Functionality correct
+- [ ] Performance comparison
+
+## Conclusion
+[PASSED/FAILED]
+```
+
+### Test Commands
+
+**Run Mojo Test:**
+```bash
+LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so \
+PYTHONPATH=/home/zhou/hello-world/.venv/lib/python3.14/site-packages \
+/home/zhou/hello-world/.venv/bin/mojo run -I . tests/mojo/<module>/test_<name>.mojo
+```
+
+**Run Python Test:**
+```bash
+/home/zhou/hello-world/.venv/bin/python -m pytest tests/python/<module>/
+```
+
+## Task ID Reference
+
+Task IDs follow the pattern `T<phase><number>`:
+
+| ID Range | Module | Description |
+|----------|--------|-------------|
+| T001-T009 | root | Root directory files |
+| T010-T014 | apis | API module |
+| T015-T020 | cmds | Command line module |
+| T021-T029 | core | Core module |
+| T030-T041 | data | Data module |
+| T042-T047 | model | Data models |
+| T048-T050 | portfolio | Portfolio management |
+| T051-T076 | utils | Utility modules |
+| T077-T091 | examples | Example strategies |
+| T092-T140 | mod | Extension modules |
+
+**Full task list available in:** `mojo_refactor/TASKS.md`
+
+## Next Steps Priority
+
+### Priority 1: Establish Test Framework
+1. Create `tests/` directory structure
+2. Write test utilities and helper functions
+3. Define test standards and procedures
+
+### Priority 2: Execute Tests
+Run Python vs Mojo comparison tests for all 140 mojo files. Update status to `passed` after test passes.
+
+### Priority 3: Complete Remaining Files
+1. T002: `__main__.mojo` - Entry module
+2. T094: `mod/rqmojo_mod_sys_accounts/__init__.mojo`
+3. T104: `mod/rqmojo_mod_sys_analyser/__init__.mojo`
+4. T079-T091: examples module remaining 13 files
+5. T138-T140: extend_api examples and LC_MESSAGES translation
