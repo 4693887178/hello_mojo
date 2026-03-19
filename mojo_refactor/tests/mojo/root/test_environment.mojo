@@ -118,7 +118,7 @@ fn test_environment_universe():
     
     universe.add("000001.XSHE")
     universe.add("600000.XSHG")
-    env.update_universe(universe)
+    env.update_universe(universe^)
     
     var updated_universe = env.get_universe()
     print("Updated universe size: " + String(updated_universe.__len__()))

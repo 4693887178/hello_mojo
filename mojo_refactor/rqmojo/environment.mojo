@@ -5,7 +5,7 @@ Ported from rqalpha/environment.py
 
 from collections import Dict, List, Set
 from rqmojo.const import RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE
-from rqmojo.core.events import EventBus, EVENT, Event, create_event_bus
+from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime
@@ -274,12 +274,12 @@ struct Environment(Movable):
         return True
 
     fn order_creation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event.create(EVENT.ORDER_CREATION_REJECT(), self._calendar_dt, order_book_id + ": " + reason)
-        self._event_bus.publish(event)
+        var event = Event(EVENT.ORDER_CREATION_REJECT().value)
+        _ = self._event_bus.publish_event(event)
 
     fn order_cancellation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event.create(EVENT.ORDER_CANCELLATION_REJECT(), self._calendar_dt, order_book_id + ": " + reason)
-        self._event_bus.publish(event)
+        var event = Event(EVENT.ORDER_CANCELLATION_REJECT().value)
+        _ = self._event_bus.publish_event(event)
 
     fn get_last_price(self, order_book_id: String) -> Float64:
         return self._data_proxy.get_last_price(order_book_id)
@@ -329,10 +329,15 @@ struct Environment(Movable):
         return decider.calc(order, quantity, price)
 
     fn get_universe(self) -> Set[String]:
-        return self._universe
+        var result = Set[String]()
+        for item in self._universe:
+            result.add(item)
+        return result^
 
-    fn update_universe(mut self, universe: Set[String]) -> None:
-        self._universe = universe
+    fn update_universe(mut self, var universe: Set[String]) -> None:
+        self._universe = Set[String]()
+        for item in universe:
+            self._universe.add(item)
 
     fn set_data_source(mut self, name: String) -> None:
         self._data_source_name = name
@@ -361,13 +366,13 @@ struct Environment(Movable):
 
     fn set_hold_strategy(mut self) -> None:
         self._is_hold = True
-        var event = Event.create(EVENT.STRATEGY_HOLD_SET(), self._calendar_dt, "")
-        self._event_bus.publish(event)
+        var event = Event(EVENT.STRATEGY_HOLD_SET().value)
+        _ = self._event_bus.publish_event(event)
 
     fn cancel_hold_strategy(mut self) -> None:
         self._is_hold = False
-        var event = Event.create(EVENT.STRATEGY_HOLD_CANCELLED(), self._calendar_dt, "")
-        self._event_bus.publish(event)
+        var event = Event(EVENT.STRATEGY_HOLD_CANCELLED().value)
+        _ = self._event_bus.publish_event(event)
 
 
 fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE.BACKTEST()) -> Environment:
@@ -379,7 +384,7 @@ fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TY
         _calendar_dt=start_date,
         _trading_dt=start_date,
         _is_initialized=False,
-        _event_bus=create_event_bus(),
+        _event_bus=EventBus(listeners=Dict[String, List[EventListener]](), user_listeners=Dict[String, List[EventListener]]()),
         _listener_count=0,
         _data_source_name="default",
         _broker_name="simulation",
