@@ -228,7 +228,7 @@ fn test_equality():
 
 fn main():
     print("=" * 60)
-    print("RQAlpha Mojo const.mojo Test")
+    print("RQAlpha Mojo root/const.mojo Test")
     print("=" * 60)
     print("")
     

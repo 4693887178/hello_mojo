@@ -147,7 +147,7 @@ def test_equality():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("RQAlpha Python const.py Test")
+    print("RQAlpha Python root/const.py Test")
     print("=" * 60)
     print("")
     

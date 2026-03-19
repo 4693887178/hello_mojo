@@ -1,4 +1,4 @@
-# const.mojo 测试结果
+# root/const.mojo 测试结果
 
 ## 测试时间
 2026-03-19
@@ -11,7 +11,7 @@
 
 ```
 ============================================================
-RQAlpha Python const.py Test
+RQAlpha Python root/const.py Test
 ============================================================
 
 === Testing EXECUTION_PHASE ===
@@ -104,7 +104,7 @@ All tests completed!
 
 ```
 ============================================================
-RQAlpha Mojo const.mojo Test
+RQAlpha Mojo root/const.mojo Test
 ============================================================
 
 === Testing EXECUTION_PHASE ===
