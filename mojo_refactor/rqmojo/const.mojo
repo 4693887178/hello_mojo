@@ -83,7 +83,7 @@ struct DEFAULT_ACCOUNT_TYPE(Stringable, Copyable, Movable, Equatable, Implicitly
         return self.value
     
     fn hash(self) -> UInt:
-        return self.value.hash()
+        return UInt(hash(self.value))
     
     @staticmethod
     fn STOCK() -> DEFAULT_ACCOUNT_TYPE:
@@ -541,3 +541,8 @@ struct MARKET(Stringable, Copyable, Movable, Equatable, ImplicitlyCopyable):
     @staticmethod
     fn HK() -> MARKET:
         return MARKET("HK", "HK")
+
+
+fn main():
+    """Test main function for const module."""
+    print("const.mojo - Constants module loaded successfully")
