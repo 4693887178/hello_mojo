@@ -3,7 +3,7 @@ RQAlpha Mojo - Trade Object Model
 Ported from rqalpha/model/trade.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION
+from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION, POSITION_DIRECTION_LONG
 from rqmojo.model.order import Order
 from rqmojo.utils.datetime_func import DateTime
 
@@ -58,7 +58,7 @@ fn create_trade_with_id(
         order_book_id=order.order_book_id,
         side=order.side,
         position_effect=order.position_effect,
-        position_direction=POSITION_DIRECTION.LONG,
+        position_direction=POSITION_DIRECTION_LONG,
         quantity=quantity,
         price=price,
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),

@@ -4,7 +4,7 @@ Ported from rqalpha/environment.py
 """
 
 from collections import Dict, List, Set
-from rqmojo.const import RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE
+from rqmojo.const import RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE, RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN, POSITION_DIRECTION_LONG, RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN, POSITION_DIRECTION_LONG
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
 from rqmojo.model.instrument import Instrument, create_stock_instrument
@@ -12,7 +12,6 @@ from rqmojo.utils.datetime_func import DateTime
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy, DividendInfo
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position
-from rqmojo.const import POSITION_DIRECTION
 
 
 @fieldwise_init
@@ -105,7 +104,7 @@ struct Portfolio(Movable):
         return "Portfolio(value=" + String(self.total_value) + ", cash=" + String(self.total_cash) + ")"
     
     fn get_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
     
     fn get_positions(self) -> List[Position]:
         var result = List[Position]()
@@ -115,7 +114,7 @@ struct Portfolio(Movable):
         return result^
     
     fn get_stock_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
 
 
 fn create_portfolio(total_value: Float64 = 100000.0) -> Portfolio:
@@ -226,7 +225,7 @@ struct Environment(Movable):
         )
         return order_with_id
 
-    fn add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE.CS) raises -> None:
+    fn add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE_CS) raises -> None:
         var key = instrument_type.value
         try:
             self._frontend_validators[key].append(validator)
@@ -250,7 +249,7 @@ struct Environment(Movable):
         return result^
 
     fn can_submit_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS
+        var instrument_type = INSTRUMENT_TYPE_CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_submission(order, "")
@@ -262,7 +261,7 @@ struct Environment(Movable):
         return True
 
     fn can_cancel_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS
+        var instrument_type = INSTRUMENT_TYPE_CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_cancellation(order, "")
@@ -306,17 +305,17 @@ struct Environment(Movable):
         return self._data_proxy.get_dividend(ins)
 
     fn get_account_type(self, order_book_id: String) -> DEFAULT_ACCOUNT_TYPE:
-        return DEFAULT_ACCOUNT_TYPE.STOCK
+        return DEFAULT_ACCOUNT_TYPE_STOCK
 
     fn get_open_orders(self) -> List[Order]:
         var orders = List[Order]()
         return orders^
 
-    fn set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET.CN) -> None:
+    fn set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET_CN) -> None:
         var key = instrument_type.value + "_" + market.value
         self._transaction_cost_deciders[key] = decider
 
-    fn get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET.CN) -> TransactionCostDecider:
+    fn get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET_CN) -> TransactionCostDecider:
         var key = instrument_type.value + "_" + market.value
         try:
             return self._transaction_cost_deciders[key]
@@ -325,7 +324,7 @@ struct Environment(Movable):
 
     fn calc_transaction_cost(self, order: Order, quantity: Int, price: Float64) -> Float64:
         var instrument = self.get_instrument(order.order_book_id)
-        var decider = self.get_transaction_cost_decider(instrument.instrument_type, MARKET.CN)
+        var decider = self.get_transaction_cost_decider(instrument.instrument_type, MARKET_CN)
         return decider.calc(order, quantity, price)
 
     fn get_universe(self) -> Set[String]:
@@ -375,7 +374,7 @@ struct Environment(Movable):
         _ = self._event_bus.publish_event(event)
 
 
-fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE.BACKTEST) -> Environment:
+fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE_BACKTEST) -> Environment:
     return Environment(
         _start_date=start_date,
         _end_date=end_date,

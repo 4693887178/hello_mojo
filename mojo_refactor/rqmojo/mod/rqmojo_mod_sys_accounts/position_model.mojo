@@ -3,7 +3,7 @@ RQAlpha Mojo - Position Model
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/position_model.py
 """
 
-from rqmojo.const import POSITION_DIRECTION, SIDE
+from rqmojo.const import POSITION_DIRECTION, SIDE, POSITION_DIRECTION_LONG, POSITION_DIRECTION_LONG
 from rqmojo.model.instrument import Instrument
 from rqmojo.utils.datetime_func import DateTime
 
@@ -65,7 +65,7 @@ struct PositionModel(Movable):
         self.frozen_quantity -= quantity
 
 
-fn create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> PositionModel:
+fn create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG) -> PositionModel:
     return PositionModel(
         order_book_id=order_book_id,
         direction=direction,

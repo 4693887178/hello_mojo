@@ -4,7 +4,7 @@ Ported from rqalpha/portfolio/account.py
 """
 
 from collections import List
-from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION
+from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION, SIDE_BUY, POSITION_DIRECTION_LONG, DEFAULT_ACCOUNT_TYPE_STOCK, DEFAULT_ACCOUNT_TYPE_FUTURE
 from rqmojo.model.trade import Trade
 from rqmojo.portfolio.position import Position, create_position, create_future_position
 from rqmojo.utils.datetime_func import DateTime
@@ -74,7 +74,7 @@ struct Account(ImplicitlyCopyable):
                 return i
         return -1
 
-    fn get_position(self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> Position:
+    fn get_position(self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG) -> Position:
         var idx = self._find_position_index(order_book_id, direction)
         if idx >= 0:
             return self._positions[idx]
@@ -104,7 +104,7 @@ struct Account(ImplicitlyCopyable):
         var delta_cash = pos.apply_trade(trade)
         self.update_position(trade.order_book_id, trade.position_direction, pos)
         
-        if trade.side == SIDE.BUY:
+        if trade.side == SIDE_BUY:
             self.total_cash -= trade.price * Float64(trade.quantity)
         else:
             self.total_cash += trade.price * Float64(trade.quantity)
@@ -161,8 +161,8 @@ fn create_account(account_type: DEFAULT_ACCOUNT_TYPE, total_cash: Float64) -> Ac
 
 
 fn create_stock_account(total_cash: Float64 = 100000.0) -> Account:
-    return create_account(DEFAULT_ACCOUNT_TYPE.STOCK, total_cash)
+    return create_account(DEFAULT_ACCOUNT_TYPE_STOCK, total_cash)
 
 
 fn create_future_account(total_cash: Float64 = 100000.0) -> Account:
-    return create_account(DEFAULT_ACCOUNT_TYPE.FUTURE, total_cash)
+    return create_account(DEFAULT_ACCOUNT_TYPE_FUTURE, total_cash)

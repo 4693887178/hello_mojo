@@ -3,7 +3,7 @@ RQAlpha Mojo - Transaction Cost Deciders
 Ported from rqalpha/mod/rqalpha_mod_sys_transaction_cost/deciders.py
 """
 
-from rqmojo.const import INSTRUMENT_TYPE, SIDE, POSITION_EFFECT, MARKET
+from rqmojo.const import INSTRUMENT_TYPE, SIDE, POSITION_EFFECT, MARKET, SIDE_SELL, POSITION_EFFECT_CLOSE, POSITION_EFFECT_CLOSE_TODAY, SIDE_SELL, POSITION_EFFECT_CLOSE, POSITION_EFFECT_CLOSE_TODAY
 from rqmojo.interface import TransactionCostArgs, TransactionCost
 from rqmojo.model.instrument import Instrument
 
@@ -21,7 +21,7 @@ struct StockTransactionCostDecider(Movable):
             commission = self.min_commission
         
         var tax = 0.0
-        if args.side == SIDE.SELL:
+        if args.side == SIDE_SELL:
             tax = args.price * Float64(args.quantity) * self.stamp_tax_rate
         
         var other_fees = args.price * Float64(args.quantity) * self.transfer_fee_rate
@@ -40,7 +40,7 @@ struct FutureTransactionCostDecider(Movable):
     
     fn calc(self, args: TransactionCostArgs) -> TransactionCost:
         var multiplier = self.commission_multiplier
-        if args.position_effect == POSITION_EFFECT.CLOSE or args.position_effect == POSITION_EFFECT.CLOSE_TODAY:
+        if args.position_effect == POSITION_EFFECT_CLOSE or args.position_effect == POSITION_EFFECT_CLOSE_TODAY:
             multiplier = self.close_commission_multiplier
         
         var commission = args.price * Float64(args.quantity) * multiplier

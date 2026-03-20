@@ -4,7 +4,7 @@ Ported from rqalpha/utils/testing/fixtures.py
 """
 
 from rqmojo.environment import Environment, create_environment
-from rqmojo.const import RUN_TYPE
+from rqmojo.const import RUN_TYPE, RUN_TYPE_BACKTEST, RUN_TYPE_BACKTEST
 from rqmojo.utils.datetime_func import DateTime, Date
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
 
@@ -26,7 +26,7 @@ fn create_backtest_fixture(start_date: DateTime = DateTime(2020, 1, 1, 0, 0, 0, 
     var env = create_environment(
         start_date=start_date,
         end_date=end_date,
-        run_type=RUN_TYPE.BACKTEST
+        run_type=RUN_TYPE_BACKTEST
     )
     
     return BacktestFixture(

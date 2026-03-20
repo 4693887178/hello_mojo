@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_future.py
 """
 
 from collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, HEDGE_TYPE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, HEDGE_TYPE, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE, POSITION_DIRECTION_LONG, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE, POSITION_DIRECTION_LONG
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
 from rqmojo.environment import Environment
@@ -43,9 +43,9 @@ fn buy_open(
         0,
         order_book_id,
         quantity,
-        SIDE.BUY,
+        SIDE_BUY,
         style,
-        POSITION_EFFECT.OPEN
+        POSITION_EFFECT_OPEN
     )
     
     return env.submit_order(order)
@@ -63,13 +63,13 @@ fn sell_close(
     if price <= 0:
         return None
     
-    var position_effect = POSITION_EFFECT.CLOSE
+    var position_effect = POSITION_EFFECT_CLOSE
     
     var order = create_order_with_id(
         0,
         order_book_id,
         quantity,
-        SIDE.SELL,
+        SIDE_SELL,
         style,
         position_effect
     )
@@ -92,9 +92,9 @@ fn sell_open(
         0,
         order_book_id,
         quantity,
-        SIDE.SELL,
+        SIDE_SELL,
         style,
-        POSITION_EFFECT.OPEN
+        POSITION_EFFECT_OPEN
     )
     
     return env.submit_order(order)
@@ -112,13 +112,13 @@ fn buy_close(
     if price <= 0:
         return None
     
-    var position_effect = POSITION_EFFECT.CLOSE
+    var position_effect = POSITION_EFFECT_CLOSE
     
     var order = create_order_with_id(
         0,
         order_book_id,
         quantity,
-        SIDE.BUY,
+        SIDE_BUY,
         style,
         position_effect
     )
@@ -197,7 +197,7 @@ fn future_order_to(
 fn get_future_position(
     env: Environment,
     order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG
+    direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG
 ) -> Position:
     return env.portfolio.get_position(order_book_id)
 

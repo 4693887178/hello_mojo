@@ -13,7 +13,7 @@ struct OrderStyleValidator(FrontendValidator, Movable):
     var frequency: String
     
     fn validate_submission(self, order: Order, account: Optional[object]) -> Optional[String]:
-        if order.order_type == ORDER_TYPE.LIMIT:
+        if order.order_type == ORDER_TYPE_LIMIT:
             if order.price <= 0:
                 return "Limit order price must be positive"
         

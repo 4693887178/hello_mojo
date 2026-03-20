@@ -3,7 +3,7 @@ RQAlpha Mojo - Run Command
 Ported from rqalpha/cmds/run.py
 """
 
-from rqmojo.const import RUN_TYPE, EXECUTION_PHASE
+from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, RUN_TYPE_BACKTEST, RUN_TYPE_BACKTEST
 from rqmojo.environment import Environment, create_environment
 from rqmojo.core.executor import Executor, create_executor
 from rqmojo.core.events import EVENT, Event, create_event_bus
@@ -58,7 +58,7 @@ fn run_strategy(strategy_file: String, start_date: DateTime, end_date: DateTime,
         start_date=start_date,
         end_date=end_date,
         frequency=frequency,
-        run_type=RUN_TYPE.BACKTEST,
+        run_type=RUN_TYPE_BACKTEST,
         base_port=0,
         accounts=Dict[String, Float64](),
         init_cash=init_cash

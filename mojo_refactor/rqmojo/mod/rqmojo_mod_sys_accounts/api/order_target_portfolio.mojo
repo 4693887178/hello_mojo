@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py
 """
 
 from collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, SIDE_SELL, SIDE_BUY, POSITION_EFFECT_CLOSE, POSITION_EFFECT_OPEN, ORDER_TYPE_LIMIT, SIDE_SELL, SIDE_BUY, POSITION_EFFECT_CLOSE, POSITION_EFFECT_OPEN, ORDER_TYPE_LIMIT
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
 from rqmojo.environment import Environment
@@ -72,9 +72,9 @@ fn order_target_portfolio(
                 0,
                 order_book_id,
                 quantity,
-                SIDE.SELL,
+                SIDE_SELL,
                 MarketOrder(),
-                POSITION_EFFECT.CLOSE
+                POSITION_EFFECT_CLOSE
             )
             env.submit_order(close_order)
     
@@ -85,9 +85,9 @@ fn order_target_portfolio(
         var close_price = item.last_price
         var open_price = item.last_price
         
-        if item.close_style.style_type == ORDER_TYPE.LIMIT:
+        if item.close_style.style_type == ORDER_TYPE_LIMIT:
             close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE.LIMIT:
+        if item.open_style.style_type == ORDER_TYPE_LIMIT:
             open_price = item.open_style.limit_price
         
         if close_price <= 0 or open_price <= 0:
@@ -103,9 +103,9 @@ fn order_target_portfolio(
                 0,
                 item.order_book_id,
                 delta_quantity,
-                SIDE.BUY,
+                SIDE_BUY,
                 item.open_style,
-                POSITION_EFFECT.OPEN
+                POSITION_EFFECT_OPEN
             )
             var result = env.submit_order(order)
             if result is not None:
@@ -116,9 +116,9 @@ fn order_target_portfolio(
                 0,
                 item.order_book_id,
                 quantity,
-                SIDE.SELL,
+                SIDE_SELL,
                 item.close_style,
-                POSITION_EFFECT.CLOSE
+                POSITION_EFFECT_CLOSE
             )
             var result = env.submit_order(order)
             if result is not None:

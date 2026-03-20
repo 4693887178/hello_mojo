@@ -4,7 +4,7 @@ Ported from rqalpha/main.py
 """
 
 from collections import Dict, List
-from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, EXIT_CODE
+from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, EXIT_CODE, RUN_TYPE_BACKTEST, RUN_TYPE_BACKTEST
 from rqmojo.environment import Environment, create_environment
 from rqmojo.core.events import EventBus, EVENT, Event, create_event_bus
 from rqmojo.core.executor import Executor, create_executor
@@ -101,7 +101,7 @@ fn create_config(
     return RQAlphaConfig(
         start_date=start_date,
         end_date=end_date,
-        run_type=RUN_TYPE.BACKTEST,
+        run_type=RUN_TYPE_BACKTEST,
         frequency="1d",
         initial_cash=initial_cash,
         strategy_file=strategy_file,

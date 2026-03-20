@@ -3,7 +3,7 @@ RQAlpha Mojo - Cash Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/cash_validator.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT
+from rqmojo.const import SIDE, POSITION_EFFECT, SIDE_BUY, SIDE_BUY
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 from rqmojo.portfolio.account import Account
@@ -17,7 +17,7 @@ struct CashValidator(FrontendValidator, Movable):
         if not self.enabled:
             return None
         
-        if order.side != SIDE.BUY:
+        if order.side != SIDE_BUY:
             return None
         
         var acc = account

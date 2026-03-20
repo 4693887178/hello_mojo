@@ -3,7 +3,7 @@ RQAlpha Mojo - Base API
 Ported from rqalpha/apis/api_base.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, ORDER_TYPE_MARKET, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE, ORDER_TYPE_MARKET, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
 from rqmojo.model.order import Order, create_order
 from rqmojo.model.instrument import Instrument
 from rqmojo.model.bar import BarObject
@@ -15,17 +15,17 @@ from rqmojo.utils.datetime_func import DateTime
 from rqmojo.core.events import EVENT
 
 
-fn order_shares(ctx: StrategyContext, order_book_id: String, quantity: Int, style: ORDER_TYPE = ORDER_TYPE.MARKET, price: Float64 = 0.0) -> Optional[Order]:
+fn order_shares(ctx: StrategyContext, order_book_id: String, quantity: Int, style: ORDER_TYPE = ORDER_TYPE_MARKET, price: Float64 = 0.0) -> Optional[Order]:
     if quantity == 0:
         return None
     
-    var side = SIDE.BUY
-    var position_effect = POSITION_EFFECT.OPEN
+    var side = SIDE_BUY
+    var position_effect = POSITION_EFFECT_OPEN
     
     if quantity < 0:
-        side = SIDE.SELL
+        side = SIDE_SELL
         quantity = -quantity
-        position_effect = POSITION_EFFECT.CLOSE
+        position_effect = POSITION_EFFECT_CLOSE
     
     return create_order(
         order_book_id=order_book_id,
@@ -37,7 +37,7 @@ fn order_shares(ctx: StrategyContext, order_book_id: String, quantity: Int, styl
     )
 
 
-fn order_value(ctx: StrategyContext, order_book_id: String, cash_amount: Float64, style: ORDER_TYPE = ORDER_TYPE.MARKET, price: Float64 = 0.0) -> Optional[Order]:
+fn order_value(ctx: StrategyContext, order_book_id: String, cash_amount: Float64, style: ORDER_TYPE = ORDER_TYPE_MARKET, price: Float64 = 0.0) -> Optional[Order]:
     if cash_amount == 0:
         return None
     
@@ -55,7 +55,7 @@ fn order_value(ctx: StrategyContext, order_book_id: String, cash_amount: Float64
     return order_shares(ctx, order_book_id, quantity, style, price)
 
 
-fn order_percent(ctx: StrategyContext, order_book_id: String, percent: Float64, style: ORDER_TYPE = ORDER_TYPE.MARKET, price: Float64 = 0.0) -> Optional[Order]:
+fn order_percent(ctx: StrategyContext, order_book_id: String, percent: Float64, style: ORDER_TYPE = ORDER_TYPE_MARKET, price: Float64 = 0.0) -> Optional[Order]:
     if percent <= 0 or percent > 1:
         return None
     
@@ -65,7 +65,7 @@ fn order_percent(ctx: StrategyContext, order_book_id: String, percent: Float64, 
     return order_value(ctx, order_book_id, cash_amount, style, price)
 
 
-fn order_target_value(ctx: StrategyContext, order_book_id: String, target_value: Float64, style: ORDER_TYPE = ORDER_TYPE.MARKET, price: Float64 = 0.0) -> Optional[Order]:
+fn order_target_value(ctx: StrategyContext, order_book_id: String, target_value: Float64, style: ORDER_TYPE = ORDER_TYPE_MARKET, price: Float64 = 0.0) -> Optional[Order]:
     var portfolio = ctx.portfolio()
     var position = portfolio.get_position(order_book_id)
     
@@ -75,7 +75,7 @@ fn order_target_value(ctx: StrategyContext, order_book_id: String, target_value:
     return order_value(ctx, order_book_id, delta_value, style, price)
 
 
-fn order_target_percent(ctx: StrategyContext, order_book_id: String, target_percent: Float64, style: ORDER_TYPE = ORDER_TYPE.MARKET, price: Float64 = 0.0) -> Optional[Order]:
+fn order_target_percent(ctx: StrategyContext, order_book_id: String, target_percent: Float64, style: ORDER_TYPE = ORDER_TYPE_MARKET, price: Float64 = 0.0) -> Optional[Order]:
     var portfolio = ctx.portfolio()
     var target_value = portfolio.total_value * target_percent
     

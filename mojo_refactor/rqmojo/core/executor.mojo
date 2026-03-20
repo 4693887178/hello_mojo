@@ -4,7 +4,7 @@ Ported from rqalpha/core/executor.py
 """
 
 from collections import Dict, List
-from rqmojo.const import EXECUTION_PHASE
+from rqmojo.const import EXECUTION_PHASE, EXECUTION_PHASE_GLOBAL, EXECUTION_PHASE_GLOBAL
 from rqmojo.core.events import EVENT, Event, EventBus, create_event_bus
 from rqmojo.utils.datetime_func import DateTime, Date
 
@@ -37,7 +37,7 @@ struct Executor(Movable):
     var _trading_dt_day: Int
 
     fn current_phase(self) -> EXECUTION_PHASE:
-        return EXECUTION_PHASE.GLOBAL
+        return EXECUTION_PHASE_GLOBAL
 
     fn set_phase(mut self, phase: EXECUTION_PHASE) -> None:
         self._current_phase_name = phase.name

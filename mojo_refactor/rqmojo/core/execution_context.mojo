@@ -4,7 +4,7 @@ Ported from rqalpha/core/execution_context.py
 """
 
 from collections import List, Dict
-from rqmojo.const import EXECUTION_PHASE
+from rqmojo.const import EXECUTION_PHASE, EXECUTION_PHASE_GLOBAL, EXECUTION_PHASE_ON_BAR, EXECUTION_PHASE_ON_TICK, EXECUTION_PHASE_BEFORE_TRADING, EXECUTION_PHASE_AFTER_TRADING, EXECUTION_PHASE_ON_INIT, EXECUTION_PHASE_GLOBAL, EXECUTION_PHASE_ON_BAR, EXECUTION_PHASE_ON_TICK, EXECUTION_PHASE_BEFORE_TRADING, EXECUTION_PHASE_AFTER_TRADING, EXECUTION_PHASE_ON_INIT
 from rqmojo.utils.datetime_func import DateTime, Date
 
 
@@ -17,12 +17,12 @@ struct ContextStack(Movable):
 
     fn pop(mut self) -> EXECUTION_PHASE:
         if len(self.stack) == 0:
-            return EXECUTION_PHASE.GLOBAL
+            return EXECUTION_PHASE_GLOBAL
         return self.stack.pop()
 
     fn top(self) -> EXECUTION_PHASE:
         if len(self.stack) == 0:
-            return EXECUTION_PHASE.GLOBAL
+            return EXECUTION_PHASE_GLOBAL
         return self.stack[len(self.stack) - 1]
 
     fn is_empty(self) -> Bool:
@@ -54,22 +54,22 @@ struct ExecutionContext(Movable, Stringable, ImplicitlyCopyable):
         return self.current_datetime
 
     fn is_on_bar(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.ON_BAR
+        return self.phase == EXECUTION_PHASE_ON_BAR
 
     fn is_on_tick(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.ON_TICK
+        return self.phase == EXECUTION_PHASE_ON_TICK
 
     fn is_before_trading(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.BEFORE_TRADING
+        return self.phase == EXECUTION_PHASE_BEFORE_TRADING
 
     fn is_after_trading(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.AFTER_TRADING
+        return self.phase == EXECUTION_PHASE_AFTER_TRADING
 
     fn is_on_init(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.ON_INIT
+        return self.phase == EXECUTION_PHASE_ON_INIT
 
     fn is_global(self) -> Bool:
-        return self.phase == EXECUTION_PHASE.GLOBAL
+        return self.phase == EXECUTION_PHASE_GLOBAL
 
 
 fn create_execution_context(phase: EXECUTION_PHASE) -> ExecutionContext:
@@ -82,7 +82,7 @@ fn create_execution_context(phase: EXECUTION_PHASE) -> ExecutionContext:
 
 fn create_bar_execution_context(dt: DateTime) -> ExecutionContext:
     return ExecutionContext(
-        phase=EXECUTION_PHASE.ON_BAR,
+        phase=EXECUTION_PHASE_ON_BAR,
         current_datetime=dt,
         stack_depth=0
     )
@@ -90,7 +90,7 @@ fn create_bar_execution_context(dt: DateTime) -> ExecutionContext:
 
 fn create_tick_execution_context(dt: DateTime) -> ExecutionContext:
     return ExecutionContext(
-        phase=EXECUTION_PHASE.ON_TICK,
+        phase=EXECUTION_PHASE_ON_TICK,
         current_datetime=dt,
         stack_depth=0
     )

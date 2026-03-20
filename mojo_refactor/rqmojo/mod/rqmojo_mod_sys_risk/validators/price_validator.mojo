@@ -3,7 +3,7 @@ RQAlpha Mojo - Price Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/price_validator.py
 """
 
-from rqmojo.const import SIDE, ORDER_TYPE
+from rqmojo.const import SIDE, ORDER_TYPE, ORDER_TYPE_LIMIT, ORDER_TYPE_LIMIT
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 
@@ -16,7 +16,7 @@ struct PriceValidator(FrontendValidator, Movable):
         if not self.enabled:
             return None
         
-        if order.order_type != ORDER_TYPE.LIMIT:
+        if order.order_type != ORDER_TYPE_LIMIT:
             return None
         
         if limit_up > 0 and order.price > limit_up:

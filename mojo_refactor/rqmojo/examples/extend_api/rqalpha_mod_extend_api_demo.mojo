@@ -36,11 +36,11 @@ struct ExtendAPIDemoMod(AbstractMod):
 
         @export_as_api
         @ExecutionContext.enforce_phase(
-            EXECUTION_PHASE.ON_INIT,
-            EXECUTION_PHASE.BEFORE_TRADING,
-            EXECUTION_PHASE.ON_BAR,
-            EXECUTION_PHASE.AFTER_TRADING,
-            EXECUTION_PHASE.SCHEDULED
+            EXECUTION_PHASE_ON_INIT,
+            EXECUTION_PHASE_BEFORE_TRADING,
+            EXECUTION_PHASE_ON_BAR,
+            EXECUTION_PHASE_AFTER_TRADING,
+            EXECUTION_PHASE_SCHEDULED
         )
         fn get_csv_as_df() -> object:
             var data = pd.read_csv(self._csv_path)

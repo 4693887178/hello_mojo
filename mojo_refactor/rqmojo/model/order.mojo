@@ -3,7 +3,7 @@ RQAlpha Mojo - Order Object Model
 Ported from rqalpha/model/order.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, ORDER_TYPE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, ORDER_TYPE, ORDER_TYPE_MARKET, ORDER_TYPE_LIMIT, ORDER_STATUS_FILLED, ORDER_STATUS_ACTIVE, ORDER_STATUS_CANCELLED, ORDER_STATUS_REJECTED, ORDER_STATUS_PENDING_NEW, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
 from rqmojo.model.instrument import Instrument
 from rqmojo.utils.datetime_func import DateTime
 
@@ -30,18 +30,18 @@ struct OrderStyle(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var limit_price: Float64
     
     fn __str__(self) -> String:
-        if self.style_type == ORDER_TYPE.MARKET:
+        if self.style_type == ORDER_TYPE_MARKET:
             return "MarketOrder"
         else:
             return "LimitOrder(" + String(self.limit_price) + ")"
 
 
 fn MarketOrder() -> OrderStyle:
-    return OrderStyle(style_type=ORDER_TYPE.MARKET, limit_price=0.0)
+    return OrderStyle(style_type=ORDER_TYPE_MARKET, limit_price=0.0)
 
 
 fn LimitOrder(price: Float64) -> OrderStyle:
-    return OrderStyle(style_type=ORDER_TYPE.LIMIT, limit_price=price)
+    return OrderStyle(style_type=ORDER_TYPE_LIMIT, limit_price=price)
 
 
 @fieldwise_init
@@ -70,21 +70,21 @@ struct Order(Stringable, Copyable, Movable, ImplicitlyCopyable):
             var new_total = price * Float64(quantity)
             self.avg_price = (old_total + new_total) / Float64(self.filled_quantity)
         if self.unfilled_quantity == 0:
-            self.status = ORDER_STATUS.FILLED
+            self.status = ORDER_STATUS_FILLED
         elif self.filled_quantity > 0:
-            self.status = ORDER_STATUS.ACTIVE
+            self.status = ORDER_STATUS_ACTIVE
     
     fn is_active(self) -> Bool:
-        return self.status == ORDER_STATUS.ACTIVE or self.status == ORDER_STATUS.PENDING_NEW
+        return self.status == ORDER_STATUS_ACTIVE or self.status == ORDER_STATUS_PENDING_NEW
     
     fn is_filled(self) -> Bool:
-        return self.status == ORDER_STATUS.FILLED
+        return self.status == ORDER_STATUS_FILLED
     
     fn is_cancelled(self) -> Bool:
-        return self.status == ORDER_STATUS.CANCELLED
+        return self.status == ORDER_STATUS_CANCELLED
     
     fn is_rejected(self) -> Bool:
-        return self.status == ORDER_STATUS.REJECTED
+        return self.status == ORDER_STATUS_REJECTED
 
 
 fn create_order_with_id(
@@ -93,7 +93,7 @@ fn create_order_with_id(
     side: SIDE,
     quantity: Int,
     style: OrderStyle,
-    position_effect: POSITION_EFFECT = POSITION_EFFECT.OPEN
+    position_effect: POSITION_EFFECT = POSITION_EFFECT_OPEN
 ) -> Order:
     return Order(
         order_id=order_id,
@@ -103,7 +103,7 @@ fn create_order_with_id(
         quantity=quantity,
         filled_quantity=0,
         unfilled_quantity=quantity,
-        status=ORDER_STATUS.PENDING_NEW,
+        status=ORDER_STATUS_PENDING_NEW,
         style=style,
         avg_price=0.0,
         created_at=DateTime(1970, 1, 1, 0, 0, 0, 0),
@@ -112,8 +112,8 @@ fn create_order_with_id(
 
 
 fn buy(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
-    return create_order_with_id(1, order_book_id, SIDE.BUY, quantity, style, POSITION_EFFECT.OPEN)
+    return create_order_with_id(1, order_book_id, SIDE_BUY, quantity, style, POSITION_EFFECT_OPEN)
 
 
 fn sell(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
-    return create_order_with_id(2, order_book_id, SIDE.SELL, quantity, style, POSITION_EFFECT.CLOSE)
+    return create_order_with_id(2, order_book_id, SIDE_SELL, quantity, style, POSITION_EFFECT_CLOSE)

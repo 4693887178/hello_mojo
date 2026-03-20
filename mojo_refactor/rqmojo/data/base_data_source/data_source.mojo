@@ -4,7 +4,7 @@ Ported from rqalpha/data/base_data_source/data_source.py
 """
 
 from collections import Dict, List
-from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET, TRADING_CALENDAR_TYPE
+from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET, TRADING_CALENDAR_TYPE, EXCHANGE_XSHE, EXCHANGE_XSHG, EXCHANGE_CFFEX, EXCHANGE_XSHE, EXCHANGE_XSHG, EXCHANGE_CFFEX
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
@@ -45,10 +45,10 @@ struct BaseDataSource(Movable):
         self._load_default_trading_dates()
 
     fn _load_default_instruments(mut self) -> None:
-        self.register_instrument(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE))
-        self.register_instrument(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE.XSHE))
-        self.register_instrument(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE.XSHG))
-        self.register_instrument(create_future_instrument("IF1912", "沪深300股指1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 20, 0, 0, 0, 0), DateTime(2019, 12, 20, 0, 0, 0, 0), 300.0, EXCHANGE.CFFEX, "IF"))
+        self.register_instrument(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
+        self.register_instrument(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
+        self.register_instrument(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE_XSHG))
+        self.register_instrument(create_future_instrument("IF1912", "沪深300股指1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 20, 0, 0, 0, 0), DateTime(2019, 12, 20, 0, 0, 0, 0), 300.0, EXCHANGE_CFFEX, "IF"))
 
     fn _load_default_trading_dates(mut self) -> None:
         var year = 2019
@@ -65,7 +65,7 @@ struct BaseDataSource(Movable):
         try:
             return self._instruments[order_book_id]
         except:
-            return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
+            return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHG)
 
     fn get_all_instruments(self) -> List[Instrument]:
         var result = List[Instrument]()

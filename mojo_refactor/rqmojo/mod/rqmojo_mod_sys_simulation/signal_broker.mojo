@@ -3,7 +3,7 @@ RQAlpha Mojo - Signal Broker
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/signal_broker.py
 """
 
-from rqmojo.const import ORDER_STATUS, SIDE, POSITION_EFFECT
+from rqmojo.const import ORDER_STATUS, SIDE, POSITION_EFFECT, ORDER_STATUS_CANCELLED, ORDER_STATUS_ACTIVE, ORDER_STATUS_CANCELLED, ORDER_STATUS_ACTIVE
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
 from rqmojo.core.events import EVENT, Event, EventBus
@@ -21,13 +21,13 @@ struct SignalBroker(Movable):
     
     fn cancel_order(mut self, order_id: Int) -> None:
         if self._orders.contains(order_id):
-            self._orders[order_id].status = ORDER_STATUS.CANCELLED
+            self._orders[order_id].status = ORDER_STATUS_CANCELLED
     
     fn get_open_orders(self) -> List[Order]:
         var result = List[Order]()
         for order_id in self._orders.keys():
             var order = self._orders[order_id]
-            if order.status == ORDER_STATUS.ACTIVE:
+            if order.status == ORDER_STATUS_ACTIVE:
                 result.append(order)
         return result
     
