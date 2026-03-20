@@ -42,11 +42,11 @@ fn _get_account_position(env: Environment, order_book_id: String) -> AccountPosi
 
 
 fn _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = "floor") -> Int:
-    if ins.type == INSTRUMENT_TYPE.CS() and ins.board_type == "KSH":
+    if ins.type == INSTRUMENT_TYPE.CS and ins.board_type == "KSH":
         if abs(quantity) < KSH_MIN_AMOUNT():
             return 0
         return quantity
-    elif ins.type == INSTRUMENT_TYPE.CS() and ins.board_type == "BJS":
+    elif ins.type == INSTRUMENT_TYPE.CS and ins.board_type == "BJS":
         if abs(quantity) < BJSE_MIN_AMOUNT():
             return 0
         return quantity
@@ -64,7 +64,7 @@ fn _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = 
 
 
 fn _get_order_style_price(env: Environment, order_book_id: String, style: OrderStyle) -> Float64:
-    if style.style_type == ORDER_TYPE.LIMIT():
+    if style.style_type == ORDER_TYPE.LIMIT:
         return style.limit_price
     return env.get_last_price_from_proxy(order_book_id)
 
@@ -84,7 +84,7 @@ fn _submit_order(
     auto_switch_order_value: Bool = True,
     zero_amount_as_exception: Bool = True
 ) -> Optional[Order]:
-    if style.style_type == ORDER_TYPE.LIMIT():
+    if style.style_type == ORDER_TYPE.LIMIT:
         if style.limit_price != style.limit_price:
             return None
     
@@ -94,7 +94,7 @@ fn _submit_order(
     
     var ins = env.get_instrument(order_book_id)
     
-    if (side == SIDE.BUY() and current_quantity != -amount) or (side == SIDE.SELL() and current_quantity != abs(amount)):
+    if (side == SIDE.BUY and current_quantity != -amount) or (side == SIDE.SELL and current_quantity != abs(amount)):
         amount = _round_order_quantity(ins, amount)
     
     if amount == 0:
@@ -125,11 +125,11 @@ fn _order_shares(
     var position_effect: POSITION_EFFECT
     
     if amount > 0:
-        side = SIDE.BUY()
-        position_effect = POSITION_EFFECT.OPEN()
+        side = SIDE.BUY
+        position_effect = POSITION_EFFECT.OPEN
     else:
-        side = SIDE.SELL()
-        position_effect = POSITION_EFFECT.CLOSE()
+        side = SIDE.SELL
+        position_effect = POSITION_EFFECT.CLOSE
     
     return _submit_order(
         env, order_book_id, amount, side, position_effect, style, quantity, 
@@ -150,7 +150,7 @@ fn _order_value(
         actual_cash = min(cash_amount, account_result.total_cash)
     
     var price: Float64
-    if style.style_type == ORDER_TYPE.LIMIT():
+    if style.style_type == ORDER_TYPE.LIMIT:
         price = style.limit_price
     else:
         price = env.get_last_price_from_proxy(order_book_id)
@@ -238,8 +238,8 @@ fn stock_order_target_value(
     
     if cash_amount == 0:
         return _submit_order(
-            env, id_or_ins, result.position_closable, SIDE.SELL(), 
-            POSITION_EFFECT.CLOSE(), close_style, result.position_quantity, False
+            env, id_or_ins, result.position_closable, SIDE.SELL, 
+            POSITION_EFFECT.CLOSE, close_style, result.position_quantity, False
         )
     
     var delta = cash_amount - result.position_market_value
@@ -258,8 +258,8 @@ fn stock_order_target_percent(
     
     if percent == 0:
         return _submit_order(
-            env, id_or_ins, result.position_closable, SIDE.SELL(),
-            POSITION_EFFECT.CLOSE(), close_style, result.position_quantity, False
+            env, id_or_ins, result.position_closable, SIDE.SELL,
+            POSITION_EFFECT.CLOSE, close_style, result.position_quantity, False
         )
     
     var delta = result.total_value * percent - result.position_market_value

@@ -75,8 +75,8 @@ fn create_run_info(
     stock_starting_cash: Float64 = 0.0,
     future_starting_cash: Float64 = 0.0,
     margin_multiplier: Float64 = 1.0,
-    run_type: RUN_TYPE = RUN_TYPE.BACKTEST(),
-    matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE(),
+    run_type: RUN_TYPE = RUN_TYPE.BACKTEST,
+    matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE,
     slippage: Float64 = 0.0,
     stock_commission_multiplier: Float64 = 0.0003,
     futures_commission_multiplier: Float64 = 0.0001
@@ -222,7 +222,7 @@ fn create_strategy_context(var env: Environment, var data_proxy: DataProxy) -> S
         run_type=env_config.base__run_type,
         data_bundle_path="~/.rqalpha/bundle",
         strategy_file="",
-        persist_mode=PERSIST_MODE.ON_CRASH(),
+        persist_mode=PERSIST_MODE.ON_CRASH,
         initial_cash=100000.0
     )
     var config = RQAlphaConfig(

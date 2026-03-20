@@ -100,7 +100,7 @@ struct TestRunner:
         self.check(split.split_factor == 1.5, "SplitInfo split_factor is 1.5")
 
     fn test_snapshot(mut self):
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var snapshot = create_snapshot(
             instrument=ins,

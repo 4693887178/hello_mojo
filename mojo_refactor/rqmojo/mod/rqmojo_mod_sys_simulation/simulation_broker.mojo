@@ -42,7 +42,7 @@ struct SimulationBroker(Movable):
         return "SimulationBroker(orders=" + String(len(self._open_orders)) + ")"
 
     fn submit_order(mut self, order: Order) -> None:
-        if order.position_effect == POSITION_EFFECT.MATCH():
+        if order.position_effect == POSITION_EFFECT.MATCH:
             return
         
         self._order_count += 1
@@ -176,8 +176,8 @@ struct SimulationBroker(Movable):
         self._trade_count = state.trade_count
 
 
-fn create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE()) -> SimulationBroker:
-    var match_immediately = (matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE() or matching_type == MATCHING_TYPE.VWAP())
+fn create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE) -> SimulationBroker:
+    var match_immediately = (matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE or matching_type == MATCHING_TYPE.VWAP)
     
     return SimulationBroker(
         _name="simulation",

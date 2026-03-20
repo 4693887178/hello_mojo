@@ -43,9 +43,9 @@ fn buy_open(
         0,
         order_book_id,
         quantity,
-        SIDE.BUY(),
+        SIDE.BUY,
         style,
-        POSITION_EFFECT.OPEN()
+        POSITION_EFFECT.OPEN
     )
     
     return env.submit_order(order)
@@ -63,13 +63,13 @@ fn sell_close(
     if price <= 0:
         return None
     
-    var position_effect = POSITION_EFFECT.CLOSE()
+    var position_effect = POSITION_EFFECT.CLOSE
     
     var order = create_order_with_id(
         0,
         order_book_id,
         quantity,
-        SIDE.SELL(),
+        SIDE.SELL,
         style,
         position_effect
     )
@@ -92,9 +92,9 @@ fn sell_open(
         0,
         order_book_id,
         quantity,
-        SIDE.SELL(),
+        SIDE.SELL,
         style,
-        POSITION_EFFECT.OPEN()
+        POSITION_EFFECT.OPEN
     )
     
     return env.submit_order(order)
@@ -112,13 +112,13 @@ fn buy_close(
     if price <= 0:
         return None
     
-    var position_effect = POSITION_EFFECT.CLOSE()
+    var position_effect = POSITION_EFFECT.CLOSE
     
     var order = create_order_with_id(
         0,
         order_book_id,
         quantity,
-        SIDE.BUY(),
+        SIDE.BUY,
         style,
         position_effect
     )
@@ -197,7 +197,7 @@ fn future_order_to(
 fn get_future_position(
     env: Environment,
     order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG()
+    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG
 ) -> Position:
     return env.portfolio.get_position(order_book_id)
 

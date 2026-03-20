@@ -21,7 +21,7 @@ struct StockTransactionCostDecider(Movable):
             commission = self.min_commission
         
         var tax = 0.0
-        if args.side == SIDE.SELL():
+        if args.side == SIDE.SELL:
             tax = args.price * Float64(args.quantity) * self.stamp_tax_rate
         
         var other_fees = args.price * Float64(args.quantity) * self.transfer_fee_rate
@@ -40,7 +40,7 @@ struct FutureTransactionCostDecider(Movable):
     
     fn calc(self, args: TransactionCostArgs) -> TransactionCost:
         var multiplier = self.commission_multiplier
-        if args.position_effect == POSITION_EFFECT.CLOSE() or args.position_effect == POSITION_EFFECT.CLOSE_TODAY():
+        if args.position_effect == POSITION_EFFECT.CLOSE or args.position_effect == POSITION_EFFECT.CLOSE_TODAY:
             multiplier = self.close_commission_multiplier
         
         var commission = args.price * Float64(args.quantity) * multiplier

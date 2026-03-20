@@ -24,11 +24,11 @@ fn parse_instrument_types(type_str: String) -> List[INSTRUMENT_TYPE]:
     for part in parts:
         var trimmed = part.strip()
         if trimmed == "CS":
-            result.append(INSTRUMENT_TYPE.CS())
+            result.append(INSTRUMENT_TYPE.CS)
         elif trimmed == "ETF":
-            result.append(INSTRUMENT_TYPE.ETF())
+            result.append(INSTRUMENT_TYPE.ETF)
         elif trimmed == "FUTURE":
-            result.append(INSTRUMENT_TYPE.FUTURE())
+            result.append(INSTRUMENT_TYPE.FUTURE)
     return result
 
 
@@ -38,7 +38,7 @@ fn parse_markets(market_str: String) -> List[MARKET]:
     for part in parts:
         var trimmed = part.strip()
         if trimmed == "CN":
-            result.append(MARKET.CN())
+            result.append(MARKET.CN)
         elif trimmed == "HK":
-            result.append(MARKET.HK())
+            result.append(MARKET.HK)
     return result

@@ -44,19 +44,19 @@ struct TestRunner:
 
     fn test_transaction_cost_args(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var args = TransactionCostArgs(
             instrument=ins,
             price=10.0,
             quantity=100,
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
             order_id=1,
             close_today_quantity=0
         )
         self.check(args.price == 10.0, "TransactionCostArgs price is 10.0")
         self.check(args.quantity == 100, "TransactionCostArgs quantity is 100")
-        self.check(args.side == SIDE.BUY(), "TransactionCostArgs side is BUY")
+        self.check(args.side == SIDE.BUY, "TransactionCostArgs side is BUY")
 
     fn test_transaction_cost(mut self):
         var cost = TransactionCost(commission=10.0, tax=5.0, other_fees=2.0)

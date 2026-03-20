@@ -105,7 +105,7 @@ struct Portfolio(Movable):
         return "Portfolio(value=" + String(self.total_value) + ", cash=" + String(self.total_cash) + ")"
     
     fn get_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG())
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
     
     fn get_positions(self) -> List[Position]:
         var result = List[Position]()
@@ -115,7 +115,7 @@ struct Portfolio(Movable):
         return result^
     
     fn get_stock_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG())
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
 
 
 fn create_portfolio(total_value: Float64 = 100000.0) -> Portfolio:
@@ -226,7 +226,7 @@ struct Environment(Movable):
         )
         return order_with_id
 
-    fn add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE.CS()) raises -> None:
+    fn add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE.CS) raises -> None:
         var key = instrument_type.value
         try:
             self._frontend_validators[key].append(validator)
@@ -250,7 +250,7 @@ struct Environment(Movable):
         return result^
 
     fn can_submit_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS()
+        var instrument_type = INSTRUMENT_TYPE.CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_submission(order, "")
@@ -262,7 +262,7 @@ struct Environment(Movable):
         return True
 
     fn can_cancel_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS()
+        var instrument_type = INSTRUMENT_TYPE.CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_cancellation(order, "")
@@ -274,11 +274,11 @@ struct Environment(Movable):
         return True
 
     fn order_creation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event(EVENT.ORDER_CREATION_REJECT().value)
+        var event = Event(EVENT.ORDER_CREATION_REJECT.value)
         _ = self._event_bus.publish_event(event)
 
     fn order_cancellation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event(EVENT.ORDER_CANCELLATION_REJECT().value)
+        var event = Event(EVENT.ORDER_CANCELLATION_REJECT.value)
         _ = self._event_bus.publish_event(event)
 
     fn get_last_price(self, order_book_id: String) -> Float64:
@@ -306,17 +306,17 @@ struct Environment(Movable):
         return self._data_proxy.get_dividend(ins)
 
     fn get_account_type(self, order_book_id: String) -> DEFAULT_ACCOUNT_TYPE:
-        return DEFAULT_ACCOUNT_TYPE.STOCK()
+        return DEFAULT_ACCOUNT_TYPE.STOCK
 
     fn get_open_orders(self) -> List[Order]:
         var orders = List[Order]()
         return orders^
 
-    fn set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET.CN()) -> None:
+    fn set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET.CN) -> None:
         var key = instrument_type.value + "_" + market.value
         self._transaction_cost_deciders[key] = decider
 
-    fn get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET.CN()) -> TransactionCostDecider:
+    fn get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET.CN) -> TransactionCostDecider:
         var key = instrument_type.value + "_" + market.value
         try:
             return self._transaction_cost_deciders[key]
@@ -325,7 +325,7 @@ struct Environment(Movable):
 
     fn calc_transaction_cost(self, order: Order, quantity: Int, price: Float64) -> Float64:
         var instrument = self.get_instrument(order.order_book_id)
-        var decider = self.get_transaction_cost_decider(instrument.instrument_type, MARKET.CN())
+        var decider = self.get_transaction_cost_decider(instrument.instrument_type, MARKET.CN)
         return decider.calc(order, quantity, price)
 
     fn get_universe(self) -> Set[String]:
@@ -366,16 +366,16 @@ struct Environment(Movable):
 
     fn set_hold_strategy(mut self) -> None:
         self._is_hold = True
-        var event = Event(EVENT.STRATEGY_HOLD_SET().value)
+        var event = Event(EVENT.STRATEGY_HOLD_SET.value)
         _ = self._event_bus.publish_event(event)
 
     fn cancel_hold_strategy(mut self) -> None:
         self._is_hold = False
-        var event = Event(EVENT.STRATEGY_HOLD_CANCELLED().value)
+        var event = Event(EVENT.STRATEGY_HOLD_CANCELLED.value)
         _ = self._event_bus.publish_event(event)
 
 
-fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE.BACKTEST()) -> Environment:
+fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE.BACKTEST) -> Environment:
     return Environment(
         _start_date=start_date,
         _end_date=end_date,

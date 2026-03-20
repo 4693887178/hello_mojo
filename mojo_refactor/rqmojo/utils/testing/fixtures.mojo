@@ -26,7 +26,7 @@ fn create_backtest_fixture(start_date: DateTime = DateTime(2020, 1, 1, 0, 0, 0, 
     var env = create_environment(
         start_date=start_date,
         end_date=end_date,
-        run_type=RUN_TYPE.BACKTEST()
+        run_type=RUN_TYPE.BACKTEST
     )
     
     return BacktestFixture(

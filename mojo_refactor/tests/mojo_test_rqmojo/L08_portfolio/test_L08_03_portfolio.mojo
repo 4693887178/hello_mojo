@@ -39,18 +39,18 @@ struct TestRunner:
     fn test_portfolio_get_account(mut self):
         var portfolio = create_stock_portfolio(100000.0)
         var acc = portfolio.get_account()
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK(), "Portfolio get_account type")
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK, "Portfolio get_account type")
         self.check(acc.total_cash == 100000.0, "Portfolio get_account total_cash")
 
     fn test_portfolio_stock_account(mut self):
         var portfolio = create_stock_portfolio(100000.0)
         var acc = portfolio.stock_account()
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK(), "Portfolio stock_account type")
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK, "Portfolio stock_account type")
 
     fn test_portfolio_future_account(mut self):
         var portfolio = create_stock_portfolio(100000.0)
         var acc = portfolio.future_account()
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.FUTURE(), "Portfolio future_account type")
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.FUTURE, "Portfolio future_account type")
 
     fn test_portfolio_get_position(mut self):
         var portfolio = create_stock_portfolio(100000.0)
@@ -69,9 +69,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=100,
             price=10.0
         )
@@ -85,9 +85,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=100,
             price=10.0
         )
@@ -102,9 +102,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=100,
             price=10.0
         )
@@ -119,9 +119,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=100,
             price=10.0
         )

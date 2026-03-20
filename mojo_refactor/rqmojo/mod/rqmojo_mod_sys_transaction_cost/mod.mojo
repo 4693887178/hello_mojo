@@ -24,11 +24,11 @@ struct TransactionCostMod(Movable):
         var future_decider = create_future_decider(commission_multiplier=self.futures_commission_multiplier)
         var bond_decider = create_bond_decider()
         
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS().__str__(), stock_decider, MARKET.CN().__str__())
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.ETF().__str__(), stock_decider, MARKET.CN().__str__())
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.LOF().__str__(), stock_decider, MARKET.CN().__str__())
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.FUTURE().__str__(), future_decider, MARKET.CN().__str__())
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.BOND().__str__(), bond_decider, MARKET.CN().__str__())
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS.__str__(), stock_decider, MARKET.CN.__str__())
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.ETF.__str__(), stock_decider, MARKET.CN.__str__())
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.LOF.__str__(), stock_decider, MARKET.CN.__str__())
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.FUTURE.__str__(), future_decider, MARKET.CN.__str__())
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.BOND.__str__(), bond_decider, MARKET.CN.__str__())
     
     fn tear_down(mut self, code: EXIT_CODE, exception: Optional[object]) -> None:
         pass

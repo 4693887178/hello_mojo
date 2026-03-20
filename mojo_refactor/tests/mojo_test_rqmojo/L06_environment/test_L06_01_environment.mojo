@@ -53,8 +53,8 @@ struct TestRunner:
     fn test_environment_run_type(mut self):
         var start = DateTime(2024, 1, 1, 0, 0, 0, 0)
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
-        var env = create_environment(start, end, RUN_TYPE.BACKTEST())
-        self.check(env.run_type() == RUN_TYPE.BACKTEST(), "Environment run_type is BACKTEST")
+        var env = create_environment(start, end, RUN_TYPE.BACKTEST)
+        self.check(env.run_type() == RUN_TYPE.BACKTEST, "Environment run_type is BACKTEST")
 
     fn test_environment_frequency(mut self):
         var start = DateTime(2024, 1, 1, 0, 0, 0, 0)
@@ -136,7 +136,7 @@ struct TestRunner:
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
         var style = MarketOrder()
-        var order = create_order_with_id(0, "000001.XSHE", SIDE.BUY(), 100, style)
+        var order = create_order_with_id(0, "000001.XSHE", SIDE.BUY, 100, style)
         var submitted = env.submit_order(order)
         self.check(submitted.order_id == 1, "Environment submit_order order_id is 1")
 
@@ -145,7 +145,7 @@ struct TestRunner:
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
         var style = MarketOrder()
-        var order = create_order_with_id(1, "000001.XSHE", SIDE.BUY(), 100, style)
+        var order = create_order_with_id(1, "000001.XSHE", SIDE.BUY, 100, style)
         self.check(env.can_submit_order(order) == True, "Environment can_submit_order is True")
 
     fn test_environment_can_cancel_order(mut self):
@@ -153,14 +153,14 @@ struct TestRunner:
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
         var style = MarketOrder()
-        var order = create_order_with_id(1, "000001.XSHE", SIDE.BUY(), 100, style)
+        var order = create_order_with_id(1, "000001.XSHE", SIDE.BUY, 100, style)
         self.check(env.can_cancel_order(order) == True, "Environment can_cancel_order is True")
 
     fn test_environment_add_frontend_validator(mut self):
         var start = DateTime(2024, 1, 1, 0, 0, 0, 0)
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
-        var validator = FrontendValidator(name="test", instrument_type=INSTRUMENT_TYPE.CS())
+        var validator = FrontendValidator(name="test", instrument_type=INSTRUMENT_TYPE.CS)
         try:
             env.add_frontend_validator(validator)
         except:
@@ -171,15 +171,15 @@ struct TestRunner:
         var start = DateTime(2024, 1, 1, 0, 0, 0, 0)
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
-        var decider = TransactionCostDecider(name="test", instrument_type=INSTRUMENT_TYPE.CS(), market=MARKET.CN())
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS(), decider)
+        var decider = TransactionCostDecider(name="test", instrument_type=INSTRUMENT_TYPE.CS, market=MARKET.CN)
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS, decider)
         self.check(True, "Environment set_transaction_cost_decider works")
 
     fn test_environment_get_transaction_cost_decider(mut self):
         var start = DateTime(2024, 1, 1, 0, 0, 0, 0)
         var end = DateTime(2024, 12, 31, 0, 0, 0, 0)
         var env = create_environment(start, end)
-        var decider = env.get_transaction_cost_decider(INSTRUMENT_TYPE.CS(), MARKET.CN())
+        var decider = env.get_transaction_cost_decider(INSTRUMENT_TYPE.CS, MARKET.CN)
         self.check(decider.name == "default", "Environment get_transaction_cost_decider name is default")
 
     fn test_portfolio_creation(mut self):
@@ -203,7 +203,7 @@ struct TestRunner:
             base__start_date=start,
             base__end_date=end,
             base__frequency="1d",
-            base__run_type=RUN_TYPE.BACKTEST(),
+            base__run_type=RUN_TYPE.BACKTEST,
             account_count=0,
             is_hold=False
         )

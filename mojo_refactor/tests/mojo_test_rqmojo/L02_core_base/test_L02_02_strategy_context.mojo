@@ -49,14 +49,14 @@ struct TestRunner:
     fn test_run_info_run_type(mut self):
         var start = Date(2024, 1, 1)
         var end = Date(2024, 12, 31)
-        var run_info = create_run_info(start, end, "1d", run_type=RUN_TYPE.PAPER_TRADING())
-        self.check(run_info.run_type() == RUN_TYPE.PAPER_TRADING(), "RunInfo run_type PAPER_TRADING")
+        var run_info = create_run_info(start, end, "1d", run_type=RUN_TYPE.PAPER_TRADING)
+        self.check(run_info.run_type() == RUN_TYPE.PAPER_TRADING, "RunInfo run_type PAPER_TRADING")
 
     fn test_run_info_matching_type(mut self):
         var start = Date(2024, 1, 1)
         var end = Date(2024, 12, 31)
-        var run_info = create_run_info(start, end, "1d", matching_type=MATCHING_TYPE.NEXT_BAR_OPEN())
-        self.check(run_info.matching_type() == MATCHING_TYPE.NEXT_BAR_OPEN(), "RunInfo matching_type NEXT_BAR_OPEN")
+        var run_info = create_run_info(start, end, "1d", matching_type=MATCHING_TYPE.NEXT_BAR_OPEN)
+        self.check(run_info.matching_type() == MATCHING_TYPE.NEXT_BAR_OPEN, "RunInfo matching_type NEXT_BAR_OPEN")
 
     fn test_run_info_slippage(mut self):
         var start = Date(2024, 1, 1)

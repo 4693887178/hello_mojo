@@ -75,7 +75,7 @@ struct CashValidator(Movable):
         if not self._enabled:
             return valid_result()
         
-        if order.position_effect != POSITION_EFFECT.OPEN():
+        if order.position_effect != POSITION_EFFECT.OPEN:
             return valid_result()
         
         var required_cash: Float64 = 0.0

@@ -17,7 +17,7 @@ struct CashValidator(FrontendValidator, Movable):
         if not self.enabled:
             return None
         
-        if order.side != SIDE.BUY():
+        if order.side != SIDE.BUY:
             return None
         
         var acc = account

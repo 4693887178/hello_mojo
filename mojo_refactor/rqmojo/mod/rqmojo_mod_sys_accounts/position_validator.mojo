@@ -17,7 +17,7 @@ struct PositionValidator(FrontendValidator, Movable):
         if not self.enabled:
             return None
         
-        if order.position_effect == POSITION_EFFECT.CLOSE() or order.position_effect == POSITION_EFFECT.CLOSE_TODAY():
+        if order.position_effect == POSITION_EFFECT.CLOSE or order.position_effect == POSITION_EFFECT.CLOSE_TODAY:
             if position is None:
                 return "Position not found for " + order.order_book_id
             

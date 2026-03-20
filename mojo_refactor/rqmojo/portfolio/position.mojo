@@ -32,7 +32,7 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
         if self.quantity == 0:
             return 0.0
         var direction_factor: Float64 = 1.0
-        if self.direction == POSITION_DIRECTION.SHORT():
+        if self.direction == POSITION_DIRECTION.SHORT:
             direction_factor = -1.0
         return direction_factor * (self.last_price - self.avg_price) * Float64(self.quantity) * self._contract_multiplier
 
@@ -40,7 +40,7 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
         if self.quantity == 0:
             return 0.0
         var direction_factor: Float64 = 1.0
-        if self.direction == POSITION_DIRECTION.SHORT():
+        if self.direction == POSITION_DIRECTION.SHORT:
             direction_factor = -1.0
         return direction_factor * (self.last_price - self.prev_close) * Float64(self.quantity) * self._contract_multiplier
 
@@ -48,7 +48,7 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
         if self.old_quantity == 0:
             return 0.0
         var direction_factor: Float64 = 1.0
-        if self.direction == POSITION_DIRECTION.SHORT():
+        if self.direction == POSITION_DIRECTION.SHORT:
             direction_factor = -1.0
         return direction_factor * (self.last_price - self.prev_close) * Float64(self.old_quantity) * self._contract_multiplier
 
@@ -67,14 +67,14 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
         var delta_cash: Float64 = 0.0
         var trade_amount = trade.price * Float64(trade.quantity) * self._contract_multiplier
         
-        if trade.position_effect == POSITION_EFFECT.OPEN():
+        if trade.position_effect == POSITION_EFFECT.OPEN:
             var old_total = self.avg_price * Float64(self.quantity)
             self.quantity += trade.quantity
             self.today_quantity += trade.quantity
             if self.quantity > 0:
                 self.avg_price = (old_total + trade_amount) / Float64(self.quantity)
             delta_cash = -trade_amount
-        elif trade.position_effect == POSITION_EFFECT.CLOSE():
+        elif trade.position_effect == POSITION_EFFECT.CLOSE:
             self.quantity -= trade.quantity
             if self.old_quantity >= trade.quantity:
                 self.old_quantity -= trade.quantity
@@ -84,7 +84,7 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
             if self.quantity < 0:
                 self.quantity = 0
             delta_cash = trade_amount
-        elif trade.position_effect == POSITION_EFFECT.CLOSE_TODAY():
+        elif trade.position_effect == POSITION_EFFECT.CLOSE_TODAY:
             self.quantity -= trade.quantity
             self.today_quantity -= trade.quantity
             if self.today_quantity < 0:
@@ -121,7 +121,7 @@ struct Position(Copyable, Movable, ImplicitlyCopyable):
 
 fn create_position(
     order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG(),
+    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG,
     quantity: Int = 0,
     avg_price: Float64 = 0.0,
     contract_multiplier: Float64 = 1.0,
@@ -144,7 +144,7 @@ fn create_position(
 
 
 fn create_stock_position(order_book_id: String, quantity: Int = 0, avg_price: Float64 = 0.0) -> Position:
-    return create_position(order_book_id, POSITION_DIRECTION.LONG(), quantity, avg_price, 1.0, 1.0)
+    return create_position(order_book_id, POSITION_DIRECTION.LONG, quantity, avg_price, 1.0, 1.0)
 
 
 fn create_future_position(

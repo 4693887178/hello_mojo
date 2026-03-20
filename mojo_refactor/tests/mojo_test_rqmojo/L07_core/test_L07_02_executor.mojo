@@ -45,11 +45,11 @@ struct TestRunner:
     fn test_executor_current_phase(mut self):
         var executor = create_executor()
         var phase = executor.current_phase()
-        self.check(phase == EXECUTION_PHASE.GLOBAL(), "Executor current_phase is GLOBAL")
+        self.check(phase == EXECUTION_PHASE.GLOBAL, "Executor current_phase is GLOBAL")
 
     fn test_executor_set_phase(mut self):
         var executor = create_executor()
-        executor.set_phase(EXECUTION_PHASE.ON_BAR())
+        executor.set_phase(EXECUTION_PHASE.ON_BAR)
         self.check(executor._current_phase_name == "ON_BAR", "Executor set_phase works")
 
     fn test_executor_get_state(mut self):

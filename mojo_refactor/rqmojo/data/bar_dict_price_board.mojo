@@ -16,7 +16,7 @@ fn nan_f64() -> Float64:
 
 
 fn create_empty_bar() -> BarObject:
-    var ins = create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHE())
+    var ins = create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHE)
     return BarObject(
         instrument=ins,
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
@@ -82,5 +82,5 @@ struct BarDictPriceBoard(PriceBoard, Movable):
 fn create_bar_dict_price_board() -> BarDictPriceBoard:
     return BarDictPriceBoard(
         _bar_cache=Dict[String, BarObject](),
-        _phase=EXECUTION_PHASE.BEFORE_TRADING()
+        _phase=EXECUTION_PHASE.BEFORE_TRADING
     )

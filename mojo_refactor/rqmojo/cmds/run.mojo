@@ -58,7 +58,7 @@ fn run_strategy(strategy_file: String, start_date: DateTime, end_date: DateTime,
         start_date=start_date,
         end_date=end_date,
         frequency=frequency,
-        run_type=RUN_TYPE.BACKTEST(),
+        run_type=RUN_TYPE.BACKTEST,
         base_port=0,
         accounts=Dict[String, Float64](),
         init_cash=init_cash

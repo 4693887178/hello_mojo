@@ -29,83 +29,83 @@ struct TestRunner:
 
     fn test_create_stock_instrument(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         self.check(ins.order_book_id == "000001.XSHE", "Stock order_book_id")
         self.check(ins.symbol == "平安银行", "Stock symbol")
-        self.check(ins.type == INSTRUMENT_TYPE.CS(), "Stock type is CS")
+        self.check(ins.type == INSTRUMENT_TYPE.CS, "Stock type is CS")
         self.check(ins.round_lot == 100, "Stock round_lot is 100")
 
     fn test_create_future_instrument(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.order_book_id == "IF2401.CFFEX", "Future order_book_id")
-        self.check(ins.type == INSTRUMENT_TYPE.FUTURE(), "Future type is FUTURE")
+        self.check(ins.type == INSTRUMENT_TYPE.FUTURE, "Future type is FUTURE")
         self.check(ins.contract_multiplier == 300.0, "Future contract_multiplier is 300")
         self.check(ins.round_lot == 1, "Future round_lot is 1")
 
     fn test_create_etf_instrument(mut self):
         var listed = DateTime(2004, 1, 1, 0, 0, 0, 0)
-        var ins = create_etf_instrument("510050.XSHG", "50ETF", listed, EXCHANGE.XSHG())
+        var ins = create_etf_instrument("510050.XSHG", "50ETF", listed, EXCHANGE.XSHG)
         self.check(ins.order_book_id == "510050.XSHG", "ETF order_book_id")
-        self.check(ins.type == INSTRUMENT_TYPE.ETF(), "ETF type is ETF")
+        self.check(ins.type == INSTRUMENT_TYPE.ETF, "ETF type is ETF")
 
     fn test_create_bond_instrument(mut self):
         var listed = DateTime(2020, 1, 1, 0, 0, 0, 0)
-        var ins = create_bond_instrument("110000.XSHG", "测试债券", listed, EXCHANGE.XSHG())
-        self.check(ins.type == INSTRUMENT_TYPE.BOND(), "Bond type is BOND")
+        var ins = create_bond_instrument("110000.XSHG", "测试债券", listed, EXCHANGE.XSHG)
+        self.check(ins.type == INSTRUMENT_TYPE.BOND, "Bond type is BOND")
         self.check(ins.round_lot == 10, "Bond round_lot is 10")
 
     fn test_create_lof_instrument(mut self):
         var listed = DateTime(2010, 1, 1, 0, 0, 0, 0)
-        var ins = create_lof_instrument("161725.XSHE", "测试LOF", listed, EXCHANGE.XSHE())
-        self.check(ins.type == INSTRUMENT_TYPE.LOF(), "LOF type is LOF")
+        var ins = create_lof_instrument("161725.XSHE", "测试LOF", listed, EXCHANGE.XSHE)
+        self.check(ins.type == INSTRUMENT_TYPE.LOF, "LOF type is LOF")
 
     fn test_create_index_instrument(mut self):
         var listed = DateTime(2000, 1, 1, 0, 0, 0, 0)
-        var ins = create_index_instrument("000300.XSHG", "沪深300", listed, EXCHANGE.XSHG())
-        self.check(ins.type == INSTRUMENT_TYPE.INDX(), "Index type is INDX")
+        var ins = create_index_instrument("000300.XSHG", "沪深300", listed, EXCHANGE.XSHG)
+        self.check(ins.type == INSTRUMENT_TYPE.INDX, "Index type is INDX")
 
     fn test_create_option_instrument(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_option_instrument("10000001.SH", "测试期权", listed, de_listed, maturity, 10000.0, EXCHANGE.XSHG(), "510050")
-        self.check(ins.type == INSTRUMENT_TYPE.OPTION(), "Option type is OPTION")
+        var ins = create_option_instrument("10000001.SH", "测试期权", listed, de_listed, maturity, 10000.0, EXCHANGE.XSHG, "510050")
+        self.check(ins.type == INSTRUMENT_TYPE.OPTION, "Option type is OPTION")
 
     fn test_instrument_tick_size_stock(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         self.check(ins.tick_size() == 0.01, "Stock tick_size is 0.01")
 
     fn test_instrument_tick_size_etf(mut self):
         var listed = DateTime(2004, 1, 1, 0, 0, 0, 0)
-        var ins = create_etf_instrument("510050.XSHG", "50ETF", listed, EXCHANGE.XSHG())
+        var ins = create_etf_instrument("510050.XSHG", "50ETF", listed, EXCHANGE.XSHG)
         self.check(ins.tick_size() == 0.001, "ETF tick_size is 0.001")
 
     fn test_instrument_tick_size_future(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.tick_size() == 1.0, "Future tick_size is 1.0")
 
     fn test_instrument_account_type_stock(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
-        self.check(ins.account_type() == DEFAULT_ACCOUNT_TYPE.STOCK(), "Stock account_type is STOCK")
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
+        self.check(ins.account_type() == DEFAULT_ACCOUNT_TYPE.STOCK, "Stock account_type is STOCK")
 
     fn test_instrument_account_type_future(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
-        self.check(ins.account_type() == DEFAULT_ACCOUNT_TYPE.FUTURE(), "Future account_type is FUTURE")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
+        self.check(ins.account_type() == DEFAULT_ACCOUNT_TYPE.FUTURE, "Future account_type is FUTURE")
 
     fn test_instrument_listed_at(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt1 = DateTime(2020, 1, 1, 0, 0, 0, 0)
         var dt2 = DateTime(1990, 1, 1, 0, 0, 0, 0)
         self.check(ins.listed_at(dt1) == True, "Instrument listed_at 2020 is True")
@@ -113,7 +113,7 @@ struct TestRunner:
 
     fn test_instrument_de_listed_at(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         ins.de_listed_date = DateTime(2020, 1, 1, 0, 0, 0, 0)
         var dt1 = DateTime(2020, 1, 1, 0, 0, 0, 0)
         var dt2 = DateTime(2019, 12, 31, 0, 0, 0, 0)
@@ -122,7 +122,7 @@ struct TestRunner:
 
     fn test_instrument_active_at(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2020, 1, 1, 0, 0, 0, 0)
         self.check(ins.active_at(dt) == True, "Instrument active_at 2020 is True")
 
@@ -130,52 +130,52 @@ struct TestRunner:
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2999, 12, 31, 0, 0, 0, 0)
         var maturity = DateTime(2999, 12, 31, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF88", "IF主力", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF88", "IF主力", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.is_future_continuous_contract() == True, "IF88 is continuous contract")
 
     fn test_instrument_is_future_continuous_contract_99(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2999, 12, 31, 0, 0, 0, 0)
         var maturity = DateTime(2999, 12, 31, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF99", "IF指数", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF99", "IF指数", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.is_future_continuous_contract() == True, "IF99 is continuous contract")
 
     fn test_instrument_is_future_continuous_contract_normal(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.is_future_continuous_contract() == False, "IF2401 is not continuous contract")
 
     fn test_instrument_str(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var str_repr = ins.__str__()
         self.check(str_repr.find("Instrument") >= 0, "Instrument __str__ contains Instrument")
         self.check(str_repr.find("000001.XSHE") >= 0, "Instrument __str__ contains order_book_id")
 
     fn test_instrument_calc_cash_occupation_stock(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
-        var cash = ins.calc_cash_occupation(10.0, 100, POSITION_DIRECTION.LONG(), 1.0, 1.0)
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
+        var cash = ins.calc_cash_occupation(10.0, 100, POSITION_DIRECTION.LONG, 1.0, 1.0)
         self.check(cash == 1000.0, "Stock calc_cash_occupation is price * quantity")
 
     fn test_instrument_calc_cash_occupation_future(mut self):
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
-        var cash = ins.calc_cash_occupation(4000.0, 1, POSITION_DIRECTION.LONG(), 1.0, 0.1)
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
+        var cash = ins.calc_cash_occupation(4000.0, 1, POSITION_DIRECTION.LONG, 1.0, 0.1)
         self.check(cash == 120000.0, "Future calc_cash_occupation with margin")
 
     fn test_is_instrument_type_in_stock_account(mut self):
-        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.CS()) == True, "CS is in stock account")
-        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.ETF()) == True, "ETF is in stock account")
-        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.FUTURE()) == False, "FUTURE is not in stock account")
+        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.CS) == True, "CS is in stock account")
+        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.ETF) == True, "ETF is in stock account")
+        self.check(is_instrument_type_in_stock_account(INSTRUMENT_TYPE.FUTURE) == False, "FUTURE is not in stock account")
 
     fn test_instrument_days_from_listed(mut self):
         var listed = DateTime(2020, 1, 1, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2020, 1, 31, 0, 0, 0, 0)
         var days = ins.days_from_listed(dt)
         self.check(days >= 0, "Instrument days_from_listed returns non-negative")
@@ -184,7 +184,7 @@ struct TestRunner:
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         self.check(ins.trade_at_night() == False, "IF2401 trade_at_night is False for day session")
 
     fn run_all(mut self):

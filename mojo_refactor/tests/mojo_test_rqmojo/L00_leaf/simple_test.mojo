@@ -1,7 +1,7 @@
 from rqmojo.const import SIDE
 
 fn main() raises:
-    var buy = SIDE.BUY()
+    var buy = SIDE.BUY
     print(buy.name)
     print(buy.value)
     

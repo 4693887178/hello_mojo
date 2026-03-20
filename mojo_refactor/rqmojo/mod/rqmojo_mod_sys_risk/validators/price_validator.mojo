@@ -16,7 +16,7 @@ struct PriceValidator(FrontendValidator, Movable):
         if not self.enabled:
             return None
         
-        if order.order_type != ORDER_TYPE.LIMIT():
+        if order.order_type != ORDER_TYPE.LIMIT:
             return None
         
         if limit_up > 0 and order.price > limit_up:

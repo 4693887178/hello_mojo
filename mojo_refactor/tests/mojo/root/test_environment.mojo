@@ -20,14 +20,14 @@ fn test_global_vars():
 
 fn test_frontend_validator():
     print("=== Testing FrontendValidator ===")
-    var validator = FrontendValidator(name="test_validator", instrument_type=INSTRUMENT_TYPE.CS())
+    var validator = FrontendValidator(name="test_validator", instrument_type=INSTRUMENT_TYPE.CS)
     print("FrontendValidator: " + validator.__str__())
     print("")
 
 
 fn test_transaction_cost_decider():
     print("=== Testing TransactionCostDecider ===")
-    var decider = TransactionCostDecider(name="stock_decider", instrument_type=INSTRUMENT_TYPE.CS(), market=MARKET.CN())
+    var decider = TransactionCostDecider(name="stock_decider", instrument_type=INSTRUMENT_TYPE.CS, market=MARKET.CN)
     print("TransactionCostDecider: " + decider.__str__())
     print("")
 
@@ -37,7 +37,7 @@ fn test_create_environment():
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
     
-    var env = create_environment(start_date, end_date, RUN_TYPE.BACKTEST())
+    var env = create_environment(start_date, end_date, RUN_TYPE.BACKTEST)
     
     print("start_date: " + env.start_date().__str__())
     print("end_date: " + env.end_date().__str__())
@@ -132,10 +132,10 @@ fn test_environment_transaction_cost_decider():
     
     var env = create_environment(start_date, end_date)
     
-    var decider = TransactionCostDecider(name="stock_decider", instrument_type=INSTRUMENT_TYPE.CS(), market=MARKET.CN())
-    env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS(), decider, MARKET.CN())
+    var decider = TransactionCostDecider(name="stock_decider", instrument_type=INSTRUMENT_TYPE.CS, market=MARKET.CN)
+    env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS, decider, MARKET.CN)
     
-    var retrieved = env.get_transaction_cost_decider(INSTRUMENT_TYPE.CS(), MARKET.CN())
+    var retrieved = env.get_transaction_cost_decider(INSTRUMENT_TYPE.CS, MARKET.CN)
     print("Retrieved decider: " + retrieved.__str__())
     print("")
 

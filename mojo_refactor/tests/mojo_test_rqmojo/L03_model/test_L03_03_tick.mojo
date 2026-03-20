@@ -25,7 +25,7 @@ struct TestRunner:
 
     fn test_create_tick_object(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         self.check(tick.last == 10.5, "TickObject last is 10.5")
@@ -34,14 +34,14 @@ struct TestRunner:
 
     fn test_tick_object_order_book_id(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         self.check(tick.order_book_id() == "000001.XSHE", "TickObject order_book_id is 000001.XSHE")
 
     fn test_tick_object_datetime(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         self.check(tick.datetime.year == 2024, "TickObject datetime year is 2024")
@@ -50,7 +50,7 @@ struct TestRunner:
 
     fn test_tick_object_ohlc(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(
             ins, dt, 10.5, 1000000.0, 10500000.0,
@@ -63,7 +63,7 @@ struct TestRunner:
 
     fn test_tick_object_limit(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(
             ins, dt, 10.5, 1000000.0, 10500000.0,
@@ -74,14 +74,14 @@ struct TestRunner:
 
     fn test_tick_object_close(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         self.check(tick.close() == 10.5, "TickObject close() returns last")
 
     fn test_tick_object_str(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         var str_repr = tick.__str__()
@@ -92,7 +92,7 @@ struct TestRunner:
         var listed = DateTime(2023, 1, 1, 0, 0, 0, 0)
         var de_listed = DateTime(2024, 1, 19, 0, 0, 0, 0)
         var maturity = DateTime(2024, 1, 19, 0, 0, 0, 0)
-        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX(), "IF")
+        var ins = create_future_instrument("IF2401.CFFEX", "沪深2401", listed, de_listed, maturity, 300.0, EXCHANGE.CFFEX, "IF")
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 4000.0, 10000.0, 12000000000.0)
         self.check(tick.last == 4000.0, "Future TickObject last is 4000.0")
@@ -100,7 +100,7 @@ struct TestRunner:
 
     fn test_tick_object_copy(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick1 = create_tick_object(ins, dt, 10.5, 1000000.0, 10500000.0)
         var tick2 = tick1
@@ -109,7 +109,7 @@ struct TestRunner:
 
     fn test_tick_object_zero_values(mut self):
         var listed = DateTime(1991, 4, 3, 0, 0, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", listed, EXCHANGE.XSHE)
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
         var tick = create_tick_object(ins, dt, 0.0, 0.0, 0.0)
         self.check(tick.last == 0.0, "TickObject zero last is 0.0")

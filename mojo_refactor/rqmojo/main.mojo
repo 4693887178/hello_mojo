@@ -101,7 +101,7 @@ fn create_config(
     return RQAlphaConfig(
         start_date=start_date,
         end_date=end_date,
-        run_type=RUN_TYPE.BACKTEST(),
+        run_type=RUN_TYPE.BACKTEST,
         frequency="1d",
         initial_cash=initial_cash,
         strategy_file=strategy_file,

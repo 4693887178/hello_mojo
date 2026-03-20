@@ -29,39 +29,39 @@ struct TestRunner:
 
     fn test_parse_run_type_backtest(mut self):
         var result = parse_run_type("b")
-        self.check(result == RUN_TYPE.BACKTEST(), "parse_run_type 'b' returns BACKTEST")
+        self.check(result == RUN_TYPE.BACKTEST, "parse_run_type 'b' returns BACKTEST")
 
     fn test_parse_run_type_paper_trading(mut self):
         var result = parse_run_type("p")
-        self.check(result == RUN_TYPE.PAPER_TRADING(), "parse_run_type 'p' returns PAPER_TRADING")
+        self.check(result == RUN_TYPE.PAPER_TRADING, "parse_run_type 'p' returns PAPER_TRADING")
 
     fn test_parse_run_type_live_trading(mut self):
         var result = parse_run_type("r")
-        self.check(result == RUN_TYPE.LIVE_TRADING(), "parse_run_type 'r' returns LIVE_TRADING")
+        self.check(result == RUN_TYPE.LIVE_TRADING, "parse_run_type 'r' returns LIVE_TRADING")
 
     fn test_parse_run_type_backtest_full(mut self):
         var result = parse_run_type("backtest")
-        self.check(result == RUN_TYPE.BACKTEST(), "parse_run_type 'backtest' returns BACKTEST")
+        self.check(result == RUN_TYPE.BACKTEST, "parse_run_type 'backtest' returns BACKTEST")
 
     fn test_parse_run_type_default(mut self):
         var result = parse_run_type("unknown")
-        self.check(result == RUN_TYPE.BACKTEST(), "parse_run_type unknown returns BACKTEST")
+        self.check(result == RUN_TYPE.BACKTEST, "parse_run_type unknown returns BACKTEST")
 
     fn test_parse_persist_mode_real_time(mut self):
         var result = parse_persist_mode("real_time")
-        self.check(result == PERSIST_MODE.REAL_TIME(), "parse_persist_mode 'real_time' returns REAL_TIME")
+        self.check(result == PERSIST_MODE.REAL_TIME, "parse_persist_mode 'real_time' returns REAL_TIME")
 
     fn test_parse_persist_mode_on_crash(mut self):
         var result = parse_persist_mode("on_crash")
-        self.check(result == PERSIST_MODE.ON_CRASH(), "parse_persist_mode 'on_crash' returns ON_CRASH")
+        self.check(result == PERSIST_MODE.ON_CRASH, "parse_persist_mode 'on_crash' returns ON_CRASH")
 
     fn test_parse_persist_mode_on_normal_exit(mut self):
         var result = parse_persist_mode("on_normal_exit")
-        self.check(result == PERSIST_MODE.ON_NORMAL_EXIT(), "parse_persist_mode 'on_normal_exit' returns ON_NORMAL_EXIT")
+        self.check(result == PERSIST_MODE.ON_NORMAL_EXIT, "parse_persist_mode 'on_normal_exit' returns ON_NORMAL_EXIT")
 
     fn test_parse_persist_mode_default(mut self):
         var result = parse_persist_mode("unknown")
-        self.check(result == PERSIST_MODE.ON_CRASH(), "parse_persist_mode unknown returns ON_CRASH")
+        self.check(result == PERSIST_MODE.ON_CRASH, "parse_persist_mode unknown returns ON_CRASH")
 
     fn test_default_base_config(mut self):
         var config = default_base_config()
@@ -103,7 +103,7 @@ struct TestRunner:
 
     fn test_create_config_from_args_with_run_type(mut self):
         var config = create_config_from_args(2022, 1, 1, 2022, 12, 31, "1d", "p")
-        self.check(config.base.run_type == RUN_TYPE.PAPER_TRADING(), "create_config_from_args with run_type p")
+        self.check(config.base.run_type == RUN_TYPE.PAPER_TRADING, "create_config_from_args with run_type p")
 
     fn test_rqalpha_config_str(mut self):
         var config = default_config()

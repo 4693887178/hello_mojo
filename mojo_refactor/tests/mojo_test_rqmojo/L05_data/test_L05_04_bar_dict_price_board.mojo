@@ -50,7 +50,7 @@ struct TestRunner:
     fn test_set_bar_and_get_last_price(mut self):
         var board = create_bar_dict_price_board()
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         var bar = create_bar_object(
             instrument=ins,
             dt=dt,
@@ -70,7 +70,7 @@ struct TestRunner:
     fn test_set_bar_and_get_limit_up(mut self):
         var board = create_bar_dict_price_board()
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         var bar = create_bar_object(
             instrument=ins,
             dt=dt,
@@ -90,7 +90,7 @@ struct TestRunner:
     fn test_set_bar_and_get_limit_down(mut self):
         var board = create_bar_dict_price_board()
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         var bar = create_bar_object(
             instrument=ins,
             dt=dt,
@@ -110,7 +110,7 @@ struct TestRunner:
     fn test_clear_cache(mut self):
         var board = create_bar_dict_price_board()
         var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
-        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE())
+        var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         var bar = create_bar_object(
             instrument=ins,
             dt=dt,
@@ -130,9 +130,9 @@ struct TestRunner:
 
     fn test_set_phase(mut self):
         var board = create_bar_dict_price_board()
-        board.set_phase(EXECUTION_PHASE.ON_BAR())
+        board.set_phase(EXECUTION_PHASE.ON_BAR)
         var phase = board.get_phase()
-        self.check(phase == EXECUTION_PHASE.ON_BAR(), "BarDictPriceBoard set_phase works")
+        self.check(phase == EXECUTION_PHASE.ON_BAR, "BarDictPriceBoard set_phase works")
 
     fn test_get_a1_is_nan(mut self):
         var board = create_bar_dict_price_board()

@@ -9,7 +9,7 @@ from collections import Dict
 
 
 fn is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
-    return ins_type == INSTRUMENT_TYPE.CS() or ins_type == INSTRUMENT_TYPE.ETF() or ins_type == INSTRUMENT_TYPE.LOF() or ins_type == INSTRUMENT_TYPE.INDX() or ins_type == INSTRUMENT_TYPE.BOND()
+    return ins_type == INSTRUMENT_TYPE.CS or ins_type == INSTRUMENT_TYPE.ETF or ins_type == INSTRUMENT_TYPE.LOF or ins_type == INSTRUMENT_TYPE.INDX or ins_type == INSTRUMENT_TYPE.BOND
 
 
 fn fix_date(ds: String, dflt: DateTime) raises -> DateTime:
@@ -64,42 +64,42 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
     fn type(self) -> INSTRUMENT_TYPE:
         var type_str = self._dict.get("type", "CS")
         if type_str == "CS":
-            return INSTRUMENT_TYPE.CS()
+            return INSTRUMENT_TYPE.CS
         elif type_str == "INDX":
-            return INSTRUMENT_TYPE.INDX()
+            return INSTRUMENT_TYPE.INDX
         elif type_str == "ETF":
-            return INSTRUMENT_TYPE.ETF()
+            return INSTRUMENT_TYPE.ETF
         elif type_str == "LOF":
-            return INSTRUMENT_TYPE.LOF()
+            return INSTRUMENT_TYPE.LOF
         elif type_str == "Future":
-            return INSTRUMENT_TYPE.FUTURE()
+            return INSTRUMENT_TYPE.FUTURE
         elif type_str == "Option":
-            return INSTRUMENT_TYPE.OPTION()
+            return INSTRUMENT_TYPE.OPTION
         elif type_str == "Bond":
-            return INSTRUMENT_TYPE.BOND()
+            return INSTRUMENT_TYPE.BOND
         elif type_str == "Convertible":
-            return INSTRUMENT_TYPE.CONVERTIBLE()
+            return INSTRUMENT_TYPE.CONVERTIBLE
         else:
-            return INSTRUMENT_TYPE.CS()
+            return INSTRUMENT_TYPE.CS
     
     fn exchange(self) -> EXCHANGE:
         var exchange_str = self._dict.get("exchange", "XSHE")
         if exchange_str == "XSHG":
-            return EXCHANGE.XSHG()
+            return EXCHANGE.XSHG
         elif exchange_str == "XSHE":
-            return EXCHANGE.XSHE()
+            return EXCHANGE.XSHE
         elif exchange_str == "SHFE":
-            return EXCHANGE.SHFE()
+            return EXCHANGE.SHFE
         elif exchange_str == "DCE":
-            return EXCHANGE.DCE()
+            return EXCHANGE.DCE
         elif exchange_str == "CZCE":
-            return EXCHANGE.CZCE()
+            return EXCHANGE.CZCE
         elif exchange_str == "CFFEX":
-            return EXCHANGE.CFFEX()
+            return EXCHANGE.CFFEX
         elif exchange_str == "INE":
-            return EXCHANGE.INE()
+            return EXCHANGE.INE
         else:
-            return EXCHANGE.XSHE()
+            return EXCHANGE.XSHE
     
     fn market_tplus(self) raises -> Int:
         var market_tplus_str = self._dict.get("market_tplus", "0")
@@ -148,11 +148,11 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
     
     fn account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type()):
-            return DEFAULT_ACCOUNT_TYPE.STOCK()
-        elif self.type() == INSTRUMENT_TYPE.FUTURE():
-            return DEFAULT_ACCOUNT_TYPE.FUTURE()
+            return DEFAULT_ACCOUNT_TYPE.STOCK
+        elif self.type() == INSTRUMENT_TYPE.FUTURE:
+            return DEFAULT_ACCOUNT_TYPE.FUTURE
         else:
-            return DEFAULT_ACCOUNT_TYPE.STOCK()
+            return DEFAULT_ACCOUNT_TYPE.STOCK
     
     fn active_at(self, dt: DateTime) raises -> Bool:
         return self.listed_at(dt) and not self.de_listed_at(dt)
@@ -165,7 +165,7 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
     fn de_listed_at(self, dt: DateTime) raises -> Bool:
         var de_listed_cmp = self.de_listed_date().year * 10000 + self.de_listed_date().month * 100 + self.de_listed_date().day
         var dt_cmp = dt.year * 10000 + dt.month * 100 + dt.day
-        if self.type() == INSTRUMENT_TYPE.FUTURE() or self.type() == INSTRUMENT_TYPE.OPTION():
+        if self.type() == INSTRUMENT_TYPE.FUTURE or self.type() == INSTRUMENT_TYPE.OPTION:
             return dt_cmp > de_listed_cmp
         else:
             return dt_cmp >= de_listed_cmp
@@ -263,9 +263,9 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
     fn during_call_auction(self, dt: DateTime) raises -> Bool:
         var _minute = dt.hour * 60 + dt.minute
         
-        if self.type() == INSTRUMENT_TYPE.CS() or self.type() == INSTRUMENT_TYPE.ETF():
+        if self.type() == INSTRUMENT_TYPE.CS or self.type() == INSTRUMENT_TYPE.ETF:
             return _minute < 9 * 60 + 30 or _minute >= 14 * 60 + 57
-        elif self.type() == INSTRUMENT_TYPE.FUTURE():
+        elif self.type() == INSTRUMENT_TYPE.FUTURE:
             var trading_hours = self.trading_hours()
             if len(trading_hours) > 0:
                 var start_time = trading_hours[0]
@@ -290,7 +290,7 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
         return ipo_days if ipo_days >= 0 else -1
     
     fn days_to_expire(self, trading_dt: DateTime) raises -> Int:
-        if self.type() != INSTRUMENT_TYPE.FUTURE():
+        if self.type() != INSTRUMENT_TYPE.FUTURE:
             return -1
         
         if is_future_continuous_contract(self.order_book_id()):
@@ -303,11 +303,11 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
         return days if days >= 0 else -1
     
     fn tick_size(self) -> Float64:
-        if self.type() == INSTRUMENT_TYPE.CS() or self.type() == INSTRUMENT_TYPE.INDX():
+        if self.type() == INSTRUMENT_TYPE.CS or self.type() == INSTRUMENT_TYPE.INDX:
             return 0.01
-        elif self.type() == INSTRUMENT_TYPE.ETF() or self.type() == INSTRUMENT_TYPE.LOF():
+        elif self.type() == INSTRUMENT_TYPE.ETF or self.type() == INSTRUMENT_TYPE.LOF:
             return 0.001
-        elif self.type() == INSTRUMENT_TYPE.FUTURE():
+        elif self.type() == INSTRUMENT_TYPE.FUTURE:
             return self._futures_tick_size_getter_result
         else:
             return 0.01
@@ -323,9 +323,9 @@ struct Instrument(Stringable, Movable, Equatable, Hashable):
     fn calc_cash_occupation(self, price: Float64, quantity: Int, direction: POSITION_DIRECTION, margin_multiplier: Float64) raises -> Float64:
         if is_instrument_type_in_stock_account(self.type()):
             return price * quantity
-        elif self.type() == INSTRUMENT_TYPE.FUTURE():
+        elif self.type() == INSTRUMENT_TYPE.FUTURE:
             var margin_rate = self.get_long_margin_ratio()
-            if direction == POSITION_DIRECTION.SHORT():
+            if direction == POSITION_DIRECTION.SHORT:
                 margin_rate = self.get_short_margin_ratio()
             return price * quantity * self.contract_multiplier() * margin_rate * margin_multiplier
         else:
@@ -348,7 +348,7 @@ fn is_future_continuous_contract(order_book_id: String) -> Bool:
     return False
 
 
-fn create_instrument_from_dict(var data: Dict[String, String], futures_tick_size_getter_result: Float64 = 1.0, market: MARKET = MARKET.CN()) -> Instrument:
+fn create_instrument_from_dict(var data: Dict[String, String], futures_tick_size_getter_result: Float64 = 1.0, market: MARKET = MARKET.CN) -> Instrument:
     return Instrument(
         _dict=data^,
         _futures_tick_size_getter_result=futures_tick_size_getter_result,

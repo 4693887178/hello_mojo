@@ -30,7 +30,7 @@ struct TestRunner:
         self.check(pos.order_book_id == "000001.XSHE", "Position order_book_id")
         self.check(pos.quantity == 0, "Position quantity is 0 initially")
         self.check(pos.avg_price == 0.0, "Position avg_price is 0 initially")
-        self.check(pos.direction == POSITION_DIRECTION.LONG(), "Position direction is LONG")
+        self.check(pos.direction == POSITION_DIRECTION.LONG, "Position direction is LONG")
 
     fn test_create_stock_position(mut self):
         var pos = create_stock_position("000001.XSHE", 100, 10.0)
@@ -40,7 +40,7 @@ struct TestRunner:
         self.check(pos._contract_multiplier == 1.0, "Stock position contract_multiplier")
 
     fn test_create_future_position(mut self):
-        var pos = create_future_position("IF2401", POSITION_DIRECTION.LONG(), 10, 4000.0, 300.0, 0.1)
+        var pos = create_future_position("IF2401", POSITION_DIRECTION.LONG, 10, 4000.0, 300.0, 0.1)
         self.check(pos.order_book_id == "IF2401", "Future position order_book_id")
         self.check(pos.quantity == 10, "Future position quantity")
         self.check(pos._contract_multiplier == 300.0, "Future position contract_multiplier")
@@ -60,7 +60,7 @@ struct TestRunner:
         self.check(daily_pnl == 100.0, "Position daily_pnl calculation")
 
     fn test_position_margin(mut self):
-        var pos = create_future_position("IF2401", POSITION_DIRECTION.LONG(), 10, 4000.0, 300.0, 0.1)
+        var pos = create_future_position("IF2401", POSITION_DIRECTION.LONG, 10, 4000.0, 300.0, 0.1)
         pos.update_last_price(4000.0)
         var margin = pos.margin()
         self.check(margin == 120000.0, "Position margin calculation")
@@ -80,9 +80,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.BUY(),
-            position_effect=POSITION_EFFECT.OPEN(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.BUY,
+            position_effect=POSITION_EFFECT.OPEN,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=100,
             price=10.0
         )
@@ -97,9 +97,9 @@ struct TestRunner:
             trade_id=1,
             order_id=1,
             order_book_id="000001.XSHE",
-            side=SIDE.SELL(),
-            position_effect=POSITION_EFFECT.CLOSE(),
-            position_direction=POSITION_DIRECTION.LONG(),
+            side=SIDE.SELL,
+            position_effect=POSITION_EFFECT.CLOSE,
+            position_direction=POSITION_DIRECTION.LONG,
             quantity=50,
             price=11.0
         )
@@ -127,7 +127,7 @@ struct TestRunner:
         self.check(pos.prev_close == 11.0, "Position prev_close after settlement")
 
     fn test_position_short_pnl(mut self):
-        var pos = create_future_position("IF2401", POSITION_DIRECTION.SHORT(), 10, 4000.0, 300.0, 0.1)
+        var pos = create_future_position("IF2401", POSITION_DIRECTION.SHORT, 10, 4000.0, 300.0, 0.1)
         pos.update_last_price(3900.0)
         var pnl = pos.pnl()
         self.check(pnl == 300000.0, "Position short pnl calculation")

@@ -40,6 +40,6 @@ fn create_mock_order(order_book_id: String = "000001.XSHE", quantity: Int = 100,
         order_book_id=order_book_id,
         quantity=quantity,
         price=price,
-        side=SIDE.BUY(),
-        position_effect=POSITION_EFFECT.OPEN()
+        side=SIDE.BUY,
+        position_effect=POSITION_EFFECT.OPEN
     )

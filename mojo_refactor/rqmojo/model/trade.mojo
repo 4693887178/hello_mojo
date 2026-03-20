@@ -58,7 +58,7 @@ fn create_trade_with_id(
         order_book_id=order.order_book_id,
         side=order.side,
         position_effect=order.position_effect,
-        position_direction=POSITION_DIRECTION.LONG(),
+        position_direction=POSITION_DIRECTION.LONG,
         quantity=quantity,
         price=price,
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),

@@ -9,13 +9,13 @@ from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime
 
 
-fn create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE.BUY()) -> Order:
+fn create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE.BUY) -> Order:
     return create_order(
         order_book_id=order_book_id,
         quantity=quantity,
         price=price,
         side=side,
-        position_effect=POSITION_EFFECT.OPEN()
+        position_effect=POSITION_EFFECT.OPEN
     )
 
 

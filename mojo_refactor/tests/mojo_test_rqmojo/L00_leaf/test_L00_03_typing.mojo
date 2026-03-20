@@ -60,21 +60,21 @@ struct TestRunner:
         self.check(s == "LONG", "POSITION_DIRECTION_TYPE can hold String value")
 
     fn test_position_direction_type_with_enum(mut self):
-        var pd = POSITION_DIRECTION.LONG()
-        var pd2 = POSITION_DIRECTION.LONG()
+        var pd = POSITION_DIRECTION.LONG
+        var pd2 = POSITION_DIRECTION.LONG
         self.check(pd.name == pd2.name, "POSITION_DIRECTION_TYPE can hold POSITION_DIRECTION enum")
 
     fn test_position_direction_enum_values(mut self):
-        var long_val = POSITION_DIRECTION.LONG()
-        var short_val = POSITION_DIRECTION.SHORT()
+        var long_val = POSITION_DIRECTION.LONG
+        var short_val = POSITION_DIRECTION.SHORT
         self.check(long_val.name != short_val.name, "POSITION_DIRECTION enum has distinct values")
 
     fn test_position_direction_long_value(mut self):
-        var pd = POSITION_DIRECTION.LONG()
+        var pd = POSITION_DIRECTION.LONG
         self.check(pd.value == "LONG", "POSITION_DIRECTION.LONG has value LONG")
 
     fn test_position_direction_short_value(mut self):
-        var pd = POSITION_DIRECTION.SHORT()
+        var pd = POSITION_DIRECTION.SHORT
         self.check(pd.value == "SHORT", "POSITION_DIRECTION.SHORT has value SHORT")
 
     fn run_all(mut self):

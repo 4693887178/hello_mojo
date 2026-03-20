@@ -64,7 +64,7 @@ struct FilePersistProvider(Movable):
         return self._should_run_init_flag
 
 
-fn create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH()) -> FilePersistProvider:
+fn create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH) -> FilePersistProvider:
     return FilePersistProvider(
         _storage=Dict[String, String](),
         _mode=mode,
@@ -140,11 +140,11 @@ struct PersistHelper(Movable):
     fn _register_event_listeners(mut self) raises -> None:
         if self._listeners_registered:
             return
-        if self._persist_mode == PERSIST_MODE.REAL_TIME():
+        if self._persist_mode == PERSIST_MODE.REAL_TIME:
             self._listeners_registered = True
 
     fn on_event(mut self, event_type: String, event: Event) -> Bool:
-        if self._persist_mode != PERSIST_MODE.REAL_TIME():
+        if self._persist_mode != PERSIST_MODE.REAL_TIME:
             return False
         if event_type == EVENT.POST_BEFORE_TRADING().value:
             self.persist()
@@ -252,7 +252,7 @@ struct PersistHelper(Movable):
 
 fn create_persist_helper(
     var event_bus: EventBus,
-    persist_mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH()
+    persist_mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH
 ) -> PersistHelper:
     return PersistHelper(
         event_bus=event_bus^,

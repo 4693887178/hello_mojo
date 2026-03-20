@@ -15,7 +15,7 @@ tracker:
 polling:
   interval_ms: 5000
 workspace:
-  root: /home/zhou/hello_mojo/trae_cn
+  root: /home/zhou/hello_mojo/trae_cn_78
 github:
   repo: "https://github.com/4693887178/hello_mojo.git"
   owner: "4693887178"
@@ -44,10 +44,10 @@ mojo:
   mojo_bin: "/home/zhou/hello_mojo/.venv/bin/mojo"
   run_prefix: "LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so PYTHONPATH=/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages"
 project_files:
-  spec: /home/zhou/hello_mojo/trae_cn/mojo_refactor/SPEC.md
-  tasks: /home/zhou/hello_mojo/trae_cn/mojo_refactor/TASKS.md
-  checklist: /home/zhou/hello_mojo/trae_cn/mojo_refactor/CHECKLIST.md
-  refactor_plan: /home/zhou/hello_mojo/trae_cn/REFACTOR_PLAN.md
+  spec: /home/zhou/hello_mojo/trae_cn_78/mojo_refactor/SPEC.md
+  tasks: /home/zhou/hello_mojo/trae_cn_78/mojo_refactor/TASKS.md
+  checklist: /home/zhou/hello_mojo/trae_cn_78/mojo_refactor/CHECKLIST.md
+  refactor_plan: /home/zhou/hello_mojo/trae_cn_78/REFACTOR_PLAN.md
 ---
 
 You are working on a Mojo refactoring task for the rqalpha project.

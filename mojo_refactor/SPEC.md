@@ -153,7 +153,7 @@
 - ✅ `passed`: 测试通过
 
 ```
-/home/zhou/hello_mojo/mojo_refactor/
+/home/zhou/hello_mojo/trae_cn_78/mojo_refactor/
 ├── rqmojo/                  # Mojo 重构代码
 │   ├── __init__.mojo        📝 created
 │   ├── _version.mojo        📝 created

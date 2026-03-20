@@ -30,7 +30,7 @@ struct TestRunner:
         var error = CustomError.create("Test error message")
         self.check(error.msg == "Test error message", "CustomError.create msg")
         self.check(error.exc_type_name == "Exception", "CustomError.create exc_type_name")
-        self.check(error.error_type == EXC_TYPE.NOTSET(), "CustomError.create error_type")
+        self.check(error.error_type == EXC_TYPE.NOTSET, "CustomError.create error_type")
 
     fn test_custom_error_str(mut self):
         var error = CustomError.create("Test error", "ValueError")
@@ -40,7 +40,7 @@ struct TestRunner:
     fn test_rq_user_error(mut self):
         var exc = RQUserError.create("User error occurred")
         self.check(exc.message == "User error occurred", "RQUserError.create message")
-        self.check(exc.error_type == EXC_TYPE.USER_EXC(), "RQUserError.create error_type")
+        self.check(exc.error_type == EXC_TYPE.USER_EXC, "RQUserError.create error_type")
         self.check(exc.__str__() == "User error occurred", "RQUserError.__str__")
 
     fn test_rq_user_error_to_error(mut self):
@@ -109,37 +109,37 @@ struct TestRunner:
         self.check(True, "EnvironmentNotInitialized.to_error returns Error")
 
     fn test_patch_user_exc(mut self):
-        var result = patch_user_exc(EXC_TYPE.NOTSET())
-        self.check(result == EXC_TYPE.USER_EXC(), "patch_user_exc returns USER_EXC for NOTSET")
+        var result = patch_user_exc(EXC_TYPE.NOTSET)
+        self.check(result == EXC_TYPE.USER_EXC, "patch_user_exc returns USER_EXC for NOTSET")
         
-        var result2 = patch_user_exc(EXC_TYPE.SYSTEM_EXC())
-        self.check(result2 == EXC_TYPE.SYSTEM_EXC(), "patch_user_exc keeps existing type")
+        var result2 = patch_user_exc(EXC_TYPE.SYSTEM_EXC)
+        self.check(result2 == EXC_TYPE.SYSTEM_EXC, "patch_user_exc keeps existing type")
 
     fn test_patch_system_exc(mut self):
-        var result = patch_system_exc(EXC_TYPE.NOTSET())
-        self.check(result == EXC_TYPE.SYSTEM_EXC(), "patch_system_exc returns SYSTEM_EXC for NOTSET")
+        var result = patch_system_exc(EXC_TYPE.NOTSET)
+        self.check(result == EXC_TYPE.SYSTEM_EXC, "patch_system_exc returns SYSTEM_EXC for NOTSET")
         
-        var result2 = patch_system_exc(EXC_TYPE.USER_EXC())
-        self.check(result2 == EXC_TYPE.USER_EXC(), "patch_system_exc keeps existing type")
+        var result2 = patch_system_exc(EXC_TYPE.USER_EXC)
+        self.check(result2 == EXC_TYPE.USER_EXC, "patch_system_exc keeps existing type")
 
     fn test_is_user_exc(mut self):
-        var result1 = is_user_exc(EXC_TYPE.USER_EXC())
+        var result1 = is_user_exc(EXC_TYPE.USER_EXC)
         self.check(result1 == True, "is_user_exc returns True for USER_EXC")
         
-        var result2 = is_user_exc(EXC_TYPE.SYSTEM_EXC())
+        var result2 = is_user_exc(EXC_TYPE.SYSTEM_EXC)
         self.check(result2 == False, "is_user_exc returns False for SYSTEM_EXC")
         
-        var result3 = is_user_exc(EXC_TYPE.NOTSET())
+        var result3 = is_user_exc(EXC_TYPE.NOTSET)
         self.check(result3 == False, "is_user_exc returns False for NOTSET")
 
     fn test_is_system_exc(mut self):
-        var result1 = is_system_exc(EXC_TYPE.SYSTEM_EXC())
+        var result1 = is_system_exc(EXC_TYPE.SYSTEM_EXC)
         self.check(result1 == True, "is_system_exc returns True for SYSTEM_EXC")
         
-        var result2 = is_system_exc(EXC_TYPE.USER_EXC())
+        var result2 = is_system_exc(EXC_TYPE.USER_EXC)
         self.check(result2 == False, "is_system_exc returns False for USER_EXC")
         
-        var result3 = is_system_exc(EXC_TYPE.NOTSET())
+        var result3 = is_system_exc(EXC_TYPE.NOTSET)
         self.check(result3 == False, "is_system_exc returns False for NOTSET")
 
     fn test_exception_equality(mut self):

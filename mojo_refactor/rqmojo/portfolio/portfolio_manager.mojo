@@ -65,7 +65,7 @@ struct Portfolio:
     fn future_account(self) -> Account:
         return create_future_account(0.0)
 
-    fn get_position(mut self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG()) -> Position:
+    fn get_position(mut self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> Position:
         return self._account.get_position(order_book_id, direction)
 
     fn get_positions(self) -> List[Position]:
@@ -128,7 +128,7 @@ fn create_portfolio(
     var stock_account = create_stock_account(total_cash)
     
     return Portfolio(
-        account_type=DEFAULT_ACCOUNT_TYPE.STOCK(),
+        account_type=DEFAULT_ACCOUNT_TYPE.STOCK,
         total_value=total_cash,
         cash=total_cash,
         start_date_val=start_date,

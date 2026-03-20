@@ -19,7 +19,7 @@ struct CustomError(Stringable, Copyable, Movable, ImplicitlyCopyable):
         return self.stacks + "\n" + self.exc_type_name + ": " + self.msg
 
     @staticmethod
-    fn create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET()) -> Self:
+    fn create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET) -> Self:
         return Self(msg, exc_type_name, error_type, "")
 
 
@@ -36,7 +36,7 @@ struct RQUserError(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
     @staticmethod
     fn create(message: String) -> Self:
-        return Self(message, EXC_TYPE.USER_EXC())
+        return Self(message, EXC_TYPE.USER_EXC)
 
 
 @fieldwise_init
@@ -130,23 +130,23 @@ struct EnvironmentNotInitialized(Stringable, Copyable, Movable, ImplicitlyCopyab
 
 
 fn patch_user_exc(exc_type: EXC_TYPE) -> EXC_TYPE:
-    if exc_type == EXC_TYPE.NOTSET():
-        return EXC_TYPE.USER_EXC()
+    if exc_type == EXC_TYPE.NOTSET:
+        return EXC_TYPE.USER_EXC
     return exc_type
 
 
 fn patch_system_exc(exc_type: EXC_TYPE) -> EXC_TYPE:
-    if exc_type == EXC_TYPE.NOTSET():
-        return EXC_TYPE.SYSTEM_EXC()
+    if exc_type == EXC_TYPE.NOTSET:
+        return EXC_TYPE.SYSTEM_EXC
     return exc_type
 
 
 fn is_user_exc(exc_type: EXC_TYPE) -> Bool:
-    return exc_type == EXC_TYPE.USER_EXC()
+    return exc_type == EXC_TYPE.USER_EXC
 
 
 fn is_system_exc(exc_type: EXC_TYPE) -> Bool:
-    return exc_type == EXC_TYPE.SYSTEM_EXC()
+    return exc_type == EXC_TYPE.SYSTEM_EXC
 
 
 fn raise_invalid_argument(message: String) raises:

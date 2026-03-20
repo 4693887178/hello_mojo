@@ -43,7 +43,7 @@ struct SimulationModState(Movable):
 
 
 fn create_simulation_mod(
-    matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE(),
+    matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE,
     slippage: Float64 = 0.0
 ) -> SimulationMod:
     return SimulationMod(

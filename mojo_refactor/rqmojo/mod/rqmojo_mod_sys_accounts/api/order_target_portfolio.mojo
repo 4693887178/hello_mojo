@@ -72,9 +72,9 @@ fn order_target_portfolio(
                 0,
                 order_book_id,
                 quantity,
-                SIDE.SELL(),
+                SIDE.SELL,
                 MarketOrder(),
-                POSITION_EFFECT.CLOSE()
+                POSITION_EFFECT.CLOSE
             )
             env.submit_order(close_order)
     
@@ -85,9 +85,9 @@ fn order_target_portfolio(
         var close_price = item.last_price
         var open_price = item.last_price
         
-        if item.close_style.style_type == ORDER_TYPE.LIMIT():
+        if item.close_style.style_type == ORDER_TYPE.LIMIT:
             close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE.LIMIT():
+        if item.open_style.style_type == ORDER_TYPE.LIMIT:
             open_price = item.open_style.limit_price
         
         if close_price <= 0 or open_price <= 0:
@@ -103,9 +103,9 @@ fn order_target_portfolio(
                 0,
                 item.order_book_id,
                 delta_quantity,
-                SIDE.BUY(),
+                SIDE.BUY,
                 item.open_style,
-                POSITION_EFFECT.OPEN()
+                POSITION_EFFECT.OPEN
             )
             var result = env.submit_order(order)
             if result is not None:
@@ -116,9 +116,9 @@ fn order_target_portfolio(
                 0,
                 item.order_book_id,
                 quantity,
-                SIDE.SELL(),
+                SIDE.SELL,
                 item.close_style,
-                POSITION_EFFECT.CLOSE()
+                POSITION_EFFECT.CLOSE
             )
             var result = env.submit_order(order)
             if result is not None:

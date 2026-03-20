@@ -25,19 +25,19 @@ struct TestRunner:
             print("FAIL: " + test_name)
 
     fn test_create_account(mut self):
-        var acc = create_account(DEFAULT_ACCOUNT_TYPE.STOCK(), 100000.0)
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK(), "Account account_type")
+        var acc = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK, "Account account_type")
         self.check(acc.total_cash == 100000.0, "Account total_cash")
         self.check(acc.total_value == 100000.0, "Account total_value")
 
     fn test_create_stock_account(mut self):
         var acc = create_stock_account(200000.0)
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK(), "Stock account type")
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.STOCK, "Stock account type")
         self.check(acc.total_cash == 200000.0, "Stock account total_cash")
 
     fn test_create_future_account(mut self):
         var acc = create_future_account(50000.0)
-        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.FUTURE(), "Future account type")
+        self.check(acc.account_type == DEFAULT_ACCOUNT_TYPE.FUTURE, "Future account type")
         self.check(acc.total_cash == 50000.0, "Future account total_cash")
 
     fn test_account_available_cash(mut self):
@@ -63,12 +63,12 @@ struct TestRunner:
 
     fn test_account_get_or_create_position(mut self):
         var acc = create_stock_account(100000.0)
-        _ = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG())
+        _ = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG)
         self.check(acc.positions_count == 1, "Account positions_count after create")
 
     fn test_account_update_last_price(mut self):
         var acc = create_stock_account(100000.0)
-        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG())
+        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG)
         pos.quantity = 100
         pos.avg_price = 10.0
         acc.update_last_price("000001.XSHE", 11.0)
@@ -76,7 +76,7 @@ struct TestRunner:
 
     fn test_account_update_positions_value(mut self):
         var acc = create_stock_account(100000.0)
-        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG())
+        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG)
         pos.quantity = 100
         pos.avg_price = 10.0
         pos.update_last_price(11.0)
@@ -85,14 +85,14 @@ struct TestRunner:
 
     fn test_account_get_positions(mut self):
         var acc = create_stock_account(100000.0)
-        _ = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG())
-        _ = acc.get_or_create_position("000002.XSHE", POSITION_DIRECTION.LONG())
+        _ = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG)
+        _ = acc.get_or_create_position("000002.XSHE", POSITION_DIRECTION.LONG)
         var positions = acc.get_positions()
         self.check(len(positions) == 2, "Account get_positions count")
 
     fn test_account_settlement(mut self):
         var acc = create_stock_account(100000.0)
-        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG())
+        var pos = acc.get_or_create_position("000001.XSHE", POSITION_DIRECTION.LONG)
         pos.quantity = 100
         pos.today_quantity = 50
         acc.settlement()
