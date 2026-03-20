@@ -24,7 +24,7 @@ hooks:
   after_create: |
     echo "Workspace initialized for rqalpha -> Mojo refactor"
     echo "Python source: /home/zhou/hello_mojo/.venv/lib/python3.14/site-packages/rqalpha"
-    echo "Mojo version: 0.26.1"
+    echo "Mojo version: 0.26.2.0"
     echo "GitHub repo: https://github.com/4693887178/hello_mojo.git"
     git status || git init
   before_remove: |
@@ -37,7 +37,7 @@ codex:
   approval_policy: never
   version: "0.115.0"
 mojo:
-  version: "0.26.1"
+  version: "0.26.2.0"
   python_version: "3.14"
   python_lib: "/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so"
   python_path: "/home/zhou/hello_mojo/.venv/lib/python3.14/site-packages"
@@ -192,7 +192,7 @@ graph TD
 ### Environment Setup
 
 - **Python**: 3.14 (installed via UV)
-- **Mojo**: 0.26.1 (installed via UV)
+- **Mojo**: 0.26.2.0 (installed via UV)
 - **Mojo Binary**: `/home/zhou/hello_mojo/.venv/bin/mojo`
 - **Python Lib**: `/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so`
 
@@ -420,7 +420,7 @@ YYYY-MM-DD HH:MM:SS
 
 ## Test Conditions
 - Input: [describe input data]
-- Environment: Python 3.14 / Mojo 0.26.1
+- Environment: Python 3.14 / Mojo 0.26.2.0
 
 ## Python Test Result
 \`\`\`

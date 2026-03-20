@@ -11,7 +11,7 @@ https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agent
 
 注意事项：
 PYTHON是用UV的方式安装的PYTHON3.14版本。
-MOJO是用UV的方式安装的0.26.1版本。
+MOJO是用UV的方式安装的0.26.2.0版本。
 在/home/zhou/hello_mojo/.venv/bin路径下, 使用时需要带上路径。
 mojo文档地址：https://docs.modular.com/mojo/lib
 
