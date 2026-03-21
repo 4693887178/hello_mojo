@@ -84,35 +84,35 @@ struct RqAttrDict(Copyable, Movable):
             result.append(self.data[k].copy())
         return result^
 
-    fn items(self) raises -> List[KeyValuePair]:
+    def items(self) raises -> List[KeyValuePair]:
         var result = List[KeyValuePair]()
         for k in self.data.keys():
             result.append(KeyValuePair(k, self.data[k].copy()))
         return result^
 
-    fn iteritems(self) raises -> List[KeyValuePair]:
+    def iteritems(self) raises -> List[KeyValuePair]:
         return self.items()
 
-    fn __iter__(self) -> List[String]:
+    def __iter__(self) -> List[String]:
         return self.keys()
 
-    fn update(mut self, other: RqAttrDict) raises:
+    def update(mut self, other: RqAttrDict) raises:
         _merge_dicts(self.data, other.data)
 
-    fn convert_to_dict(self) raises -> Dict[String, RqValue]:
+    def convert_to_dict(self) raises -> Dict[String, RqValue]:
         var result = Dict[String, RqValue]()
         _copy_dict_recursive(result, self.data)
         return result^
 
 
-fn _dict_to_string(d: Dict[String, RqValue]) raises -> String:
+def _dict_to_string(d: Dict[String, RqValue]) raises -> String:
     var parts = List[String]()
     for k in d.keys():
         parts.append("'" + k + "': " + _value_to_string(d[k]))
     return "{" + ", ".join(parts) + "}"
 
 
-fn _value_to_string(v: RqValue) raises -> String:
+def _value_to_string(v: RqValue) raises -> String:
     if v.kind == KIND_NONE:
         return "None"
     if v.kind == KIND_INT:
@@ -130,14 +130,14 @@ fn _value_to_string(v: RqValue) raises -> String:
     return "Unknown"
 
 
-fn _list_to_string(l: List[RqValue]) raises -> String:
+def _list_to_string(l: List[RqValue]) raises -> String:
     var parts = List[String]()
     for item in l:
         parts.append(_value_to_string(item))
     return "[" + ", ".join(parts) + "]"
 
 
-fn _copy_dict_recursive(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
+def _copy_dict_recursive(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
     for k in source.keys():
         var v = source[k].copy()
         if v.kind == KIND_DICT:
@@ -154,7 +154,7 @@ fn _copy_dict_recursive(mut target: Dict[String, RqValue], source: Dict[String, 
             target[k] = v.copy()
 
 
-fn _copy_list_recursive(source: List[RqValue]) raises -> List[RqValue]:
+def _copy_list_recursive(source: List[RqValue]) raises -> List[RqValue]:
     var result = List[RqValue]()
     for item in source:
         var v = item.copy()
@@ -170,7 +170,7 @@ fn _copy_list_recursive(source: List[RqValue]) raises -> List[RqValue]:
     return result^
 
 
-fn _init_from_dict(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
+def _init_from_dict(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
     for k in source.keys():
         var v = source[k].copy()
         if v.kind == KIND_DICT:
@@ -187,7 +187,7 @@ fn _init_from_dict(mut target: Dict[String, RqValue], source: Dict[String, RqVal
             target[k] = v.copy()
 
 
-fn _merge_dicts(mut target: Dict[String, RqValue], other: Dict[String, RqValue]) raises:
+def _merge_dicts(mut target: Dict[String, RqValue], other: Dict[String, RqValue]) raises:
     for k in other.keys():
         var v = other[k].copy()
         if v.kind == KIND_DICT:
