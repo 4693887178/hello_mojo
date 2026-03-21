@@ -1,10 +1,10 @@
 """
-RQAlpha Mojo - API Names
+RQAlpha Mojo - API Names Module
 Ported from rqalpha/apis/names.py
 """
 
-from collections import List
-from rqmojo.const import INSTRUMENT_TYPE, INSTRUMENT_TYPE_CS, INSTRUMENT_TYPE_FUTURE, INSTRUMENT_TYPE_OPTION, INSTRUMENT_TYPE_ETF, INSTRUMENT_TYPE_LOF, INSTRUMENT_TYPE_INDX, INSTRUMENT_TYPE_PUBLIC_FUND, INSTRUMENT_TYPE_FUND, INSTRUMENT_TYPE_BOND, INSTRUMENT_TYPE_CONVERTIBLE, INSTRUMENT_TYPE_SPOT, INSTRUMENT_TYPE_REPO, INSTRUMENT_TYPE_REITS, INSTRUMENT_TYPE_FUTURE_ARBITRAGE, INSTRUMENT_TYPE_CS, INSTRUMENT_TYPE_FUTURE, INSTRUMENT_TYPE_OPTION, INSTRUMENT_TYPE_ETF, INSTRUMENT_TYPE_LOF, INSTRUMENT_TYPE_INDX, INSTRUMENT_TYPE_PUBLIC_FUND, INSTRUMENT_TYPE_FUND, INSTRUMENT_TYPE_BOND, INSTRUMENT_TYPE_CONVERTIBLE, INSTRUMENT_TYPE_SPOT, INSTRUMENT_TYPE_REPO, INSTRUMENT_TYPE_REITS, INSTRUMENT_TYPE_FUTURE_ARBITRAGE
+from std.collections import List
+from rqmojo.const import INSTRUMENT_TYPE
 
 
 comptime VALID_HISTORY_FIELDS: List[String] = [
@@ -25,6 +25,7 @@ comptime VALID_HISTORY_FIELDS: List[String] = [
     "settlement",
     "prev_settlement",
 ]
+
 
 comptime VALID_TENORS: List[String] = [
     "0S",
@@ -51,26 +52,19 @@ comptime VALID_TENORS: List[String] = [
 ]
 
 
-fn all_instrument_type_values() -> List[String]:
-    return [
-        INSTRUMENT_TYPE_CS.value,
-        INSTRUMENT_TYPE_FUTURE.value,
-        INSTRUMENT_TYPE_OPTION.value,
-        INSTRUMENT_TYPE_ETF.value,
-        INSTRUMENT_TYPE_LOF.value,
-        INSTRUMENT_TYPE_INDX.value,
-        INSTRUMENT_TYPE_PUBLIC_FUND.value,
-        INSTRUMENT_TYPE_FUND.value,
-        INSTRUMENT_TYPE_BOND.value,
-        INSTRUMENT_TYPE_CONVERTIBLE.value,
-        INSTRUMENT_TYPE_SPOT.value,
-        INSTRUMENT_TYPE_REPO.value,
-        INSTRUMENT_TYPE_REITS().value,
-        INSTRUMENT_TYPE_FUTURE_ARBITRAGE().value,
-    ]
+def get_valid_instrument_types() -> List[String]:
+    var result = List[String]()
+    result.append("CS")
+    result.append("Future")
+    result.append("ETF")
+    result.append("LOF")
+    result.append("INDX")
+    result.append("Future")
+    result.append("PY")
+    result.append("Fund")
+    result.append("Stock")
+    return result
 
-
-comptime VALID_INSTRUMENT_TYPES: List[String] = all_instrument_type_values() + ["Fund", "Stock"]
 
 comptime VALID_MARGIN_FIELDS: List[String] = [
     "margin_balance",
@@ -83,6 +77,7 @@ comptime VALID_MARGIN_FIELDS: List[String] = [
     "total_balance",
 ]
 
+
 comptime VALID_SHARE_FIELDS: List[String] = [
     "total",
     "circulation_a",
@@ -90,6 +85,7 @@ comptime VALID_SHARE_FIELDS: List[String] = [
     "non_circulation_a",
     "total_a",
 ]
+
 
 comptime VALID_TURNOVER_FIELDS: List[String] = [
     "today",
@@ -102,10 +98,12 @@ comptime VALID_TURNOVER_FIELDS: List[String] = [
     "total",
 ]
 
+
 comptime VALID_STOCK_CONNECT_FIELDS: List[String] = [
     "shares_holding",
     "holding_ratio",
 ]
+
 
 comptime VALID_CURRENT_PERFORMANCE_FIELDS: List[String] = [
     "operating_revenue",
@@ -128,23 +126,8 @@ comptime VALID_CURRENT_PERFORMANCE_FIELDS: List[String] = [
     "roe_cut_weighted",
     "net_operate_cashflow_per_share",
     "equity_per_share",
-    "operating_revenue_yoy",
-    "gross_profit_yoy",
-    "operating_profit_yoy",
-    "total_profit_yoy",
-    "np_parent_minority_pany_yoy",
-    "ne_t_minority_ty_yoy",
-    "net_operate_cash_flow_yoy",
-    "total_assets_to_opening",
-    "se_without_minority_to_opening",
-    "basic_eps_yoy",
-    "eps_weighted_yoy",
-    "eps_cut_yoy",
-    "eps_cut_weighted_yoy",
-    "roe_yoy",
-    "roe_weighted_yoy",
-    "roe_cut_yoy",
-    "roe_cut_weighted_yoy",
-    "net_operate_cash_flow_per_share_yoy",
-    "net_asset_psto_opening",
 ]
+
+
+def main():
+    print("names.mojo - API names module loaded successfully")

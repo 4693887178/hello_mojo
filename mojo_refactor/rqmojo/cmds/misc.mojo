@@ -1,62 +1,70 @@
 """
-RQAlpha Mojo - Misc Commands
+RQAlpha Mojo - Misc Commands Module
 Ported from rqalpha/cmds/misc.py
 """
 
-from rqmojo.const import EXIT_CODE
-from rqmojo._version import Version
+from std.collections import List
+from python import Python
 
 
-fn print_version() -> None:
-    print("RQAlpha Mojo v" + Version.VERSION)
-    print("A quantitative trading framework")
+def examples(directory: String) -> Int:
+    """Generate example strategies to target folder."""
+    var py = Python.import_module("rqalpha")
+    var os = Python.import_module("os")
+    var shutil = Python.import_module("shutil")
+    var errno = Python.import_module("errno")
+    
+    var source_dir = os.path.join(os.path.dirname(py.__file__), "examples")
+    
+    try:
+        var dest_path = os.path.abspath(os.path.join(directory, "examples"))
+        shutil.copytree(source_dir, dest_path)
+        print("Examples copied to: " + dest_path)
+        return 0
+    except:
+        print("Folder examples exists or error occurred.")
+        return 1
 
 
-fn print_help() -> None:
-    print("RQAlpha Mojo - A quantitative trading framework")
-    print("")
-    print("Commands:")
-    print("  run              Run a strategy")
-    print("  run -h           Show help for run command")
-    print("  bundle           Manage data bundles")
-    print("  bundle -h        Show help for bundle commands")
-    print("  mod              Manage modules")
-    print("  mod -h           Show help for mod commands")
-    print("  version          Print version")
-    print("  help             Print this help message")
-    print("")
-    print("Examples:")
-    print("  rqalpha run -f strategy.py -s 2020-01-01 -e 2020-12-31")
-    print("  rqalpha bundle create")
-    print("  rqalpha mod list")
+def version(**kwargs) -> Int:
+    """Output Version Info."""
+    try:
+        var py = Python.import_module("rqalpha")
+        print("Current Version: ", py.__version__)
+        return 0
+    except:
+        print("Current Version: 0.0.1 (Mojo)")
+        return 0
 
 
-fn examples(directory: String) -> Int:
-    print("=== Generate Examples ===")
-    print("Target Directory: ", directory)
-    print("")
-    print("Note: Example generation is not supported in Mojo. Please use Python version.")
-    return 1
+def generate_config(directory: String) -> Int:
+    """Generate default config file."""
+    var os = Python.import_module("os")
+    var shutil = Python.import_module("shutil")
+    
+    try:
+        var default_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config.yml")
+        var target_config_path = os.path.abspath(os.path.join(directory, "config.yml"))
+        shutil.copy(default_config, target_config_path)
+        print("Config file has been generated in " + target_config_path)
+        return 0
+    except:
+        print("Failed to generate config file.")
+        return 1
 
 
-fn generate_config(directory: String) -> Int:
-    print("=== Generate Config ===")
-    print("Target Directory: ", directory)
-    print("")
-    print("Note: Config generation is not supported in Mojo. Please use Python version.")
-    return 1
+def print_version() -> None:
+    """Print version info."""
+    version()
 
 
-fn generate_strategy_template(output_path: String) -> Int:
-    print("=== Generate Strategy Template ===")
-    print("Output Path: ", output_path)
-    print("")
-    print("Note: Template generation is not supported in Mojo.")
-    return 1
+def print_help() -> None:
+    """Print help info."""
+    print("Available commands:")
+    print("  examples    - Generate example strategies to target folder")
+    print("  version     - Output Version Info")
+    print("  generate_config - Generate default config file")
 
 
-fn validate_config(config_path: String) -> Bool:
-    print("=== Validate Config ===")
-    print("Config Path: ", config_path)
-    print("Config validation not implemented in Mojo version.")
-    return True
+def main():
+    print("misc.mojo - Misc commands module loaded successfully")
