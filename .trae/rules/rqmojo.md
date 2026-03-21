@@ -15,6 +15,29 @@ MOJO是用UV的方式安装的0.26.2.0版本。
 在/home/zhou/hello_mojo/trae_cn_78/.venv/bin路径下, 使用时需要带上路径。
 mojo文档地址：https://docs.modular.com/mojo/lib
 
+Mojo函数定义规则（重要）：
+Mojo 0.26+版本中，函数定义必须使用 `def` 而不是 `fn`：
+- `def foo():` - 不抛出异常的函数
+- `def bar() raises:` - 显式抛出 Error 的函数
+- `def baz() raises EmptyDictError:` - 抛出特定类型错误的函数
+- `fn` 关键字已弃用，所有新代码必须使用 `def`
+
+示例：
+```mojo
+# 正确 ✓
+def calculate_sum(a: Int, b: Int) -> Int:
+    return a + b
+
+def process_data(data: Dict) raises:
+    if data.is_empty():
+        raise Error("Empty data")
+    # ...
+
+# 错误 ✗ (fn 已弃用)
+fn old_style():  # 不要使用
+    pass
+```
+
 Mojo Python互操作配置：
 由于Mojo编译的程序不自动链接Python库，运行包含Python互操作的Mojo程序时需要预加载Python动态库并设置Python模块路径：
 export LD_PRELOAD=/home/zhou/.local/share/uv/python/cpython-3.14.3-linux-x86_64-gnu/lib/libpython3.14.so

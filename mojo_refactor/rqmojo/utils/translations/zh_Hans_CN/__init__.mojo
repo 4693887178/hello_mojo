@@ -2,11 +2,14 @@
 RQAlpha Mojo - Chinese Simplified Translations
 """
 
-fn get_translation(key: String) -> String:
+from std.collections import Dict
+
+
+def get_translation(key: String) raises -> String:
     var translations = Dict[String, String]()
     translations["error"] = "错误"
     translations["warning"] = "警告"
     translations["info"] = "信息"
-    if translations.contains(key):
+    if translations.__contains__(key):
         return translations[key]
     return key

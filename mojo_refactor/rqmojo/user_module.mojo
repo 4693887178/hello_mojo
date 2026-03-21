@@ -3,8 +3,8 @@ RQAlpha Mojo - User Module Base
 Ported from rqalpha/user_module.py
 """
 
+from std.collections import Dict
 from rqmojo.const import EXIT_CODE
-from rqmojo.interface import Mod
 from rqmojo.environment import Environment
 
 
@@ -13,12 +13,12 @@ struct UserModule(Movable):
     var name: String
     var enabled: Bool
     
-    fn start_up(mut self, env: Environment, config: Dict[String, String]) -> None:
+    def start_up(mut self, env: Environment, config: Dict[String, String]) -> None:
         pass
     
-    fn tear_down(mut self, code: EXIT_CODE, exception: Optional[object]) -> None:
+    def tear_down(mut self, code: EXIT_CODE, exception: Optional[String]) -> None:
         pass
 
 
-fn create_user_module(name: String = "user_module") -> UserModule:
+def create_user_module(name: String = "user_module") -> UserModule:
     return UserModule(name=name, enabled=True)

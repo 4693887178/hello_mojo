@@ -5,10 +5,10 @@ Reference: rqcpp/utils/risk_free_helper.cppm
 """
 
 from rqmojo.utils.datetime_func import DateTime, Date
-from collections import Dict, List
+from std.collections import Dict, List
 
 
-fn get_yield_curve_tenors() -> Dict[Int, String]:
+def get_yield_curve_tenors() -> Dict[Int, String]:
     var tenors = Dict[Int, String]()
     tenors[0] = "0S"
     tenors[30] = "1M"
@@ -34,16 +34,11 @@ fn get_yield_curve_tenors() -> Dict[Int, String]:
     return tenors^
 
 
-fn get_yield_curve_duration() -> List[Int]:
-    var tenors = get_yield_curve_tenors()
-    var keys = tenors.keys()
-    var result = List[Int]()
-    for k in keys:
-        result.append(k)
-    return result^
+def get_yield_curve_duration() -> List[Int]:
+    return [0, 30, 60, 90, 180, 270, 365, 730, 1095, 1460, 1825, 2190, 2555, 2920, 3285, 3650, 5475, 7300, 10950, 14600, 18250]
 
 
-fn get_tenor_for(start_date: Date, end_date: Date) raises -> String:
+def get_tenor_for(start_date: Date, end_date: Date) raises -> String:
     var duration = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
     
     var tenors = get_yield_curve_tenors()
@@ -58,7 +53,7 @@ fn get_tenor_for(start_date: Date, end_date: Date) raises -> String:
     return result
 
 
-fn get_tenors_for(start_date: Date, end_date: Date) raises -> List[String]:
+def get_tenors_for(start_date: Date, end_date: Date) raises -> List[String]:
     var duration = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
     
     var tenors = get_yield_curve_tenors()
