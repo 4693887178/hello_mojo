@@ -153,7 +153,7 @@ struct Scheduler(Writable, Movable):
                 return True
         return False
 
-    def _should_trigger(mut self, time_rule: TimeRule) -> Bool:
+    def _check_time_rule(self, time_rule: TimeRule) -> Bool:
         if time_rule.is_before_trading:
             return self._stage == "before_trading"
 
@@ -235,7 +235,7 @@ struct Scheduler(Writable, Movable):
         var result = List[String]()
         
         for entry in self._registry:
-            if self._should_trigger(entry.time_rule):
+            if self._check_time_rule(entry.time_rule):
                 result.append(entry.func_name)
         
         self._last_minute = self._current_minute
@@ -253,18 +253,29 @@ struct Scheduler(Writable, Movable):
         return result^
 
     def set_trading_ranges(mut self, ranges: List[TradingMinuteRange]) -> None:
-        self._trading_minute_ranges = ranges^
+        self._trading_minute_ranges = ranges.copy()
 
     def get_state(self) -> String:
-        if var today = self._today.value():
+        if self._today:
+            var today = self._today.value()
             return today.to_string() + "|" + String(self._last_minute)
         return ""
 
-    def set_state(mut self, state: String) -> None:
+    def set_state(mut self, state: String) raises:
         var parts = state.split("|")
         if parts.__len__() >= 2:
-            self._last_minute = Int(parts[1])()
+            var minute_str = String(parts[1])
+            self._last_minute = _parse_int(minute_str)
             self._today = Optional[DateTime](_parse_datetime(String(parts[0])))
+
+
+def _parse_int(s: String) raises -> Int:
+    var result = 0
+    for cp in s.codepoints():
+        var c = Int(cp)
+        if c >= 48 and c <= 57:
+            result = result * 10 + (c - 48)
+    return result
 
 
 def create_scheduler(frequency: String = "1d") -> Scheduler:

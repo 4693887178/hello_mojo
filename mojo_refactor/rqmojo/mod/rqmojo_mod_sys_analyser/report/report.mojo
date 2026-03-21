@@ -8,7 +8,7 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct StrategyResult(Movable):
+struct StrategyResult(Movable, Copyable, ImplicitlyCopyable):
     var start_date: DateTime
     var end_date: DateTime
     var total_returns: Float64
@@ -30,7 +30,7 @@ struct StrategyResult(Movable):
         d["total_trades"] = String(self.total_trades)
         d["win_rate"] = String(self.win_rate * 100) + "%"
         d["profit_loss_ratio"] = String(self.profit_loss_ratio)
-        return d
+        return d^
 
 
 @fieldwise_init
@@ -92,8 +92,8 @@ fn create_report(strategy_name: String, nav_list: List[Float64], start_date: Dat
     
     return Report(
         strategy_name=strategy_name,
-        result=result,
-        daily_returns=returns,
-        nav_list=nav_list,
+        result=result^,
+        daily_returns=returns^,
+        nav_list=nav_list.copy(),
         trade_list=List[Dict[String, String]]()
     )

@@ -40,7 +40,7 @@ struct Trade(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var tax: Float64
     
     fn __str__(self) -> String:
-        return "Trade(" + String(self.trade_id) + ", " + self.order_book_id + ", " + self.side.value + ", qty=" + String(self.quantity) + ", price=" + String(self.price) + ")"
+        return "Trade(" + String(self.trade_id) + ", " + self.order_book_id + ", " + String(self.side.value()) + ", qty=" + String(self.quantity) + ", price=" + String(self.price) + ")"
 
 
 fn create_trade_with_id(

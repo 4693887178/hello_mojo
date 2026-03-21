@@ -3,8 +3,8 @@ RQAlpha Mojo - Simulation Mod
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/
 """
 
-from collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, MATCHING_TYPE
+from std.collections import Dict, List
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, MATCHING_TYPE, MATCHING_TYPE_CURRENT_BAR_CLOSE
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade_with_id
 from rqmojo.model.bar import BarObject
@@ -14,25 +14,25 @@ from rqmojo.core.events import EVENT, EventBus, Event
 
 
 @fieldwise_init
-struct SimulationMod(Copyable, Movable, ImplicitlyCopyable):
+struct SimulationMod(Copyable, Movable, ImplicitlyCopyable, Writable):
     var name: String
     var enabled: Bool
     var matching_type: MATCHING_TYPE
     var slippage: Float64
     
-    fn __str__(self) -> String:
-        return "SimulationMod(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("SimulationMod(", self.name, ")")
     
-    fn start(self) -> None:
+    def start(self) -> None:
         pass
     
-    fn stop(self) -> None:
+    def stop(self) -> None:
         pass
     
-    fn get MatchingType(self) -> MATCHING_TYPE:
+    def get_matching_type(self) -> MATCHING_TYPE:
         return self.matching_type
     
-    fn get Slippage(self) -> Float64:
+    def get_slippage(self) -> Float64:
         return self.slippage
 
 
@@ -42,7 +42,7 @@ struct SimulationModState(Movable):
     var order_id_count: Int
 
 
-fn create_simulation_mod(
+def create_simulation_mod(
     matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE,
     slippage: Float64 = 0.0
 ) -> SimulationMod:
@@ -54,5 +54,5 @@ fn create_simulation_mod(
     )
 
 
-fn load_mod_events(event_bus: EventBus) -> None:
+def load_mod_events(event_bus: EventBus) -> None:
     pass

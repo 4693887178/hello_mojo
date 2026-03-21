@@ -3,20 +3,28 @@ RQAlpha Mojo - Price Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/price_validator.py
 """
 
-from rqmojo.const import SIDE, ORDER_TYPE, ORDER_TYPE_LIMIT, ORDER_TYPE_LIMIT
+from rqmojo.const import SIDE, ORDER_TYPE, ORDER_TYPE_LIMIT
 from rqmojo.model.order import Order
-from rqmojo.interface import FrontendValidator
 
 
 @fieldwise_init
-struct PriceValidator(FrontendValidator, Movable):
+struct PriceValidator(Movable, Copyable, ImplicitlyCopyable):
     var enabled: Bool
     
-    fn validate_submission(self, order: Order, account: Optional[object], limit_up: Float64 = 0.0, limit_down: Float64 = 0.0) -> Optional[String]:
+    def validate_order(self, order: Order) -> Bool:
+        return self.enabled
+    
+    def can_submit_order(self, order: Order) -> Bool:
+        return self.enabled
+    
+    def can_cancel_order(self, order_id: Int) -> Bool:
+        return True
+    
+    def validate_submission(self, order: Order, limit_up: Float64 = 0.0, limit_down: Float64 = 0.0) -> Optional[String]:
         if not self.enabled:
             return None
         
-        if order.order_type != ORDER_TYPE_LIMIT:
+        if order.order_type() != ORDER_TYPE_LIMIT:
             return None
         
         if limit_up > 0 and order.price > limit_up:
@@ -27,9 +35,9 @@ struct PriceValidator(FrontendValidator, Movable):
         
         return None
     
-    fn validate_cancellation(self, order: Order, account: Optional[object]) -> Optional[String]:
+    def validate_cancellation(self, order: Order) -> Optional[String]:
         return None
 
 
-fn create_price_validator(enabled: Bool = True) -> PriceValidator:
+def create_price_validator(enabled: Bool = True) -> PriceValidator:
     return PriceValidator(enabled=enabled)

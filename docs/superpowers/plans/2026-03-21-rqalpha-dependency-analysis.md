@@ -161,16 +161,16 @@
 
 | 序号 | 文件路径                                                          | 状态  | 依赖数量 | 依赖模块                                                                                                                                   |
 | -- | ------------------------------------------------------------- | --- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1  | `mod/rqalpha_mod_sys_analyser/report/report.py`               | 待重构 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils.datetime_func`, `rqalpha.utils.logger`                                           |
-| 2  | `mod/rqalpha_mod_sys_risk/validators/price_validator.py`      | 待重构 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           |
-| 3  | `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.py` | 待重构 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           |
-| 4  | `mod/rqalpha_mod_sys_scheduler/scheduler.py`                  | 待重构 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`                                                   |
-| 5  | `mod/rqalpha_mod_sys_simulation/mod.py`                       | 待重构 | 4    | `rqalpha.core.events`, `rqalpha.utils.logger`, `rqalpha.interface`, `rqalpha.const`                                                    |
-| 6  | `mod/rqalpha_mod_sys_simulation/signal_broker.py`             | 待重构 | 4    | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.core.events`                                               |
-| 7  | `mod/rqalpha_mod_sys_simulation/testing.py`                   | 待重构 | 4    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model`                                                           |
-| 8  | `model/instrument.py`                                         | 待重构 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`                                                           |
-| 9  | `core/strategy.py`                                            | 待重构 | 5    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.const`                        |
-| 10 | `data/bundle.py`                                              | 待重构 | 5    | `rqalpha.apis.api_rqdatac`, `rqalpha.utils.concurrent`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools` |
+| 1  | `mod/rqalpha_mod_sys_analyser/report/report.py`               | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils.datetime_func`, `rqalpha.utils.logger`                                           |
+| 2  | `mod/rqalpha_mod_sys_risk/validators/price_validator.py`      | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           |
+| 3  | `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.py` | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           |
+| 4  | `mod/rqalpha_mod_sys_scheduler/scheduler.py`                  | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`                                                   |
+| 5  | `mod/rqalpha_mod_sys_simulation/mod.py`                       | ✅ 已完成 | 4    | `rqalpha.core.events`, `rqalpha.utils.logger`, `rqalpha.interface`, `rqalpha.const`                                                    |
+| 6  | `mod/rqalpha_mod_sys_simulation/signal_broker.py`             | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.core.events`                                               |
+| 7  | `mod/rqalpha_mod_sys_simulation/testing.py`                   | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model`                                                           |
+| 8  | `model/instrument.py`                                         | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`                                                           |
+| 9  | `core/strategy.py`                                            | ✅ 已完成 | 5    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.const`                        |
+| 10 | `data/bundle.py`                                              | ✅ 已完成 | 5    | `rqalpha.apis.api_rqdatac`, `rqalpha.utils.concurrent`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools` |
 
 ***
 

@@ -45,7 +45,7 @@ fn LimitOrder(price: Float64) -> OrderStyle:
 
 
 @fieldwise_init
-struct Order(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct Order(Writable, Copyable, Movable, ImplicitlyCopyable):
     var order_id: Int
     var order_book_id: String
     var side: SIDE
@@ -58,11 +58,15 @@ struct Order(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var avg_price: Float64
     var created_at: DateTime
     var transaction_cost: Float64
+    var price: Float64
     
-    fn __str__(self) -> String:
-        return "Order(" + String(self.order_id) + ", " + self.order_book_id + ", " + self.side.value() + ", qty=" + String(self.quantity) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("Order(", String(self.order_id), ", ", self.order_book_id, ", ", self.side.value(), ", qty=", String(self.quantity), ")")
     
-    fn fill(mut self, quantity: Int, price: Float64) -> None:
+    def order_type(self) -> ORDER_TYPE:
+        return self.style.style_type
+    
+    def fill(mut self, quantity: Int, price: Float64) -> None:
         self.filled_quantity += quantity
         self.unfilled_quantity = self.quantity - self.filled_quantity
         if self.filled_quantity > 0:
@@ -74,16 +78,16 @@ struct Order(Stringable, Copyable, Movable, ImplicitlyCopyable):
         elif self.filled_quantity > 0:
             self.status = ORDER_STATUS_ACTIVE
     
-    fn is_active(self) -> Bool:
+    def is_active(self) -> Bool:
         return self.status == ORDER_STATUS_ACTIVE or self.status == ORDER_STATUS_PENDING_NEW
     
-    fn is_filled(self) -> Bool:
+    def is_filled(self) -> Bool:
         return self.status == ORDER_STATUS_FILLED
     
-    fn is_cancelled(self) -> Bool:
+    def is_cancelled(self) -> Bool:
         return self.status == ORDER_STATUS_CANCELLED
     
-    fn is_rejected(self) -> Bool:
+    def is_rejected(self) -> Bool:
         return self.status == ORDER_STATUS_REJECTED
 
 
@@ -95,6 +99,7 @@ fn create_order_with_id(
     style: OrderStyle,
     position_effect: POSITION_EFFECT = POSITION_EFFECT_OPEN
 ) -> Order:
+    var price = style.limit_price
     return Order(
         order_id=order_id,
         order_book_id=order_book_id,
@@ -107,7 +112,8 @@ fn create_order_with_id(
         style=style,
         avg_price=0.0,
         created_at=DateTime(1970, 1, 1, 0, 0, 0, 0),
-        transaction_cost=0.0
+        transaction_cost=0.0,
+        price=price
     )
 
 
