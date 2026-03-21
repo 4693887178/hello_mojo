@@ -93,16 +93,16 @@
 
 | 序号 | 文件路径 | 状态 | 依赖数量 | 依赖模块 |
 |-----|---------|------|---------|---------|
-| 1 | `mod/rqalpha_mod_sys_transaction_cost/__init__.py` | 待重构 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
-| 2 | `mod/rqalpha_mod_sys_transaction_cost/deciders.py` | 待重构 | 2 | `rqalpha.const`, `rqalpha.model.instrument` |
-| 3 | `mod/rqalpha_mod_sys_transaction_cost/mod.py` | 待重构 | 2 | `rqalpha.interface`, `rqalpha.const` |
-| 4 | `mod/rqalpha_mod_sys_scheduler/__init__.py` | 待重构 | 2 | 内部相对导入 |
-| 5 | `mod/rqalpha_mod_sys_simulation/__init__.py` | 待重构 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
-| 6 | `mod/rqalpha_mod_sys_analyser/plot/__init__.py` | 待重构 | 2 | 内部相对导入 |
-| 7 | `mod/rqalpha_mod_sys_analyser/plot/consts.py` | 待重构 | 2 | 无内部依赖 |
-| 8 | `mod/rqalpha_mod_sys_analyser/report/__init__.py` | 待重构 | 2 | 内部相对导入 |
-| 9 | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | 待重构 | 2 | 内部相对导入 |
-| 10 | `data/base_data_source/__init__.py` | 待重构 | 2 | 内部相对导入 |
+| 1 | `mod/rqalpha_mod_sys_transaction_cost/__init__.py` | ✅ 已完成 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
+| 2 | `mod/rqalpha_mod_sys_transaction_cost/deciders.py` | ✅ 已完成 | 2 | `rqalpha.const`, `rqalpha.model.instrument` |
+| 3 | `mod/rqalpha_mod_sys_transaction_cost/mod.py` | ✅ 已完成 | 2 | `rqalpha.interface`, `rqalpha.const` |
+| 4 | `mod/rqalpha_mod_sys_scheduler/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 5 | `mod/rqalpha_mod_sys_simulation/__init__.py` | ✅ 已完成 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
+| 6 | `mod/rqalpha_mod_sys_analyser/plot/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 7 | `mod/rqalpha_mod_sys_analyser/plot/consts.py` | ✅ 已完成 | 2 | 无内部依赖 |
+| 8 | `mod/rqalpha_mod_sys_analyser/report/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 9 | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 10 | `data/base_data_source/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
 
 ---
 
@@ -243,7 +243,7 @@
 | 第2组 | 0 | 10 | 10 | 0 |
 | 第3组 | 1-2 | 10 | 10 | 0 |
 | 第4组 | 2 | 10 | 10 | 0 |
-| 第5组 | 2 | 10 | 0 | 10 |
+| 第5组 | 2 | 10 | 10 | 0 |
 | 第6组 | 2-3 | 10 | 0 | 10 |
 | 第7组 | 3-4 | 10 | 0 | 10 |
 | 第8组 | 4 | 10 | 0 | 10 |
@@ -252,7 +252,7 @@
 | 第11组 | 6 | 10 | 0 | 10 |
 | 第12组 | 7-10 | 10 | 0 | 10 |
 | 第13组 | 1-20 | 3 | 0 | 3 |
-| **总计** | - | **123** | **40** | **83** |
+| **总计** | - | **123** | **50** | **73** |
 
 ---
 
