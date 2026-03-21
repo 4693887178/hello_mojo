@@ -16,9 +16,8 @@ def nan_f64() -> Float64:
 
 
 def create_empty_bar() -> BarObject:
-    var ins = create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHE)
     return BarObject(
-        instrument=ins,
+        _order_book_id="",
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
         open=0.0,
         high=0.0,

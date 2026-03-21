@@ -165,7 +165,7 @@ struct Environment(Movable):
             is_hold=self._is_hold
         )
 
-    fn get_event_bus(ref self) -> ref EventBus:
+    fn get_event_bus[origin: Origin](ref[origin] self) -> ref[origin] EventBus:
         return self._event_bus
 
     fn calendar_dt(self) -> DateTime:
@@ -206,7 +206,7 @@ struct Environment(Movable):
         self._listener_count += 1
 
     fn publish_event(mut self, event: Event) -> None:
-        self._event_bus.publish(event)
+        _ = self._event_bus.publish_event(event)
 
     fn submit_order(mut self, order: Order) -> Order:
         var order_with_id = Order(

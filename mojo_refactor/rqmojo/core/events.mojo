@@ -332,3 +332,10 @@ def parse_event(event_str: String) raises -> EVENT:
     if event_map.__contains__(upper_str):
         return event_map[upper_str]
     raise Error("Unknown event type: " + event_str)
+
+
+def create_event_bus() -> EventBus:
+    return EventBus(
+        listeners=Dict[String, List[EventListener]](),
+        user_listeners=Dict[String, List[EventListener]]()
+    )

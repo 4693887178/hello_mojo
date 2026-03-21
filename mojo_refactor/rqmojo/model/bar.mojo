@@ -9,7 +9,7 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct BarObject(Stringable, Movable):
+struct BarObject(Stringable, Movable, Copyable, ImplicitlyCopyable):
     var _order_book_id: String
     var datetime: DateTime
     var open: Float64

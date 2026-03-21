@@ -117,7 +117,7 @@ struct StrategyContext(Movable):
         return DateTime(self._start_year, self._start_month, self._start_day, 0, 0, 0, 0)
     
     fn universe(self) -> Set[String]:
-        return self._universe
+        return self._universe.copy()
     
     fn now(self) -> DateTime:
         return self._env.calendar_dt()
@@ -163,7 +163,9 @@ struct StrategyContext(Movable):
                 continue
             var parts = line.split("=", maxsplit=1)
             if len(parts) == 2:
-                self._state_data[parts[0]] = parts[1]
+                var key_str = String(parts[0])
+                var val_str = String(parts[1])
+                self._state_data[key_str] = val_str
     
     fn get_instrument(self, order_book_id: String) -> Instrument:
         return self._data_proxy.get_instrument(order_book_id)
@@ -189,8 +191,8 @@ struct StrategyContext(Movable):
     fn cancel_order(self, order_id: Int) -> None:
         pass
     
-    fn update_universe(mut self, universe: Set[String]) -> None:
-        self._universe = universe
+    fn update_universe(mut self, var universe: Set[String]) -> None:
+        self._universe = universe^
     
     fn subscribe(mut self, order_book_id: String) -> None:
         self._universe.add(order_book_id)

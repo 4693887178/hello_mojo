@@ -28,12 +28,12 @@ struct ExtraConfig(Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct ModConfig(Movable):
+struct ModConfig(Movable, ImplicitlyCopyable):
     var enabled: Bool
 
 
 @fieldwise_init
-struct RQAlphaConfig(Movable):
+struct RQAlphaConfig(Movable, ImplicitlyCopyable):
     var base: BaseConfig
     var extra: ExtraConfig
     var mod: ModConfig

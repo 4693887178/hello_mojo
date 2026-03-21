@@ -35,27 +35,27 @@ struct Account(ImplicitlyCopyable):
         self.daily_pnl = daily_pnl
         self._positions = _positions^
 
-    fn __copyinit__(out self, existing: Self):
-        self.account_type = existing.account_type
-        self.total_cash = existing.total_cash
-        self.total_value = existing.total_value
-        self.positions_count = existing.positions_count
-        self.frozen_cash = existing.frozen_cash
-        self.margin_val = existing.margin_val
-        self.daily_pnl = existing.daily_pnl
+    fn __init__(out self, *, copy: Self):
+        self.account_type = copy.account_type
+        self.total_cash = copy.total_cash
+        self.total_value = copy.total_value
+        self.positions_count = copy.positions_count
+        self.frozen_cash = copy.frozen_cash
+        self.margin_val = copy.margin_val
+        self.daily_pnl = copy.daily_pnl
         self._positions = List[Position]()
-        for i in range(len(existing._positions)):
-            self._positions.append(existing._positions[i])
+        for i in range(len(copy._positions)):
+            self._positions.append(copy._positions[i])
 
-    fn __moveinit__(out self, deinit existing: Self):
-        self.account_type = existing.account_type
-        self.total_cash = existing.total_cash
-        self.total_value = existing.total_value
-        self.positions_count = existing.positions_count
-        self.frozen_cash = existing.frozen_cash
-        self.margin_val = existing.margin_val
-        self.daily_pnl = existing.daily_pnl
-        self._positions = existing._positions^
+    fn __init__(out self, *, deinit take: Self):
+        self.account_type = take.account_type
+        self.total_cash = take.total_cash
+        self.total_value = take.total_value
+        self.positions_count = take.positions_count
+        self.frozen_cash = take.frozen_cash
+        self.margin_val = take.margin_val
+        self.daily_pnl = take.daily_pnl
+        self._positions = take._positions^
 
     fn available_cash(self) -> Float64:
         return self.total_cash - self.frozen_cash - self.margin_val

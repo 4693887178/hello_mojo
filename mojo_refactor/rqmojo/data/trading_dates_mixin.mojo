@@ -127,3 +127,7 @@ fn create_trading_dates_mixin_with_november_2018() -> TradingDatesMixin:
     dates.append(20181130)
     
     return TradingDatesMixin(_trading_dates=dates^, _initialized=True)
+
+
+fn create_trading_dates_mixin() -> TradingDatesMixin:
+    return TradingDatesMixin(_trading_dates=List[Int](), _initialized=False)

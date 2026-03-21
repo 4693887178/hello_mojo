@@ -11,16 +11,17 @@ from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
 @fieldwise_init
 struct InstrumentsMixin(Movable):
     var _instruments: List[Instrument]
+    var _default_instrument: Instrument
     
     fn get_instrument(self, order_book_id: String) -> Instrument:
         for i in range(len(self._instruments)):
-            if self._instruments[i].order_book_id == order_book_id:
+            if self._instruments[i].order_book_id() == order_book_id:
                 return self._instruments[i]
-        return create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHE)
+        return self._default_instrument
     
     fn has_instrument(self, order_book_id: String) -> Bool:
         for i in range(len(self._instruments)):
-            if self._instruments[i].order_book_id == order_book_id:
+            if self._instruments[i].order_book_id() == order_book_id:
                 return True
         return False
     
@@ -53,10 +54,11 @@ struct InstrumentsMixin(Movable):
 
 fn create_instruments_mixin_with_test_data() -> InstrumentsMixin:
     var instruments = List[Instrument]()
+    var default_ins = create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHE)
     
     instruments.append(create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE_SHFE, "RB"))
     instruments.append(create_future_instrument("AG1912", "白银1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 15.0, EXCHANGE_SHFE, "AG"))
     instruments.append(create_future_instrument("TF1912", "五年期国债1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10000.0, EXCHANGE_CFFEX, "TF"))
     instruments.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
     
-    return InstrumentsMixin(_instruments=instruments^)
+    return InstrumentsMixin(_instruments=instruments^, _default_instrument=default_ins^)

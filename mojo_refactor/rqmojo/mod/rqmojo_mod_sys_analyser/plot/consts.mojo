@@ -4,6 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/consts.py
 """
 
 
+@fieldwise_init
 struct ChartType(Stringable, Copyable, Movable, Equatable):
     var name: String
     var value: String
@@ -13,17 +14,18 @@ struct ChartType(Stringable, Copyable, Movable, Equatable):
     
     @staticmethod
     fn LINE() -> ChartType:
-        return ChartType("LINE", "line")
+        return ChartType(name="LINE", value="line")
     
     @staticmethod
     fn BAR() -> ChartType:
-        return ChartType("BAR", "bar")
+        return ChartType(name="BAR", value="bar")
     
     @staticmethod
     fn SCATTER() -> ChartType:
-        return ChartType("SCATTER", "scatter")
+        return ChartType(name="SCATTER", value="scatter")
 
 
+@fieldwise_init
 struct Color(Stringable, Copyable, Movable, Equatable):
     var r: Int
     var g: Int
@@ -35,19 +37,19 @@ struct Color(Stringable, Copyable, Movable, Equatable):
     
     @staticmethod
     fn RED() -> Color:
-        return Color(255, 0, 0, 1.0)
+        return Color(r=255, g=0, b=0, a=1.0)
     
     @staticmethod
     fn GREEN() -> Color:
-        return Color(0, 255, 0, 1.0)
+        return Color(r=0, g=255, b=0, a=1.0)
     
     @staticmethod
     fn BLUE() -> Color:
-        return Color(0, 0, 255, 1.0)
+        return Color(r=0, g=0, b=255, a=1.0)
     
     @staticmethod
     fn BLACK() -> Color:
-        return Color(0, 0, 0, 1.0)
+        return Color(r=0, g=0, b=0, a=1.0)
 
 
 struct PlotConst:

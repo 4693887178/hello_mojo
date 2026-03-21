@@ -171,9 +171,8 @@ struct DataProxy(Movable):
         return result^
     
     fn get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
-        var ins = self.get_instrument(order_book_id)
         return create_bar_object(
-            instrument=ins,
+            order_book_id=order_book_id,
             dt=dt,
             open=10.0,
             high=10.5,
@@ -186,7 +185,7 @@ struct DataProxy(Movable):
     fn get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
         var ins = self.get_instrument(order_book_id)
         return create_tick_object(
-            instrument=ins,
+            instrument=ins^,
             dt=dt,
             last=10.2,
             volume=1000000.0,

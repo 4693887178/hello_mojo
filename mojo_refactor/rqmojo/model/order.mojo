@@ -60,7 +60,7 @@ struct Order(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var transaction_cost: Float64
     
     fn __str__(self) -> String:
-        return "Order(" + String(self.order_id) + ", " + self.order_book_id + ", " + self.side.value + ", qty=" + String(self.quantity) + ")"
+        return "Order(" + String(self.order_id) + ", " + self.order_book_id + ", " + self.side.value() + ", qty=" + String(self.quantity) + ")"
     
     fn fill(mut self, quantity: Int, price: Float64) -> None:
         self.filled_quantity += quantity
