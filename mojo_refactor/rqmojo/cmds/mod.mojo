@@ -7,7 +7,7 @@ from rqmojo.const import EXIT_CODE
 
 
 @fieldwise_init
-struct ModInfo(Movable):
+struct ModInfo(Copyable, Movable, ImplicitlyCopyable):
     var name: String
     var enabled: Bool
     var description: String
@@ -19,7 +19,7 @@ struct ModCommand(Movable):
     var mod_name: String
 
 
-fn get_builtin_mods() -> List[ModInfo]:
+def get_builtin_mods() -> List[ModInfo]:
     var mods = List[ModInfo]()
     mods.append(ModInfo(name="simulation", enabled=True, description="Simulation broker and matcher"))
     mods.append(ModInfo(name="risk", enabled=True, description="Risk management and validation"))
@@ -28,22 +28,22 @@ fn get_builtin_mods() -> List[ModInfo]:
     mods.append(ModInfo(name="scheduler", enabled=True, description="Task scheduling"))
     mods.append(ModInfo(name="progress", enabled=True, description="Progress tracking"))
     mods.append(ModInfo(name="transaction_cost", enabled=True, description="Transaction cost calculation"))
-    return mods
+    return mods^
 
 
-fn list_mods() -> List[String]:
+def list_mods() -> List[String]:
     var mods = List[String]()
     var mod_infos = get_builtin_mods()
     for mod in mod_infos:
         mods.append(mod.name)
-    return mods
+    return mods^
 
 
-fn list_mods_detailed() -> List[ModInfo]:
+def list_mods_detailed() -> List[ModInfo]:
     return get_builtin_mods()
 
 
-fn enable_mod(mod_name: String) -> Bool:
+def enable_mod(mod_name: String) -> Bool:
     var mods = get_builtin_mods()
     for mod in mods:
         if mod.name == mod_name:
@@ -51,18 +51,18 @@ fn enable_mod(mod_name: String) -> Bool:
     return False
 
 
-fn disable_mod(mod_name: String) -> Bool:
+def disable_mod(mod_name: String) -> Bool:
     return True
 
 
-fn get_mod_config(mod_name: String) -> Dict[String, String]:
+def get_mod_config(mod_name: String) -> Dict[String, String]:
     var config = Dict[String, String]()
     config["enabled"] = "true"
     config["name"] = mod_name
-    return config
+    return config^
 
 
-fn run_mod_command(action: String, params: List[String]) -> Int:
+def run_mod_command(action: String, params: List[String]) -> Int:
     if action == "list":
         print("=== Available Modules ===")
         var mods = get_builtin_mods()

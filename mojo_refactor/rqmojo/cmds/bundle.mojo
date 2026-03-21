@@ -17,11 +17,11 @@ struct BundleConfig(Movable):
     var concurrency: Int
 
 
-fn update_bundle(config: BundleConfig) -> Int:
+def update_bundle(config: BundleConfig) -> Int:
     print("=== Bundle Update ===")
     print("Data Path: ", config.data_path)
-    print("Start Date: ", config.start_date)
-    print("End Date: ", config.end_date)
+    print("Start Date: ", config.start_date.__str__())
+    print("End Date: ", config.end_date.__str__())
     print("Include Stock: ", config.include_stock)
     print("Include Future: ", config.include_future)
     print("Compression: ", config.compression)
@@ -31,7 +31,7 @@ fn update_bundle(config: BundleConfig) -> Int:
     return 0
 
 
-fn create_bundle(data_path: String, start_date: DateTime, end_date: DateTime) -> Int:
+def create_bundle(data_path: String, start_date: DateTime, end_date: DateTime) -> Int:
     var config = BundleConfig(
         data_path=data_path,
         start_date=start_date,
@@ -45,20 +45,20 @@ fn create_bundle(data_path: String, start_date: DateTime, end_date: DateTime) ->
     return update_bundle(config)
 
 
-fn download_bundle(data_path: String = "./bundle") -> Int:
+def download_bundle(data_path: String = "./bundle") -> Int:
     var start_date = DateTime(2010, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
     
     print("=== Bundle Download ===")
     print("Data Path: ", data_path)
-    print("Start Date: ", start_date)
-    print("End Date: ", end_date)
+    print("Start Date: ", start_date.__str__())
+    print("End Date: ", end_date.__str__())
     print("")
     print("Note: Bundle download is not supported in Mojo. Please use Python version.")
     return 1
 
 
-fn check_bundle(data_path: String = "./bundle") -> Int:
+def check_bundle(data_path: String = "./bundle") -> Int:
     print("=== Bundle Check ===")
     print("Data Path: ", data_path)
     print("")

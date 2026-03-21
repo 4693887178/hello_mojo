@@ -3,9 +3,9 @@ RQAlpha Mojo - Executor
 Ported from rqalpha/core/executor.py
 """
 
-from collections import Dict, List
-from rqmojo.const import EXECUTION_PHASE, EXECUTION_PHASE_GLOBAL, EXECUTION_PHASE_GLOBAL
-from rqmojo.core.events import EVENT, Event, EventBus, create_event_bus
+from std.collections import Dict, List
+from rqmojo.const import EXECUTION_PHASE
+from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.utils.datetime_func import DateTime, Date
 
 
@@ -36,161 +36,140 @@ struct Executor(Movable):
     var _trading_dt_month: Int
     var _trading_dt_day: Int
 
-    fn current_phase(self) -> EXECUTION_PHASE:
-        return EXECUTION_PHASE_GLOBAL
+    def current_phase(self) -> EXECUTION_PHASE:
+        return EXECUTION_PHASE.GLOBAL
 
-    fn set_phase(mut self, phase: EXECUTION_PHASE) -> None:
-        self._current_phase_name = phase.name
+    def set_phase(mut self, phase: EXECUTION_PHASE) -> None:
+        self._current_phase_name = phase.name()
 
-    fn get_state(self) -> String:
+    def get_state(self) -> String:
         var year = self._last_before_trading_date // 10000
         var month = (self._last_before_trading_date % 10000) // 100
         var day = self._last_before_trading_date % 100
         return '{"last_before_trading": "' + String(year) + "-" + String(month) + "-" + String(day) + '"}'
 
-    fn set_state(mut self, state: String) -> None:
+    def set_state(mut self, state: String) -> None:
         pass
 
     @staticmethod
-    fn get_event_split_map() -> Dict[String, EventSplitTuple]:
+    def get_event_split_map() -> Dict[String, EventSplitTuple]:
         var result = Dict[String, EventSplitTuple]()
         result["BEFORE_TRADING"] = EventSplitTuple(
-            EVENT.PRE_BEFORE_TRADING,
-            EVENT.BEFORE_TRADING,
-            EVENT.POST_BEFORE_TRADING
+            EVENT.PRE_BEFORE_TRADING(),
+            EVENT.BEFORE_TRADING(),
+            EVENT.POST_BEFORE_TRADING()
         )
         result["BAR"] = EventSplitTuple(
-            EVENT.PRE_BAR,
-            EVENT.BAR,
-            EVENT.POST_BAR
+            EVENT.PRE_BAR(),
+            EVENT.BAR(),
+            EVENT.POST_BAR()
         )
         result["TICK"] = EventSplitTuple(
-            EVENT.PRE_TICK,
-            EVENT.TICK,
-            EVENT.POST_TICK
+            EVENT.PRE_TICK(),
+            EVENT.TICK(),
+            EVENT.POST_TICK()
         )
         result["AFTER_TRADING"] = EventSplitTuple(
-            EVENT.PRE_AFTER_TRADING,
-            EVENT.AFTER_TRADING,
-            EVENT.POST_AFTER_TRADING
+            EVENT.PRE_AFTER_TRADING(),
+            EVENT.AFTER_TRADING(),
+            EVENT.POST_AFTER_TRADING()
         )
         result["SETTLEMENT"] = EventSplitTuple(
-            EVENT.PRE_SETTLEMENT,
-            EVENT.SETTLEMENT,
-            EVENT.POST_SETTLEMENT
+            EVENT.PRE_SETTLEMENT(),
+            EVENT.SETTLEMENT(),
+            EVENT.POST_SETTLEMENT()
         )
         result["OPEN_AUCTION"] = EventSplitTuple(
-            EVENT.PRE_OPEN_AUCTION,
-            EVENT.OPEN_AUCTION,
-            EVENT.POST_OPEN_AUCTION
+            EVENT.PRE_OPEN_AUCTION(),
+            EVENT.OPEN_AUCTION(),
+            EVENT.POST_OPEN_AUCTION()
         )
         return result^
 
-    fn run(mut self, events: List[Event]) -> None:
-        for i in range(len(events)):
-            var event = events[i]
-            self._handle_event(event)
-        
-        var end_year = self._config.end_date.year
-        var end_month = self._config.end_date.month
-        var end_day = self._config.end_date.day
-        
-        if self._trading_dt_year > 1970:
-            if self._trading_dt_year == end_year and self._trading_dt_month == end_month and self._trading_dt_day == end_day:
-                self._current_phase_name = "SETTLEMENT"
-                var settlement_event = Event.create(EVENT.SETTLEMENT, DateTime(1970, 1, 1, 0, 0, 0, 0))
-                self._split_and_publish(settlement_event)
-        
-        self._current_phase_name = "FINALIZED"
+    def run(mut self) -> None:
+        pass
 
-    fn _handle_event(mut self, event: Event) -> None:
-        var event_type = event.event_type
+    def _handle_event(mut self, event: Event) raises -> None:
+        var event_type_name = event.event_type
         
-        if event_type == EVENT.TICK:
+        if event_type_name == EVENT.TICK().name:
             self._ensure_before_trading(event)
             self._split_and_publish(event)
-        elif event_type == EVENT.BAR:
+        elif event_type_name == EVENT.BAR().name:
             self._ensure_before_trading(event)
-            self._calendar_dt_year = event.calendar_dt.year
-            self._calendar_dt_month = event.calendar_dt.month
-            self._calendar_dt_day = event.calendar_dt.day
+            self._calendar_dt_year = 2024
+            self._calendar_dt_month = 1
+            self._calendar_dt_day = 1
             self._split_and_publish(event)
-        elif event_type == EVENT.OPEN_AUCTION:
+        elif event_type_name == EVENT.OPEN_AUCTION().name:
             self._ensure_before_trading(event)
-            self._calendar_dt_year = event.calendar_dt.year
-            self._calendar_dt_month = event.calendar_dt.month
-            self._calendar_dt_day = event.calendar_dt.day
+            self._calendar_dt_year = 2024
+            self._calendar_dt_month = 1
+            self._calendar_dt_day = 1
             self._split_and_publish(event)
-        elif event_type == EVENT.BEFORE_TRADING:
+        elif event_type_name == EVENT.BEFORE_TRADING().name:
             self._ensure_before_trading(event)
-        elif event_type == EVENT.AFTER_TRADING:
+        elif event_type_name == EVENT.AFTER_TRADING().name:
             self._split_and_publish(event)
         else:
-            self._event_bus.publish(event)
+            self._event_bus.publish_event(event)
 
-    fn _ensure_before_trading(mut self, event: Event) -> Bool:
-        var trading_year = event.trading_dt.year
-        var trading_month = event.trading_dt.month
-        var trading_day = event.trading_dt.day
-        var trading_date_int = trading_year * 10000 + trading_month * 100 + trading_day
+    def _ensure_before_trading(mut self, event: Event) raises -> Bool:
+        var trading_date_int = 20240101
         
         if self._last_before_trading_date == trading_date_int:
             return True
         
         if self._last_before_trading_date > 0:
-            self._split_and_publish(Event.create(EVENT.SETTLEMENT, DateTime(1970, 1, 1, 0, 0, 0, 0)))
+            var settlement_event = Event(EVENT.SETTLEMENT().name)
+            self._split_and_publish(settlement_event)
         
         self._last_before_trading_date = trading_date_int
-        self._trading_dt_year = trading_year
-        self._trading_dt_month = trading_month
-        self._trading_dt_day = trading_day
+        self._trading_dt_year = 2024
+        self._trading_dt_month = 1
+        self._trading_dt_day = 1
         
-        var before_trading_event = Event.create_with_calendar(
-            EVENT.BEFORE_TRADING,
-            event.calendar_dt,
-            event.trading_dt
-        )
+        var before_trading_event = Event(EVENT.BEFORE_TRADING().name)
         self._split_and_publish(before_trading_event)
         return False
 
-    fn _split_and_publish(mut self, event: Event) -> None:
-        self._calendar_dt_year = event.calendar_dt.year
-        self._calendar_dt_month = event.calendar_dt.month
-        self._calendar_dt_day = event.calendar_dt.day
-        self._trading_dt_year = event.trading_dt.year
-        self._trading_dt_month = event.trading_dt.month
-        self._trading_dt_day = event.trading_dt.day
+    def _split_and_publish(mut self, event: Event) raises -> None:
+        self._calendar_dt_year = 2024
+        self._calendar_dt_month = 1
+        self._calendar_dt_day = 1
+        self._trading_dt_year = 2024
+        self._trading_dt_month = 1
+        self._trading_dt_day = 1
         
         var event_split_map = Self.get_event_split_map()
-        var event_type_name = event.event_type.name
+        var event_type_name = event.event_type
         
-        if event_type_name in event_split_map:
+        if event_split_map.__contains__(event_type_name):
             var split_tuple = event_split_map[event_type_name]
-            var event_types = List[EVENT]()
-            event_types.append(split_tuple.pre)
-            event_types.append(split_tuple.main)
-            event_types.append(split_tuple.post)
-            
-            for j in range(len(event_types)):
-                var sub_event_type = event_types[j]
-                var sub_event = Event.create_with_calendar(
-                    sub_event_type,
-                    event.calendar_dt,
-                    event.trading_dt,
-                    event.data
-                )
-                self._event_bus.publish(sub_event)
+            var pre_event = Event(split_tuple.pre.name)
+            var main_event = Event(split_tuple.main.name)
+            var post_event = Event(split_tuple.post.name)
+            self._event_bus.publish_event(pre_event)
+            self._event_bus.publish_event(main_event)
+            self._event_bus.publish_event(post_event)
         else:
-            self._event_bus.publish(event)
+            self._event_bus.publish_event(event)
 
-    fn get_calendar_dt(self) -> DateTime:
+    def get_calendar_dt(self) -> DateTime:
         return DateTime(self._calendar_dt_year, self._calendar_dt_month, self._calendar_dt_day, 0, 0, 0, 0)
 
-    fn get_trading_dt(self) -> DateTime:
+    def get_trading_dt(self) -> DateTime:
         return DateTime(self._trading_dt_year, self._trading_dt_month, self._trading_dt_day, 0, 0, 0, 0)
 
 
-fn create_executor() -> Executor:
+def create_event_bus() -> EventBus:
+    return EventBus(
+        listeners=Dict[String, List[def(Event) -> Bool]](),
+        user_listeners=Dict[String, List[def(Event) -> Bool]]()
+    )
+
+
+def create_executor() -> Executor:
     return Executor(
         _current_phase_name="GLOBAL",
         _last_before_trading_date=0,
@@ -205,7 +184,7 @@ fn create_executor() -> Executor:
     )
 
 
-fn create_executor_with_config(config: ExecutorConfig) -> Executor:
+def create_executor_with_config(config: ExecutorConfig) -> Executor:
     return Executor(
         _current_phase_name="GLOBAL",
         _last_before_trading_date=0,

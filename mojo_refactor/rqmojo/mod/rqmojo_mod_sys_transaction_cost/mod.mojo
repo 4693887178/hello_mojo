@@ -4,13 +4,13 @@ Ported from rqalpha/mod/rqalpha_mod_sys_transaction_cost/mod.py
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, EXIT_CODE
-from rqmojo.interface import Mod
+from rqmojo.interface import ModInterface
 from rqmojo.environment import Environment
 from rqmojo.mod.rqmojo_mod_sys_transaction_cost.deciders import StockTransactionCostDecider, FutureTransactionCostDecider, BondTransactionCostDecider, create_stock_decider, create_future_decider, create_bond_decider
 
 
 @fieldwise_init
-struct TransactionCostMod(Mod, Stringable, Movable):
+struct TransactionCostMod(ModInterface, Stringable, Movable):
     var name: String
     var enabled: Bool
     var stock_commission_multiplier: Float64

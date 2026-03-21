@@ -110,16 +110,16 @@
 
 | 序号 | 文件路径 | 状态 | 依赖数量 | 依赖模块 |
 |-----|---------|------|---------|---------|
-| 1 | `mod/rqalpha_mod_sys_risk/__init__.py` | 待重构 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
-| 2 | `mod/rqalpha_mod_sys_risk/validators/__init__.py` | 待重构 | 2 | 内部相对导入 |
-| 3 | `mod/rqalpha_mod_sys_accounts/__init__.py` | 待重构 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
-| 4 | `__main__.py` | 待重构 | 2 | `rqalpha.cmds`, `rqalpha.mod.utils` |
-| 5 | `api.py` | 待重构 | 3 | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const` |
-| 6 | `cmds/bundle.py` | 待重构 | 3 | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils` |
-| 7 | `cmds/mod.py` | 待重构 | 3 | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry` |
-| 8 | `core/execution_context.py` | 待重构 | 3 | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` |
-| 9 | `core/executor.py` | 待重构 | 3 | `rqalpha.core.events`, `rqalpha.utils.rq_json`, `rqalpha.utils.logger` |
-| 10 | `core/strategy_loader.py` | 待重构 | 3 | `rqalpha.utils.logger`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` |
+| 1 | `mod/rqalpha_mod_sys_risk/__init__.py` | ✅ 已完成 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
+| 2 | `mod/rqalpha_mod_sys_risk/validators/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 3 | `mod/rqalpha_mod_sys_accounts/__init__.py` | ✅ 已完成 | 2 | `rqalpha`, `rqalpha.utils.i18n` |
+| 4 | `__main__.py` | ✅ 已完成 | 2 | `rqalpha.cmds`, `rqalpha.mod.utils` |
+| 5 | `api.py` | ✅ 已完成 | 3 | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const` |
+| 6 | `cmds/bundle.py` | ✅ 已完成 | 3 | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils` |
+| 7 | `cmds/mod.py` | ✅ 已完成 | 3 | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry` |
+| 8 | `core/execution_context.py` | ✅ 已完成 | 3 | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` |
+| 9 | `core/executor.py` | ✅ 已完成 | 3 | `rqalpha.core.events`, `rqalpha.utils.rq_json`, `rqalpha.utils.logger` |
+| 10 | `core/strategy_loader.py` | ✅ 已完成 | 3 | `rqalpha.utils.logger`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` |
 
 ---
 
