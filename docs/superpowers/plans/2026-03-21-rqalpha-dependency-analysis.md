@@ -76,16 +76,16 @@
 
 | 序号 | 文件路径 | 状态 | 依赖数量 | 依赖模块 |
 |-----|---------|------|---------|---------|
-| 1 | `utils/logger.py` | 待重构 | 2 | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.utils.exception` |
-| 2 | `utils/rq_json.py` | 待重构 | 2 | `rqalpha.utils.logger`, `rqalpha.utils.datetime_func` |
-| 3 | `utils/strategy_loader_help.py` | 待重构 | 2 | `rqalpha.utils.logger`, `rqalpha.utils.exception` |
-| 4 | `utils/testing/__init__.py` | 待重构 | 2 | `.mocking`, `.fixtures` |
-| 5 | `utils/arg_checker.py` | 待重构 | 2 | `rqalpha.utils.i18n` |
-| 6 | `utils/class_helper.py` | 待重构 | 2 | `rqalpha.utils.i18n` |
-| 7 | `utils/functools.py` | 待重构 | 2 | `rqalpha.utils.i18n`, `rqalpha.const` |
-| 8 | `model/tick.py` | 待重构 | 2 | `rqalpha.utils.i18n`, `rqalpha.utils.repr` |
-| 9 | `mod/rqalpha_mod_sys_progress/__init__.py` | 待重构 | 2 | 内部相对导入 |
-| 10 | `mod/rqalpha_mod_sys_progress/mod.py` | 待重构 | 2 | `rqalpha.interface`, `rqalpha.utils.logger` |
+| 1 | `utils/logger.py` | ✅ 已完成 | 2 | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.utils.exception` |
+| 2 | `utils/rq_json.py` | ✅ 已完成 | 2 | `rqalpha.utils.logger`, `rqalpha.utils.datetime_func` |
+| 3 | `utils/strategy_loader_help.py` | ✅ 已完成 | 2 | `rqalpha.utils.logger`, `rqalpha.utils.exception` |
+| 4 | `utils/testing/__init__.py` | ✅ 已完成 | 2 | `.mocking`, `.fixtures` |
+| 5 | `utils/arg_checker.py` | ✅ 已完成 | 2 | `rqalpha.utils.i18n` |
+| 6 | `utils/class_helper.py` | ✅ 已完成 | 2 | `rqalpha.utils.i18n` |
+| 7 | `utils/functools.py` | ✅ 已完成 | 2 | `rqalpha.utils.i18n`, `rqalpha.const` |
+| 8 | `model/tick.py` | ✅ 已完成 | 2 | `rqalpha.utils.i18n`, `rqalpha.utils.repr` |
+| 9 | `mod/rqalpha_mod_sys_progress/__init__.py` | ✅ 已完成 | 2 | 内部相对导入 |
+| 10 | `mod/rqalpha_mod_sys_progress/mod.py` | ✅ 已完成 | 2 | `rqalpha.interface`, `rqalpha.utils.logger` |
 
 ---
 
@@ -242,7 +242,7 @@
 | 第1组 | 0 | 10 | 10 | 0 |
 | 第2组 | 0 | 10 | 10 | 0 |
 | 第3组 | 1-2 | 10 | 10 | 0 |
-| 第4组 | 2 | 10 | 0 | 10 |
+| 第4组 | 2 | 10 | 10 | 0 |
 | 第5组 | 2 | 10 | 0 | 10 |
 | 第6组 | 2-3 | 10 | 0 | 10 |
 | 第7组 | 3-4 | 10 | 0 | 10 |
@@ -252,7 +252,7 @@
 | 第11组 | 6 | 10 | 0 | 10 |
 | 第12组 | 7-10 | 10 | 0 | 10 |
 | 第13组 | 1-20 | 3 | 0 | 3 |
-| **总计** | - | **123** | **30** | **93** |
+| **总计** | - | **123** | **40** | **83** |
 
 ---
 
