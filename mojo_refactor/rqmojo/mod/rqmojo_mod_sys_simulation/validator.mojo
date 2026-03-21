@@ -3,28 +3,37 @@ RQAlpha Mojo - Order Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/validator.py
 """
 
-from rqmojo.const import ORDER_TYPE, MATCHING_TYPE
+from rqmojo.const import ORDER_TYPE, MATCHING_TYPE, ORDER_TYPE_LIMIT
 from rqmojo.model.order import Order
-from rqmojo.interface import FrontendValidator
+from rqmojo.interface import FrontendValidatorInterface
 
 
-@fieldwise_init
-struct OrderStyleValidator(FrontendValidator, Movable):
+struct OrderStyleValidator(FrontendValidatorInterface, Movable, Copyable):
     var frequency: String
     
-    fn validate_submission(self, order: Order, account: Optional[object]) -> Optional[String]:
-        if order.order_type == ORDER_TYPE_LIMIT:
-            if order.price <= 0:
-                return "Limit order price must be positive"
-        
+    def __init__(out self, frequency: String = "1d"):
+        self.frequency = frequency
+    
+    def validate_order(self, order: Order) -> Bool:
+        return True
+    
+    def can_submit_order(self, order: Order) -> Bool:
+        return True
+    
+    def can_cancel_order(self, order_id: Int) -> Bool:
+        return True
+    
+    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
+        if order.style.style_type == ORDER_TYPE_LIMIT:
+            if order.style.limit_price <= 0:
+                return Optional[String]("Limit order price must be positive")
         if self.frequency == "tick":
             pass
-        
-        return None
+        return Optional[String](None)
     
-    fn validate_cancellation(self, order: Order, account: Optional[object]) -> Optional[String]:
-        return None
+    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+        return Optional[String](None)
 
 
-fn create_order_style_validator(frequency: String = "1d") -> OrderStyleValidator:
+def create_order_style_validator(frequency: String = "1d") -> OrderStyleValidator:
     return OrderStyleValidator(frequency=frequency)

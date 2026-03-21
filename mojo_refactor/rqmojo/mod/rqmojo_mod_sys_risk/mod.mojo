@@ -12,13 +12,13 @@ struct RiskMod(Copyable, Movable, ImplicitlyCopyable):
     var name: String
     var enabled: Bool
     
-    fn __str__(self) -> String:
-        return "RiskMod(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("RiskMod(", self.name, ")")
     
-    fn start(self) -> None:
+    def start(self):
         pass
     
-    fn stop(self) -> None:
+    def stop(self):
         pass
 
 
@@ -26,10 +26,10 @@ struct RiskMod(Copyable, Movable, ImplicitlyCopyable):
 struct PriceValidator(Movable):
     var _enabled: Bool
     
-    fn validate(self, order: Order, limit_up: Float64, limit_down: Float64) -> Bool:
+    def validate(self, order: Order, limit_up: Float64, limit_down: Float64) -> Bool:
         return True
     
-    fn is_enabled(self) -> Bool:
+    def is_enabled(self) -> Bool:
         return self._enabled
 
 
@@ -38,10 +38,10 @@ struct CashValidator(Movable):
     var _enabled: Bool
     var _min_cash: Float64
     
-    fn validate(self, order: Order, available_cash: Float64) -> Bool:
+    def validate(self, order: Order, available_cash: Float64) -> Bool:
         return available_cash >= self._min_cash
     
-    fn is_enabled(self) -> Bool:
+    def is_enabled(self) -> Bool:
         return self._enabled
 
 
@@ -49,24 +49,24 @@ struct CashValidator(Movable):
 struct SelfTradeValidator(Movable):
     var _enabled: Bool
     
-    fn validate(self, order: Order, existing_orders: List[Order]) -> Bool:
+    def validate(self, order: Order, existing_orders: List[Order]) -> Bool:
         return True
     
-    fn is_enabled(self) -> Bool:
+    def is_enabled(self) -> Bool:
         return self._enabled
 
 
-fn create_risk_mod() -> RiskMod:
+def create_risk_mod() -> RiskMod:
     return RiskMod(name="risk", enabled=True)
 
 
-fn create_price_validator(enabled: Bool = True) -> PriceValidator:
+def create_price_validator(enabled: Bool = True) -> PriceValidator:
     return PriceValidator(_enabled=enabled)
 
 
-fn create_cash_validator(enabled: Bool = True, min_cash: Float64 = 0.0) -> CashValidator:
+def create_cash_validator(enabled: Bool = True, min_cash: Float64 = 0.0) -> CashValidator:
     return CashValidator(_enabled=enabled, _min_cash=min_cash)
 
 
-fn create_self_trade_validator(enabled: Bool = True) -> SelfTradeValidator:
+def create_self_trade_validator(enabled: Bool = True) -> SelfTradeValidator:
     return SelfTradeValidator(_enabled=enabled)

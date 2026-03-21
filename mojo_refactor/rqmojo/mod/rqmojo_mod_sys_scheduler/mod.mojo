@@ -14,43 +14,41 @@ from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import (
 
 
 @fieldwise_init
-struct SchedulerMod(Mod, Stringable, Movable):
+struct SchedulerMod(Mod, Writable, Movable):
     var name: String
     var _scheduler: Optional[Scheduler]
     var _enabled: Bool
 
-    fn __str__(self) -> String:
-        return "SchedulerMod(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("SchedulerMod(", self.name, ")")
 
-    fn __init__(ref self) -> Self:
-        return Self(
-            name="scheduler",
-            _scheduler=Optional[Scheduler](None),
-            _enabled=False
-        )
+    def __init__(out self):
+        self.name = "scheduler"
+        self._scheduler = Optional[Scheduler](None)
+        self._enabled = False
 
-    fn start_up(mut self, env: object, mod_config: object) -> None:
+    def start_up(mut self, env: object, mod_config: object):
         self._enabled = True
         var scheduler = create_scheduler("1d")
         self._scheduler = Optional[Scheduler](scheduler)
 
-    fn tear_down(self, code: EXIT_CODE, exception: Optional[object]) -> None:
+    def tear_down(self, code: EXIT_CODE, exception: Optional[object]):
         pass
 
-    fn get_scheduler(self) -> Optional[Scheduler]:
+    def get_scheduler(self) -> Optional[Scheduler]:
         return self._scheduler
 
-    fn get_state(self) -> String:
+    def get_state(self) -> String:
         if var scheduler = self._scheduler.value():
             return scheduler.get_state()
         return ""
 
-    fn set_state(mut self, state: String) -> None:
+    def set_state(mut self, state: String):
         if var scheduler = self._scheduler.value():
             scheduler.set_state(state)
 
 
-fn create_scheduler_mod() -> SchedulerMod:
+def create_scheduler_mod() -> SchedulerMod:
     return SchedulerMod(
         name="scheduler",
         _scheduler=Optional[Scheduler](None),

@@ -3,21 +3,29 @@ RQAlpha Mojo - Plot Utils
 Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/utils.py
 """
 
+from std.math import sqrt
 from rqmojo.utils.datetime_func import DateTime
 
 
-fn format_date(dt: DateTime) -> String:
-    return String(dt.year) + "-" + String(dt.month).zfill(2) + "-" + String(dt.day).zfill(2)
+def _pad_zero(value: Int, width: Int) -> String:
+    var s = String(value)
+    while len(s) < width:
+        s = "0" + s
+    return s
 
 
-fn format_datetime(dt: DateTime) -> String:
-    return format_date(dt) + " " + String(dt.hour).zfill(2) + ":" + String(dt.minute).zfill(2) + ":" + String(dt.second).zfill(2)
+def format_date(dt: DateTime) -> String:
+    return String(dt.year) + "-" + _pad_zero(dt.month, 2) + "-" + _pad_zero(dt.day, 2)
 
 
-fn calculate_returns(nav_list: List[Float64]) -> List[Float64]:
+def format_datetime(dt: DateTime) -> String:
+    return format_date(dt) + " " + _pad_zero(dt.hour, 2) + ":" + _pad_zero(dt.minute, 2) + ":" + _pad_zero(dt.second, 2)
+
+
+def calculate_returns(nav_list: List[Float64]) -> List[Float64]:
     var returns = List[Float64]()
     if len(nav_list) < 2:
-        return returns
+        return returns^
     
     for i in range(1, len(nav_list)):
         if nav_list[i-1] > 0:
@@ -26,10 +34,10 @@ fn calculate_returns(nav_list: List[Float64]) -> List[Float64]:
         else:
             returns.append(0.0)
     
-    return returns
+    return returns^
 
 
-fn calculate_max_drawdown(nav_list: List[Float64]) -> Float64:
+def calculate_max_drawdown(nav_list: List[Float64]) -> Float64:
     if len(nav_list) == 0:
         return 0.0
     
@@ -48,7 +56,7 @@ fn calculate_max_drawdown(nav_list: List[Float64]) -> Float64:
     return max_drawdown
 
 
-fn calculate_sharpe_ratio(returns: List[Float64], risk_free_rate: Float64 = 0.03) -> Float64:
+def calculate_sharpe_ratio(returns: List[Float64], risk_free_rate: Float64 = 0.03) -> Float64:
     if len(returns) == 0:
         return 0.0
     
@@ -63,9 +71,9 @@ fn calculate_sharpe_ratio(returns: List[Float64], risk_free_rate: Float64 = 0.03
         var diff = ret - avg_return
         sum_sq_diff += diff * diff
     
-    var std_dev = (sum_sq_diff / Float64(len(returns))).sqrt()
+    var std_dev = sqrt(sum_sq_diff / Float64(len(returns)))
     
     if std_dev == 0:
         return 0.0
     
-    return (avg_return - risk_free_rate / 252.0) / std_dev * 252.0.sqrt()
+    return (avg_return - risk_free_rate / 252.0) / std_dev * sqrt(252.0)

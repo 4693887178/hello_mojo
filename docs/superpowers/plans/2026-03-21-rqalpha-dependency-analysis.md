@@ -127,16 +127,16 @@
 
 | 序号 | 文件路径 | 状态 | 依赖数量 | 依赖模块 |
 |-----|---------|------|---------|---------|
-| 1 | `core/strategy_universe.py` | 待重构 | 3 | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.model.instrument` |
-| 2 | `data/bar_dict_price_board.py` | 待重构 | 3 | `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.bar` |
-| 3 | `mod/rqalpha_mod_sys_analyser/__init__.py` | 待重构 | 3 | `rqalpha`, `rqalpha.utils.i18n` |
-| 4 | `mod/rqalpha_mod_sys_analyser/plot/utils.py` | 待重构 | 3 | 内部相对导入 |
-| 5 | `mod/rqalpha_mod_sys_risk/mod.py` | 待重构 | 3 | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const` |
-| 6 | `mod/rqalpha_mod_sys_scheduler/mod.py` | 待重构 | 3 | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger` |
-| 7 | `mod/rqalpha_mod_sys_simulation/slippage.py` | 待重构 | 3 | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment` |
-| 8 | `mod/rqalpha_mod_sys_simulation/validator.py` | 待重构 | 3 | `rqalpha.model.order`, `rqalpha.interface` |
-| 9 | `mod/utils.py` | 待重构 | 3 | `rqalpha.utils.config`, `rqalpha.mod`, `rqalpha.utils.package_helper` |
-| 10 | `utils/testing/mocking.py` | 待重构 | 3 | `rqalpha.model.instrument`, `rqalpha.model.bar`, `rqalpha.model.tick` |
+| 1 | `core/strategy_universe.py` | ✅ 已完成 | 3 | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.model.instrument` |
+| 2 | `data/bar_dict_price_board.py` | ✅ 已完成 | 3 | `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.bar` |
+| 3 | `mod/rqalpha_mod_sys_analyser/__init__.py` | ✅ 已完成 | 3 | `rqalpha`, `rqalpha.utils.i18n` |
+| 4 | `mod/rqalpha_mod_sys_analyser/plot/utils.py` | ✅ 已完成 | 3 | 内部相对导入 |
+| 5 | `mod/rqalpha_mod_sys_risk/mod.py` | ✅ 已完成 | 3 | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const` |
+| 6 | `mod/rqalpha_mod_sys_scheduler/mod.py` | ✅ 已完成 | 3 | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger` |
+| 7 | `mod/rqalpha_mod_sys_simulation/slippage.py` | ✅ 已完成 | 3 | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment` |
+| 8 | `mod/rqalpha_mod_sys_simulation/validator.py` | ✅ 已完成 | 3 | `rqalpha.model.order`, `rqalpha.interface` |
+| 9 | `mod/utils.py` | ✅ 已完成 | 3 | `rqalpha.utils.config`, `rqalpha.mod`, `rqalpha.utils.package_helper` |
+| 10 | `utils/testing/mocking.py` | ✅ 已完成 | 3 | `rqalpha.model.instrument`, `rqalpha.model.bar`, `rqalpha.model.tick` |
 
 ---
 
@@ -244,15 +244,15 @@
 | 第3组 | 1-2 | 10 | 10 | 0 |
 | 第4组 | 2 | 10 | 10 | 0 |
 | 第5组 | 2 | 10 | 10 | 0 |
-| 第6组 | 2-3 | 10 | 0 | 10 |
-| 第7组 | 3-4 | 10 | 0 | 10 |
+| 第6组 | 2-3 | 10 | 10 | 0 |
+| 第7组 | 3-4 | 10 | 10 | 0 |
 | 第8组 | 4 | 10 | 0 | 10 |
 | 第9组 | 4-5 | 10 | 0 | 10 |
 | 第10组 | 5-6 | 10 | 0 | 10 |
 | 第11组 | 6 | 10 | 0 | 10 |
 | 第12组 | 7-10 | 10 | 0 | 10 |
 | 第13组 | 1-20 | 3 | 0 | 3 |
-| **总计** | - | **123** | **50** | **73** |
+| **总计** | - | **123** | **70** | **53** |
 
 ---
 

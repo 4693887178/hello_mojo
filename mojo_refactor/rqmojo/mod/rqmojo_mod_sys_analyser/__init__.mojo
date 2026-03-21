@@ -3,12 +3,11 @@ RQAlpha Mojo - System Analyser Module
 Ported from rqalpha/mod/rqalpha_mod_sys_analyser/__init__.py
 """
 
-from python import click
-from rqmojo.utils.i18n import gettext as _
-from rqmojo import cli, inject_run_param
+from python import PythonObject
+from rqmojo.utils.i18n import gettext
 
 
-alias __config__ = {
+comptime __config__ = {
     "benchmark": None,
     "record": True,
     "strategy_name": None,
@@ -23,9 +22,9 @@ alias __config__ = {
 }
 
 
-fn load_mod() -> object:
+def load_mod() -> PythonObject:
     from .mod import AnalyserMod
     return AnalyserMod()
 
 
-var cli_prefix = "mod__sys_analyser__"
+comptime cli_prefix = "mod__sys_analyser__"
