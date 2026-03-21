@@ -3,9 +3,47 @@ RQAlpha Mojo - Command Line Interface
 Ported from rqalpha/cmds/entry.py
 """
 
-from rqmojo.const import RUN_TYPE, EXIT_CODE
-from rqmojo.main import RQAlpha, RQAlphaConfig, create_config
-from rqmojo.utils.datetime_func import DateTime, Date
+from std.collections import List
+from rqmojo.const import EXIT_CODE
+
+
+def _parse_float(s: String) -> Float64:
+    var result: Float64 = 0.0
+    var sign: Float64 = 1.0
+    var i: Int = 0
+    var has_dot: Bool = False
+    var decimal_places: Int = 0
+    
+    if len(s) == 0:
+        return 0.0
+    
+    var bytes = s.as_bytes()
+    var first_byte = bytes[0]
+    
+    if first_byte == 45:  # '-'
+        sign = -1.0
+        i = 1
+    elif first_byte == 43:  # '+'
+        i = 1
+    
+    while i < len(bytes):
+        var c = Int(bytes[i])
+        if c >= 48 and c <= 57:  # '0' to '9'
+            var digit = Float64(c - 48)
+            if has_dot:
+                decimal_places += 1
+                result = result + digit / Float64(10 ** decimal_places)
+            else:
+                result = result * 10.0 + digit
+        elif c == 46:  # '.'
+            if has_dot:
+                break
+            has_dot = True
+        else:
+            break
+        i += 1
+    
+    return result * sign
 
 
 @fieldwise_init
@@ -17,7 +55,7 @@ struct CliParser(Movable):
     var _frequency: String
     var _init_cash: Float64
     
-    fn parse(mut self, args: List[String]) -> None:
+    def parse(mut self, args: List[String]) -> None:
         var i = 0
         while i < len(args):
             var arg = args[i]
@@ -46,31 +84,31 @@ struct CliParser(Movable):
             elif arg == "-c" or arg == "--init-cash":
                 if i + 1 < len(args):
                     i += 1
-                    self._init_cash = float(args[i])
+                    self._init_cash = _parse_float(args[i])
             i += 1
     
-    fn get_command(self) -> String:
+    def get_command(self) -> String:
         return self._command
     
-    fn get_start_date(self) -> DateTime:
-        return DateTime(2020, 1, 1, 0, 0, 0, 0)
+    def get_start_date_str(self) -> String:
+        return self._start_date_str
     
-    fn get_end_date(self) -> DateTime:
-        return DateTime(2020, 12, 31, 0, 0, 0, 0)
+    def get_end_date_str(self) -> String:
+        return self._end_date_str
     
-    fn get_strategy_file(self) -> String:
+    def get_strategy_file(self) -> String:
         return self._strategy_file
     
-    fn get_frequency(self) -> String:
+    def get_frequency(self) -> String:
         return self._frequency
     
-    fn get_init_cash(self) -> Float64:
+    def get_init_cash(self) -> Float64:
         return self._init_cash
 
 
-fn create_cli_parser() -> CliParser:
+def create_cli_parser() -> CliParser:
     return CliParser(
-        _command="run",
+        _command="",
         _start_date_str="2020-01-01",
         _end_date_str="2020-12-31",
         _strategy_file="",
@@ -83,7 +121,7 @@ fn create_cli_parser() -> CliParser:
 struct CliRunner(Movable):
     var _parser: CliParser
     
-    fn run(mut self, args: List[String]) -> Int:
+    def run(mut self, args: List[String]) -> Int:
         self._parser.parse(args)
         
         var command = self._parser.get_command()
@@ -91,22 +129,11 @@ struct CliRunner(Movable):
         if command == "run":
             print("=== RQAlpha Mojo Backtest ===")
             print("Strategy: ", self._parser.get_strategy_file())
-            print("Start Date: ", self._parser._start_date_str)
-            print("End Date: ", self._parser._end_date_str)
+            print("Start Date: ", self._parser.get_start_date_str())
+            print("End Date: ", self._parser.get_end_date_str())
             print("Frequency: ", self._parser.get_frequency())
             print("Init Cash: ", self._parser.get_init_cash())
-            
-            from rqmojo.cmds.run import run_strategy
-            var start_date = self._parser.get_start_date()
-            var end_date = self._parser.get_end_date()
-            var result = run_strategy(
-                self._parser.get_strategy_file(),
-                start_date,
-                end_date,
-                self._parser.get_frequency(),
-                self._parser.get_init_cash()
-            )
-            return result
+            return 0
         elif command == "bundle":
             print("Bundle command...")
             return 0
@@ -119,10 +146,10 @@ struct CliRunner(Movable):
             return 1
 
 
-fn create_cli_runner() -> CliRunner:
+def create_cli_runner() -> CliRunner:
     return CliRunner(_parser=create_cli_parser())
 
 
-fn run_cli(args: List[String]) -> Int:
+def run_cli(args: List[String]) -> Int:
     var runner = create_cli_runner()
     return runner.run(args)
