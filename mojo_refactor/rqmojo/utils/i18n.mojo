@@ -124,3 +124,7 @@ fn set_locale():
 
 fn get_locale() -> String:
     return "zh_CN"
+
+
+def lazy_gettext(message: String) -> String:
+    return message

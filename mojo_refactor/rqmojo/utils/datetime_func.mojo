@@ -3,7 +3,7 @@ RQAlpha Mojo - DateTime Functions
 Ported from rqalpha/utils/datetime_func.py
 """
 
-from python import Python
+from python import Python, PythonObject
 
 
 def _py_int_to_int(py_obj: PythonObject) raises -> Int:
@@ -157,3 +157,41 @@ def convert_date_time_ms_int_to_datetime(date_int: Int, time_int: Int) -> DateTi
     var seconds = r // 1000
     var millisecond = r % 1000
     return dt.replace(hour=hours, minute=minutes, second=seconds, microsecond=millisecond * 1000)
+
+
+def to_date_from_string(date_str: String) raises -> Date:
+    var parser = Python.import_module("dateutil.parser")
+    var py_dt = parser.parse(date_str)
+    return Date(
+        _py_int_to_int(py_dt.year),
+        _py_int_to_int(py_dt.month),
+        _py_int_to_int(py_dt.day)
+    )
+
+
+def to_date_from_datetime(dt: DateTime) -> Date:
+    return dt.date()
+
+
+def to_date_from_date(d: Date) -> Date:
+    return d
+
+
+def to_date_from_py_datetime(py_dt: PythonObject) raises -> Date:
+    var datetime_module = Python.import_module("datetime")
+    var builtins = Python.import_module("builtins")
+    
+    if builtins.isinstance(py_dt, datetime_module.datetime):
+        return Date(
+            _py_int_to_int(py_dt.year),
+            _py_int_to_int(py_dt.month),
+            _py_int_to_int(py_dt.day)
+        )
+    elif builtins.isinstance(py_dt, datetime_module.date):
+        return Date(
+            _py_int_to_int(py_dt.year),
+            _py_int_to_int(py_dt.month),
+            _py_int_to_int(py_dt.day)
+        )
+    else:
+        raise Error("Invalid Python datetime object: " + builtins.str(py_dt))
