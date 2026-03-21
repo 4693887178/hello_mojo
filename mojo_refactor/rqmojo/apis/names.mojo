@@ -7,126 +7,95 @@ from std.collections import List
 from rqmojo.const import INSTRUMENT_TYPE
 
 
-comptime VALID_HISTORY_FIELDS: List[String] = [
-    "datetime",
-    "open",
-    "close",
-    "high",
-    "low",
-    "total_turnover",
-    "volume",
-    "acc_net_value",
-    "discount_rate",
-    "unit_net_value",
-    "limit_up",
-    "limit_down",
-    "open_interest",
-    "basis_spread",
-    "settlement",
-    "prev_settlement",
-]
+def get_valid_history_fields() -> List[String]:
+    var result = List[String]()
+    result.append("datetime")
+    result.append("open")
+    result.append("close")
+    result.append("high")
+    result.append("low")
+    result.append("total_turnover")
+    result.append("volume")
+    result.append("acc_net_value")
+    result.append("discount_rate")
+    result.append("unit_net_value")
+    result.append("limit_up")
+    result.append("limit_down")
+    result.append("open_interest")
+    result.append("basis_spread")
+    result.append("settlement")
+    result.append("prev_settlement")
+    return result^
 
 
-comptime VALID_TENORS: List[String] = [
-    "0S",
-    "1M",
-    "2M",
-    "3M",
-    "6M",
-    "9M",
-    "1Y",
-    "2Y",
-    "3Y",
-    "4Y",
-    "5Y",
-    "6Y",
-    "7Y",
-    "8Y",
-    "9Y",
-    "10Y",
-    "15Y",
-    "20Y",
-    "30Y",
-    "40Y",
-    "50Y",
-]
+def get_valid_tenors() -> List[String]:
+    var result = List[String]()
+    result.append("0S")
+    result.append("1M")
+    result.append("2M")
+    result.append("3M")
+    result.append("6M")
+    result.append("9M")
+    result.append("1Y")
+    result.append("2Y")
+    result.append("3Y")
+    result.append("4Y")
+    result.append("5Y")
+    result.append("6Y")
+    result.append("7Y")
+    result.append("8Y")
+    result.append("9Y")
+    result.append("10Y")
+    result.append("15Y")
+    result.append("20Y")
+    result.append("30Y")
+    result.append("40Y")
+    result.append("50Y")
+    return result^
+
+
+def get_valid_margin_fields() -> List[String]:
+    var result = List[String]()
+    result.append("margin_balance")
+    result.append("buy_on_margin_value")
+    result.append("short_sell_quantity")
+    result.append("margin_repayment")
+    result.append("short_balance_quantity")
+    result.append("short_repayment_quantity")
+    result.append("short_balance")
+    result.append("total_balance")
+    return result^
+
+
+def get_valid_share_fields() -> List[String]:
+    var result = List[String]()
+    result.append("total")
+    result.append("circulation_a")
+    result.append("management_circulation")
+    result.append("non_circulation_a")
+    result.append("total_a")
+    return result^
 
 
 def get_valid_instrument_types() -> List[String]:
     var result = List[String]()
-    result.append("CS")
-    result.append("Future")
-    result.append("ETF")
-    result.append("LOF")
-    result.append("INDX")
-    result.append("Future")
-    result.append("PY")
+    result.append(INSTRUMENT_TYPE.CS.value())
+    result.append(INSTRUMENT_TYPE.FUTURE.value())
+    result.append(INSTRUMENT_TYPE.OPTION.value())
+    result.append(INSTRUMENT_TYPE.ETF.value())
+    result.append(INSTRUMENT_TYPE.LOF.value())
+    result.append(INSTRUMENT_TYPE.INDX.value())
+    result.append(INSTRUMENT_TYPE.PUBLIC_FUND.value())
+    result.append(INSTRUMENT_TYPE.FUND.value())
+    result.append(INSTRUMENT_TYPE.BOND.value())
+    result.append(INSTRUMENT_TYPE.CONVERTIBLE.value())
+    result.append(INSTRUMENT_TYPE.SPOT.value())
+    result.append(INSTRUMENT_TYPE.REPO.value())
+    result.append(INSTRUMENT_TYPE.REITs.value())
+    result.append(INSTRUMENT_TYPE.FutureArbitrage.value())
     result.append("Fund")
     result.append("Stock")
-    return result
-
-
-comptime VALID_MARGIN_FIELDS: List[String] = [
-    "margin_balance",
-    "buy_on_margin_value",
-    "short_sell_quantity",
-    "margin_repayment",
-    "short_balance_quantity",
-    "short_repayment_quantity",
-    "short_balance",
-    "total_balance",
-]
-
-
-comptime VALID_SHARE_FIELDS: List[String] = [
-    "total",
-    "circulation_a",
-    "management_circulation",
-    "non_circulation_a",
-    "total_a",
-]
-
-
-comptime VALID_TURNOVER_FIELDS: List[String] = [
-    "today",
-    "week",
-    "month",
-    "three_month",
-    "six_month",
-    "year",
-    "current_year",
-    "total",
-]
-
-
-comptime VALID_STOCK_CONNECT_FIELDS: List[String] = [
-    "shares_holding",
-    "holding_ratio",
-]
-
-
-comptime VALID_CURRENT_PERFORMANCE_FIELDS: List[String] = [
-    "operating_revenue",
-    "gross_profit",
-    "operating_profit",
-    "total_profit",
-    "np_parent_owners",
-    "net_profit_cut",
-    "net_operate_cashflow",
-    "total_assets",
-    "se_without_minority",
-    "total_shares",
-    "basic_eps",
-    "eps_weighted",
-    "eps_cut_epscut",
-    "eps_cut_weighted",
-    "roe",
-    "roe_weighted",
-    "roe_cut",
-    "roe_cut_weighted",
-    "net_operate_cashflow_per_share",
-    "equity_per_share",
-]
+    return result^
 
 
 def main():

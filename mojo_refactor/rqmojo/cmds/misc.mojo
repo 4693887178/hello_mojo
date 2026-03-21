@@ -3,16 +3,14 @@ RQAlpha Mojo - Misc Commands Module
 Ported from rqalpha/cmds/misc.py
 """
 
-from std.collections import List
+from std.collections import List, Dict
 from python import Python
 
 
-def examples(directory: String) -> Int:
-    """Generate example strategies to target folder."""
+def examples(directory: String) raises -> Int:
     var py = Python.import_module("rqalpha")
     var os = Python.import_module("os")
     var shutil = Python.import_module("shutil")
-    var errno = Python.import_module("errno")
     
     var source_dir = os.path.join(os.path.dirname(py.__file__), "examples")
     
@@ -26,8 +24,7 @@ def examples(directory: String) -> Int:
         return 1
 
 
-def version(**kwargs) -> Int:
-    """Output Version Info."""
+def version(kwargs: Dict[String, String] = Dict[String, String]()) raises -> Int:
     try:
         var py = Python.import_module("rqalpha")
         print("Current Version: ", py.__version__)
@@ -37,15 +34,17 @@ def version(**kwargs) -> Int:
         return 0
 
 
-def generate_config(directory: String) -> Int:
-    """Generate default config file."""
+def generate_config(directory: String) raises -> Int:
     var os = Python.import_module("os")
     var shutil = Python.import_module("shutil")
+    var builtins = Python.import_module("builtins")
     
     try:
-        var default_config = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config.yml")
+        var cwd = os.getcwd()
+        var default_config = os.path.join(cwd, "config.yml")
         var target_config_path = os.path.abspath(os.path.join(directory, "config.yml"))
-        shutil.copy(default_config, target_config_path)
+        var content = builtins.open(default_config, "r").read()
+        builtins.open(target_config_path, "w").write(content)
         print("Config file has been generated in " + target_config_path)
         return 0
     except:
@@ -53,13 +52,11 @@ def generate_config(directory: String) -> Int:
         return 1
 
 
-def print_version() -> None:
-    """Print version info."""
-    version()
+def print_version() raises -> None:
+    _ = version()
 
 
 def print_help() -> None:
-    """Print help info."""
     print("Available commands:")
     print("  examples    - Generate example strategies to target folder")
     print("  version     - Output Version Info")

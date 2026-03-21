@@ -3,12 +3,13 @@ RQAlpha Mojo - Package Helper
 Ported from rqalpha/utils/package_helper.py
 """
 
-from rqmojo.utils.logger import system_log
+from python import Python, PythonObject
+from rqmojo.utils.rq_logger import system_log
 
 
-fn import_mod(mod_name: String) -> object:
+def import_mod(mod_name: String) raises -> PythonObject:
     try:
-        return __import__(mod_name)
+        return Python.import_module(mod_name)
     except:
-        system_log.error("Mod Import Error: " + mod_name)
+        system_log().error("Mod Import Error: " + mod_name)
         raise

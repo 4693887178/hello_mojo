@@ -7,7 +7,7 @@ from python import click
 from rqmojo import cli
 
 
-alias __config__ = {
+comptime __config__ = {
     "stock_t1": True,
     "dividend_reinvestment": False,
     "dividend_tax_rate": 0.0,
@@ -21,9 +21,10 @@ alias __config__ = {
 }
 
 
-fn load_mod() -> object:
+def load_mod() raises -> PythonObject:
     from .mod import AccountMod
     return AccountMod()
 
 
-var cli_prefix = "mod__sys_accounts__"
+def get_cli_prefix() -> String:
+    return "mod__sys_accounts__"

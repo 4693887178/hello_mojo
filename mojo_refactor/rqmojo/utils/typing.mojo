@@ -15,5 +15,4 @@ comptime POSITION_DIRECTION_TYPE = Variant[String, POSITION_DIRECTION]
 
 
 def main():
-    """Test main function for typing module."""
     print("typing.mojo - Type aliases module loaded successfully")

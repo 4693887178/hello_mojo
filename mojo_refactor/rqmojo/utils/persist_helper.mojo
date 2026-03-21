@@ -1,23 +1,16 @@
 """
 RQAlpha Mojo - Persistence Provider and Helper
 Ported from rqalpha/utils/persisit_helper.py
-Reference: rqcpp/utils/persisit_helper.cpp
-
-完全按照 Python/C++ 实现:
-- PersistHelper: 核心持久化辅助类
-- 支持事件监听器注册 (REAL_TIME 模式)
-- 使用 DJB2 哈希替代 MD5
-
-注意: Mojo 不支持 lambda 捕获，事件监听器需要通过 on_event 方法手动调用
 """
 
-from collections import Dict, List
-from rqmojo.const import PERSIST_MODE, PERSIST_MODE_ON_CRASH, PERSIST_MODE_REAL_TIME, PERSIST_MODE_ON_CRASH, PERSIST_MODE_REAL_TIME
-from rqmojo.core.events import EVENT, EventBus, Event, EventValue
+from std.collections import Dict, List
+from python import Python, PythonObject
+from rqmojo.const import PERSIST_MODE
+from rqmojo.core.events import EVENT, EventBus, Event, EventValue, EventListener
 from rqmojo.utils.rq_logger import system_log
 
 
-fn _compute_hash(data: Span[Byte]) -> String:
+def _compute_hash(data: Span[Byte, ...]) -> String:
     var hash_val: UInt64 = 5381
     for i in range(len(data)):
         hash_val = ((hash_val << 5) + hash_val) + UInt64(data[i])
@@ -33,38 +26,45 @@ fn _compute_hash(data: Span[Byte]) -> String:
     return result
 
 
-fn _compute_hash_from_string(s: String) -> String:
+def _compute_hash_from_string(s: String) -> String:
     var bytes = s.as_bytes()
     return _compute_hash(bytes)
 
 
+trait PersistProvider:
+    def store(mut self, key: String, value: String) -> None: ...
+    def load(self, key: String) -> String: ...
+    def should_resume(self) -> Bool: ...
+    def should_run_init(self) -> Bool: ...
+
+
 @fieldwise_init
-struct FilePersistProvider(Movable):
+struct FilePersistProvider(Movable, PersistProvider):
     var _storage: Dict[String, String]
     var _mode: PERSIST_MODE
     var _should_resume_flag: Bool
     var _should_run_init_flag: Bool
 
-    fn __str__(self) -> String:
-        return "FilePersistProvider(mode=" + self._mode.value + ")"
+    def __str__(self) -> String:
+        return "FilePersistProvider(mode=" + self._mode.value() + ")"
 
-    fn store(mut self, key: String, value: String) -> None:
+    def store(mut self, key: String, value: String) -> None:
         self._storage[key] = value
 
-    fn load(self, key: String) -> String:
+    def load(self, key: String) -> String:
         try:
             return self._storage[key]
         except:
             return ""
 
-    fn should_resume(self) -> Bool:
+    def should_resume(self) -> Bool:
         return self._should_resume_flag
 
-    fn should_run_init(self) -> Bool:
+    def should_run_init(self) -> Bool:
         return self._should_run_init_flag
 
 
-fn create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE_ON_CRASH) -> FilePersistProvider:
+def create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH) -> FilePersistProvider:
     return FilePersistProvider(
         _storage=Dict[String, String](),
         _mode=mode,
@@ -74,35 +74,42 @@ fn create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE_ON_CRASH) -> F
 
 
 @fieldwise_init
-struct MemoryPersistProvider(Movable):
+struct MemoryPersistProvider(Movable, PersistProvider):
     var _storage: Dict[String, String]
     var _should_resume_flag: Bool
     var _should_run_init_flag: Bool
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "MemoryPersistProvider()"
 
-    fn store(mut self, key: String, value: String) -> None:
+    def store(mut self, key: String, value: String) -> None:
         self._storage[key] = value
 
-    fn load(self, key: String) -> String:
+    def load(self, key: String) -> String:
         try:
             return self._storage[key]
         except:
             return ""
 
-    fn should_resume(self) -> Bool:
+    def should_resume(self) -> Bool:
         return self._should_resume_flag
 
-    fn should_run_init(self) -> Bool:
+    def should_run_init(self) -> Bool:
         return self._should_run_init_flag
 
 
-fn create_memory_persist_provider() -> MemoryPersistProvider:
+def create_memory_persist_provider() -> MemoryPersistProvider:
     return MemoryPersistProvider(
         _storage=Dict[String, String](),
         _should_resume_flag=False,
         _should_run_init_flag=True
+    )
+
+
+def create_event_bus() -> EventBus:
+    return EventBus(
+        listeners=Dict[String, List[EventListener]](),
+        user_listeners=Dict[String, List[EventListener]]()
     )
 
 
@@ -115,7 +122,7 @@ struct PersistHelper(Movable):
     var _persist_mode: PERSIST_MODE
     var _listeners_registered: Bool
 
-    fn __init__(
+    def __init__(
         out self,
         var event_bus: EventBus,
         persist_mode: PERSIST_MODE
@@ -127,46 +134,46 @@ struct PersistHelper(Movable):
         self._persist_mode = persist_mode
         self._listeners_registered = False
 
-    fn __str__(self) -> String:
-        return "PersistHelper(mode=" + self._persist_mode.value + ", objects=" + String(len(self._objects)) + ")"
+    def __str__(self) -> String:
+        return "PersistHelper(mode=" + self._persist_mode.value() + ", objects=" + String(len(self._objects)) + ")"
 
-    fn _has_object(self, key: String) -> Bool:
+    def _has_object(self, key: String) -> Bool:
         try:
             _ = self._objects[key]
             return True
         except:
             return False
 
-    fn _register_event_listeners(mut self) raises -> None:
+    def _register_event_listeners(mut self) raises -> None:
         if self._listeners_registered:
             return
-        if self._persist_mode == PERSIST_MODE_REAL_TIME:
+        if self._persist_mode == PERSIST_MODE.REAL_TIME:
             self._listeners_registered = True
 
-    fn on_event(mut self, event_type: String, event: Event) -> Bool:
-        if self._persist_mode != PERSIST_MODE_REAL_TIME:
+    def on_event(mut self, event_type: String, event: Event) -> Bool:
+        if self._persist_mode != PERSIST_MODE.REAL_TIME:
             return False
-        if event_type == EVENT.POST_BEFORE_TRADING().value:
+        if event_type == EVENT.POST_BEFORE_TRADING().value():
             self.persist()
             return False
-        if event_type == EVENT.POST_AFTER_TRADING().value:
+        if event_type == EVENT.POST_AFTER_TRADING().value():
             self.persist()
             return False
-        if event_type == EVENT.POST_BAR().value:
+        if event_type == EVENT.POST_BAR().value():
             self.persist()
             return False
-        if event_type == EVENT.DO_PERSIST().value:
+        if event_type == EVENT.DO_PERSIST().value():
             self.persist()
             return False
-        if event_type == EVENT.POST_SETTLEMENT().value:
+        if event_type == EVENT.POST_SETTLEMENT().value():
             self.persist()
             return False
-        if event_type == EVENT.DO_RESTORE().value:
+        if event_type == EVENT.DO_RESTORE().value():
             _ = self.restore(event)
             return False
         return False
 
-    fn persist(mut self) -> None:
+    def persist(mut self) -> None:
         var keys_list = List[String]()
         for key in self._objects.keys():
             keys_list.append(key)
@@ -177,7 +184,7 @@ struct PersistHelper(Movable):
             except:
                 system_log().exception("PersistHelper.persist fail")
 
-    fn _persist_object(mut self, key: String, state: String) -> None:
+    def _persist_object(mut self, key: String, state: String) -> None:
         if state == "":
             return
         var md5 = _compute_hash_from_string(state)
@@ -193,12 +200,12 @@ struct PersistHelper(Movable):
         self._persist_provider.store(key, state)
         self._last_state[key] = md5
 
-    fn register(mut self, key: String, state: String) raises -> None:
+    def register(mut self, key: String, state: String) raises -> None:
         if self._has_object(key):
             raise Error("duplicated persist key found: " + key)
         self._objects[key] = state
 
-    fn unregister(mut self, key: String) -> Bool:
+    def unregister(mut self, key: String) -> Bool:
         if self._has_object(key):
             try:
                 _ = self._objects.pop(key)
@@ -207,7 +214,7 @@ struct PersistHelper(Movable):
             return True
         return False
 
-    fn restore(mut self, event: Event) -> Dict[String, Bool]:
+    def restore(mut self, event: Event) -> Dict[String, Bool]:
         var event_key = event.attributes.get("key", EventValue(""))
         if event_key.isa[String]():
             var key_str = event_key[String]
@@ -225,7 +232,7 @@ struct PersistHelper(Movable):
             result[key] = self._restore_obj(key)
         return result^
 
-    fn _restore_obj(mut self, key: String) -> Bool:
+    def _restore_obj(mut self, key: String) -> Bool:
         var state = self._persist_provider.load(key)
         system_log().debug("restore " + key + " with state = " + state)
         if state == "":
@@ -236,23 +243,23 @@ struct PersistHelper(Movable):
             system_log().exception("restore failed: key=" + key)
         return True
 
-    fn get_object_count(self) -> Int:
+    def get_object_count(self) -> Int:
         return len(self._objects)
 
-    fn get_object_state(self, key: String) -> String:
+    def get_object_state(self, key: String) -> String:
         try:
             return self._objects[key]
         except:
             return ""
 
-    fn update_object_state(mut self, key: String, state: String) -> None:
+    def update_object_state(mut self, key: String, state: String) -> None:
         if self._has_object(key):
             self._objects[key] = state
 
 
-fn create_persist_helper(
+def create_persist_helper(
     var event_bus: EventBus,
-    persist_mode: PERSIST_MODE = PERSIST_MODE_ON_CRASH
+    persist_mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH
 ) -> PersistHelper:
     return PersistHelper(
         event_bus=event_bus^,

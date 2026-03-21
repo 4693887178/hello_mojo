@@ -27,15 +27,15 @@ def test_capture_handler_emit():
     
     handler = CaptureHandler()
     
-    record1 = logbook.LogRecord("Test message 1", level=logbook.INFO)
-    record2 = logbook.LogRecord("Test message 2", level=logbook.WARNING)
+    logger = logbook.Logger("test")
+    record = logbook.LogRecord("Test message", logger, logbook.INFO)
     
-    handler.emit(record1)
-    handler.emit(record2)
+    handler.emit(record)
     
     print(f"Captured {len(handler.captured)} records")
     
-    assert len(handler.captured) == 2, "Should have 2 captured records"
+    assert len(handler.captured) == 1, "Should have 1 captured record"
+    assert handler.captured[0] == record, "Captured record should match"
     
     print("PASS: CaptureHandler.emit works correctly")
     print("")
@@ -50,6 +50,10 @@ def test_log_capture_init():
     
     print(f"LogCapture created for logger: {logger.name}")
     
+    assert capture._logger == logger, "Logger should be stored"
+    assert capture._capture_handler is not None, "CaptureHandler should be created"
+    assert capture._handlers is None, "Handlers should be None initially"
+    
     print("PASS: LogCapture initialized correctly")
     print("")
 
@@ -61,6 +65,7 @@ def test_log_capture_context_manager():
     logger = logbook.Logger("test_logger")
     
     with LogCapture(logger) as capture:
+        assert logger.handlers == [capture._capture_handler], "Handler should be replaced"
         logger.info("Test message inside context")
     
     print("Context manager entered and exited successfully")
@@ -82,6 +87,8 @@ def test_log_capture_captured_list():
     
     print(f"Captured {len(capture._capture_handler.captured)} records")
     
+    assert len(capture._capture_handler.captured) == 3, "Should have 3 captured records"
+    
     print("PASS: LogCapture captured list works")
     print("")
 
@@ -94,6 +101,9 @@ def test_log_capture_replay():
     
     with LogCapture(logger) as capture:
         logger.info("Test message for replay")
+    
+    captured_count = len(capture._capture_handler.captured)
+    print(f"Captured {captured_count} records before replay")
     
     capture.replay()
     print("Replay executed successfully")

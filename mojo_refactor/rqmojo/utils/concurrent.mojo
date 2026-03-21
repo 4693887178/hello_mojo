@@ -3,18 +3,20 @@ RQAlpha Mojo - Concurrent Utilities
 Ported from rqalpha/utils/concurrent.py
 """
 
-from collections import Queue
+from std.collections import Queue
+from utils import Variant
 
 
-@value
-struct TaskResult:
+comptime TaskResultValue = Variant[String, Int, Float64]
+
+
+@fieldwise_init
+struct TaskResult(Movable):
     var task_id: Int
-    var result: Optional[object]
+    var result: Optional[TaskResultValue]
     var exception: Optional[String]
 
 
 trait ProgressedTask:
-    fn total_steps(self) -> Int:
-        ...
-    fn execute(self) -> object:
-        ...
+    def total_steps(self) -> Int: ...
+    def execute(self) -> TaskResultValue: ...

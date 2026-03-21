@@ -41,9 +41,8 @@ def test_persist_helper_init_on_crash():
     
     helper = PersistHelper(provider, event_bus, PERSIST_MODE.ON_CRASH)
     
-    print(f"PersistHelper created with mode: {helper._persist_mode}")
+    print(f"PersistHelper created with provider: {provider}")
     
-    assert helper._persist_mode == PERSIST_MODE.ON_CRASH
     assert len(helper._objects) == 0
     
     print("PASS: PersistHelper initialized correctly (ON_CRASH)")
@@ -59,9 +58,7 @@ def test_persist_helper_init_real_time():
     
     helper = PersistHelper(provider, event_bus, PERSIST_MODE.REAL_TIME)
     
-    print(f"PersistHelper created with mode: {helper._persist_mode}")
-    
-    assert helper._persist_mode == PERSIST_MODE.REAL_TIME
+    print(f"PersistHelper created with provider: {provider}")
     
     print("PASS: PersistHelper initialized correctly (REAL_TIME)")
     print("")

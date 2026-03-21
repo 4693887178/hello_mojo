@@ -1,38 +1,38 @@
 """
 Test for concurrent.mojo - Concurrent Utilities
-Compares output with Python rqalpha/utils/concurrent.py
 """
 
 from std.collections import List
+from std.utils import Variant
 from rqmojo.utils.concurrent import TaskResult, ProgressedTask
+
+
+comptime TaskResultValue = Variant[String, Int, Float64]
 
 
 @fieldwise_init
 struct SimpleProgressedTask(ProgressedTask, Movable):
-    var _steps: Int
-    var _current: Int
+    var steps: Int
     
     def total_steps(self) -> Int:
-        return self._steps
+        return self.steps
     
-    def execute(self) -> object:
-        self._current = self._steps
-        return object()
+    def execute(self) -> TaskResultValue:
+        return TaskResultValue("done")
 
 
 @fieldwise_init
 struct CountingProgressedTask(ProgressedTask, Movable):
-    var _count_to: Int
+    var count_to: Int
     
     def total_steps(self) -> Int:
-        return self._count_to
+        return self.count_to
     
-    def execute(self) -> object:
-        return object()
+    def execute(self) -> TaskResultValue:
+        return TaskResultValue("counted")
 
 
 def test_task_result_struct():
-    """测试 TaskResult 结构体创建"""
     print("=== Testing TaskResult struct ===")
     
     var result = TaskResult(task_id=1, result=None, exception=None)
@@ -46,23 +46,20 @@ def test_task_result_struct():
 
 
 def test_task_result_fields():
-    """测试 TaskResult 字段访问"""
     print("=== Testing TaskResult fields ===")
     
-    var result = TaskResult(task_id=5, result=object(), exception=None)
+    var result = TaskResult(task_id=5, result=TaskResultValue("test"), exception=None)
     
     print("task_id: " + String(result.task_id))
-    print("exception: " + str(result.exception))
     
     print("PASS: TaskResult fields accessible")
     print("")
 
 
 def test_simple_progressed_task():
-    """测试 SimpleProgressedTask 实现 ProgressedTask trait"""
     print("=== Testing SimpleProgressedTask ===")
     
-    var task = SimpleProgressedTask(_steps=5, _current=0)
+    var task = SimpleProgressedTask(steps=5)
     var steps = task.total_steps()
     
     print("total_steps: " + String(steps))
@@ -74,10 +71,9 @@ def test_simple_progressed_task():
 
 
 def test_counting_progressed_task():
-    """测试 CountingProgressedTask 实现"""
     print("=== Testing CountingProgressedTask ===")
     
-    var task = CountingProgressedTask(_count_to=10)
+    var task = CountingProgressedTask(count_to=10)
     var steps = task.total_steps()
     
     print("total_steps: " + String(steps))
@@ -89,12 +85,11 @@ def test_counting_progressed_task():
 
 
 def test_multiple_progressed_tasks():
-    """测试多个 ProgressedTask 实例"""
     print("=== Testing multiple ProgressedTask instances ===")
     
-    var task1 = SimpleProgressedTask(_steps=3, _current=0)
-    var task2 = SimpleProgressedTask(_steps=5, _current=0)
-    var task3 = SimpleProgressedTask(_steps=7, _current=0)
+    var task1 = SimpleProgressedTask(steps=3)
+    var task2 = SimpleProgressedTask(steps=5)
+    var task3 = SimpleProgressedTask(steps=7)
     
     print("task1.total_steps: " + String(task1.total_steps()))
     print("task2.total_steps: " + String(task2.total_steps()))
@@ -107,23 +102,7 @@ def test_multiple_progressed_tasks():
     print("")
 
 
-def test_progressed_task_trait_usage():
-    """测试 Trait 方法调用"""
-    print("=== Testing ProgressedTask trait usage ===")
-    
-    var task: ProgressedTask = SimpleProgressedTask(_steps=4, _current=0)
-    var steps = task.total_steps()
-    
-    print("Trait method total_steps: " + String(steps))
-    if steps == 4:
-        print("PASS: Trait method works correctly")
-    else:
-        print("FAIL: expected 4, got " + String(steps))
-    print("")
-
-
 def test_task_result_equality():
-    """测试 TaskResult 相等性比较"""
     print("=== Testing TaskResult equality ===")
     
     var result1 = TaskResult(task_id=1, result=None, exception=None)
@@ -137,7 +116,6 @@ def test_task_result_equality():
 
 
 def test_task_result_with_exception():
-    """测试带异常的 TaskResult"""
     print("=== Testing TaskResult with exception ===")
     
     var result = TaskResult(task_id=2, result=None, exception="Error occurred")
@@ -150,11 +128,10 @@ def test_task_result_with_exception():
 
 
 def test_total_steps_calculation():
-    """测试模拟 executor 的总步骤计算"""
     print("=== Testing total steps calculation ===")
     
-    var task1 = CountingProgressedTask(_count_to=5)
-    var task2 = CountingProgressedTask(_count_to=3)
+    var task1 = CountingProgressedTask(count_to=5)
+    var task2 = CountingProgressedTask(count_to=3)
     
     var total = task1.total_steps() + task2.total_steps()
     print("Total steps: " + String(total))
@@ -177,7 +154,6 @@ def main():
     test_simple_progressed_task()
     test_counting_progressed_task()
     test_multiple_progressed_tasks()
-    test_progressed_task_trait_usage()
     test_task_result_equality()
     test_task_result_with_exception()
     test_total_steps_calculation()

@@ -1,48 +1,56 @@
 """
 Test for package_helper.mojo - Package Helper Module
-Compares output with Python rqalpha/utils/package_helper.py
 """
 
+from std.collections import List
+from python import Python
 from rqmojo.utils.package_helper import import_mod
 
 
 def test_import_mod_success():
-    """测试 import_mod 成功导入模块"""
-    print("=== Testing import_mod (success case) ===")
+    print("=== Testing import_mod (success) ===")
     
-    var mod = import_mod("os")
-    print("Imported module: " + str(mod))
-    
-    print("PASS: Successfully imported 'os' module")
+    try:
+        var mod = import_mod("os")
+        print("Imported module: os")
+        print("PASS: Successfully imported 'os' module")
+    except:
+        print("FAIL: Failed to import 'os' module")
     print("")
 
 
 def test_import_mod_stdlib():
-    """测试 import_mod 导入其他标准库模块"""
     print("=== Testing import_mod (stdlib modules) ===")
     
-    var mod = import_mod("sys")
-    print("Imported module: " + str(mod))
-    print("PASS: Successfully imported 'sys' module")
+    try:
+        var mod = import_mod("sys")
+        print("Imported module: sys")
+        print("PASS: Successfully imported 'sys' module")
+    except:
+        print("FAIL: Failed to import 'sys' module")
     
-    var mod2 = import_mod("json")
-    print("Imported module: " + str(mod2))
-    print("PASS: Successfully imported 'json' module")
+    try:
+        var mod2 = import_mod("json")
+        print("Imported module: json")
+        print("PASS: Successfully imported 'json' module")
+    except:
+        print("FAIL: Failed to import 'json' module")
     print("")
 
 
 def test_import_mod_submodule():
-    """测试 import_mod 导入子模块"""
     print("=== Testing import_mod (submodule) ===")
     
-    var mod = import_mod("collections.abc")
-    print("Imported module: " + str(mod))
-    print("PASS: Successfully imported 'collections.abc' submodule")
+    try:
+        var mod = import_mod("collections.abc")
+        print("Imported module: collections.abc")
+        print("PASS: Successfully imported 'collections.abc' submodule")
+    except:
+        print("FAIL: Failed to import 'collections.abc' submodule")
     print("")
 
 
 def test_import_mod_failure():
-    """测试 import_mod 导入不存在的模块时抛出异常"""
     print("=== Testing import_mod (failure case) ===")
     
     var invalid_mod_name = "nonexistent_module_xyz123"
@@ -57,22 +65,26 @@ def test_import_mod_failure():
 
 
 def test_import_mod_rqmojo():
-    """测试 import_mod 导入 rqmojo 模块"""
     print("=== Testing import_mod (rqmojo module) ===")
     
-    var mod = import_mod("rqmojo")
-    print("Imported module: " + str(mod))
-    print("PASS: Successfully imported 'rqmojo' module")
+    try:
+        var mod = import_mod("rqmojo")
+        print("Imported module: rqmojo")
+        print("PASS: Successfully imported 'rqmojo' module")
+    except:
+        print("FAIL: Failed to import 'rqmojo' module")
     print("")
 
 
 def test_import_mod_rqmojo_submodule():
-    """测试 import_mod 导入 rqmojo 子模块"""
     print("=== Testing import_mod (rqmojo submodule) ===")
     
-    var mod = import_mod("rqmojo.const")
-    print("Imported module: " + str(mod))
-    print("PASS: Successfully imported 'rqmojo.const' submodule")
+    try:
+        var mod = import_mod("rqmojo.const")
+        print("Imported module: rqmojo.const")
+        print("PASS: Successfully imported 'rqmojo.const' submodule")
+    except:
+        print("FAIL: Failed to import 'rqmojo.const' submodule")
     print("")
 
 

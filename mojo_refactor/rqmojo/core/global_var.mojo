@@ -3,47 +3,56 @@ RQAlpha Mojo - Global Variables Module
 Ported from rqalpha/core/global_var.py
 """
 
-from std.collections import Dict
-from python import Python
+from std.collections import Dict, List
+from python import Python, PythonObject
 
 
 @fieldwise_init
 struct GlobalVars(Movable):
-    var _data: Dict[String, object]
+    var _data: Dict[String, PythonObject]
     
     def __init__(out self):
-        self._data = Dict[String, object]()
+        self._data = Dict[String, PythonObject]()
     
-    def get_state(self) -> object:
+    def get_state(self) -> PythonObject:
         return Python.serialize(self._data)
     
-    def set_state(self, state: object) -> None:
+    def set_state(self, state: PythonObject) -> None:
         var loaded = Python.deserialize(state)
         if loaded != None:
             self._data = loaded
     
-    def get(self, key: String, default: object = None) -> object:
-        if self._data.contains(key):
+    def get(self, key: String, default: PythonObject = None) -> PythonObject:
+        try:
             return self._data[key]
-        return default
+        except:
+            return default
     
-    def set(self, key: String, value: object) -> None:
+    def set(mut self, key: String, value: PythonObject) -> None:
         self._data[key] = value
     
     def contains(self, key: String) -> Bool:
-        return self._data.contains(key)
-    
-    def remove(self, key: String) -> Bool:
-        if self._data.contains(key):
-            self._data.remove(key)
+        try:
+            _ = self._data[key]
             return True
-        return False
+        except:
+            return False
+    
+    def remove(mut self, key: String) -> Bool:
+        try:
+            _ = self._data.pop(key)
+            return True
+        except:
+            return False
     
     def keys(self) -> List[String]:
-        return self._data.keys()
+        var result = List[String]()
+        for key in self._data.keys():
+            result.append(key)
+        return result^
     
-    def clear(self) -> None:
-        self._data.clear()
+    def clear(mut self) -> None:
+        self._data = Dict[String, PythonObject]()
 
 
 def create_global_vars() -> GlobalVars:

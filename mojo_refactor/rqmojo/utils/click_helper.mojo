@@ -3,17 +3,17 @@ RQAlpha Mojo - Click Helper
 Ported from rqalpha/utils/click_helper.py
 """
 
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.datetime_func import DateTime, Date
 
 
 struct DateParam:
     var tz: Optional[String]
 
-    fn __init__(inout self, tz: Optional[String] = None) -> Self:
-        return Self(tz=tz)
+    def __init__(out self, tz: Optional[String] = None):
+        self.tz = tz
 
-    fn convert(self, value: String) -> DateTime:
-        return DateTime.from_string(value)
+    def convert(self, value: String) raises -> Date:
+        return Date.from_string(value)
 
-    fn name(self) -> String:
+    def name(self) -> String:
         return "DATE"

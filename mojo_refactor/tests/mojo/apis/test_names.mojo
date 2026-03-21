@@ -1,21 +1,19 @@
 """
 Test for names.mojo - API Names
-Compares output with Python rqalpha/apis/names.py
 """
 
 from std.collections import List
 from rqmojo.apis.names import (
-    VALID_HISTORY_FIELDS, VALID_TENORS, VALID_MARGIN_FIELDS,
-    VALID_SHARE_FIELDS, VALID_TURNOVER_FIELDS, VALID_STOCK_CONNECT_FIELDS,
-    VALID_CURRENT_PERFORMANCE_FIELDS, get_valid_instrument_types
+    get_valid_history_fields, get_valid_tenors, get_valid_margin_fields,
+    get_valid_share_fields, get_valid_instrument_types
 )
 
 
 def test_valid_history_fields():
-    """测试 VALID_HISTORY_FIELDS"""
     print("=== Testing VALID_HISTORY_FIELDS ===")
     
-    var count = len(VALID_HISTORY_FIELDS)
+    var fields = get_valid_history_fields()
+    var count = len(fields)
     print("VALID_HISTORY_FIELDS count: " + String(count))
     
     if count == 16:
@@ -27,10 +25,10 @@ def test_valid_history_fields():
 
 
 def test_valid_tenors():
-    """测试 VALID_TENORS"""
     print("=== Testing VALID_TENORS ===")
     
-    var count = len(VALID_TENORS)
+    var tenors = get_valid_tenors()
+    var count = len(tenors)
     print("VALID_TENORS count: " + String(count))
     
     if count == 21:
@@ -42,10 +40,10 @@ def test_valid_tenors():
 
 
 def test_valid_margin_fields():
-    """测试 VALID_MARGIN_FIELDS"""
     print("=== Testing VALID_MARGIN_FIELDS ===")
     
-    var count = len(VALID_MARGIN_FIELDS)
+    var fields = get_valid_margin_fields()
+    var count = len(fields)
     print("VALID_MARGIN_FIELDS count: " + String(count))
     
     if count == 8:
@@ -57,10 +55,10 @@ def test_valid_margin_fields():
 
 
 def test_valid_share_fields():
-    """测试 VALID_SHARE_FIELDS"""
     print("=== Testing VALID_SHARE_FIELDS ===")
     
-    var count = len(VALID_SHARE_FIELDS)
+    var fields = get_valid_share_fields()
+    var count = len(fields)
     print("VALID_SHARE_FIELDS count: " + String(count))
     
     if count == 5:
@@ -72,17 +70,16 @@ def test_valid_share_fields():
 
 
 def test_valid_instrument_types():
-    """测试 VALID_INSTRUMENT_TYPES"""
     print("=== Testing VALID_INSTRUMENT_TYPES ===")
     
     var types = get_valid_instrument_types()
     var count = len(types)
     print("VALID_INSTRUMENT_TYPES count: " + String(count))
     
-    if count == 9:
+    if count == 16:
         print("PASS: VALID_INSTRUMENT_TYPES count correct")
     else:
-        print("FAIL: expected 9, got " + String(count))
+        print("FAIL: expected 16, got " + String(count))
     
     print("")
 

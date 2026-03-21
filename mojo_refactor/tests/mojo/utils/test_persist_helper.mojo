@@ -1,20 +1,18 @@
 """
 Test for persist_helper.mojo - Persist Helper Module
-Compares output with Python rqalpha/utils/persisit_helper.py
 """
 
 from std.collections import Dict
-from rqmojo.const import PERSIST_MODE, PERSIST_MODE_ON_CRASH, PERSIST_MODE_REAL_TIME
-from rqmojo.core.events import EVENT, EventBus, Event
+from rqmojo.const import PERSIST_MODE
+from rqmojo.core.events import EVENT, Event, EventListener
 from rqmojo.utils.persist_helper import (
     PersistHelper, MemoryPersistProvider, FilePersistProvider,
     create_persist_helper, create_memory_persist_provider, create_file_persist_provider,
-    _compute_hash, _compute_hash_from_string
+    _compute_hash, _compute_hash_from_string, create_event_bus
 )
 
 
 def test_compute_hash():
-    """测试哈希计算函数"""
     print("=== Testing _compute_hash ===")
     
     var data = "test_data".as_bytes()
@@ -29,7 +27,6 @@ def test_compute_hash():
 
 
 def test_compute_hash_from_string():
-    """测试字符串哈希计算"""
     print("=== Testing _compute_hash_from_string ===")
     
     var hash_result = _compute_hash_from_string("test_string")
@@ -43,7 +40,6 @@ def test_compute_hash_from_string():
 
 
 def test_memory_persist_provider():
-    """测试 MemoryPersistProvider"""
     print("=== Testing MemoryPersistProvider ===")
     
     var provider = create_memory_persist_provider()
@@ -60,7 +56,6 @@ def test_memory_persist_provider():
 
 
 def test_memory_persist_provider_not_found():
-    """测试 MemoryPersistProvider 加载不存在的键"""
     print("=== Testing MemoryPersistProvider load nonexistent ===")
     
     var provider = create_memory_persist_provider()
@@ -76,7 +71,6 @@ def test_memory_persist_provider_not_found():
 
 
 def test_file_persist_provider():
-    """测试 FilePersistProvider"""
     print("=== Testing FilePersistProvider ===")
     
     var provider = create_file_persist_provider()
@@ -93,11 +87,10 @@ def test_file_persist_provider():
 
 
 def test_persist_helper_init():
-    """测试 PersistHelper 初始化"""
     print("=== Testing PersistHelper init ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     print("PersistHelper created")
     print("PASS: PersistHelper initialized correctly")
@@ -105,11 +98,10 @@ def test_persist_helper_init():
 
 
 def test_persist_helper_register():
-    """测试 PersistHelper.register 方法"""
     print("=== Testing PersistHelper.register ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     try:
         helper.register("test_key", "test_state")
@@ -126,11 +118,10 @@ def test_persist_helper_register():
 
 
 def test_persist_helper_unregister():
-    """测试 PersistHelper.unregister 方法"""
     print("=== Testing PersistHelper.unregister ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     try:
         helper.register("test_key", "test_state")
@@ -146,11 +137,10 @@ def test_persist_helper_unregister():
 
 
 def test_persist_helper_get_object_state():
-    """测试 PersistHelper.get_object_state 方法"""
     print("=== Testing PersistHelper.get_object_state ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     try:
         helper.register("test_key", "test_state_value")
@@ -166,11 +156,10 @@ def test_persist_helper_get_object_state():
 
 
 def test_persist_helper_update_object_state():
-    """测试 PersistHelper.update_object_state 方法"""
     print("=== Testing PersistHelper.update_object_state ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     try:
         helper.register("test_key", "initial_state")
@@ -187,11 +176,10 @@ def test_persist_helper_update_object_state():
 
 
 def test_persist_helper_persist():
-    """测试 PersistHelper.persist 方法"""
     print("=== Testing PersistHelper.persist ===")
     
-    var event_bus = EventBus()
-    var helper = create_persist_helper(event_bus, PERSIST_MODE_ON_CRASH)
+    var event_bus = create_event_bus()
+    var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
     
     try:
         helper.register("test_key", "test_state_data")

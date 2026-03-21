@@ -51,7 +51,7 @@
 | 7 | `utils/translations/__init__.py` | ✅ 已完成 | 0 | 无 |
 | 8 | `utils/translations/zh_Hans_CN/__init__.py` | ✅ 已完成 | 0 | 无 |
 | 9 | `utils/translations/zh_Hans_CN/LC_MESSAGES/__init__.py` | ✅ 已完成 | 0 | 无 |
-| 10 | `data/base_data_source/adjust.py` | 待重构 | 1 | `rqalpha.utils.datetime_func` |
+| 10 | `data/base_data_source/adjust.py` | ✅ 已完成 | 1 | `rqalpha.utils.datetime_func` |
 
 ---
 
@@ -59,9 +59,9 @@
 
 | 序号 | 文件路径 | 状态 | 依赖数量 | 依赖模块 |
 |-----|---------|------|---------|---------|
-| 1 | `apis/names.py` | 待重构 | 1 | `rqalpha.const` |
-| 2 | `cmds/misc.py` | 待重构 | 1 | `rqalpha.utils.i18n` |
-| 3 | `core/global_var.py` | 待重构 | 1 | `rqalpha.utils.logger` |
+| 1 | `apis/names.py` | ✅ 已完成 | 1 | `rqalpha.const` |
+| 2 | `cmds/misc.py` | ✅ 已完成 | 1 | `rqalpha.utils.i18n` |
+| 3 | `core/global_var.py` | ✅ 已完成 | 1 | `rqalpha.utils.logger` |
 | 4 | `data/__init__.py` | 待重构 | 1 | 内部相对导入 |
 | 5 | `model/__init__.py` | 待重构 | 1 | 内部相对导入 |
 | 6 | `utils/i18n.py` | 待重构 | 1 | `rqalpha.utils.translations` |
@@ -239,9 +239,9 @@
 
 | 分组 | 依赖数量范围 | 文件数量 | 已完成 | 待重构 |
 |-----|-------------|---------|--------|--------|
-| 第1组 | 0 | 10 | 1 | 9 |
-| 第2组 | 0 | 10 | 9 | 1 |
-| 第3组 | 1-2 | 10 | 0 | 10 |
+| 第1组 | 0 | 10 | 10 | 0 |
+| 第2组 | 0 | 10 | 10 | 0 |
+| 第3组 | 1-2 | 10 | 3 | 7 |
 | 第4组 | 2 | 10 | 0 | 10 |
 | 第5组 | 2 | 10 | 0 | 10 |
 | 第6组 | 2-3 | 10 | 0 | 10 |
@@ -252,7 +252,7 @@
 | 第11组 | 6 | 10 | 0 | 10 |
 | 第12组 | 7-10 | 10 | 0 | 10 |
 | 第13组 | 1-20 | 3 | 0 | 3 |
-| **总计** | - | **123** | **10** | **113** |
+| **总计** | - | **123** | **23** | **100** |
 
 ---
 
