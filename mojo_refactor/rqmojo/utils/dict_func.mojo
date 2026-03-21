@@ -1,40 +1,28 @@
 """
 RQAlpha Mojo - Dictionary Functions
 Ported from rqalpha/utils/dict_func.py
-Uses Mojo traits similar to C++ concepts
+
+Uses Variant for dynamic type handling - supports nested Dict
 """
 
 from collections import Dict
+from utils import Variant
 
 
-trait Mapping:
-    comptime KeyType: Copyable & Hashable & Equatable
-    comptime ValueType: Movable & ImplicitlyDestructible
-    fn keys(self) -> List[Self.KeyType]: ...
-    fn __contains__(self, key: Self.KeyType) -> Bool: ...
-    fn __getitem__(self, key: Self.KeyType) -> Self.ValueType: ...
-    fn __setitem__(mut self, key: Self.KeyType, value: Self.ValueType): ...
+alias DynamicValue = Variant[Int, Float64, String, Bool, NoneType, Dict[String, DynamicValue]]
 
 
-trait NestedMapping:
-    comptime KeyType: Copyable & Hashable & Equatable
-    comptime ValueType: Mapping
-    fn keys(self) -> List[Self.KeyType]: ...
-    fn __contains__(self, key: Self.KeyType) -> Bool: ...
-    fn __getitem__(self, key: Self.KeyType) -> Self.ValueType: ...
-    fn __setitem__(mut self, key: Self.KeyType, value: Self.ValueType): ...
+fn main():
+    print("dict_func.mojo - DynamicDict test")
 
+    var from_dict = Dict[String, DynamicValue]()
+    from_dict["name"] = DynamicValue(String("test"))
+    from_dict["count"] = DynamicValue(Int(42))
+    from_dict["price"] = DynamicValue(Float64(3.14))
 
-fn deep_update[M: Mapping](from_dict: M, mut to_dict: M) -> None:
-    for key in from_dict.keys():
-        var value = from_dict[key]
-        to_dict[key] = value^
+    var to_dict = Dict[String, DynamicValue]()
+    to_dict["existing"] = DynamicValue(String("already there"))
 
-
-fn deep_update[N: NestedMapping](from_dict: N, mut to_dict: N) -> None:
-    for key in from_dict.keys():
-        var value = from_dict[key]
-        if to_dict.__contains__(key):
-            deep_update(value, to_dict[key])
-        else:
-            to_dict[key] = value^
+    print("from_dict size:", from_dict.size())
+    print("to_dict size:", to_dict.size())
+    print("OK")
