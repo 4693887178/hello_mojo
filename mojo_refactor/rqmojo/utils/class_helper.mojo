@@ -5,12 +5,22 @@ Ported from rqalpha/utils/class_helper.py
 
 from collections import List, Dict
 from rqmojo.utils.logger import user_system_log
+from rqmojo.utils.i18n import gettext
 
 
-fn deprecated_property(property_name: String, instead_property_name: String) raises -> String:
+comptime __all__: List[String] = [
+    "deprecated_property",
+    "cached_property",
+    "CachedProperty",
+    "property_repr",
+    "make_cached_property",
+]
+
+
+def deprecated_property(property_name: String, instead_property_name: String) raises -> String:
     if property_name == instead_property_name:
-        raise Error("property_name and instead_property_name must be different")
-    user_system_log().warn("\"" + property_name + "\" is deprecated, please use \"" + instead_property_name + "\" instead, check the document for more information")
+        raise Error(gettext("property_name and instead_property_name must be different"))
+    user_system_log().warn(gettext("\"") + property_name + gettext("\" is deprecated, please use \"") + instead_property_name + gettext("\" instead, check the document for more information"))
     return instead_property_name
 
 
@@ -21,22 +31,22 @@ struct cached_property(Movable, Copyable):
     var value: String
     var _computed: Bool
 
-    fn __init__(name: String) -> Self:
+    def __init__(name: String) -> Self:
         return Self(name, False, "", False)
 
-    fn __init__(name: String, value: String) -> Self:
+    def __init__(name: String, value: String) -> Self:
         return Self(name, True, value, True)
 
-    fn is_cached(self) -> Bool:
+    def is_cached(self) -> Bool:
         return self.cached
 
-    fn get_name(self) -> String:
+    def get_name(self) -> String:
         return self.name
 
-    fn get_value(self) -> String:
+    def get_value(self) -> String:
         return self.value
 
-    fn set_value(mut self, value: String):
+    def set_value(mut self, value: String):
         self.value = value
         self.cached = True
         self._computed = True
@@ -45,9 +55,13 @@ struct cached_property(Movable, Copyable):
 comptime CachedProperty = cached_property
 
 
+def make_cached_property(name: String, value: String) -> cached_property:
+    return cached_property(name, value)
+
+
 trait HasCachedProperties:
-    fn get_cached_properties(self) -> List[cached_property]: ...
-    fn set_cached_property(mut self, name: String, value: String): ...
+    def get_cached_properties(self) -> List[cached_property]: ...
+    def set_cached_property(mut self, name: String, value: String): ...
 
 
 @fieldwise_init
@@ -56,13 +70,13 @@ struct PropertyRepr(Movable):
     var cached_properties: List[cached_property]
 
 
-fn property_repr(obj_name: String, properties: Dict[String, String]) raises -> String:
+def property_repr(obj_name: String, properties: Dict[String, String]) -> String:
     var result = obj_name + "("
     var first = True
     for key in properties.keys():
         if not first:
             result = result + ", "
-        var val = properties[key]
+        var val = properties.get(key, "")
         result = result + key + "=" + val
         first = False
     result = result + ")"

@@ -4,7 +4,7 @@ Ported from rqalpha/utils/logger.py
 Uses Mojo native logger module
 """
 
-from logger import Logger, Level
+from std.logger import Logger, Level
 from collections import List
 
 
@@ -22,121 +22,112 @@ comptime __all__: List[String] = [
 
 
 @fieldwise_init
-struct RQAlphaLogger(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct RQAlphaLogger(Writable, Copyable, Movable, ImplicitlyCopyable):
     var name: String
-    var _logger: Logger
+    var _logger: Logger[Level.DEBUG]
     var _level: Level
 
-    fn __init__(out self, name: String, level: Level = Level.DEBUG):
+    def __init__(out self, name: String, level: Level = Level.DEBUG):
         self.name = name
         self._level = level
         var prefix = "[" + name + "] "
-        self._logger = Logger(prefix=prefix)
+        self._logger = Logger[Level.DEBUG](prefix=prefix)
 
-    fn __str__(self) -> String:
-        return self.name
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write(self.name)
 
     @staticmethod
-    fn create(name: String) -> Self:
+    def create(name: String) -> Self:
         return Self(name, Level.DEBUG)
 
-    fn trace(self, message: String):
+    def trace(self, message: String):
         self._logger.trace(message)
 
-    fn debug(self, message: String):
+    def debug(self, message: String):
         self._logger.debug(message)
 
-    fn info(self, message: String):
+    def info(self, message: String):
         self._logger.info(message)
 
-    fn warning(self, message: String):
+    def warning(self, message: String):
         self._logger.warning(message)
 
-    fn warn(self, message: String):
+    def warn(self, message: String):
         self.warning(message)
 
-    fn error(self, message: String):
+    def error(self, message: String):
         self._logger.error(message)
 
-    fn critical(self, message: String):
+    def critical(self, message: String):
         self._logger.critical(message)
 
-    fn exception(self, message: String):
+    def exception(self, message: String):
         self.error(message)
 
-    fn set_level(mut self, level: Level):
+    def set_level(mut self, level: Level):
         self._level = level
 
 
 @fieldwise_init
-struct LoggerManager(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct LoggerManager(Writable, Copyable, Movable, ImplicitlyCopyable):
     var _user_log: RQAlphaLogger
     var _system_log: RQAlphaLogger
     var _user_system_log: RQAlphaLogger
     var _initialized: Bool
 
-    fn __init__(out self):
+    def __init__(out self):
         self._user_log = RQAlphaLogger.create("user_log")
         self._system_log = RQAlphaLogger.create("system_log")
         self._user_system_log = RQAlphaLogger.create("user_system_log")
         self._initialized = False
 
     @staticmethod
-    fn create() -> Self:
+    def create() -> Self:
         return Self()
 
-    fn __str__(self) -> String:
-        return "LoggerManager"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("LoggerManager")
 
-    fn user_log(self) -> RQAlphaLogger:
+    def user_log(self) -> RQAlphaLogger:
         return self._user_log
 
-    fn system_log(self) -> RQAlphaLogger:
+    def system_log(self) -> RQAlphaLogger:
         return self._system_log
 
-    fn user_system_log(self) -> RQAlphaLogger:
+    def user_system_log(self) -> RQAlphaLogger:
         return self._user_system_log
 
-    fn init(mut self):
+    def init(mut self):
         self._user_log = RQAlphaLogger.create("user_log")
         self._system_log = RQAlphaLogger.create("system_log")
         self._user_system_log = RQAlphaLogger.create("user_system_log")
         self._initialized = True
 
 
-fn _get_logger_manager() -> LoggerManager:
+def _get_logger_manager() -> LoggerManager:
     return LoggerManager.create()
 
 
-fn user_log() -> RQAlphaLogger:
+def user_log() -> RQAlphaLogger:
     return _get_logger_manager().user_log()
 
 
-fn system_log() -> RQAlphaLogger:
+def system_log() -> RQAlphaLogger:
     return _get_logger_manager().system_log()
 
 
-fn user_system_log() -> RQAlphaLogger:
+def user_system_log() -> RQAlphaLogger:
     return _get_logger_manager().user_system_log()
 
 
-fn init_logger():
+def init_logger():
     var manager = _get_logger_manager()
     manager.init()
 
 
-fn user_print[*Ts: Stringable](*args: Ts, sep: String = " ", end: String = ""):
-    var message = String()
-    var first = True
-    for arg in args:
-        if not first:
-            message = message + sep
-        message = message + str(arg)
-        first = False
-    message = message + end
-    
+def user_print(message: String):
     user_log().info(message)
 
 
-fn release_print():
+def release_print():
     pass

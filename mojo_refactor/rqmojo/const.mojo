@@ -802,3 +802,7 @@ struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write("MARKET.", self._name)
+
+
+comptime MARKET_CN = MARKET.CN
+comptime MARKET_HK = MARKET.HK
