@@ -3,8 +3,12 @@ RQAlpha Mojo - Environment
 Ported from rqalpha/environment.py
 """
 
-from collections import Dict, List, Set
-from rqmojo.const import RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE, RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN, POSITION_DIRECTION_LONG, RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN, POSITION_DIRECTION_LONG
+from collections import Dict, List, Set, Optional
+from rqmojo.const import (
+    RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE,
+    RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN,
+    POSITION_DIRECTION_LONG, EXECUTION_PHASE
+)
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
 from rqmojo.model.instrument import Instrument, create_stock_instrument
@@ -12,6 +16,7 @@ from rqmojo.utils.datetime_func import DateTime
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy, DividendInfo
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position
+from rqmojo.portfolio.portfolio_manager import Portfolio as PortfolioManager
 
 
 @fieldwise_init
@@ -116,6 +121,35 @@ struct Portfolio(Movable):
     fn get_stock_position(self, order_book_id: String) -> Position:
         return self._stock_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
 
+    fn get_future_position(self, order_book_id: String) -> Position:
+        return self._future_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
+
+    fn total_market_value(self) -> Float64:
+        return self.total_value - self.total_cash
+
+    fn start_date(self) -> DateTime:
+        return DateTime(1970, 1, 1, 0, 0, 0, 0)
+
+    fn annualized_returns(self) -> Float64:
+        return 0.0
+
+    fn daily_returns(self) -> Float64:
+        return 0.0
+
+    fn get_daily_pnl(self) -> Float64:
+        return self.daily_pnl
+
+    fn total_returns(self) -> Float64:
+        return 0.0
+
+    fn unit_net_value(self) -> Float64:
+        if self.units > 0:
+            return self.total_value / self.units
+        return 1.0
+
+    fn static_unit_net_value(self) -> Float64:
+        return self.unit_net_value()
+
 
 fn create_portfolio(total_value: Float64 = 100000.0) -> Portfolio:
     return Portfolio(
@@ -154,6 +188,8 @@ struct Environment(Movable):
     var _data_proxy: DataProxy
     var _order_id_generator: OrderIdGenerator
     var portfolio: Portfolio
+    var _execution_phase: EXECUTION_PHASE
+    var _broker: String
 
     fn config(self) -> Config:
         return Config(
@@ -202,6 +238,12 @@ struct Environment(Movable):
     fn frequency(self) -> String:
         return self._frequency
 
+    fn execution_phase(self) -> EXECUTION_PHASE:
+        return self._execution_phase
+
+    fn set_execution_phase(mut self, phase: EXECUTION_PHASE) -> None:
+        self._execution_phase = phase
+
     fn add_listener(mut self, event_type: EVENT, listener: String, priority: Int = 0) -> None:
         self._listener_count += 1
 
@@ -209,21 +251,7 @@ struct Environment(Movable):
         _ = self._event_bus.publish_event(event)
 
     fn submit_order(mut self, order: Order) -> Order:
-        var order_with_id = Order(
-            order_id=self._order_id_generator.next(),
-            order_book_id=order.order_book_id,
-            side=order.side,
-            position_effect=order.position_effect,
-            quantity=order.quantity,
-            filled_quantity=order.filled_quantity,
-            unfilled_quantity=order.unfilled_quantity,
-            status=order.status,
-            style=order.style,
-            avg_price=order.avg_price,
-            created_at=order.created_at,
-            transaction_cost=order.transaction_cost
-        )
-        return order_with_id
+        return order
 
     fn add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE_CS) raises -> None:
         var key = instrument_type.value
@@ -346,6 +374,7 @@ struct Environment(Movable):
 
     fn set_broker(mut self, name: String) -> None:
         self._broker_name = name
+        self._broker = name
 
     fn set_portfolio(mut self, total_value: Float64, cash: Float64) -> None:
         self._portfolio_total_value = total_value
@@ -373,6 +402,48 @@ struct Environment(Movable):
         var event = Event(EVENT.STRATEGY_HOLD_CANCELLED.value)
         _ = self._event_bus.publish_event(event)
 
+    fn next_order_id(mut self) -> Int:
+        return self._order_id_generator.next()
+
+    fn get_stock_account(self) -> Account:
+        return self._stock_account
+
+    fn get_future_account(self) -> Account:
+        return self._future_account
+
+    fn get_account(self, account_type: DEFAULT_ACCOUNT_TYPE) -> Optional[Account]:
+        if account_type == DEFAULT_ACCOUNT_TYPE_STOCK:
+            return self._stock_account
+        return None
+
+    fn get_portfolio(self) -> Portfolio:
+        return self.portfolio
+
+    fn get_positions(self) -> List[Position]:
+        return self.portfolio.get_positions()
+
+    fn get_position(self, order_book_id: String) -> Position:
+        return self.portfolio.get_position(order_book_id)
+
+    fn current_snapshot(self, order_book_id: String) -> Dict[String, Float64]:
+        var result = Dict[String, Float64]()
+        var price = self.get_last_price(order_book_id)
+        result["last"] = price
+        return result
+
+    fn history_bars(
+        self,
+        order_book_id: String,
+        bar_count: Int,
+        frequency: String,
+        fields: String
+    ) -> List[Dict[String, Float64]]:
+        var result = List[Dict[String, Float64]]()
+        return result^
+
+    fn get_yield_curve(self, start_date: DateTime, end_date: DateTime, tenor: String = "") -> Dict[String, Float64]:
+        return Dict[String, Float64]()
+
 
 fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE_BACKTEST) -> Environment:
     return Environment(
@@ -399,5 +470,7 @@ fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TY
         _universe=Set[String](),
         _data_proxy=create_data_proxy(),
         _order_id_generator=create_order_id_generator(),
-        portfolio=create_portfolio(100000.0)
+        portfolio=create_portfolio(100000.0),
+        _execution_phase=EXECUTION_PHASE.GLOBAL(),
+        _broker="simulation"
     )

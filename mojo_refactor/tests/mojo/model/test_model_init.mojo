@@ -19,8 +19,8 @@ def test_order_import():
 def test_order_style_import():
     var market = MarketOrder()
     var limit = LimitOrder(10.5)
-    print("MarketOrder: " + market.__str__())
-    print("LimitOrder: " + limit.__str__())
+    print("MarketOrder: ", market)
+    print("LimitOrder: ", limit)
     assert True
 
 
@@ -43,7 +43,7 @@ def test_bar_object_import():
         open_interest=0.0,
         prev_close=0.0
     )
-    print("BarObject created: " + bar.__str__())
+    print("BarObject created: ", bar)
     assert True
 
 

@@ -3,38 +3,70 @@ RQAlpha Mojo - Cash Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/cash_validator.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, SIDE_BUY, SIDE_BUY
+from collections import Optional
+from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_EFFECT_OPEN, SIDE_BUY
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 from rqmojo.portfolio.account import Account
+from rqmojo.model.instrument import Instrument
+from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.i18n import gettext as _
+
+
+fn validate_cash(
+    order: Order,
+    cash: Float64,
+    instrument: Instrument,
+    trading_date: DateTime
+) -> Optional[String]:
+    var cost_money = instrument.calc_cash_occupation(
+        order.frozen_price,
+        order.quantity,
+        order.position_direction,
+        trading_date
+    )
+    cost_money = cost_money + order.estimated_transaction_cost
+    if cost_money <= cash:
+        return None
+    var reason = "Order Creation Failed: not enough money to buy " + order.order_book_id + ", needs " + String(cost_money) + ", cash " + String(cash)
+    return reason
 
 
 @fieldwise_init
-struct CashValidator(FrontendValidator, Movable):
+struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
+    var _env_name: String
     var enabled: Bool
-    
-    fn validate_submission(self, order: Order, account: Optional[object]) -> Optional[String]:
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("CashValidator(enabled=", String(self.enabled), ")")
+
+    fn validate_submission(
+        self,
+        order: Order,
+        account: Optional[Account],
+        instrument: Optional[Instrument] = None,
+        trading_date: DateTime = DateTime(1970, 1, 1, 0, 0, 0, 0)
+    ) -> Optional[String]:
         if not self.enabled:
             return None
-        
-        if order.side != SIDE_BUY:
+
+        if account is None:
             return None
-        
+
+        if order.position_effect != POSITION_EFFECT_OPEN:
+            return None
+
         var acc = account
-        if acc is None:
-            return None
-        
-        var required_cash = order.price * Float64(order.quantity)
-        var available_cash = acc.cash
-        
-        if required_cash > available_cash:
-            return "Insufficient cash: required=" + String(required_cash) + ", available=" + String(available_cash)
-        
-        return None
-    
-    fn validate_cancellation(self, order: Order, account: Optional[object]) -> Optional[String]:
+        var available_cash = acc.available_cash_for(instrument)
+        return validate_cash(order, available_cash, instrument, trading_date)
+
+    fn validate_cancellation(
+        self,
+        order: Order,
+        account: Optional[Account]
+    ) -> Optional[String]:
         return None
 
 
-fn create_cash_validator(enabled: Bool = True) -> CashValidator:
-    return CashValidator(enabled=enabled)
+fn create_cash_validator(env_name: String = "", enabled: Bool = True) -> CashValidator:
+    return CashValidator(_env_name=env_name, enabled=enabled)

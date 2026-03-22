@@ -9,11 +9,11 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct OrderIdGenerator(Stringable, Movable):
+struct OrderIdGenerator(Writable, Movable):
     var counter: Int
     
-    fn __str__(self) -> String:
-        return "OrderIdGenerator(" + String(self.counter) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("OrderIdGenerator(", String(self.counter), ")")
     
     fn next(mut self) -> Int:
         self.counter += 1
@@ -25,15 +25,15 @@ fn create_order_id_generator() -> OrderIdGenerator:
 
 
 @fieldwise_init
-struct OrderStyle(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct OrderStyle(Writable, Copyable, Movable, ImplicitlyCopyable):
     var style_type: ORDER_TYPE
     var limit_price: Float64
     
-    fn __str__(self) -> String:
+    def write_to(self, mut writer: Some[Writer]):
         if self.style_type == ORDER_TYPE_MARKET:
-            return "MarketOrder"
+            writer.write("MarketOrder")
         else:
-            return "LimitOrder(" + String(self.limit_price) + ")"
+            writer.write("LimitOrder(", String(self.limit_price), ")")
 
 
 fn MarketOrder() -> OrderStyle:

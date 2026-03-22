@@ -3,7 +3,7 @@ RQAlpha Mojo - Abstract Interfaces
 Ported from rqalpha/interface.py
 """
 
-from collections import Dict, List, Optional
+from std.collections import Dict, List, Optional
 from rqmojo.const import (
     INSTRUMENT_TYPE, SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE,
     POSITION_DIRECTION, EXIT_CODE, MARKET

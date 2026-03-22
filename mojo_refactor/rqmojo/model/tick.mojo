@@ -8,7 +8,7 @@ from rqmojo.model.instrument import Instrument, create_instrument_from_dict
 from rqmojo.utils.datetime_func import DateTime
 from rqmojo.utils.i18n import gettext
 from rqmojo.utils.repr import dict_repr_from_dict
-from collections import Dict, List
+from std.collections import Dict, List
 
 
 comptime __all__: List[String] = [
@@ -18,7 +18,7 @@ comptime __all__: List[String] = [
 
 
 @fieldwise_init
-struct TickObject(Writable, Movable):
+struct TickObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     var _order_book_id: String
     var _instrument: Instrument
     var datetime: DateTime

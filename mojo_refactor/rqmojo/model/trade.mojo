@@ -9,11 +9,11 @@ from rqmojo.utils.datetime_func import DateTime
 
 
 @fieldwise_init
-struct TradeIdGenerator(Stringable, Movable):
+struct TradeIdGenerator(Writable, Movable):
     var counter: Int
     
-    fn __str__(self) -> String:
-        return "TradeIdGenerator(" + String(self.counter) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TradeIdGenerator(", String(self.counter), ")")
     
     fn next(mut self) -> Int:
         self.counter += 1
@@ -25,7 +25,7 @@ fn create_trade_id_generator() -> TradeIdGenerator:
 
 
 @fieldwise_init
-struct Trade(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct Trade(Writable, Copyable, Movable, ImplicitlyCopyable):
     var trade_id: Int
     var exec_id: String
     var order_id: Int
@@ -39,8 +39,8 @@ struct Trade(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var commission: Float64
     var tax: Float64
     
-    fn __str__(self) -> String:
-        return "Trade(" + String(self.trade_id) + ", " + self.order_book_id + ", " + String(self.side.value()) + ", qty=" + String(self.quantity) + ", price=" + String(self.price) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("Trade(", String(self.trade_id), ", ", self.order_book_id, ", ", String(self.side.value()), ", qty=", String(self.quantity), ", price=", String(self.price), ")")
 
 
 fn create_trade_with_id(
