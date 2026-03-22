@@ -11,7 +11,8 @@ from rqmojo.portfolio.position import Position, PositionProxy, create_position_p
 from rqmojo.utils.datetime_func import DateTime
 
 
-struct Portfolio:
+@fieldwise_init
+struct Portfolio(Movable):
     var account_type: DEFAULT_ACCOUNT_TYPE
     var total_value: Float64
     var cash: Float64
@@ -23,38 +24,6 @@ struct Portfolio:
 
     fn __str__(self) -> String:
         return "Portfolio(total_value=" + String(self.total_value) + ", cash=" + String(self.cash) + ")"
-
-    fn __init__(out self, account_type: DEFAULT_ACCOUNT_TYPE, total_value: Float64, cash: Float64,
-                 start_date_val: DateTime, static_unit_net_value: Float64, daily_return: Float64,
-                 units_val: Float64, var _account: Account):
-        self.account_type = account_type
-        self.total_value = total_value
-        self.cash = cash
-        self.start_date_val = start_date_val
-        self.static_unit_net_value = static_unit_net_value
-        self.daily_return = daily_return
-        self.units_val = units_val
-        self._account = _account^
-
-    fn __copyinit__(out self, existing: Self):
-        self.account_type = existing.account_type
-        self.total_value = existing.total_value
-        self.cash = existing.cash
-        self.start_date_val = existing.start_date_val
-        self.static_unit_net_value = existing.static_unit_net_value
-        self.daily_return = existing.daily_return
-        self.units_val = existing.units_val
-        self._account = existing._account
-
-    fn __moveinit__(out self, deinit existing: Self):
-        self.account_type = existing.account_type
-        self.total_value = existing.total_value
-        self.cash = existing.cash
-        self.start_date_val = existing.start_date_val
-        self.static_unit_net_value = existing.static_unit_net_value
-        self.daily_return = existing.daily_return
-        self.units_val = existing.units_val
-        self._account = existing._account^
 
     fn get_account(self) -> Account:
         return self._account

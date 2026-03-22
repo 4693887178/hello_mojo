@@ -129,12 +129,12 @@ struct StrategyEventWrapper(
             self.registered_events.append(EVENT.OPEN_AUCTION())
 
 
-fn create_base_strategy(
-    event_bus: EventBus,
+def create_base_strategy(
+    var event_bus: EventBus,
     name: String = "BaseStrategy"
 ) -> BaseStrategy:
     return BaseStrategy(
-        event_bus=event_bus,
+        event_bus=event_bus^,
         current_universe=Set[String](),
         callbacks=create_strategy_callbacks(),
         strategy_name=name

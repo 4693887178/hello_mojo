@@ -19,15 +19,15 @@ def _get_current_time() -> DateTime:
 
 @fieldwise_init
 struct StrategyUniverse(
-    Copyable, Movable, Writable, ImplicitlyCopyable
+    Movable, Writable
 ):
     var universe_set: Set[String]
     var event_bus: EventBus
     var last_update_time: DateTime
 
-    def __init__(out self, event_bus: EventBus):
+    def __init__(out self, var event_bus: EventBus):
         self.universe_set = Set[String]()
-        self.event_bus = event_bus
+        self.event_bus = event_bus^
         self.last_update_time = _get_current_time()
 
     def write_to(self, mut writer: Some[Writer]):

@@ -201,9 +201,9 @@ struct Environment(Movable):
             is_hold=self._is_hold
         )
 
-    fn get_event_bus[origin: Origin](ref[origin] self) -> ref[origin] EventBus:
-        return self._event_bus
-
+    fn get_event_bus(mut self) -> EventBus:
+        return self._event_bus^
+    
     fn calendar_dt(self) -> DateTime:
         return self._calendar_dt
 
@@ -443,6 +443,99 @@ struct Environment(Movable):
 
     fn get_yield_curve(self, start_date: DateTime, end_date: DateTime, tenor: String = "") -> Dict[String, Float64]:
         return Dict[String, Float64]()
+    
+    fn data_proxy(self) -> DataProxy:
+        return self._data_proxy
+    
+    fn data_source(self) -> DataProxy:
+        return self._data_proxy
+    
+    fn price_board(self) -> DataProxy:
+        return self._data_proxy
+    
+    fn has_data_source(self) -> Bool:
+        return len(self._data_source_name) > 0
+    
+    fn has_price_board(self) -> Bool:
+        return True
+    
+    fn has_broker(self) -> Bool:
+        return len(self._broker_name) > 0
+    
+    fn has_event_source(self) -> Bool:
+        return True
+    
+    fn has_portfolio(self) -> Bool:
+        return self._portfolio_total_value > 0
+    
+    fn set_strategy_loader(mut self, loader: String) -> None:
+        pass
+    
+    fn strategy_loader(self) -> String:
+        return "file"
+    
+    fn set_user_strategy(mut self, strategy: String) -> None:
+        pass
+    
+    fn user_strategy(self) -> String:
+        return "user_strategy"
+    
+    fn set_price_board(mut self, board: String) -> None:
+        pass
+    
+    fn set_profile_deco(mut self, deco: PythonObject) -> None:
+        self._profile_deco = deco
+    
+    fn has_profile_deco(self) -> Bool:
+        return True
+    
+    fn get_profile_output(self) -> String:
+        return "Profile output"
+    
+    fn clear_data_proxy_cache(mut self) -> None:
+        pass
+    
+    fn clear_data_source_cache(mut self) -> None:
+        pass
+    
+    fn get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+        var result = List[DateTime]()
+        var current = start_date
+        while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
+            result.append(current)
+            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
+        return result^
+
+
+fn create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: Bool = False) -> Environment:
+    return Environment(
+        _start_date=config.base.start_date,
+        _end_date=config.base.end_date,
+        _frequency=config.base.frequency,
+        _run_type=config.base.run_type,
+        _calendar_dt=config.base.start_date,
+        _trading_dt=config.base.start_date,
+        _is_initialized=False,
+        _event_bus=EventBus(listeners=Dict[String, List[EventListener]](), user_listeners=Dict[String, List[EventListener]]()),
+        _listener_count=0,
+        _data_source_name="default",
+        _broker_name="simulation",
+        _portfolio_total_value=config.base.initial_cash,
+        _portfolio_cash=config.base.initial_cash,
+        _is_hold=False,
+        global_vars=GlobalVars(data_string=""),
+        persist_provider=PersistProvider(name=""),
+        persist_helper=PersistHelper(name=""),
+        _frontend_validators=Dict[String, List[FrontendValidator]](),
+        _default_frontend_validators=List[FrontendValidator](),
+        _transaction_cost_deciders=Dict[String, TransactionCostDecider](),
+        _universe=Set[String](),
+        _data_proxy=create_data_proxy(),
+        _order_id_generator=create_order_id_generator(),
+        portfolio=create_portfolio(config.base.initial_cash),
+        _execution_phase=EXECUTION_PHASE.GLOBAL,
+        _broker="simulation"
+    )
 
 
 fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE_BACKTEST) -> Environment:

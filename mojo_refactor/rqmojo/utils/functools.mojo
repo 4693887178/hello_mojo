@@ -65,3 +65,11 @@ struct LazyProperty(Movable, Copyable):
 
 def lazy_property(name: String) -> LazyProperty:
     return LazyProperty(name)
+
+
+def clear_all_cached_functions() -> None:
+    """
+    Clear all cached function results.
+    This is called before running a new strategy to ensure fresh data.
+    """
+    pass

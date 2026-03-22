@@ -11,3 +11,6 @@ struct Version:
 
 fn get_version() -> String:
     return Version.VERSION
+
+
+comptime __version__: String = "0.1.0"

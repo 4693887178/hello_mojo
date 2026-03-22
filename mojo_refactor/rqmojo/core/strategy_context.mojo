@@ -225,7 +225,8 @@ fn create_strategy_context(var env: Environment, var data_proxy: DataProxy) -> S
         data_bundle_path="~/.rqalpha/bundle",
         strategy_file="",
         persist_mode=PERSIST_MODE_ON_CRASH,
-        initial_cash=100000.0
+        initial_cash=100000.0,
+        rqdatac_uri=""
     )
     var config = RQAlphaConfig(
         base=base_cfg,

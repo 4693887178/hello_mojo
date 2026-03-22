@@ -59,7 +59,7 @@ struct BaseDataSource(Movable):
                 self._trading_dates.append(dt_int)
 
     fn register_instrument(mut self, instrument: Instrument) -> None:
-        self._instruments[instrument.order_book_id] = instrument
+        self._instruments[instrument.order_book_id()] = instrument
 
     fn get_instrument(self, order_book_id: String) -> Instrument:
         try:
@@ -178,3 +178,13 @@ fn create_base_data_source() -> BaseDataSource:
         _trading_dates=List[Int](),
         _initialized=False
     )
+
+
+fn create_base_data_source_with_path(bundle_path: String) -> BaseDataSource:
+    var ds = BaseDataSource(
+        _instruments=Dict[String, Instrument](),
+        _trading_dates=List[Int](),
+        _initialized=False
+    )
+    ds.load_bundle(bundle_path)
+    return ds^

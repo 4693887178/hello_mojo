@@ -490,6 +490,40 @@ struct DataProxy(Movable):
             if ins.trade_at_night():
                 return True
         return False
+    
+    fn available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
+        return Tuple[DateTime, DateTime](DateTime(2020, 1, 1, 0, 0, 0, 0), DateTime(2024, 12, 31, 0, 0, 0, 0))
+    
+    fn get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+        var result = List[DateTime]()
+        var current = start_date
+        while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
+            if self.is_trading_date(current):
+                result.append(current)
+            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
+        return result^
+    
+    fn get_all_instruments(self, type: String = "") -> List[Instrument]:
+        var result = List[Instrument]()
+        result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
+        result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
+        result.append(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE_XSHG))
+        result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE_XSHG))
+        return result^
+    
+    fn get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
+        if instrument.type != INSTRUMENT_TYPE_CS and instrument.type != INSTRUMENT_TYPE_ETF:
+            return Optional[DividendInfo](None)
+        
+        var dividend = create_dividend_info(
+            book_closure_date=20231215,
+            announcement_date=20231210,
+            dividend_cash_before_tax=0.5,
+            ex_dividend_date=20231216,
+            payable_date=20231220,
+            round_lot=10
+        )
+        return Optional[DividendInfo](dividend)
 
 
 fn merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
@@ -543,3 +577,14 @@ fn create_data_proxy_with_name(name: String) -> DataProxy:
         _data_source_name=name,
         _trading_dates_mixin=create_trading_dates_mixin_with_november_2018()
     )
+
+
+fn create_data_proxy_from_source(var data_source: DataProxy, var price_board: DataProxy) -> DataProxy:
+    return DataProxy(
+        _data_source_name=data_source._data_source_name,
+        _trading_dates_mixin=data_source._trading_dates_mixin
+    )
+
+
+fn get_available_data_range(data_proxy: DataProxy, frequency: String) -> Tuple[DateTime, DateTime]:
+    return Tuple[DateTime, DateTime](DateTime(2020, 1, 1, 0, 0, 0, 0), DateTime(2024, 12, 31, 0, 0, 0, 0))

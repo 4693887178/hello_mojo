@@ -18,6 +18,7 @@ struct BaseConfig(Movable, ImplicitlyCopyable):
     var strategy_file: String
     var persist_mode: PERSIST_MODE
     var initial_cash: Float64
+    var rqdatac_uri: String
 
 
 @fieldwise_init
@@ -73,7 +74,8 @@ fn default_base_config() -> BaseConfig:
         data_bundle_path="~/.rqalpha/bundle",
         strategy_file="",
         persist_mode=PERSIST_MODE_ON_CRASH,
-        initial_cash=100000.0
+        initial_cash=100000.0,
+        rqdatac_uri=""
     )
 
 
@@ -112,7 +114,8 @@ fn create_config(
             data_bundle_path="~/.rqalpha/bundle",
             strategy_file="",
             persist_mode=PERSIST_MODE_ON_CRASH,
-            initial_cash=100000.0
+            initial_cash=100000.0,
+            rqdatac_uri=""
         ),
         extra=default_extra_config(),
         mod=default_mod_config()
@@ -133,3 +136,58 @@ fn create_config_from_args(
     var end_dt = DateTime(end_year, end_month, end_day, 0, 0, 0, 0)
     var rt = parse_run_type(run_type_str)
     return create_config(start_dt, end_dt, frequency, rt)
+
+
+def parse_config(
+    config_dict: Dict[String, String],
+    source_code: String = "",
+    user_funcs: Dict[String, String] = Dict[String, String]()
+) raises -> RQAlphaConfig:
+    """
+    Parse configuration dictionary into RQAlphaConfig.
+    
+    Args:
+        config_dict: Configuration dictionary
+        source_code: Strategy source code (optional)
+        user_funcs: User function dictionary (optional)
+        
+    Returns:
+        Parsed RQAlphaConfig
+    """
+    var base_cfg = default_base_config()
+    var extra_cfg = default_extra_config()
+    var mod_cfg = default_mod_config()
+    
+    for key in config_dict.keys():
+        var value = config_dict[key]
+        
+        if key == "base.start_date" or key == "start_date":
+            var parts = value.split("-")
+            if len(parts) >= 3:
+                base_cfg.start_date = DateTime(
+                    Int(parts[0]), Int(parts[1]), Int(parts[2]), 0, 0, 0, 0
+                )
+        elif key == "base.end_date" or key == "end_date":
+            var parts = value.split("-")
+            if len(parts) >= 3:
+                base_cfg.end_date = DateTime(
+                    Int(parts[0]), Int(parts[1]), Int(parts[2]), 0, 0, 0, 0
+                )
+        elif key == "base.frequency" or key == "frequency":
+            base_cfg.frequency = value
+        elif key == "base.run_type" or key == "run_type":
+            base_cfg.run_type = parse_run_type(value)
+        elif key == "base.data_bundle_path" or key == "data_bundle_path":
+            base_cfg.data_bundle_path = value
+        elif key == "base.strategy_file" or key == "strategy_file":
+            base_cfg.strategy_file = value
+        elif key == "base.initial_cash" or key == "initial_cash":
+            base_cfg.initial_cash = Float64(value)
+        elif key == "base.persist_mode" or key == "persist_mode":
+            base_cfg.persist_mode = parse_persist_mode(value)
+        elif key == "extra.locale" or key == "locale":
+            extra_cfg.locale = value
+        elif key == "mod.enabled":
+            mod_cfg.enabled = (value == "true" or value == "True")
+    
+    return RQAlphaConfig(base=base_cfg, extra=extra_cfg, mod=mod_cfg)
