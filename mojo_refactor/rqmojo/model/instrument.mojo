@@ -81,6 +81,14 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     fn underlying_symbol(self) -> String:
         return self.underlying_symbol_val
     
+    fn board_type(self) -> String:
+        if self.type_val == INSTRUMENT_TYPE_CS:
+            if self.order_book_id_val.startswith("688"):
+                return "KSH"
+            elif self.order_book_id_val.startswith("8") or self.order_book_id_val.startswith("4"):
+                return "BJS"
+        return ""
+    
     fn account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type_val):
             return DEFAULT_ACCOUNT_TYPE_STOCK

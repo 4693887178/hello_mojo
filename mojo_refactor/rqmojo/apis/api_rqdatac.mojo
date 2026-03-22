@@ -3,6 +3,7 @@ RQAlpha Mojo - RQData API
 Ported from rqalpha/apis/api_rqdatac.py
 """
 
+from collections import Dict, List
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE
 from rqmojo.model.order import Order
 from rqmojo.core.strategy_context import StrategyContext
@@ -12,14 +13,15 @@ from rqmojo.utils.datetime_func import DateTime
 fn get_price(ctx: StrategyContext, order_book_id: String, start_date: DateTime, end_date: DateTime, frequency: String = "1d") -> List[Float64]:
     var prices = List[Float64]()
     var bar = ctx.get_bar(order_book_id)
-    prices.append(bar.close)
-    return prices
+    var close_price = bar.close()
+    prices.append(close_price)
+    return prices^
 
 
 fn get_yield_curve(ctx: StrategyContext, start_date: DateTime, end_date: DateTime, tenor: String = "10y") -> Dict[String, Float64]:
     var result = Dict[String, Float64]()
     result["10y"] = 0.03
-    return result
+    return result^
 
 
 fn is_trading_date(ctx: StrategyContext, date: DateTime) -> Bool:
@@ -36,9 +38,9 @@ fn get_next_trading_date(ctx: StrategyContext, date: DateTime) -> DateTime:
 
 fn get_dividend_info(ctx: StrategyContext, order_book_id: String) -> Dict[String, Float64]:
     var result = Dict[String, Float64]()
-    return result
+    return result^
 
 
 fn get_split_info(ctx: StrategyContext, order_book_id: String) -> Dict[String, Float64]:
     var result = Dict[String, Float64]()
-    return result
+    return result^

@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_stock.py
 """
 
 from collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, INSTRUMENT_TYPE_CS, ORDER_TYPE_LIMIT, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE, INSTRUMENT_TYPE_CS, ORDER_TYPE_LIMIT, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, INSTRUMENT_TYPE_CS, ORDER_TYPE_LIMIT, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
 from rqmojo.environment import Environment
@@ -14,7 +14,8 @@ from rqmojo.data.data_proxy import DataProxy
 from rqmojo.utils.datetime_func import DateTime
 
 
-struct AccountPositionResult(Copyable, Movable):
+@fieldwise_init
+struct AccountPositionResult(Copyable, Movable, ImplicitlyCopyable):
     var total_cash: Float64
     var total_value: Float64
     var position_quantity: Int
@@ -30,7 +31,7 @@ fn BJSE_MIN_AMOUNT() -> Int:
     return 100
 
 
-fn _get_account_position(env: Environment, order_book_id: String) -> AccountPositionResult:
+fn _get_account_position(env: Environment, order_book_id: String) -> AccountPositionResult raises:
     var position = env.portfolio.get_stock_position(order_book_id)
     return AccountPositionResult(
         total_cash=env._portfolio_cash,
@@ -42,16 +43,18 @@ fn _get_account_position(env: Environment, order_book_id: String) -> AccountPosi
 
 
 fn _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = "floor") -> Int:
-    if ins.type == INSTRUMENT_TYPE_CS and ins.board_type == "KSH":
+    var ins_type = ins.type()
+    var board_type = ins.board_type()
+    if ins_type == INSTRUMENT_TYPE_CS and board_type == "KSH":
         if abs(quantity) < KSH_MIN_AMOUNT():
             return 0
         return quantity
-    elif ins.type == INSTRUMENT_TYPE_CS and ins.board_type == "BJS":
+    elif ins_type == INSTRUMENT_TYPE_CS and board_type == "BJS":
         if abs(quantity) < BJSE_MIN_AMOUNT():
             return 0
         return quantity
     else:
-        var round_lot = ins.round_lot
+        var round_lot = ins.round_lot()
         if round_lot <= 0:
             round_lot = 100
         var abs_qty = abs(quantity)
@@ -83,7 +86,7 @@ fn _submit_order(
     current_quantity: Int,
     auto_switch_order_value: Bool = True,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     if style.style_type == ORDER_TYPE_LIMIT:
         if style.limit_price != style.limit_price:
             return None
@@ -102,7 +105,7 @@ fn _submit_order(
     
     var order = create_order_with_id(
         0,
-        ins.order_book_id,
+        ins.order_book_id(),
         abs(amount),
         side,
         style,
@@ -120,7 +123,7 @@ fn _order_shares(
     quantity: Int,
     auto_switch_order_value: Bool = True,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var side: SIDE
     var position_effect: POSITION_EFFECT
     
@@ -144,7 +147,7 @@ fn _order_value(
     cash_amount: Float64,
     style: OrderStyle,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var actual_cash = cash_amount
     if cash_amount > 0:
         actual_cash = min(cash_amount, account_result.total_cash)
@@ -159,7 +162,7 @@ fn _order_value(
         return None
     
     var ins = env.get_instrument(order_book_id)
-    var round_lot = ins.round_lot
+    var round_lot = ins.round_lot()
     if round_lot <= 0:
         round_lot = 100
     
@@ -186,7 +189,7 @@ fn stock_order_shares(
     id_or_ins: String,
     amount: Int,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     return _order_shares(
         env, id_or_ins, amount, style, result.position_quantity, True
@@ -198,9 +201,9 @@ fn stock_order_lots(
     id_or_ins: String,
     lots: Int,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var ins = env.get_instrument(id_or_ins)
-    var round_lot = ins.round_lot
+    var round_lot = ins.round_lot()
     if round_lot <= 0:
         round_lot = 100
     return stock_order_shares(env, id_or_ins, lots * round_lot, style)
@@ -211,7 +214,7 @@ fn stock_order_value(
     id_or_ins: String,
     cash_amount: Float64,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     return _order_value(env, result, id_or_ins, cash_amount, style)
 
@@ -221,7 +224,7 @@ fn stock_order_percent(
     id_or_ins: String,
     percent: Float64,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     var cash_amount = result.total_value * percent
     return _order_value(env, result, id_or_ins, cash_amount, style)
@@ -233,7 +236,7 @@ fn stock_order_target_value(
     cash_amount: Float64,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     
     if cash_amount == 0:
@@ -253,7 +256,7 @@ fn stock_order_target_percent(
     percent: Float64,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
+) -> Optional[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     
     if percent == 0:
@@ -272,7 +275,7 @@ fn stock_order(
     id_or_ins: String,
     quantity: Int,
     style: OrderStyle = MarketOrder()
-) -> List[Order]:
+) -> List[Order] raises:
     var result = stock_order_shares(env, id_or_ins, quantity, style)
     var orders = List[Order]()
     if result is not None:
@@ -286,7 +289,7 @@ fn stock_order_to(
     quantity: Int,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> List[Order]:
+) -> List[Order] raises:
     var result = _get_account_position(env, id_or_ins)
     var delta = quantity - result.position_quantity
     var style = open_style if delta > 0 else close_style

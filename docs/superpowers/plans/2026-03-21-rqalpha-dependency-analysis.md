@@ -193,35 +193,35 @@
 
 ## 第十一组：依赖数量 6（共10个文件）
 
-| 序号 | 文件路径                                                          | 状态  | 依赖数量 | 依赖模块                                                                                                                                                |
-| -- | ------------------------------------------------------------- | --- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1  | `apis/api_abstract.py`                                        | 待重构 | 6    | `rqalpha.api`, `rqalpha.core.execution_context`, `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.utils.arg_checker`    |
-| 2  | `cmds/__init__.py`                                            | 待重构 | 6    | `.bundle`, `.mod`, `.run`, `.misc`, `.entry`, `.run`                                                                                                |
-| 3  | `environment.py`                                              | 待重构 | 6    | `rqalpha.const`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`, `rqalpha.utils.exception`                |
-| 4  | `mod/rqalpha_mod_sys_risk/validators/cash_validator.py`       | 待重构 | 6    | `rqalpha.interface`, `rqalpha.const`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.environment`, `rqalpha.utils.i18n`               |
-| 5  | `mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py` | 待重构 | 6    | `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.environment`, `rqalpha.utils.exception`     |
-| 6  | `mod/rqalpha_mod_sys_simulation/simulation_broker.py`         | 待重构 | 6    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.order`, `rqalpha.model.trade`, `rqalpha.core.events`                    |
-| 7  | `mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py`  | 待重构 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    |
-| 8  | `mod/rqalpha_mod_sys_accounts/api/api_future.py`              | 待重构 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    |
-| 9  | `model/bar.py`                                                | 待重构 | 6    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`, `rqalpha.utils.datetime_func`, `rqalpha.model.instrument`             |
-| 10 | `data/base_data_source/storages.py`                           | 待重构 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` |
+| 序号 | 文件路径                                                          | 状态    | 依赖数量 | 依赖模块                                                                                                                                                |
+| -- | ------------------------------------------------------------- | ----- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1  | `apis/api_abstract.py`                                        | ✅ 已完成 | 6    | `rqalpha.api`, `rqalpha.core.execution_context`, `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.utils.arg_checker`    |
+| 2  | `cmds/__init__.py`                                            | ✅ 已完成 | 6    | `.bundle`, `.mod`, `.run`, `.misc`, `.entry`, `.run`                                                                                                |
+| 3  | `environment.py`                                              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`, `rqalpha.utils.exception`                |
+| 4  | `mod/rqalpha_mod_sys_risk/validators/cash_validator.py`       | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.const`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.environment`, `rqalpha.utils.i18n`               |
+| 5  | `mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py` | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.environment`, `rqalpha.utils.exception`     |
+| 6  | `mod/rqalpha_mod_sys_simulation/simulation_broker.py`         | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.order`, `rqalpha.model.trade`, `rqalpha.core.events`                    |
+| 7  | `mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py`  | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    |
+| 8  | `mod/rqalpha_mod_sys_accounts/api/api_future.py`              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    |
+| 9  | `model/bar.py`                                                | ✅ 已完成 | 6    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`, `rqalpha.utils.datetime_func`, `rqalpha.model.instrument`             |
+| 10 | `data/base_data_source/storages.py`                           | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` |
 
 ***
 
 ## 第十二组：依赖数量 7-9（共10个文件）
 
-| 序号 | 文件路径                                             | 状态  | 依赖数量 | 依赖模块                                                                                                                                                                                                                                                         |
-| -- | ------------------------------------------------ | --- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1  | `mod/rqalpha_mod_sys_accounts/api/api_stock.py`  | 待重构 | 7    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.utils.logger`                                                                                     |
-| 2  | `apis/api_rqdatac.py`                            | 待重构 | 7    | `rqalpha.const`, `rqalpha.api`, `rqalpha.apis.names`, `rqalpha.core.execution_context`, `rqalpha.environment`, `rqalpha.utils.arg_checker`, `rqalpha.utils.exception`                                                                                        |
-| 3  | `mod/rqalpha_mod_sys_accounts/position_model.py` | 待重构 | 8    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.utils.logger`, `rqalpha.environment`, `rqalpha.interface`, `rqalpha.utils`                                                                            |
-| 4  | `data/data_proxy.py`                             | 待重构 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.instrument`, `rqalpha.model.tick`, `rqalpha.model.bar`, `rqalpha.utils`                                                                                   |
-| 5  | `portfolio/__init__.py`                          | 待重构 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.data`, `rqalpha.utils`                                                                                      |
-| 6  | `portfolio/position.py`                          | 待重构 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.model.trade`, `rqalpha.utils`, `rqalpha.utils.i18n`                                                                                      |
-| 7  | `portfolio/account.py`                           | 待重构 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.position`, `rqalpha.data`, `rqalpha.utils`                                                                                     |
-| 8  | `apis/api_base.py`                               | 待重构 | 9    | `rqalpha.apis.names`, `rqalpha.environment`, `rqalpha.core.execution_context`, `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`, `rqalpha.utils.arg_checker`, `rqalpha.api`, `rqalpha.utils.logger`                                          |
-| 9  | `utils/testing/fixtures.py`                      | 待重构 | 9    | `rqalpha.utils.config`, `rqalpha.environment`, `rqalpha.utils`, `rqalpha.core.strategy_universe`, `rqalpha.data.base_data_source`, `rqalpha.data.bar_dict_price_board`, `rqalpha.data.data_proxy`, `rqalpha.mod.rqalpha_mod_sys_simulation`, `rqalpha.const` |
-| 10 | `data/base_data_source/data_source.py`           | 待重构 | 10   | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.instrument`, `rqalpha.model.tick`, `rqalpha.model.bar`, `rqalpha.utils`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`                                     |
+| 序号 | 文件路径                                             | 状态    | 依赖数量 | 依赖模块                                                                                                                                                                                                                                                         |
+| -- | ------------------------------------------------ | ----- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1  | `mod/rqalpha_mod_sys_accounts/api/api_stock.py`  | ✅ 已完成 | 7    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.utils.logger`                                                                                     |
+| 2  | `apis/api_rqdatac.py`                            | ✅ 已完成 | 7    | `rqalpha.const`, `rqalpha.api`, `rqalpha.apis.names`, `rqalpha.core.execution_context`, `rqalpha.environment`, `rqalpha.utils.arg_checker`, `rqalpha.utils.exception`                                                                                        |
+| 3  | `mod/rqalpha_mod_sys_accounts/position_model.py` | ✅ 已完成 | 8    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.utils.logger`, `rqalpha.environment`, `rqalpha.interface`, `rqalpha.utils`                                                                            |
+| 4  | `data/data_proxy.py`                             | ✅ 已完成 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.instrument`, `rqalpha.model.tick`, `rqalpha.model.bar`, `rqalpha.utils`                                                                                   |
+| 5  | `portfolio/__init__.py`                          | ✅ 已完成 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.data`, `rqalpha.utils`                                                                                      |
+| 6  | `portfolio/position.py`                          | ✅ 已完成 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.model.trade`, `rqalpha.utils`, `rqalpha.utils.i18n`                                                                                      |
+| 7  | `portfolio/account.py`                           | ✅ 已完成 | 8    | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.position`, `rqalpha.data`, `rqalpha.utils`                                                                                     |
+| 8  | `apis/api_base.py`                               | ✅ 已完成 | 9    | `rqalpha.apis.names`, `rqalpha.environment`, `rqalpha.core.execution_context`, `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`, `rqalpha.utils.arg_checker`, `rqalpha.api`, `rqalpha.utils.logger`                                          |
+| 9  | `utils/testing/fixtures.py`                      | ✅ 已完成 | 9    | `rqalpha.utils.config`, `rqalpha.environment`, `rqalpha.utils`, `rqalpha.core.strategy_universe`, `rqalpha.data.base_data_source`, `rqalpha.data.bar_dict_price_board`, `rqalpha.data.data_proxy`, `rqalpha.mod.rqalpha_mod_sys_simulation`, `rqalpha.const` |
+| 10 | `data/base_data_source/data_source.py`           | ✅ 已完成 | 10   | `rqalpha.const`, `rqalpha.environment`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.model.instrument`, `rqalpha.model.tick`, `rqalpha.model.bar`, `rqalpha.utils`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`                                     |
 
 ***
 
@@ -249,10 +249,10 @@
 | 第8组    | 4      | 10      | 0      | 10     |
 | 第9组    | 4-5    | 10      | 0      | 10     |
 | 第10组   | 5-6    | 10      | 10     | 0      |
-| 第11组   | 6      | 10      | 0      | 10     |
+| 第11组   | 6      | 10      | 10     | 0      |
 | 第12组   | 7-10   | 10      | 0      | 10     |
 | 第13组   | 1-20   | 3       | 0      | 3      |
-| **总计** | -      | **123** | **80** | **43** |
+| **总计** | -      | **123** | **90** | **33** |
 
 ***
 
