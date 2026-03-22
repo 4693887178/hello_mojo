@@ -1,171 +1,427 @@
-# -*- coding: utf-8 -*-
 """
-Test for rqalpha/const.py - Constants and Enumerations
-Compares output with Mojo rqmojo/const.mojo
+RQAlpha const.py 测试文件
+测试所有枚举类和常量的正确性
 """
 
+import pytest
 from rqalpha.const import (
     EXECUTION_PHASE, RUN_TYPE, DEFAULT_ACCOUNT_TYPE, MATCHING_TYPE,
-    ORDER_TYPE, ORDER_STATUS, SIDE, POSITION_EFFECT, POSITION_DIRECTION,
-    INSTRUMENT_TYPE, EXCHANGE, DAYS_CNT, MARKET
+    ORDER_TYPE, ALGO, ORDER_STATUS, SIDE, POSITION_EFFECT,
+    POSITION_DIRECTION, EXC_TYPE, INSTRUMENT_TYPE, PERSIST_MODE,
+    COMMISSION_TYPE, EXIT_CODE, HEDGE_TYPE, DAYS_CNT, EXCHANGE,
+    TRADING_CALENDAR_TYPE, MARKET
 )
 
 
-def test_execution_phase():
-    print("=== Testing EXECUTION_PHASE ===")
-    print(f"GLOBAL: name={EXECUTION_PHASE.GLOBAL.name}, value={EXECUTION_PHASE.GLOBAL.value}")
-    print(f"ON_INIT: name={EXECUTION_PHASE.ON_INIT.name}, value={EXECUTION_PHASE.ON_INIT.value}")
-    print(f"BEFORE_TRADING: name={EXECUTION_PHASE.BEFORE_TRADING.name}, value={EXECUTION_PHASE.BEFORE_TRADING.value}")
-    print(f"ON_BAR: name={EXECUTION_PHASE.ON_BAR.name}, value={EXECUTION_PHASE.ON_BAR.value}")
-    print(f"ON_TICK: name={EXECUTION_PHASE.ON_TICK.name}, value={EXECUTION_PHASE.ON_TICK.value}")
-    print(f"AFTER_TRADING: name={EXECUTION_PHASE.AFTER_TRADING.name}, value={EXECUTION_PHASE.AFTER_TRADING.value}")
-    print(f"FINALIZED: name={EXECUTION_PHASE.FINALIZED.name}, value={EXECUTION_PHASE.FINALIZED.value}")
-    print(f"SCHEDULED: name={EXECUTION_PHASE.SCHEDULED.name}, value={EXECUTION_PHASE.SCHEDULED.value}")
-    print("")
-
-
-def test_run_type():
-    print("=== Testing RUN_TYPE ===")
-    print(f"BACKTEST: name={RUN_TYPE.BACKTEST.name}, value={RUN_TYPE.BACKTEST.value}")
-    print(f"PAPER_TRADING: name={RUN_TYPE.PAPER_TRADING.name}, value={RUN_TYPE.PAPER_TRADING.value}")
-    print(f"LIVE_TRADING: name={RUN_TYPE.LIVE_TRADING.name}, value={RUN_TYPE.LIVE_TRADING.value}")
-    print("")
-
-
-def test_default_account_type():
-    print("=== Testing DEFAULT_ACCOUNT_TYPE ===")
-    print(f"STOCK: name={DEFAULT_ACCOUNT_TYPE.STOCK.name}, value={DEFAULT_ACCOUNT_TYPE.STOCK.value}")
-    print(f"FUTURE: name={DEFAULT_ACCOUNT_TYPE.FUTURE.name}, value={DEFAULT_ACCOUNT_TYPE.FUTURE.value}")
-    print(f"BOND: name={DEFAULT_ACCOUNT_TYPE.BOND.name}, value={DEFAULT_ACCOUNT_TYPE.BOND.value}")
-    print("")
-
-
-def test_matching_type():
-    print("=== Testing MATCHING_TYPE ===")
-    print(f"CURRENT_BAR_CLOSE: name={MATCHING_TYPE.CURRENT_BAR_CLOSE.name}, value={MATCHING_TYPE.CURRENT_BAR_CLOSE.value}")
-    print(f"VWAP: name={MATCHING_TYPE.VWAP.name}, value={MATCHING_TYPE.VWAP.value}")
-    print(f"COUNTERPARTY_OFFER: name={MATCHING_TYPE.COUNTERPARTY_OFFER.name}, value={MATCHING_TYPE.COUNTERPARTY_OFFER.value}")
-    print(f"NEXT_BAR_OPEN: name={MATCHING_TYPE.NEXT_BAR_OPEN.name}, value={MATCHING_TYPE.NEXT_BAR_OPEN.value}")
-    print("")
-
-
-def test_order_type():
-    print("=== Testing ORDER_TYPE ===")
-    print(f"MARKET: name={ORDER_TYPE.MARKET.name}, value={ORDER_TYPE.MARKET.value}")
-    print(f"LIMIT: name={ORDER_TYPE.LIMIT.name}, value={ORDER_TYPE.LIMIT.value}")
-    print(f"ALGO: name={ORDER_TYPE.ALGO.name}, value={ORDER_TYPE.ALGO.value}")
-    print("")
-
-
-def test_order_status():
-    print("=== Testing ORDER_STATUS ===")
-    print(f"PENDING_NEW: name={ORDER_STATUS.PENDING_NEW.name}, value={ORDER_STATUS.PENDING_NEW.value}")
-    print(f"ACTIVE: name={ORDER_STATUS.ACTIVE.name}, value={ORDER_STATUS.ACTIVE.value}")
-    print(f"FILLED: name={ORDER_STATUS.FILLED.name}, value={ORDER_STATUS.FILLED.value}")
-    print(f"REJECTED: name={ORDER_STATUS.REJECTED.name}, value={ORDER_STATUS.REJECTED.value}")
-    print(f"CANCELLED: name={ORDER_STATUS.CANCELLED.name}, value={ORDER_STATUS.CANCELLED.value}")
-    print("")
-
-
-def test_side():
-    print("=== Testing SIDE ===")
-    print(f"BUY: name={SIDE.BUY.name}, value={SIDE.BUY.value}")
-    print(f"SELL: name={SIDE.SELL.name}, value={SIDE.SELL.value}")
-    print(f"FINANCING: name={SIDE.FINANCING.name}, value={SIDE.FINANCING.value}")
-    print(f"MARGIN: name={SIDE.MARGIN.name}, value={SIDE.MARGIN.value}")
-    print("")
-
-
-def test_position_effect():
-    print("=== Testing POSITION_EFFECT ===")
-    print(f"OPEN: name={POSITION_EFFECT.OPEN.name}, value={POSITION_EFFECT.OPEN.value}")
-    print(f"CLOSE: name={POSITION_EFFECT.CLOSE.name}, value={POSITION_EFFECT.CLOSE.value}")
-    print(f"CLOSE_TODAY: name={POSITION_EFFECT.CLOSE_TODAY.name}, value={POSITION_EFFECT.CLOSE_TODAY.value}")
-    print("")
-
-
-def test_position_direction():
-    print("=== Testing POSITION_DIRECTION ===")
-    print(f"LONG: name={POSITION_DIRECTION.LONG.name}, value={POSITION_DIRECTION.LONG.value}")
-    print(f"SHORT: name={POSITION_DIRECTION.SHORT.name}, value={POSITION_DIRECTION.SHORT.value}")
-    print("")
-
-
-def test_instrument_type():
-    print("=== Testing INSTRUMENT_TYPE ===")
-    print(f"CS: name={INSTRUMENT_TYPE.CS.name}, value={INSTRUMENT_TYPE.CS.value}")
-    print(f"FUTURE: name={INSTRUMENT_TYPE.FUTURE.name}, value={INSTRUMENT_TYPE.FUTURE.value}")
-    print(f"OPTION: name={INSTRUMENT_TYPE.OPTION.name}, value={INSTRUMENT_TYPE.OPTION.value}")
-    print(f"ETF: name={INSTRUMENT_TYPE.ETF.name}, value={INSTRUMENT_TYPE.ETF.value}")
-    print(f"LOF: name={INSTRUMENT_TYPE.LOF.name}, value={INSTRUMENT_TYPE.LOF.value}")
-    print(f"INDX: name={INSTRUMENT_TYPE.INDX.name}, value={INSTRUMENT_TYPE.INDX.value}")
-    print("")
-
-
-def test_exchange():
-    print("=== Testing EXCHANGE ===")
-    print(f"XSHE: name={EXCHANGE.XSHE.name}, value={EXCHANGE.XSHE.value}")
-    print(f"XSHG: name={EXCHANGE.XSHG.name}, value={EXCHANGE.XSHG.value}")
-    print(f"SHFE: name={EXCHANGE.SHFE.name}, value={EXCHANGE.SHFE.value}")
-    print(f"DCE: name={EXCHANGE.DCE.name}, value={EXCHANGE.DCE.value}")
-    print(f"CZCE: name={EXCHANGE.CZCE.name}, value={EXCHANGE.CZCE.value}")
-    print(f"CFFEX: name={EXCHANGE.CFFEX.name}, value={EXCHANGE.CFFEX.value}")
-    print("")
-
-
-def test_days_cnt():
-    print("=== Testing DAYS_CNT ===")
-    print(f"DAYS_A_YEAR: {DAYS_CNT.DAYS_A_YEAR}")
-    print(f"TRADING_DAYS_A_YEAR: {DAYS_CNT.TRADING_DAYS_A_YEAR}")
-    print("")
-
-
-def test_market():
-    print("=== Testing MARKET ===")
-    print(f"CN: name={MARKET.CN.name}, value={MARKET.CN.value}")
-    print(f"HK: name={MARKET.HK.name}, value={MARKET.HK.value}")
-    print("")
-
-
-def test_equality():
-    print("=== Testing Equality ===")
-    buy1 = SIDE.BUY
-    buy2 = SIDE.BUY
-    sell = SIDE.SELL
+class TestEXECUTION_PHASE:
+    def test_global(self):
+        assert EXECUTION_PHASE.GLOBAL.value == "[全局]"
+        assert EXECUTION_PHASE.GLOBAL.name == "GLOBAL"
     
-    if buy1 == buy2:
-        print("PASS: buy1 == buy2")
-    else:
-        print("FAIL: buy1 should equal buy2")
+    def test_on_init(self):
+        assert EXECUTION_PHASE.ON_INIT.value == "[程序初始化]"
+        assert EXECUTION_PHASE.ON_INIT.name == "ON_INIT"
     
-    if buy1 != sell:
-        print("PASS: buy1 != sell")
-    else:
-        print("FAIL: buy1 should not equal sell")
-    print("")
+    def test_before_trading(self):
+        assert EXECUTION_PHASE.BEFORE_TRADING.value == "[日内交易前]"
+        assert EXECUTION_PHASE.BEFORE_TRADING.name == "BEFORE_TRADING"
+    
+    def test_open_auction(self):
+        assert EXECUTION_PHASE.OPEN_AUCTION.value == "[集合竞价]"
+        assert EXECUTION_PHASE.OPEN_AUCTION.name == "OPEN_AUCTION"
+    
+    def test_on_bar(self):
+        assert EXECUTION_PHASE.ON_BAR.value == "[盘中 handle_bar 函数]"
+        assert EXECUTION_PHASE.ON_BAR.name == "ON_BAR"
+    
+    def test_on_tick(self):
+        assert EXECUTION_PHASE.ON_TICK.value == "[盘中 handle_tick 函数]"
+        assert EXECUTION_PHASE.ON_TICK.name == "ON_TICK"
+    
+    def test_after_trading(self):
+        assert EXECUTION_PHASE.AFTER_TRADING.value == "[日内交易后]"
+        assert EXECUTION_PHASE.AFTER_TRADING.name == "AFTER_TRADING"
+    
+    def test_finalized(self):
+        assert EXECUTION_PHASE.FINALIZED.value == "[程序结束]"
+        assert EXECUTION_PHASE.FINALIZED.name == "FINALIZED"
+    
+    def test_scheduled(self):
+        assert EXECUTION_PHASE.SCHEDULED.value == "[scheduler函数内]"
+        assert EXECUTION_PHASE.SCHEDULED.name == "SCHEDULED"
+    
+    def test_count(self):
+        assert len(EXECUTION_PHASE) == 9
+    
+    def test_contains_by_name(self):
+        assert "GLOBAL" in EXECUTION_PHASE
+    
+    def test_contains_by_value(self):
+        assert "[全局]" in EXECUTION_PHASE
+    
+    def test_getitem_by_name(self):
+        assert EXECUTION_PHASE["GLOBAL"] == EXECUTION_PHASE.GLOBAL
+    
+    def test_getitem_by_value(self):
+        assert EXECUTION_PHASE["[全局]"] == EXECUTION_PHASE.GLOBAL
 
 
-if __name__ == "__main__":
-    print("=" * 60)
-    print("RQAlpha Python root/const.py Test")
-    print("=" * 60)
-    print("")
+class TestRUN_TYPE:
+    def test_backtest(self):
+        assert RUN_TYPE.BACKTEST.value == "BACKTEST"
+        assert RUN_TYPE.BACKTEST.name == "BACKTEST"
     
-    test_execution_phase()
-    test_run_type()
-    test_default_account_type()
-    test_matching_type()
-    test_order_type()
-    test_order_status()
-    test_side()
-    test_position_effect()
-    test_position_direction()
-    test_instrument_type()
-    test_exchange()
-    test_days_cnt()
-    test_market()
-    test_equality()
+    def test_paper_trading(self):
+        assert RUN_TYPE.PAPER_TRADING.value == "PAPER_TRADING"
+        assert RUN_TYPE.PAPER_TRADING.name == "PAPER_TRADING"
     
-    print("=" * 60)
-    print("All tests completed!")
-    print("=" * 60)
+    def test_live_trading(self):
+        assert RUN_TYPE.LIVE_TRADING.value == "LIVE_TRADING"
+        assert RUN_TYPE.LIVE_TRADING.name == "LIVE_TRADING"
+    
+    def test_count(self):
+        assert len(RUN_TYPE) == 3
+
+
+class TestDEFAULT_ACCOUNT_TYPE:
+    def test_stock(self):
+        assert DEFAULT_ACCOUNT_TYPE.STOCK.value == "STOCK"
+        assert DEFAULT_ACCOUNT_TYPE.STOCK.name == "STOCK"
+    
+    def test_future(self):
+        assert DEFAULT_ACCOUNT_TYPE.FUTURE.value == "FUTURE"
+        assert DEFAULT_ACCOUNT_TYPE.FUTURE.name == "FUTURE"
+    
+    def test_bond(self):
+        assert DEFAULT_ACCOUNT_TYPE.BOND.value == "BOND"
+        assert DEFAULT_ACCOUNT_TYPE.BOND.name == "BOND"
+    
+    def test_count(self):
+        assert len(DEFAULT_ACCOUNT_TYPE) == 3
+
+
+class TestMATCHING_TYPE:
+    def test_current_bar_close(self):
+        assert MATCHING_TYPE.CURRENT_BAR_CLOSE.value == "CURRENT_BAR_CLOSE"
+    
+    def test_vwap(self):
+        assert MATCHING_TYPE.VWAP.value == "VWAP"
+    
+    def test_counterparty_offer(self):
+        assert MATCHING_TYPE.COUNTERPARTY_OFFER.value == "COUNTERPARTY_OFFER"
+    
+    def test_next_bar_open(self):
+        assert MATCHING_TYPE.NEXT_BAR_OPEN.value == "NEXT_BAR_OPEN"
+    
+    def test_next_tick_last(self):
+        assert MATCHING_TYPE.NEXT_TICK_LAST.value == "NEXT_TICK_LAST"
+    
+    def test_next_tick_best_own(self):
+        assert MATCHING_TYPE.NEXT_TICK_BEST_OWN.value == "NEXT_TICK_BEST_OWN"
+    
+    def test_next_tick_best_counterparty(self):
+        assert MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY.value == "NEXT_TICK_BEST_COUNTERPARTY"
+    
+    def test_count(self):
+        assert len(MATCHING_TYPE) == 7
+
+
+class TestORDER_TYPE:
+    def test_market(self):
+        assert ORDER_TYPE.MARKET.value == "MARKET"
+    
+    def test_limit(self):
+        assert ORDER_TYPE.LIMIT.value == "LIMIT"
+    
+    def test_algo(self):
+        assert ORDER_TYPE.ALGO.value == "ALGO"
+    
+    def test_count(self):
+        assert len(ORDER_TYPE) == 3
+
+
+class TestALGO:
+    def test_twap(self):
+        assert ALGO.TWAP.value == "TWAP"
+    
+    def test_vwap(self):
+        assert ALGO.VWAP.value == "VWAP"
+    
+    def test_count(self):
+        assert len(ALGO) == 2
+
+
+class TestORDER_STATUS:
+    def test_pending_new(self):
+        assert ORDER_STATUS.PENDING_NEW.value == "PENDING_NEW"
+    
+    def test_active(self):
+        assert ORDER_STATUS.ACTIVE.value == "ACTIVE"
+    
+    def test_filled(self):
+        assert ORDER_STATUS.FILLED.value == "FILLED"
+    
+    def test_rejected(self):
+        assert ORDER_STATUS.REJECTED.value == "REJECTED"
+    
+    def test_pending_cancel(self):
+        assert ORDER_STATUS.PENDING_CANCEL.value == "PENDING_CANCEL"
+    
+    def test_cancelled(self):
+        assert ORDER_STATUS.CANCELLED.value == "CANCELLED"
+    
+    def test_count(self):
+        assert len(ORDER_STATUS) == 6
+
+
+class TestSIDE:
+    def test_buy(self):
+        assert SIDE.BUY.value == "BUY"
+    
+    def test_sell(self):
+        assert SIDE.SELL.value == "SELL"
+    
+    def test_financing(self):
+        assert SIDE.FINANCING.value == "FINANCING"
+    
+    def test_margin(self):
+        assert SIDE.MARGIN.value == "MARGIN"
+    
+    def test_convert_stock(self):
+        assert SIDE.CONVERT_STOCK.value == "CONVERT_STOCK"
+    
+    def test_count(self):
+        assert len(SIDE) == 5
+
+
+class TestPOSITION_EFFECT:
+    def test_open(self):
+        assert POSITION_EFFECT.OPEN.value == "OPEN"
+    
+    def test_close(self):
+        assert POSITION_EFFECT.CLOSE.value == "CLOSE"
+    
+    def test_close_today(self):
+        assert POSITION_EFFECT.CLOSE_TODAY.value == "CLOSE_TODAY"
+    
+    def test_exercise(self):
+        assert POSITION_EFFECT.EXERCISE.value == "EXERCISE"
+    
+    def test_match(self):
+        assert POSITION_EFFECT.MATCH.value == "MATCH"
+    
+    def test_count(self):
+        assert len(POSITION_EFFECT) == 5
+
+
+class TestPOSITION_DIRECTION:
+    def test_long(self):
+        assert POSITION_DIRECTION.LONG.value == "LONG"
+    
+    def test_short(self):
+        assert POSITION_DIRECTION.SHORT.value == "SHORT"
+    
+    def test_count(self):
+        assert len(POSITION_DIRECTION) == 2
+
+
+class TestEXC_TYPE:
+    def test_user_exc(self):
+        assert EXC_TYPE.USER_EXC.value == "USER_EXC"
+    
+    def test_system_exc(self):
+        assert EXC_TYPE.SYSTEM_EXC.value == "SYSTEM_EXC"
+    
+    def test_notset(self):
+        assert EXC_TYPE.NOTSET.value == "NOTSET"
+    
+    def test_count(self):
+        assert len(EXC_TYPE) == 3
+
+
+class TestINSTRUMENT_TYPE:
+    def test_cs(self):
+        assert INSTRUMENT_TYPE.CS.value == "CS"
+    
+    def test_future(self):
+        assert INSTRUMENT_TYPE.FUTURE.value == "Future"
+    
+    def test_option(self):
+        assert INSTRUMENT_TYPE.OPTION.value == "Option"
+    
+    def test_etf(self):
+        assert INSTRUMENT_TYPE.ETF.value == "ETF"
+    
+    def test_lof(self):
+        assert INSTRUMENT_TYPE.LOF.value == "LOF"
+    
+    def test_indx(self):
+        assert INSTRUMENT_TYPE.INDX.value == "INDX"
+    
+    def test_public_fund(self):
+        assert INSTRUMENT_TYPE.PUBLIC_FUND.value == "PublicFund"
+    
+    def test_fund(self):
+        assert INSTRUMENT_TYPE.FUND.value == "Fund"
+    
+    def test_bond(self):
+        assert INSTRUMENT_TYPE.BOND.value == "Bond"
+    
+    def test_convertible(self):
+        assert INSTRUMENT_TYPE.CONVERTIBLE.value == "Convertible"
+    
+    def test_spot(self):
+        assert INSTRUMENT_TYPE.SPOT.value == "Spot"
+    
+    def test_repo(self):
+        assert INSTRUMENT_TYPE.REPO.value == "Repo"
+    
+    def test_reits(self):
+        assert INSTRUMENT_TYPE.REITs.value == "REITs"
+    
+    def test_future_arbitrage(self):
+        assert INSTRUMENT_TYPE.FutureArbitrage.value == "FutureArbitrage"
+    
+    def test_count(self):
+        assert len(INSTRUMENT_TYPE) == 14
+
+
+class TestPERSIST_MODE:
+    def test_on_crash(self):
+        assert PERSIST_MODE.ON_CRASH.value == "ON_CRASH"
+    
+    def test_real_time(self):
+        assert PERSIST_MODE.REAL_TIME.value == "REAL_TIME"
+    
+    def test_on_normal_exit(self):
+        assert PERSIST_MODE.ON_NORMAL_EXIT.value == "ON_NORMAL_EXIT"
+    
+    def test_count(self):
+        assert len(PERSIST_MODE) == 3
+
+
+class TestCOMMISSION_TYPE:
+    def test_by_money(self):
+        assert COMMISSION_TYPE.BY_MONEY.value == "BY_MONEY"
+    
+    def test_by_volume(self):
+        assert COMMISSION_TYPE.BY_VOLUME.value == "BY_VOLUME"
+    
+    def test_count(self):
+        assert len(COMMISSION_TYPE) == 2
+
+
+class TestEXIT_CODE:
+    def test_exit_success(self):
+        assert EXIT_CODE.EXIT_SUCCESS.value == "EXIT_SUCCESS"
+    
+    def test_exit_user_error(self):
+        assert EXIT_CODE.EXIT_USER_ERROR.value == "EXIT_USER_ERROR"
+    
+    def test_exit_internal_error(self):
+        assert EXIT_CODE.EXIT_INTERNAL_ERROR.value == "EXIT_INTERNAL_ERROR"
+    
+    def test_count(self):
+        assert len(EXIT_CODE) == 3
+
+
+class TestHEDGE_TYPE:
+    def test_hedge(self):
+        assert HEDGE_TYPE.HEDGE.value == "hedge"
+    
+    def test_speculation(self):
+        assert HEDGE_TYPE.SPECULATION.value == "speculation"
+    
+    def test_arbitrage(self):
+        assert HEDGE_TYPE.ARBITRAGE.value == "arbitrage"
+    
+    def test_count(self):
+        assert len(HEDGE_TYPE) == 3
+
+
+class TestDAYS_CNT:
+    def test_days_a_year(self):
+        assert DAYS_CNT.DAYS_A_YEAR == 365
+    
+    def test_trading_days_a_year(self):
+        assert DAYS_CNT.TRADING_DAYS_A_YEAR == 252
+
+
+class TestEXCHANGE:
+    def test_xshe(self):
+        assert EXCHANGE.XSHE.value == "XSHE"
+    
+    def test_xshg(self):
+        assert EXCHANGE.XSHG.value == "XSHG"
+    
+    def test_shfe(self):
+        assert EXCHANGE.SHFE.value == "SHFE"
+    
+    def test_ine(self):
+        assert EXCHANGE.INE.value == "INE"
+    
+    def test_dce(self):
+        assert EXCHANGE.DCE.value == "DCE"
+    
+    def test_czce(self):
+        assert EXCHANGE.CZCE.value == "CZCE"
+    
+    def test_cffex(self):
+        assert EXCHANGE.CFFEX.value == "CFFEX"
+    
+    def test_sgex(self):
+        assert EXCHANGE.SGEX.value == "SGEX"
+    
+    def test_bjse(self):
+        assert EXCHANGE.BJSE.value == "BJSE"
+    
+    def test_count(self):
+        assert len(EXCHANGE) == 9
+
+
+class TestTRADING_CALENDAR_TYPE:
+    def test_cn_stock(self):
+        assert TRADING_CALENDAR_TYPE.CN_STOCK.value == "CN_STOCK"
+    
+    def test_hk_stock(self):
+        assert TRADING_CALENDAR_TYPE.HK_STOCK.value == "HK_STOCK"
+    
+    def test_southbound(self):
+        assert TRADING_CALENDAR_TYPE.SOUTHBOUND.value == "SOUTHBOUND"
+    
+    def test_inter_bank(self):
+        assert TRADING_CALENDAR_TYPE.INTER_BANK.value == "INTERBANK"
+    
+    def test_exchange_backward_compatible(self):
+        assert TRADING_CALENDAR_TYPE.EXCHANGE == TRADING_CALENDAR_TYPE.CN_STOCK
+    
+    def test_count(self):
+        assert len(TRADING_CALENDAR_TYPE) == 4
+
+
+class TestMARKET:
+    def test_cn(self):
+        assert MARKET.CN.value == "CN"
+    
+    def test_hk(self):
+        assert MARKET.HK.value == "HK"
+    
+    def test_count(self):
+        assert len(MARKET) == 2
+
+
+class TestCustomEnumFeatures:
+    def test_repr_format(self):
+        assert repr(EXECUTION_PHASE.GLOBAL) == "EXECUTION_PHASE.GLOBAL"
+    
+    def test_string_inheritance(self):
+        assert isinstance(EXECUTION_PHASE.GLOBAL, str)
+    
+    def test_equality(self):
+        assert EXECUTION_PHASE.GLOBAL == EXECUTION_PHASE.GLOBAL
+        assert EXECUTION_PHASE.GLOBAL != EXECUTION_PHASE.ON_INIT
+    
+    def test_hashable(self):
+        phase_set = {EXECUTION_PHASE.GLOBAL, EXECUTION_PHASE.ON_INIT}
+        assert len(phase_set) == 2
+        assert EXECUTION_PHASE.GLOBAL in phase_set

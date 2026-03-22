@@ -1,497 +1,593 @@
 """
-Test for const.mojo - Constants and Enumerations
-Complete test coverage for all 20 structs
-TDD-style comprehensive testing
+RQMojo const.mojo 测试文件
+测试所有枚举类和常量的正确性
 """
 
-from rqmojo.const import *
+from std.testing import assert_equal, assert_true, assert_false
+from rqmojo.const import (
+    EXECUTION_PHASE, RUN_TYPE, DEFAULT_ACCOUNT_TYPE, MATCHING_TYPE,
+    ORDER_TYPE, ALGO, ORDER_STATUS, SIDE, POSITION_EFFECT,
+    POSITION_DIRECTION, EXC_TYPE, INSTRUMENT_TYPE, PERSIST_MODE,
+    COMMISSION_TYPE, EXIT_CODE, HEDGE_TYPE, DAYS_CNT, EXCHANGE,
+    TRADING_CALENDAR_TYPE, MARKET, EnumRegistry
+)
 
 
-def test_execution_phase():
-    print("=== Testing EXECUTION_PHASE ===")
+def test_execution_phase() raises:
+    print("Testing EXECUTION_PHASE...")
     
-    var global_phase = EXECUTION_PHASE.GLOBAL
-    print("GLOBAL: name=" + global_phase.name + ", value=" + global_phase.value)
+    assert_equal(EXECUTION_PHASE.GLOBAL.name, "GLOBAL")
+    assert_equal(EXECUTION_PHASE.GLOBAL.value, "[全局]")
     
-    var on_init = EXECUTION_PHASE.ON_INIT
-    print("ON_INIT: name=" + on_init.name + ", value=" + on_init.value)
+    assert_equal(EXECUTION_PHASE.ON_INIT.name, "ON_INIT")
+    assert_equal(EXECUTION_PHASE.ON_INIT.value, "[程序初始化]")
     
-    var before_trading = EXECUTION_PHASE.BEFORE_TRADING
-    print("BEFORE_TRADING: name=" + before_trading.name + ", value=" + before_trading.value)
+    assert_equal(EXECUTION_PHASE.BEFORE_TRADING.name, "BEFORE_TRADING")
+    assert_equal(EXECUTION_PHASE.BEFORE_TRADING.value, "[日内交易前]")
     
-    var open_auction = EXECUTION_PHASE.OPEN_AUCTION
-    print("OPEN_AUCTION: name=" + open_auction.name + ", value=" + open_auction.value)
+    assert_equal(EXECUTION_PHASE.OPEN_AUCTION.name, "OPEN_AUCTION")
+    assert_equal(EXECUTION_PHASE.OPEN_AUCTION.value, "[集合竞价]")
     
-    var on_bar = EXECUTION_PHASE.ON_BAR
-    print("ON_BAR: name=" + on_bar.name + ", value=" + on_bar.value)
+    assert_equal(EXECUTION_PHASE.ON_BAR.name, "ON_BAR")
+    assert_equal(EXECUTION_PHASE.ON_BAR.value, "[盘中 handle_bar 函数]")
     
-    var on_tick = EXECUTION_PHASE.ON_TICK
-    print("ON_TICK: name=" + on_tick.name + ", value=" + on_tick.value)
+    assert_equal(EXECUTION_PHASE.ON_TICK.name, "ON_TICK")
+    assert_equal(EXECUTION_PHASE.ON_TICK.value, "[盘中 handle_tick 函数]")
     
-    var after_trading = EXECUTION_PHASE.AFTER_TRADING
-    print("AFTER_TRADING: name=" + after_trading.name + ", value=" + after_trading.value)
+    assert_equal(EXECUTION_PHASE.AFTER_TRADING.name, "AFTER_TRADING")
+    assert_equal(EXECUTION_PHASE.AFTER_TRADING.value, "[日内交易后]")
     
-    var finalized = EXECUTION_PHASE.FINALIZED
-    print("FINALIZED: name=" + finalized.name + ", value=" + finalized.value)
+    assert_equal(EXECUTION_PHASE.FINALIZED.name, "FINALIZED")
+    assert_equal(EXECUTION_PHASE.FINALIZED.value, "[程序结束]")
     
-    var scheduled = EXECUTION_PHASE.SCHEDULED
-    print("SCHEDULED: name=" + scheduled.name + ", value=" + scheduled.value)
+    assert_equal(EXECUTION_PHASE.SCHEDULED.name, "SCHEDULED")
+    assert_equal(EXECUTION_PHASE.SCHEDULED.value, "[scheduler函数内]")
     
-    var result = EXECUTION_PHASE.from_name("GLOBAL")
-    if result:
-        print("PASS: from_name('GLOBAL') found")
+    print("  EXECUTION_PHASE tests passed!")
+
+
+def test_run_type() raises:
+    print("Testing RUN_TYPE...")
+    
+    assert_equal(RUN_TYPE.BACKTEST.name, "BACKTEST")
+    assert_equal(RUN_TYPE.BACKTEST.value, "BACKTEST")
+    
+    assert_equal(RUN_TYPE.PAPER_TRADING.name, "PAPER_TRADING")
+    assert_equal(RUN_TYPE.PAPER_TRADING.value, "PAPER_TRADING")
+    
+    assert_equal(RUN_TYPE.LIVE_TRADING.name, "LIVE_TRADING")
+    assert_equal(RUN_TYPE.LIVE_TRADING.value, "LIVE_TRADING")
+    
+    print("  RUN_TYPE tests passed!")
+
+
+def test_default_account_type() raises:
+    print("Testing DEFAULT_ACCOUNT_TYPE...")
+    
+    assert_equal(DEFAULT_ACCOUNT_TYPE.STOCK.name, "STOCK")
+    assert_equal(DEFAULT_ACCOUNT_TYPE.STOCK.value, "STOCK")
+    
+    assert_equal(DEFAULT_ACCOUNT_TYPE.FUTURE.name, "FUTURE")
+    assert_equal(DEFAULT_ACCOUNT_TYPE.FUTURE.value, "FUTURE")
+    
+    assert_equal(DEFAULT_ACCOUNT_TYPE.BOND.name, "BOND")
+    assert_equal(DEFAULT_ACCOUNT_TYPE.BOND.value, "BOND")
+    
+    print("  DEFAULT_ACCOUNT_TYPE tests passed!")
+
+
+def test_matching_type() raises:
+    print("Testing MATCHING_TYPE...")
+    
+    assert_equal(MATCHING_TYPE.CURRENT_BAR_CLOSE.name, "CURRENT_BAR_CLOSE")
+    assert_equal(MATCHING_TYPE.CURRENT_BAR_CLOSE.value, "CURRENT_BAR_CLOSE")
+    
+    assert_equal(MATCHING_TYPE.VWAP.name, "VWAP")
+    assert_equal(MATCHING_TYPE.VWAP.value, "VWAP")
+    
+    assert_equal(MATCHING_TYPE.COUNTERPARTY_OFFER.name, "COUNTERPARTY_OFFER")
+    assert_equal(MATCHING_TYPE.COUNTERPARTY_OFFER.value, "COUNTERPARTY_OFFER")
+    
+    assert_equal(MATCHING_TYPE.NEXT_BAR_OPEN.name, "NEXT_BAR_OPEN")
+    assert_equal(MATCHING_TYPE.NEXT_BAR_OPEN.value, "NEXT_BAR_OPEN")
+    
+    assert_equal(MATCHING_TYPE.NEXT_TICK_LAST.name, "NEXT_TICK_LAST")
+    assert_equal(MATCHING_TYPE.NEXT_TICK_LAST.value, "NEXT_TICK_LAST")
+    
+    assert_equal(MATCHING_TYPE.NEXT_TICK_BEST_OWN.name, "NEXT_TICK_BEST_OWN")
+    assert_equal(MATCHING_TYPE.NEXT_TICK_BEST_OWN.value, "NEXT_TICK_BEST_OWN")
+    
+    assert_equal(MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY.name, "NEXT_TICK_BEST_COUNTERPARTY")
+    assert_equal(MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY.value, "NEXT_TICK_BEST_COUNTERPARTY")
+    
+    print("  MATCHING_TYPE tests passed!")
+
+
+def test_order_type() raises:
+    print("Testing ORDER_TYPE...")
+    
+    assert_equal(ORDER_TYPE.MARKET.name, "MARKET")
+    assert_equal(ORDER_TYPE.MARKET.value, "MARKET")
+    
+    assert_equal(ORDER_TYPE.LIMIT.name, "LIMIT")
+    assert_equal(ORDER_TYPE.LIMIT.value, "LIMIT")
+    
+    assert_equal(ORDER_TYPE.ALGO.name, "ALGO")
+    assert_equal(ORDER_TYPE.ALGO.value, "ALGO")
+    
+    print("  ORDER_TYPE tests passed!")
+
+
+def test_algo() raises:
+    print("Testing ALGO...")
+    
+    assert_equal(ALGO.TWAP.name, "TWAP")
+    assert_equal(ALGO.TWAP.value, "TWAP")
+    
+    assert_equal(ALGO.VWAP.name, "VWAP")
+    assert_equal(ALGO.VWAP.value, "VWAP")
+    
+    print("  ALGO tests passed!")
+
+
+def test_order_status() raises:
+    print("Testing ORDER_STATUS...")
+    
+    assert_equal(ORDER_STATUS.PENDING_NEW.name, "PENDING_NEW")
+    assert_equal(ORDER_STATUS.PENDING_NEW.value, "PENDING_NEW")
+    
+    assert_equal(ORDER_STATUS.ACTIVE.name, "ACTIVE")
+    assert_equal(ORDER_STATUS.ACTIVE.value, "ACTIVE")
+    
+    assert_equal(ORDER_STATUS.FILLED.name, "FILLED")
+    assert_equal(ORDER_STATUS.FILLED.value, "FILLED")
+    
+    assert_equal(ORDER_STATUS.REJECTED.name, "REJECTED")
+    assert_equal(ORDER_STATUS.REJECTED.value, "REJECTED")
+    
+    assert_equal(ORDER_STATUS.PENDING_CANCEL.name, "PENDING_CANCEL")
+    assert_equal(ORDER_STATUS.PENDING_CANCEL.value, "PENDING_CANCEL")
+    
+    assert_equal(ORDER_STATUS.CANCELLED.name, "CANCELLED")
+    assert_equal(ORDER_STATUS.CANCELLED.value, "CANCELLED")
+    
+    print("  ORDER_STATUS tests passed!")
+
+
+def test_side() raises:
+    print("Testing SIDE...")
+    
+    assert_equal(SIDE.BUY.name, "BUY")
+    assert_equal(SIDE.BUY.value, "BUY")
+    
+    assert_equal(SIDE.SELL.name, "SELL")
+    assert_equal(SIDE.SELL.value, "SELL")
+    
+    assert_equal(SIDE.FINANCING.name, "FINANCING")
+    assert_equal(SIDE.FINANCING.value, "FINANCING")
+    
+    assert_equal(SIDE.MARGIN.name, "MARGIN")
+    assert_equal(SIDE.MARGIN.value, "MARGIN")
+    
+    assert_equal(SIDE.CONVERT_STOCK.name, "CONVERT_STOCK")
+    assert_equal(SIDE.CONVERT_STOCK.value, "CONVERT_STOCK")
+    
+    print("  SIDE tests passed!")
+
+
+def test_position_effect() raises:
+    print("Testing POSITION_EFFECT...")
+    
+    assert_equal(POSITION_EFFECT.OPEN.name, "OPEN")
+    assert_equal(POSITION_EFFECT.OPEN.value, "OPEN")
+    
+    assert_equal(POSITION_EFFECT.CLOSE.name, "CLOSE")
+    assert_equal(POSITION_EFFECT.CLOSE.value, "CLOSE")
+    
+    assert_equal(POSITION_EFFECT.CLOSE_TODAY.name, "CLOSE_TODAY")
+    assert_equal(POSITION_EFFECT.CLOSE_TODAY.value, "CLOSE_TODAY")
+    
+    assert_equal(POSITION_EFFECT.EXERCISE.name, "EXERCISE")
+    assert_equal(POSITION_EFFECT.EXERCISE.value, "EXERCISE")
+    
+    assert_equal(POSITION_EFFECT.MATCH.name, "MATCH")
+    assert_equal(POSITION_EFFECT.MATCH.value, "MATCH")
+    
+    print("  POSITION_EFFECT tests passed!")
+
+
+def test_position_direction() raises:
+    print("Testing POSITION_DIRECTION...")
+    
+    assert_equal(POSITION_DIRECTION.LONG.name, "LONG")
+    assert_equal(POSITION_DIRECTION.LONG.value, "LONG")
+    
+    assert_equal(POSITION_DIRECTION.SHORT.name, "SHORT")
+    assert_equal(POSITION_DIRECTION.SHORT.value, "SHORT")
+    
+    print("  POSITION_DIRECTION tests passed!")
+
+
+def test_exc_type() raises:
+    print("Testing EXC_TYPE...")
+    
+    assert_equal(EXC_TYPE.USER_EXC.name, "USER_EXC")
+    assert_equal(EXC_TYPE.USER_EXC.value, "USER_EXC")
+    
+    assert_equal(EXC_TYPE.SYSTEM_EXC.name, "SYSTEM_EXC")
+    assert_equal(EXC_TYPE.SYSTEM_EXC.value, "SYSTEM_EXC")
+    
+    assert_equal(EXC_TYPE.NOTSET.name, "NOTSET")
+    assert_equal(EXC_TYPE.NOTSET.value, "NOTSET")
+    
+    print("  EXC_TYPE tests passed!")
+
+
+def test_instrument_type() raises:
+    print("Testing INSTRUMENT_TYPE...")
+    
+    assert_equal(INSTRUMENT_TYPE.CS.name, "CS")
+    assert_equal(INSTRUMENT_TYPE.CS.value, "CS")
+    
+    assert_equal(INSTRUMENT_TYPE.FUTURE.name, "FUTURE")
+    assert_equal(INSTRUMENT_TYPE.FUTURE.value, "Future")
+    
+    assert_equal(INSTRUMENT_TYPE.OPTION.name, "OPTION")
+    assert_equal(INSTRUMENT_TYPE.OPTION.value, "Option")
+    
+    assert_equal(INSTRUMENT_TYPE.ETF.name, "ETF")
+    assert_equal(INSTRUMENT_TYPE.ETF.value, "ETF")
+    
+    assert_equal(INSTRUMENT_TYPE.LOF.name, "LOF")
+    assert_equal(INSTRUMENT_TYPE.LOF.value, "LOF")
+    
+    assert_equal(INSTRUMENT_TYPE.INDX.name, "INDX")
+    assert_equal(INSTRUMENT_TYPE.INDX.value, "INDX")
+    
+    assert_equal(INSTRUMENT_TYPE.PUBLIC_FUND.name, "PUBLIC_FUND")
+    assert_equal(INSTRUMENT_TYPE.PUBLIC_FUND.value, "PublicFund")
+    
+    assert_equal(INSTRUMENT_TYPE.FUND.name, "FUND")
+    assert_equal(INSTRUMENT_TYPE.FUND.value, "Fund")
+    
+    assert_equal(INSTRUMENT_TYPE.BOND.name, "BOND")
+    assert_equal(INSTRUMENT_TYPE.BOND.value, "Bond")
+    
+    assert_equal(INSTRUMENT_TYPE.CONVERTIBLE.name, "CONVERTIBLE")
+    assert_equal(INSTRUMENT_TYPE.CONVERTIBLE.value, "Convertible")
+    
+    assert_equal(INSTRUMENT_TYPE.SPOT.name, "SPOT")
+    assert_equal(INSTRUMENT_TYPE.SPOT.value, "Spot")
+    
+    assert_equal(INSTRUMENT_TYPE.REPO.name, "REPO")
+    assert_equal(INSTRUMENT_TYPE.REPO.value, "Repo")
+    
+    assert_equal(INSTRUMENT_TYPE.REITs.name, "REITs")
+    assert_equal(INSTRUMENT_TYPE.REITs.value, "REITs")
+    
+    assert_equal(INSTRUMENT_TYPE.FutureArbitrage.name, "FutureArbitrage")
+    assert_equal(INSTRUMENT_TYPE.FutureArbitrage.value, "FutureArbitrage")
+    
+    print("  INSTRUMENT_TYPE tests passed!")
+
+
+def test_persist_mode() raises:
+    print("Testing PERSIST_MODE...")
+    
+    assert_equal(PERSIST_MODE.ON_CRASH.name, "ON_CRASH")
+    assert_equal(PERSIST_MODE.ON_CRASH.value, "ON_CRASH")
+    
+    assert_equal(PERSIST_MODE.REAL_TIME.name, "REAL_TIME")
+    assert_equal(PERSIST_MODE.REAL_TIME.value, "REAL_TIME")
+    
+    assert_equal(PERSIST_MODE.ON_NORMAL_EXIT.name, "ON_NORMAL_EXIT")
+    assert_equal(PERSIST_MODE.ON_NORMAL_EXIT.value, "ON_NORMAL_EXIT")
+    
+    print("  PERSIST_MODE tests passed!")
+
+
+def test_commission_type() raises:
+    print("Testing COMMISSION_TYPE...")
+    
+    assert_equal(COMMISSION_TYPE.BY_MONEY.name, "BY_MONEY")
+    assert_equal(COMMISSION_TYPE.BY_MONEY.value, "BY_MONEY")
+    
+    assert_equal(COMMISSION_TYPE.BY_VOLUME.name, "BY_VOLUME")
+    assert_equal(COMMISSION_TYPE.BY_VOLUME.value, "BY_VOLUME")
+    
+    print("  COMMISSION_TYPE tests passed!")
+
+
+def test_exit_code() raises:
+    print("Testing EXIT_CODE...")
+    
+    assert_equal(EXIT_CODE.EXIT_SUCCESS.name, "EXIT_SUCCESS")
+    assert_equal(EXIT_CODE.EXIT_SUCCESS.value, "EXIT_SUCCESS")
+    
+    assert_equal(EXIT_CODE.EXIT_USER_ERROR.name, "EXIT_USER_ERROR")
+    assert_equal(EXIT_CODE.EXIT_USER_ERROR.value, "EXIT_USER_ERROR")
+    
+    assert_equal(EXIT_CODE.EXIT_INTERNAL_ERROR.name, "EXIT_INTERNAL_ERROR")
+    assert_equal(EXIT_CODE.EXIT_INTERNAL_ERROR.value, "EXIT_INTERNAL_ERROR")
+    
+    print("  EXIT_CODE tests passed!")
+
+
+def test_hedge_type() raises:
+    print("Testing HEDGE_TYPE...")
+    
+    assert_equal(HEDGE_TYPE.HEDGE.name, "HEDGE")
+    assert_equal(HEDGE_TYPE.HEDGE.value, "hedge")
+    
+    assert_equal(HEDGE_TYPE.SPECULATION.name, "SPECULATION")
+    assert_equal(HEDGE_TYPE.SPECULATION.value, "speculation")
+    
+    assert_equal(HEDGE_TYPE.ARBITRAGE.name, "ARBITRAGE")
+    assert_equal(HEDGE_TYPE.ARBITRAGE.value, "arbitrage")
+    
+    print("  HEDGE_TYPE tests passed!")
+
+
+def test_days_cnt() raises:
+    print("Testing DAYS_CNT...")
+    
+    assert_equal(DAYS_CNT.DAYS_A_YEAR, 365)
+    assert_equal(DAYS_CNT.TRADING_DAYS_A_YEAR, 252)
+    
+    print("  DAYS_CNT tests passed!")
+
+
+def test_exchange() raises:
+    print("Testing EXCHANGE...")
+    
+    assert_equal(EXCHANGE.XSHE.name, "XSHE")
+    assert_equal(EXCHANGE.XSHE.value, "XSHE")
+    
+    assert_equal(EXCHANGE.XSHG.name, "XSHG")
+    assert_equal(EXCHANGE.XSHG.value, "XSHG")
+    
+    assert_equal(EXCHANGE.SHFE.name, "SHFE")
+    assert_equal(EXCHANGE.SHFE.value, "SHFE")
+    
+    assert_equal(EXCHANGE.INE.name, "INE")
+    assert_equal(EXCHANGE.INE.value, "INE")
+    
+    assert_equal(EXCHANGE.DCE.name, "DCE")
+    assert_equal(EXCHANGE.DCE.value, "DCE")
+    
+    assert_equal(EXCHANGE.CZCE.name, "CZCE")
+    assert_equal(EXCHANGE.CZCE.value, "CZCE")
+    
+    assert_equal(EXCHANGE.CFFEX.name, "CFFEX")
+    assert_equal(EXCHANGE.CFFEX.value, "CFFEX")
+    
+    assert_equal(EXCHANGE.SGEX.name, "SGEX")
+    assert_equal(EXCHANGE.SGEX.value, "SGEX")
+    
+    assert_equal(EXCHANGE.BJSE.name, "BJSE")
+    assert_equal(EXCHANGE.BJSE.value, "BJSE")
+    
+    print("  EXCHANGE tests passed!")
+
+
+def test_trading_calendar_type() raises:
+    print("Testing TRADING_CALENDAR_TYPE...")
+    
+    assert_equal(TRADING_CALENDAR_TYPE.CN_STOCK.name, "CN_STOCK")
+    assert_equal(TRADING_CALENDAR_TYPE.CN_STOCK.value, "CN_STOCK")
+    
+    assert_equal(TRADING_CALENDAR_TYPE.HK_STOCK.name, "HK_STOCK")
+    assert_equal(TRADING_CALENDAR_TYPE.HK_STOCK.value, "HK_STOCK")
+    
+    assert_equal(TRADING_CALENDAR_TYPE.SOUTHBOUND.name, "SOUTHBOUND")
+    assert_equal(TRADING_CALENDAR_TYPE.SOUTHBOUND.value, "SOUTHBOUND")
+    
+    assert_equal(TRADING_CALENDAR_TYPE.INTER_BANK.name, "INTER_BANK")
+    assert_equal(TRADING_CALENDAR_TYPE.INTER_BANK.value, "INTERBANK")
+    
+    assert_equal(TRADING_CALENDAR_TYPE.EXCHANGE.name, "CN_STOCK")
+    assert_equal(TRADING_CALENDAR_TYPE.EXCHANGE.value, "CN_STOCK")
+    
+    print("  TRADING_CALENDAR_TYPE tests passed!")
+
+
+def test_market() raises:
+    print("Testing MARKET...")
+    
+    assert_equal(MARKET.CN.name, "CN")
+    assert_equal(MARKET.CN.value, "CN")
+    
+    assert_equal(MARKET.HK.name, "HK")
+    assert_equal(MARKET.HK.value, "HK")
+    
+    print("  MARKET tests passed!")
+
+
+def test_equality() raises:
+    print("Testing equality...")
+    
+    assert_true(EXECUTION_PHASE.GLOBAL == EXECUTION_PHASE.GLOBAL)
+    assert_false(EXECUTION_PHASE.GLOBAL == EXECUTION_PHASE.ON_INIT)
+    
+    assert_true(RUN_TYPE.BACKTEST == RUN_TYPE.BACKTEST)
+    assert_false(RUN_TYPE.BACKTEST == RUN_TYPE.PAPER_TRADING)
+    
+    assert_true(DEFAULT_ACCOUNT_TYPE.STOCK == DEFAULT_ACCOUNT_TYPE.STOCK)
+    assert_false(DEFAULT_ACCOUNT_TYPE.STOCK == DEFAULT_ACCOUNT_TYPE.FUTURE)
+    
+    assert_true(ORDER_TYPE.MARKET == ORDER_TYPE.MARKET)
+    assert_false(ORDER_TYPE.MARKET == ORDER_TYPE.LIMIT)
+    
+    assert_true(SIDE.BUY == SIDE.BUY)
+    assert_false(SIDE.BUY == SIDE.SELL)
+    
+    assert_true(POSITION_EFFECT.OPEN == POSITION_EFFECT.OPEN)
+    assert_false(POSITION_EFFECT.OPEN == POSITION_EFFECT.CLOSE)
+    
+    assert_true(POSITION_DIRECTION.LONG == POSITION_DIRECTION.LONG)
+    assert_false(POSITION_DIRECTION.LONG == POSITION_DIRECTION.SHORT)
+    
+    assert_true(EXCHANGE.XSHE == EXCHANGE.XSHE)
+    assert_false(EXCHANGE.XSHE == EXCHANGE.XSHG)
+    
+    assert_true(MARKET.CN == MARKET.CN)
+    assert_false(MARKET.CN == MARKET.HK)
+    
+    print("  Equality tests passed!")
+
+
+def test_enum_registry_get() raises:
+    print("Testing EnumRegistry.get()...")
+    
+    var registry = EnumRegistry()
+    
+    var phase_opt = registry.get[EXECUTION_PHASE]("GLOBAL")
+    if phase_opt:
+        var phase = phase_opt.value()
+        assert_equal(phase.name, "GLOBAL")
+        assert_equal(phase.value, "[全局]")
     else:
-        print("FAIL: from_name('GLOBAL') should return value")
+        raise Error("Failed to get EXECUTION_PHASE.GLOBAL")
     
-    var invalid = EXECUTION_PHASE.from_name("INVALID")
-    if not invalid:
-        print("PASS: from_name('INVALID') = None")
+    var run_type_opt = registry.get[RUN_TYPE]("BACKTEST")
+    if run_type_opt:
+        var run_type = run_type_opt.value()
+        assert_equal(run_type.name, "BACKTEST")
+        assert_equal(run_type.value, "BACKTEST")
     else:
-        print("FAIL: from_name('INVALID') should return None")
+        raise Error("Failed to get RUN_TYPE.BACKTEST")
     
-    var result2 = EXECUTION_PHASE.from_value("[全局]")
-    if result2:
-        print("PASS: from_value('[全局]') found")
+    var account_type_opt = registry.get[DEFAULT_ACCOUNT_TYPE]("STOCK")
+    if account_type_opt:
+        var account_type = account_type_opt.value()
+        assert_equal(account_type.name, "STOCK")
+        assert_equal(account_type.value, "STOCK")
     else:
-        print("FAIL: from_value('[全局]') should return value")
-    print("")
-
-
-def test_run_type():
-    print("=== Testing RUN_TYPE ===")
+        raise Error("Failed to get DEFAULT_ACCOUNT_TYPE.STOCK")
     
-    var backtest = RUN_TYPE.BACKTEST
-    print("BACKTEST: name=" + backtest.name + ", value=" + backtest.value)
-    
-    var paper_trading = RUN_TYPE.PAPER_TRADING
-    print("PAPER_TRADING: name=" + paper_trading.name + ", value=" + paper_trading.value)
-    
-    var live_trading = RUN_TYPE.LIVE_TRADING
-    print("LIVE_TRADING: name=" + live_trading.name + ", value=" + live_trading.value)
-    
-    var result = RUN_TYPE.from_name("BACKTEST")
-    if result:
-        print("PASS: from_name('BACKTEST') found")
+    var order_type_opt = registry.get[ORDER_TYPE]("MARKET")
+    if order_type_opt:
+        var order_type = order_type_opt.value()
+        assert_equal(order_type.name, "MARKET")
+        assert_equal(order_type.value, "MARKET")
     else:
-        print("FAIL: from_name('BACKTEST') should return value")
-    print("")
-
-
-def test_default_account_type():
-    print("=== Testing DEFAULT_ACCOUNT_TYPE ===")
+        raise Error("Failed to get ORDER_TYPE.MARKET")
     
-    var stock = DEFAULT_ACCOUNT_TYPE.STOCK
-    print("STOCK: name=" + stock.name + ", value=" + stock.value)
-    
-    var future = DEFAULT_ACCOUNT_TYPE.FUTURE
-    print("FUTURE: name=" + future.name + ", value=" + future.value)
-    
-    var bond = DEFAULT_ACCOUNT_TYPE.BOND
-    print("BOND: name=" + bond.name + ", value=" + bond.value)
-    
-    var result = DEFAULT_ACCOUNT_TYPE.from_name("STOCK")
-    if result:
-        print("PASS: from_name('STOCK') found")
+    var side_opt = registry.get[SIDE]("BUY")
+    if side_opt:
+        var side = side_opt.value()
+        assert_equal(side.name, "BUY")
+        assert_equal(side.value, "BUY")
     else:
-        print("FAIL: from_name('STOCK') should return value")
-    print("")
-
-
-def test_matching_type():
-    print("=== Testing MATCHING_TYPE ===")
+        raise Error("Failed to get SIDE.BUY")
     
-    var current_bar_close = MATCHING_TYPE.CURRENT_BAR_CLOSE
-    print("CURRENT_BAR_CLOSE: name=" + current_bar_close.name + ", value=" + current_bar_close.value)
-    
-    var vwap = MATCHING_TYPE.VWAP
-    print("VWAP: name=" + vwap.name + ", value=" + vwap.value)
-    
-    var counterparty_offer = MATCHING_TYPE.COUNTERPARTY_OFFER
-    print("COUNTERPARTY_OFFER: name=" + counterparty_offer.name + ", value=" + counterparty_offer.value)
-    
-    var next_bar_open = MATCHING_TYPE.NEXT_BAR_OPEN
-    print("NEXT_BAR_OPEN: name=" + next_bar_open.name + ", value=" + next_bar_open.value)
-    
-    var next_tick_last = MATCHING_TYPE.NEXT_TICK_LAST
-    print("NEXT_TICK_LAST: name=" + next_tick_last.name + ", value=" + next_tick_last.value)
-    
-    var next_tick_best_own = MATCHING_TYPE.NEXT_TICK_BEST_OWN
-    print("NEXT_TICK_BEST_OWN: name=" + next_tick_best_own.name + ", value=" + next_tick_best_own.value)
-    
-    var next_tick_best_counterparty = MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY
-    print("NEXT_TICK_BEST_COUNTERPARTY: name=" + next_tick_best_counterparty.name + ", value=" + next_tick_best_counterparty.value)
-    print("")
-
-
-def test_order_type():
-    print("=== Testing ORDER_TYPE ===")
-    
-    var market = ORDER_TYPE.MARKET
-    print("MARKET: name=" + market.name + ", value=" + market.value)
-    
-    var limit = ORDER_TYPE.LIMIT
-    print("LIMIT: name=" + limit.name + ", value=" + limit.value)
-    
-    var algo = ORDER_TYPE.ALGO
-    print("ALGO: name=" + algo.name + ", value=" + algo.value)
-    print("")
-
-
-def test_algo():
-    print("=== Testing ALGO ===")
-    
-    var twap = ALGO.TWAP
-    print("TWAP: name=" + twap.name + ", value=" + twap.value)
-    
-    var vwap = ALGO.VWAP
-    print("VWAP: name=" + vwap.name + ", value=" + vwap.value)
-    print("")
-
-
-def test_order_status():
-    print("=== Testing ORDER_STATUS ===")
-    
-    var pending_new = ORDER_STATUS.PENDING_NEW
-    print("PENDING_NEW: name=" + pending_new.name + ", value=" + pending_new.value)
-    
-    var active = ORDER_STATUS.ACTIVE
-    print("ACTIVE: name=" + active.name + ", value=" + active.value)
-    
-    var filled = ORDER_STATUS.FILLED
-    print("FILLED: name=" + filled.name + ", value=" + filled.value)
-    
-    var rejected = ORDER_STATUS.REJECTED
-    print("REJECTED: name=" + rejected.name + ", value=" + rejected.value)
-    
-    var pending_cancel = ORDER_STATUS.PENDING_CANCEL
-    print("PENDING_CANCEL: name=" + pending_cancel.name + ", value=" + pending_cancel.value)
-    
-    var cancelled = ORDER_STATUS.CANCELLED
-    print("CANCELLED: name=" + cancelled.name + ", value=" + cancelled.value)
-    print("")
-
-
-def test_side():
-    print("=== Testing SIDE ===")
-    
-    var buy = SIDE.BUY
-    print("BUY: name=" + buy.name + ", value=" + buy.value)
-    
-    var sell = SIDE.SELL
-    print("SELL: name=" + sell.name + ", value=" + sell.value)
-    
-    var financing = SIDE.FINANCING
-    print("FINANCING: name=" + financing.name + ", value=" + financing.value)
-    
-    var margin = SIDE.MARGIN
-    print("MARGIN: name=" + margin.name + ", value=" + margin.value)
-    
-    var convert_stock = SIDE.CONVERT_STOCK
-    print("CONVERT_STOCK: name=" + convert_stock.name + ", value=" + convert_stock.value)
-    
-    var result = SIDE.from_name("BUY")
-    if result:
-        print("PASS: from_name('BUY') found")
+    var exchange_opt = registry.get[EXCHANGE]("XSHE")
+    if exchange_opt:
+        var exchange = exchange_opt.value()
+        assert_equal(exchange.name, "XSHE")
+        assert_equal(exchange.value, "XSHE")
     else:
-        print("FAIL: from_name('BUY') should return value")
+        raise Error("Failed to get EXCHANGE.XSHE")
     
-    var result2 = SIDE.from_value("SELL")
-    if result2:
-        print("PASS: from_value('SELL') found")
+    var market_opt = registry.get[MARKET]("CN")
+    if market_opt:
+        var market = market_opt.value()
+        assert_equal(market.name, "CN")
+        assert_equal(market.value, "CN")
     else:
-        print("FAIL: from_value('SELL') should return value")
-    print("")
+        raise Error("Failed to get MARKET.CN")
+    
+    print("  EnumRegistry.get() tests passed!")
 
 
-def test_position_effect():
-    print("=== Testing POSITION_EFFECT ===")
+def test_enum_registry_get_by_value() raises:
+    print("Testing EnumRegistry.get_by_value()...")
     
-    var open = POSITION_EFFECT.OPEN
-    print("OPEN: name=" + open.name + ", value=" + open.value)
+    var registry = EnumRegistry()
     
-    var close = POSITION_EFFECT.CLOSE
-    print("CLOSE: name=" + close.name + ", value=" + close.value)
-    
-    var close_today = POSITION_EFFECT.CLOSE_TODAY
-    print("CLOSE_TODAY: name=" + close_today.name + ", value=" + close_today.value)
-    
-    var exercise = POSITION_EFFECT.EXERCISE
-    print("EXERCISE: name=" + exercise.name + ", value=" + exercise.value)
-    
-    var match_val = POSITION_EFFECT.MATCH
-    print("MATCH: name=" + match_val.name + ", value=" + match_val.value)
-    print("")
-
-
-def test_position_direction():
-    print("=== Testing POSITION_DIRECTION ===")
-    
-    var long = POSITION_DIRECTION.LONG
-    print("LONG: name=" + long.name + ", value=" + long.value)
-    
-    var short = POSITION_DIRECTION.SHORT
-    print("SHORT: name=" + short.name + ", value=" + short.value)
-    print("")
-
-
-def test_exc_type():
-    print("=== Testing EXC_TYPE ===")
-    
-    var user_exc = EXC_TYPE.USER_EXC
-    print("USER_EXC: name=" + user_exc.name + ", value=" + user_exc.value)
-    
-    var system_exc = EXC_TYPE.SYSTEM_EXC
-    print("SYSTEM_EXC: name=" + system_exc.name + ", value=" + system_exc.value)
-    
-    var notset = EXC_TYPE.NOTSET
-    print("NOTSET: name=" + notset.name + ", value=" + notset.value)
-    print("")
-
-
-def test_instrument_type():
-    print("=== Testing INSTRUMENT_TYPE ===")
-    
-    var cs = INSTRUMENT_TYPE.CS
-    print("CS: name=" + cs.name + ", value=" + cs.value)
-    
-    var future = INSTRUMENT_TYPE.FUTURE
-    print("FUTURE: name=" + future.name + ", value=" + future.value)
-    
-    var option = INSTRUMENT_TYPE.OPTION
-    print("OPTION: name=" + option.name + ", value=" + option.value)
-    
-    var etf = INSTRUMENT_TYPE.ETF
-    print("ETF: name=" + etf.name + ", value=" + etf.value)
-    
-    var lof = INSTRUMENT_TYPE.LOF
-    print("LOF: name=" + lof.name + ", value=" + lof.value)
-    
-    var indx = INSTRUMENT_TYPE.INDX
-    print("INDX: name=" + indx.name + ", value=" + indx.value)
-    
-    var public_fund = INSTRUMENT_TYPE.PUBLIC_FUND
-    print("PUBLIC_FUND: name=" + public_fund.name + ", value=" + public_fund.value)
-    
-    var fund = INSTRUMENT_TYPE.FUND
-    print("FUND: name=" + fund.name + ", value=" + fund.value)
-    
-    var bond = INSTRUMENT_TYPE.BOND
-    print("BOND: name=" + bond.name + ", value=" + bond.value)
-    
-    var convertible = INSTRUMENT_TYPE.CONVERTIBLE
-    print("CONVERTIBLE: name=" + convertible.name + ", value=" + convertible.value)
-    
-    var spot = INSTRUMENT_TYPE.SPOT
-    print("SPOT: name=" + spot.name + ", value=" + spot.value)
-    
-    var repo = INSTRUMENT_TYPE.REPO
-    print("REPO: name=" + repo.name + ", value=" + repo.value)
-    
-    var reits = INSTRUMENT_TYPE.REITs
-    print("REITs: name=" + reits.name + ", value=" + reits.value)
-    
-    var future_arbitrage = INSTRUMENT_TYPE.FutureArbitrage
-    print("FutureArbitrage: name=" + future_arbitrage.name + ", value=" + future_arbitrage.value)
-    print("")
-
-
-def test_persist_mode():
-    print("=== Testing PERSIST_MODE ===")
-    
-    var on_crash = PERSIST_MODE.ON_CRASH
-    print("ON_CRASH: name=" + on_crash.name + ", value=" + on_crash.value)
-    
-    var real_time = PERSIST_MODE.REAL_TIME
-    print("REAL_TIME: name=" + real_time.name + ", value=" + real_time.value)
-    
-    var on_normal_exit = PERSIST_MODE.ON_NORMAL_EXIT
-    print("ON_NORMAL_EXIT: name=" + on_normal_exit.name + ", value=" + on_normal_exit.value)
-    print("")
-
-
-def test_commission_type():
-    print("=== Testing COMMISSION_TYPE ===")
-    
-    var by_money = COMMISSION_TYPE.BY_MONEY
-    print("BY_MONEY: name=" + by_money.name + ", value=" + by_money.value)
-    
-    var by_volume = COMMISSION_TYPE.BY_VOLUME
-    print("BY_VOLUME: name=" + by_volume.name + ", value=" + by_volume.value)
-    print("")
-
-
-def test_exit_code():
-    print("=== Testing EXIT_CODE ===")
-    
-    var exit_success = EXIT_CODE.EXIT_SUCCESS
-    print("EXIT_SUCCESS: name=" + exit_success.name + ", value=" + exit_success.value)
-    
-    var exit_user_error = EXIT_CODE.EXIT_USER_ERROR
-    print("EXIT_USER_ERROR: name=" + exit_user_error.name + ", value=" + exit_user_error.value)
-    
-    var exit_internal_error = EXIT_CODE.EXIT_INTERNAL_ERROR
-    print("EXIT_INTERNAL_ERROR: name=" + exit_internal_error.name + ", value=" + exit_internal_error.value)
-    print("")
-
-
-def test_hedge_type():
-    print("=== Testing HEDGE_TYPE ===")
-    
-    var hedge = HEDGE_TYPE.HEDGE
-    print("HEDGE: name=" + hedge.name + ", value=" + hedge.value)
-    
-    var speculation = HEDGE_TYPE.SPECULATION
-    print("SPECULATION: name=" + speculation.name + ", value=" + speculation.value)
-    
-    var arbitrage = HEDGE_TYPE.ARBITRAGE
-    print("ARBITRAGE: name=" + arbitrage.name + ", value=" + arbitrage.value)
-    print("")
-
-
-def test_days_cnt():
-    print("=== Testing DAYS_CNT ===")
-    print("DAYS_A_YEAR: " + String(DAYS_CNT.DAYS_A_YEAR))
-    print("TRADING_DAYS_A_YEAR: " + String(DAYS_CNT.TRADING_DAYS_A_YEAR))
-    print("")
-
-
-def test_exchange():
-    print("=== Testing EXCHANGE ===")
-    
-    var xshe = EXCHANGE.XSHE
-    print("XSHE: name=" + xshe.name + ", value=" + xshe.value)
-    
-    var xshg = EXCHANGE.XSHG
-    print("XSHG: name=" + xshg.name + ", value=" + xshg.value)
-    
-    var shfe = EXCHANGE.SHFE
-    print("SHFE: name=" + shfe.name + ", value=" + shfe.value)
-    
-    var ine = EXCHANGE.INE
-    print("INE: name=" + ine.name + ", value=" + ine.value)
-    
-    var dce = EXCHANGE.DCE
-    print("DCE: name=" + dce.name + ", value=" + dce.value)
-    
-    var czce = EXCHANGE.CZCE
-    print("CZCE: name=" + czce.name + ", value=" + czce.value)
-    
-    var cffex = EXCHANGE.CFFEX
-    print("CFFEX: name=" + cffex.name + ", value=" + cffex.value)
-    
-    var sgex = EXCHANGE.SGEX
-    print("SGEX: name=" + sgex.name + ", value=" + sgex.value)
-    
-    var bjse = EXCHANGE.BJSE
-    print("BJSE: name=" + bjse.name + ", value=" + bjse.value)
-    print("")
-
-
-def test_trading_calendar_type():
-    print("=== Testing TRADING_CALENDAR_TYPE ===")
-    
-    var cn_stock = TRADING_CALENDAR_TYPE.CN_STOCK
-    print("CN_STOCK: name=" + cn_stock.name + ", value=" + cn_stock.value)
-    
-    var hk_stock = TRADING_CALENDAR_TYPE.HK_STOCK
-    print("HK_STOCK: name=" + hk_stock.name + ", value=" + hk_stock.value)
-    
-    var southbound = TRADING_CALENDAR_TYPE.SOUTHBOUND
-    print("SOUTHBOUND: name=" + southbound.name + ", value=" + southbound.value)
-    
-    var inter_bank = TRADING_CALENDAR_TYPE.INTER_BANK
-    print("INTER_BANK: name=" + inter_bank.name + ", value=" + inter_bank.value)
-    
-    var exchange = TRADING_CALENDAR_TYPE.EXCHANGE
-    print("EXCHANGE: name=" + exchange.name + ", value=" + exchange.value)
-    print("")
-
-
-def test_market():
-    print("=== Testing MARKET ===")
-    
-    var cn = MARKET.CN
-    print("CN: name=" + cn.name + ", value=" + cn.value)
-    
-    var hk = MARKET.HK
-    print("HK: name=" + hk.name + ", value=" + hk.value)
-    print("")
-
-
-def test_equality():
-    print("=== Testing Equality ===")
-    
-    var buy1 = SIDE.BUY
-    var buy2 = SIDE.BUY
-    var sell = SIDE.SELL
-    
-    if buy1 == buy2:
-        print("PASS: buy1 == buy2")
+    var phase_opt = registry.get_by_value[EXECUTION_PHASE]("[全局]")
+    if phase_opt:
+        var phase = phase_opt.value()
+        assert_equal(phase.name, "GLOBAL")
+        assert_equal(phase.value, "[全局]")
     else:
-        print("FAIL: buy1 should equal buy2")
+        raise Error("Failed to get EXECUTION_PHASE by value")
     
-    if buy1 != sell:
-        print("PASS: buy1 != sell")
+    var run_type_opt = registry.get_by_value[RUN_TYPE]("BACKTEST")
+    if run_type_opt:
+        var run_type = run_type_opt.value()
+        assert_equal(run_type.name, "BACKTEST")
+        assert_equal(run_type.value, "BACKTEST")
     else:
-        print("FAIL: buy1 should not equal sell")
+        raise Error("Failed to get RUN_TYPE by value")
     
-    var phase1 = EXECUTION_PHASE.GLOBAL
-    var phase2 = EXECUTION_PHASE.GLOBAL
-    var phase3 = EXECUTION_PHASE.ON_INIT
-    
-    if phase1 == phase2:
-        print("PASS: phase1 == phase2")
+    var hedge_type_opt = registry.get_by_value[HEDGE_TYPE]("hedge")
+    if hedge_type_opt:
+        var hedge_type = hedge_type_opt.value()
+        assert_equal(hedge_type.name, "HEDGE")
+        assert_equal(hedge_type.value, "hedge")
     else:
-        print("FAIL: phase1 should equal phase2")
+        raise Error("Failed to get HEDGE_TYPE by value")
     
-    if phase1 != phase3:
-        print("PASS: phase1 != phase3")
+    var instrument_opt = registry.get_by_value[INSTRUMENT_TYPE]("Future")
+    if instrument_opt:
+        var instrument = instrument_opt.value()
+        assert_equal(instrument.name, "FUTURE")
+        assert_equal(instrument.value, "Future")
     else:
-        print("FAIL: phase1 should not equal phase3")
-    print("")
+        raise Error("Failed to get INSTRUMENT_TYPE by value")
+    
+    print("  EnumRegistry.get_by_value() tests passed!")
 
 
-def test_writable():
-    print("=== Testing Writable (print) ===")
+def test_enum_registry_to_string() raises:
+    print("Testing EnumRegistry.to_string()...")
     
-    var buy = SIDE.BUY
-    print("SIDE.BUY prints as: " + String(buy))
+    var registry = EnumRegistry()
     
-    var phase = EXECUTION_PHASE.GLOBAL
-    print("EXECUTION_PHASE.GLOBAL prints as: " + String(phase))
+    var str1 = registry.to_string(EXECUTION_PHASE.GLOBAL)
+    assert_equal(str1, "EXECUTION_PHASE.GLOBAL")
     
-    var status = ORDER_STATUS.FILLED
-    print("ORDER_STATUS.FILLED prints as: " + String(status))
-    print("")
+    var str2 = registry.to_string(RUN_TYPE.BACKTEST)
+    assert_equal(str2, "RUN_TYPE.BACKTEST")
+    
+    var str3 = registry.to_string(DEFAULT_ACCOUNT_TYPE.STOCK)
+    assert_equal(str3, "DEFAULT_ACCOUNT_TYPE.STOCK")
+    
+    var str4 = registry.to_string(ORDER_TYPE.MARKET)
+    assert_equal(str4, "ORDER_TYPE.MARKET")
+    
+    var str5 = registry.to_string(SIDE.BUY)
+    assert_equal(str5, "SIDE.BUY")
+    
+    var str6 = registry.to_string(EXCHANGE.XSHE)
+    assert_equal(str6, "EXCHANGE.XSHE")
+    
+    var str7 = registry.to_string(MARKET.CN)
+    assert_equal(str7, "MARKET.CN")
+    
+    print("  EnumRegistry.to_string() tests passed!")
 
 
-def test_hashable():
-    print("=== Testing Hashable ===")
+def test_enum_registry_not_found() raises:
+    print("Testing EnumRegistry not found cases...")
     
-    var buy = SIDE.BUY
-    var sell = SIDE.SELL
+    var registry = EnumRegistry()
     
-    var hash_buy1 = hash(buy)
-    var hash_buy2 = hash(buy)
-    var hash_sell = hash(sell)
+    var not_found1 = registry.get[EXECUTION_PHASE]("NOT_EXIST")
+    assert_true(not_found1 == None)
     
-    if hash_buy1 == hash_buy2:
-        print("PASS: Same values have same hash")
-    else:
-        print("FAIL: Same values should have same hash")
+    var not_found2 = registry.get_by_value[RUN_TYPE]("NOT_EXIST")
+    assert_true(not_found2 == None)
     
-    if hash_buy1 != hash_sell:
-        print("PASS: Different values have different hash")
-    else:
-        print("FAIL: Different values should have different hash")
-    print("")
+    print("  EnumRegistry not found tests passed!")
 
 
-def main():
+def main() raises:
     print("=" * 60)
-    print("RQAlpha Mojo const.mojo Test (Complete Coverage)")
+    print("RQMojo const.mojo Test Suite")
     print("=" * 60)
-    print("")
+    print()
     
     test_execution_phase()
     test_run_type()
@@ -513,11 +609,13 @@ def main():
     test_exchange()
     test_trading_calendar_type()
     test_market()
-    
     test_equality()
-    test_writable()
-    test_hashable()
+    test_enum_registry_get()
+    test_enum_registry_get_by_value()
+    test_enum_registry_to_string()
+    test_enum_registry_not_found()
     
+    print()
     print("=" * 60)
-    print("All tests completed!")
+    print("All tests passed!")
     print("=" * 60)
