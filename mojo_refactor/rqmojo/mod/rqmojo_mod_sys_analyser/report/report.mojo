@@ -19,7 +19,7 @@ struct StrategyResult(Movable, Copyable, ImplicitlyCopyable):
     var win_rate: Float64
     var profit_loss_ratio: Float64
     
-    fn to_dict(self) -> Dict[String, String]:
+    def to_dict(self) -> Dict[String, String]:
         var d = Dict[String, String]()
         d["start_date"] = String(self.start_date.year) + "-" + String(self.start_date.month) + "-" + String(self.start_date.day)
         d["end_date"] = String(self.end_date.year) + "-" + String(self.end_date.month) + "-" + String(self.end_date.day)
@@ -41,7 +41,7 @@ struct Report(Movable):
     var nav_list: List[Float64]
     var trade_list: List[Dict[String, String]]
     
-    fn generate_summary(self) -> String:
+    def generate_summary(self) -> String:
         var summary = "=== Strategy Report ===\n"
         summary += "Strategy: " + self.strategy_name + "\n"
         summary += "Period: " + self.result.start_date.__str__() + " to " + self.result.end_date.__str__() + "\n"
@@ -55,7 +55,7 @@ struct Report(Movable):
         return summary
 
 
-fn create_report(strategy_name: String, nav_list: List[Float64], start_date: DateTime, end_date: DateTime, total_trades: Int = 0, win_count: Int = 0, loss_count: Int = 0) -> Report:
+def create_report(strategy_name: String, nav_list: List[Float64], start_date: DateTime, end_date: DateTime, total_trades: Int = 0, win_count: Int = 0, loss_count: Int = 0) -> Report:
     var max_dd = calculate_max_drawdown(nav_list)
     
     var returns = List[Float64]()

@@ -3,7 +3,7 @@ RQAlpha Mojo - Strategy Base
 Ported from rqalpha/core/strategy.py
 """
 
-from collections import Dict, Set
+from std.collections import Dict, Set
 from rqmojo.const import EXECUTION_PHASE, EXC_TYPE
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.core.strategy_context import StrategyContext
@@ -13,17 +13,17 @@ from rqmojo.environment import Environment
 
 
 trait Strategy:
-    fn init(ref self, context: StrategyContext) -> None:
+    def init(ref self, context: StrategyContext) -> None:
         ...
-    fn before_trading(ref self, context: StrategyContext) -> None:
+    def before_trading(ref self, context: StrategyContext) -> None:
         ...
-    fn handle_bar(ref self, context: StrategyContext, bar: BarObject) -> None:
+    def handle_bar(ref self, context: StrategyContext, bar: BarObject) -> None:
         ...
-    fn handle_tick(ref self, context: StrategyContext, tick: TickObject) -> None:
+    def handle_tick(ref self, context: StrategyContext, tick: TickObject) -> None:
         ...
-    fn after_trading(ref self, context: StrategyContext) -> None:
+    def after_trading(ref self, context: StrategyContext) -> None:
         ...
-    fn open_auction(ref self, context: StrategyContext, bar: BarObject) -> None:
+    def open_auction(ref self, context: StrategyContext, bar: BarObject) -> None:
         ...
 
 
@@ -39,7 +39,7 @@ struct StrategyCallbacks(
     var has_open_auction: Bool
 
 
-fn create_strategy_callbacks() -> StrategyCallbacks:
+def create_strategy_callbacks() -> StrategyCallbacks:
     return StrategyCallbacks(
         has_init=False,
         has_before_trading=False,
@@ -59,49 +59,49 @@ struct BaseStrategy(
     var event_bus: EventBus
     var strategy_name: String
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Strategy(" + self.strategy_name + ")"
 
-    fn register_init(mut self) -> None:
+    def register_init(mut self) -> None:
         self.callbacks.has_init = True
 
-    fn register_before_trading(mut self) -> None:
+    def register_before_trading(mut self) -> None:
         self.callbacks.has_before_trading = True
 
-    fn register_handle_bar(mut self) -> None:
+    def register_handle_bar(mut self) -> None:
         self.callbacks.has_handle_bar = True
 
-    fn register_handle_tick(mut self) -> None:
+    def register_handle_tick(mut self) -> None:
         self.callbacks.has_handle_tick = True
 
-    fn register_after_trading(mut self) -> None:
+    def register_after_trading(mut self) -> None:
         self.callbacks.has_after_trading = True
 
-    fn register_open_auction(mut self) -> None:
+    def register_open_auction(mut self) -> None:
         self.callbacks.has_open_auction = True
 
-    fn call_init(mut self) -> None:
+    def call_init(mut self) -> None:
         pass
 
-    fn call_before_trading(mut self) -> None:
+    def call_before_trading(mut self) -> None:
         pass
 
-    fn call_handle_bar(mut self, bar: BarObject) -> None:
+    def call_handle_bar(mut self, bar: BarObject) -> None:
         pass
 
-    fn call_handle_tick(mut self, tick: TickObject) -> None:
+    def call_handle_tick(mut self, tick: TickObject) -> None:
         pass
 
-    fn call_after_trading(mut self) -> None:
+    def call_after_trading(mut self) -> None:
         pass
 
-    fn call_open_auction(mut self, bar: BarObject) -> None:
+    def call_open_auction(mut self, bar: BarObject) -> None:
         pass
 
-    fn get_universe(self) -> Set[String]:
+    def get_universe(self) -> Set[String]:
         return self.current_universe
 
-    fn update_universe(mut self, universe: Set[String]) -> None:
+    def update_universe(mut self, universe: Set[String]) -> None:
         self.current_universe = universe
 
 
@@ -110,9 +110,9 @@ struct StrategyEventWrapper(
     Copyable, Movable, ImplicitlyCopyable
 ):
     var strategy: BaseStrategy
-    var registered_events: DynamicVector[EVENT]
+    var registered_events: List[EVENT]
 
-    fn register_events(mut self, event_bus: EventBus) -> None:
+    def register_events(mut self, event_bus: EventBus) -> None:
         if self.strategy.callbacks.has_before_trading:
             self.registered_events.append(EVENT.BEFORE_TRADING())
 
@@ -141,7 +141,7 @@ def create_base_strategy(
     )
 
 
-fn run_when_strategy_not_hold[T](func: fn() -> T, env: Environment) -> Optional[T]:
+def run_when_strategy_not_hold[T](func: fn() -> T, env: Environment) -> Optional[T]:
     if not env.config.extra.is_hold:
         return Optional[T](func())
     return Optional[T](None)

@@ -6,13 +6,13 @@ Ported from rqalpha/examples/golden_cross.py
 from rqmojo.apis import *
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.s1 = "000001.XSHE"
     context.SHORTPERIOD = 20
     context.LONGPERIOD = 120
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     var prices = history_bars(context.s1, context.LONGPERIOD + 1, "1d", "close")
     
     var short_avg = simple_moving_average(prices, context.SHORTPERIOD)
@@ -31,7 +31,7 @@ fn handle_bar(context: object, bar_dict: object) -> None:
         order_shares(context.s1, shares)
 
 
-fn simple_moving_average(data: List[Float64], period: Int) -> List[Float64]:
+def simple_moving_average(data: List[Float64], period: Int) -> List[Float64]:
     var result = List[Float64]()
     for i in range(period - 1, len(data)):
         var sum = 0.0

@@ -3,7 +3,7 @@ Mojo Test for utils/exception.mojo
 Tests the exception classes
 """
 
-from collections import List
+from std.collections import List
 from rqmojo.utils.exception import (
     CustomError, RQUserError, RQInvalidArgument,
     InstrumentNotFound, EnvironmentNotInitialized,

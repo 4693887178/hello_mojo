@@ -6,7 +6,7 @@ Ported from rqalpha/examples/subscribe_event.py
 from rqmojo.apis import *
 
 
-fn on_trade_handler(event: object) -> None:
+def on_trade_handler(event: object) -> None:
     var trade = event.trade
     var order = event.order
     var account = event.account
@@ -16,13 +16,13 @@ fn on_trade_handler(event: object) -> None:
     log.info("{}", account)
 
 
-fn on_order_handler(event: object) -> None:
+def on_order_handler(event: object) -> None:
     var order = event.order
     log.info("********** Order Handler **********")
     log.info("{}", order)
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     log.info("init")
     context.s1 = "000001.XSHE"
     update_universe(context.s1)
@@ -31,11 +31,11 @@ fn init(context: object) -> None:
     subscribe_event(EVENT.ORDER_CREATION_PASS, on_order_handler)
 
 
-fn before_trading(context: object) -> None:
+def before_trading(context: object) -> None:
     pass
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     if not context.fired:
         order_percent(context.s1, 1.0)
         context.fired = True

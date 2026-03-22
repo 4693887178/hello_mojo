@@ -3,7 +3,7 @@ RQAlpha Mojo - Run Command
 Ported from rqalpha/cmds/run.py
 """
 
-from collections import Dict, List, Optional
+from std.collections import Dict, List, Optional
 from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, RUN_TYPE_BACKTEST, RUN_TYPE_PAPER_TRADING, RUN_TYPE_LIVE_TRADING
 from rqmojo.environment import Environment, create_environment
 from rqmojo.core.executor import Executor, create_executor
@@ -117,11 +117,11 @@ def run_with_config(config: RunConfig) -> Optional[Dict[String, object]]:
     return None
 
 
-fn inject_run_param(param: CliParam, ref params: List[CliParam]) -> None:
+def inject_run_param(param: CliParam, ref params: List[CliParam]) -> None:
     params.append(param)
 
 
-fn create_run_params() -> List[CliParam]:
+def create_run_params() -> List[CliParam]:
     var params = List[CliParam]()
     
     params.append(CliParam(
@@ -199,7 +199,7 @@ fn create_run_params() -> List[CliParam]:
     return params^
 
 
-fn parse_run_type(run_type_str: String) -> RUN_TYPE:
+def parse_run_type(run_type_str: String) -> RUN_TYPE:
     if run_type_str == "b" or run_type_str == "backtest":
         return RUN_TYPE_BACKTEST
     elif run_type_str == "p" or run_type_str == "paper":
@@ -209,7 +209,7 @@ fn parse_run_type(run_type_str: String) -> RUN_TYPE:
     return RUN_TYPE_BACKTEST
 
 
-fn create_run_config_from_dict(params: Dict[String, String]) -> RunConfig:
+def create_run_config_from_dict(params: Dict[String, String]) -> RunConfig:
     var start_date = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var frequency = "1d"

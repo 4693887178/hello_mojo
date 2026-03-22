@@ -9,7 +9,7 @@ from python import talib
 from python import math
 
 
-fn get_extreme(array_high_price_result: object, array_low_price_result: object) -> List[Float64]:
+def get_extreme(array_high_price_result: object, array_low_price_result: object) -> List[Float64]:
     var np_array_high_price_result = np.array(array_high_price_result[:-1])
     var np_array_low_price_result = np.array(array_low_price_result[:-1])
     var max_result = np_array_high_price_result.max()
@@ -17,18 +17,18 @@ fn get_extreme(array_high_price_result: object, array_low_price_result: object) 
     return [max_result, min_result]
 
 
-fn get_atr_and_unit(atr_array_result: object, atr_length_result: Int, portfolio_value_result: Float64) -> List[Float64]:
+def get_atr_and_unit(atr_array_result: object, atr_length_result: Int, portfolio_value_result: Float64) -> List[Float64]:
     var atr = atr_array_result[atr_length_result - 1]
     var unit = math.floor(portfolio_value_result * 0.01 / atr)
     return [atr, unit]
 
 
-fn get_stop_price(first_open_price_result: Float64, units_hold_result: Int, atr_result: Float64) -> Float64:
+def get_stop_price(first_open_price_result: Float64, units_hold_result: Int, atr_result: Float64) -> Float64:
     var stop_price = first_open_price_result - 2 * atr_result + (units_hold_result - 1) * 0.5 * atr_result
     return stop_price
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.trade_day_num = 0
     context.unit = 0
     context.atr = 0
@@ -45,7 +45,7 @@ fn init(context: object) -> None:
     context.atr_time = 20
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     var portfolio_value = context.portfolio.portfolio_value
     var high_price = history_bars(context.s, context.open_observe_time + 1, "1d", "high")
     var low_price_for_atr = history_bars(context.s, context.open_observe_time + 1, "1d", "low")

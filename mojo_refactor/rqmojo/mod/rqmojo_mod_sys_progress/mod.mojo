@@ -7,7 +7,7 @@ from rqmojo.interface import ModInterface
 from rqmojo.const import EXIT_CODE
 from rqmojo.core.events import EVENT
 from rqmojo.utils.i18n import gettext
-from collections import List
+from std.collections import List
 
 
 comptime __all__: List[String] = [

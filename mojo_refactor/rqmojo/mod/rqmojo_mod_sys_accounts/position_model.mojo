@@ -19,23 +19,23 @@ struct PositionModel(Movable):
     var prev_close: Float64
     var last_price: Float64
     
-    fn market_value(self) -> Float64:
+    def market_value(self) -> Float64:
         return self.last_price * Float64(self.quantity)
     
-    fn pnl(self) -> Float64:
+    def pnl(self) -> Float64:
         if self.quantity == 0:
             return 0.0
         return (self.last_price - self.avg_price) * Float64(self.quantity)
     
-    fn position_pnl(self) -> Float64:
+    def position_pnl(self) -> Float64:
         if self.quantity == 0:
             return 0.0
         return (self.last_price - self.prev_close) * Float64(self.quantity)
     
-    fn closable(self) -> Int:
+    def closable(self) -> Int:
         return self.quantity - self.frozen_quantity
     
-    fn apply_trade(mut self, quantity: Int, price: Float64) -> None:
+    def apply_trade(mut self, quantity: Int, price: Float64) -> None:
         if quantity > 0:
             var new_quantity = self.quantity + quantity
             var new_value = self.avg_price * Float64(self.quantity) + price * Float64(quantity)
@@ -53,19 +53,19 @@ struct PositionModel(Movable):
             else:
                 self.today_quantity -= closed_quantity
     
-    fn freeze(mut self, quantity: Int) -> Bool:
+    def freeze(mut self, quantity: Int) -> Bool:
         if quantity > self.closable():
             return False
         self.frozen_quantity += quantity
         return True
     
-    fn unfreeze(mut self, quantity: Int) -> None:
+    def unfreeze(mut self, quantity: Int) -> None:
         if quantity > self.frozen_quantity:
             quantity = self.frozen_quantity
         self.frozen_quantity -= quantity
 
 
-fn create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG) -> PositionModel:
+def create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG) -> PositionModel:
     return PositionModel(
         order_book_id=order_book_id,
         direction=direction,

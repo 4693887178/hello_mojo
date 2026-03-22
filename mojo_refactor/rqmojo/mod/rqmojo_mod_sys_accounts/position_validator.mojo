@@ -13,7 +13,7 @@ from rqmojo.mod.rqmojo_mod_sys_accounts.position_model import PositionModel
 struct PositionValidator(FrontendValidator, Movable):
     var enabled: Bool
     
-    fn validate_submission(self, order: Order, account: Optional[object], position: Optional[PositionModel] = None) -> Optional[String]:
+    def validate_submission(self, order: Order, account: Optional[object], position: Optional[PositionModel] = None) -> Optional[String]:
         if not self.enabled:
             return None
         
@@ -26,9 +26,9 @@ struct PositionValidator(FrontendValidator, Movable):
         
         return None
     
-    fn validate_cancellation(self, order: Order, account: Optional[object]) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account: Optional[object]) -> Optional[String]:
         return None
 
 
-fn create_position_validator(enabled: Bool = True) -> PositionValidator:
+def create_position_validator(enabled: Bool = True) -> PositionValidator:
     return PositionValidator(enabled=enabled)

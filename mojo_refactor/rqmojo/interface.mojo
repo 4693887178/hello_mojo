@@ -42,11 +42,11 @@ struct TransactionCost(Copyable, Movable, ImplicitlyCopyable):
     var tax: Float64
     var other_fees: Float64
 
-    fn total(self) -> Float64:
+    def total(self) -> Float64:
         return self.commission + self.tax + self.other_fees
 
     @staticmethod
-    fn zero() -> TransactionCost:
+    def zero() -> TransactionCost:
         return TransactionCost(commission=0.0, tax=0.0, other_fees=0.0)
 
 
@@ -74,94 +74,94 @@ struct Snapshot(Copyable, Movable, ImplicitlyCopyable):
 
 
 trait Persistable:
-    fn get_state(self) -> String:
+    def get_state(self) -> String:
         ...
-    fn set_state(mut self, state: String):
+    def set_state(mut self, state: String):
         ...
 
 
 trait PositionInterface(Persistable):
-    fn order_book_id(self) -> String:
+    def order_book_id(self) -> String:
         ...
-    fn quantity(self) -> Int:
+    def quantity(self) -> Int:
         ...
-    fn avg_price(self) -> Float64:
+    def avg_price(self) -> Float64:
         ...
-    fn market_value(self) -> Float64:
+    def market_value(self) -> Float64:
         ...
-    fn pnl(self) -> Float64:
+    def pnl(self) -> Float64:
         ...
-    fn direction(self) -> POSITION_DIRECTION:
+    def direction(self) -> POSITION_DIRECTION:
         ...
-    fn transaction_cost(self) -> Float64:
+    def transaction_cost(self) -> Float64:
         ...
-    fn position_pnl(self) -> Float64:
+    def position_pnl(self) -> Float64:
         ...
-    fn trading_pnl(self) -> Float64:
+    def trading_pnl(self) -> Float64:
         ...
-    fn closable(self) -> Int:
+    def closable(self) -> Int:
         ...
-    fn today_closable(self) -> Int:
+    def today_closable(self) -> Int:
         ...
-    fn equity(self) -> Float64:
+    def equity(self) -> Float64:
         ...
-    fn prev_close(self) -> Float64:
+    def prev_close(self) -> Float64:
         ...
-    fn last_price(self) -> Float64:
+    def last_price(self) -> Float64:
         ...
 
 
 trait StrategyLoader:
-    fn load(mut self):
+    def load(mut self):
         ...
-    fn init(mut self):
+    def init(mut self):
         ...
-    fn handle_bar(mut self, bar: BarObject):
+    def handle_bar(mut self, bar: BarObject):
         ...
-    fn handle_tick(mut self, tick: TickObject):
+    def handle_tick(mut self, tick: TickObject):
         ...
-    fn before_trading(mut self):
+    def before_trading(mut self):
         ...
-    fn after_trading(mut self):
+    def after_trading(mut self):
         ...
 
 
 trait EventSource:
-    fn events(mut self):
+    def events(mut self):
         ...
-    fn start(mut self):
+    def start(mut self):
         ...
-    fn stop(mut self):
+    def stop(mut self):
         ...
 
 
 trait PriceBoard:
-    fn get_last_price(mut self, order_book_id: String) -> Float64:
+    def get_last_price(mut self, order_book_id: String) -> Float64:
         ...
-    fn get_limit_up(mut self, order_book_id: String) -> Float64:
+    def get_limit_up(mut self, order_book_id: String) -> Float64:
         ...
-    fn get_limit_down(mut self, order_book_id: String) -> Float64:
+    def get_limit_down(mut self, order_book_id: String) -> Float64:
         ...
-    fn get_a1(mut self, order_book_id: String) -> Float64:
+    def get_a1(mut self, order_book_id: String) -> Float64:
         ...
-    fn get_b1(mut self, order_book_id: String) -> Float64:
+    def get_b1(mut self, order_book_id: String) -> Float64:
         ...
 
 
 trait DataSource:
-    fn get_instrument_order_book_id(self, order_book_id: String) -> String:
+    def get_instrument_order_book_id(self, order_book_id: String) -> String:
         ...
-    fn get_instrument_order_book_ids(
+    def get_instrument_order_book_ids(
         self, id_or_syms: Optional[List[String]]
     ) -> List[String]:
         ...
-    fn get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
+    def get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
         ...
-    fn get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
+    def get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
         ...
-    fn get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+    def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
         ...
-    fn history_bars(
+    def history_bars(
         self,
         order_book_id: String,
         bar_count: Int,
@@ -173,62 +173,62 @@ trait DataSource:
         adjust_type: String
     ) -> Optional[List[BarObject]]:
         ...
-    fn history_ticks(self, order_book_id: String, count: Int, dt: DateTime) -> List[TickObject]:
+    def history_ticks(self, order_book_id: String, count: Int, dt: DateTime) -> List[TickObject]:
         ...
-    fn current_snapshot(self, order_book_id: String, frequency: String, dt: DateTime) -> Snapshot:
+    def current_snapshot(self, order_book_id: String, frequency: String, dt: DateTime) -> Snapshot:
         ...
-    fn available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
+    def available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
         ...
-    fn is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
+    def is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
         ...
-    fn is_st_stock(self, order_book_id: String, dt: DateTime) -> Bool:
+    def is_st_stock(self, order_book_id: String, dt: DateTime) -> Bool:
         ...
 
 
 trait Broker:
-    fn submit_order(mut self, order: Order):
+    def submit_order(mut self, order: Order):
         ...
-    fn cancel_order(mut self, order_id: Int):
+    def cancel_order(mut self, order_id: Int):
         ...
-    fn get_open_orders(self) -> List[Order]:
+    def get_open_orders(self) -> List[Order]:
         ...
 
 
 trait ModInterface:
-    fn start_up(mut self, env_name: String, mod_config_name: String):
+    def start_up(mut self, env_name: String, mod_config_name: String):
         ...
-    fn tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
+    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
         ...
 
 
 trait PersistProviderInterface:
-    fn store(mut self, key: String, value: String):
+    def store(mut self, key: String, value: String):
         ...
-    fn load(self, key: String) -> Optional[String]:
+    def load(self, key: String) -> Optional[String]:
         ...
-    fn remove(mut self, key: String):
+    def remove(mut self, key: String):
         ...
-    fn should_resume(self) -> Bool:
+    def should_resume(self) -> Bool:
         ...
-    fn should_run_init(self) -> Bool:
+    def should_run_init(self) -> Bool:
         ...
 
 
 trait FrontendValidatorInterface:
-    fn validate_order(self, order: Order) -> Bool:
+    def validate_order(self, order: Order) -> Bool:
         ...
-    fn can_submit_order(self, order: Order) -> Bool:
+    def can_submit_order(self, order: Order) -> Bool:
         ...
-    fn can_cancel_order(self, order_id: Int) -> Bool:
+    def can_cancel_order(self, order_id: Int) -> Bool:
         ...
-    fn validate_submission(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
         ...
-    fn validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
         ...
 
 
 trait TransactionCostDeciderInterface:
-    fn get_transaction_cost(self, order: Order, trade: Trade) -> Float64:
+    def get_transaction_cost(self, order: Order, trade: Trade) -> Float64:
         ...
-    fn calc(self, args: TransactionCostArgs) -> TransactionCost:
+    def calc(self, args: TransactionCostArgs) -> TransactionCost:
         ...

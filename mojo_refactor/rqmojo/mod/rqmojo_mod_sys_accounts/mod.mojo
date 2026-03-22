@@ -13,13 +13,13 @@ struct AccountsMod(Copyable, Movable, ImplicitlyCopyable):
     var enabled: Bool
     var account_count: Int
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "AccountsMod(" + self.name + ", accounts=" + String(self.account_count) + ")"
     
-    fn start(self) -> None:
+    def start(self) -> None:
         pass
     
-    fn stop(self) -> None:
+    def stop(self) -> None:
         pass
 
 
@@ -28,26 +28,26 @@ struct AccountProxy:
     var _total_cash: Float64
     var _total_value: Float64
     
-    fn __init__(account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64) -> Self:
+    def __init__(account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64) -> Self:
         return Self {
             _account_type: account_type,
             _total_cash: cash,
             _total_value: cash
         }
     
-    fn account_type(self) -> DEFAULT_ACCOUNT_TYPE:
+    def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         return self._account_type
     
-    fn total_cash(self) -> Float64:
+    def total_cash(self) -> Float64:
         return self._total_cash
     
-    fn total_value(self) -> Float64:
+    def total_value(self) -> Float64:
         return self._total_value
 
 
-fn create_accounts_mod() -> AccountsMod:
+def create_accounts_mod() -> AccountsMod:
     return AccountsMod(name="accounts", enabled=True, account_count=0)
 
 
-fn create_account_proxy(account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64) -> AccountProxy:
+def create_account_proxy(account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64) -> AccountProxy:
     return AccountProxy(account_type=account_type, cash=cash)

@@ -3,17 +3,17 @@ RQAlpha Mojo - HDF5 Storage Reader
 Uses Python h5py for HDF5 file reading
 """
 
-from collections import List, Dict
+from std.collections import List, Dict
 from python import Python
 
 
 struct H5Reader(Movable):
     var _path: String
 
-    fn __init__(out self, path: String):
+    def __init__(out self, path: String):
         self._path = path
 
-    fn read_dataset(ref self, dataset_name: String) raises -> List[Dict[String, Float64]]:
+    def read_dataset(ref self, dataset_name: String) raises -> List[Dict[String, Float64]]:
         var py = Python()
         var h5py = py.import_module("h5py")
         var np = py.import_module("numpy")
@@ -35,7 +35,7 @@ struct H5Reader(Movable):
         except:
             return List[Dict[String, Float64]]()
 
-    fn get_date_range(ref self, dataset_name: String) raises -> Tuple[Int, Int]:
+    def get_date_range(ref self, dataset_name: String) raises -> Tuple[Int, Int]:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -50,7 +50,7 @@ struct H5Reader(Movable):
         except:
             return (20050104, 20050104)
 
-    fn get_dataset_names(ref self) raises -> List[String]:
+    def get_dataset_names(ref self) raises -> List[String]:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -65,5 +65,5 @@ struct H5Reader(Movable):
         return result^
 
 
-fn create_h5_reader(path: String) -> H5Reader:
+def create_h5_reader(path: String) -> H5Reader:
     return H5Reader(path)

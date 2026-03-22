@@ -3,7 +3,7 @@ RQAlpha Mojo - Simulation Broker
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/simulation_broker.py
 """
 
-from collections import Dict, List
+from std.collections import Dict, List
 from rqmojo.const import ORDER_STATUS, INSTRUMENT_TYPE, MATCHING_TYPE, POSITION_EFFECT, EXECUTION_PHASE, POSITION_EFFECT_MATCH, MATCHING_TYPE_CURRENT_BAR_CLOSE, MATCHING_TYPE_VWAP, POSITION_EFFECT_MATCH, MATCHING_TYPE_CURRENT_BAR_CLOSE, MATCHING_TYPE_VWAP
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade_with_id
@@ -38,10 +38,10 @@ struct SimulationBroker(Movable):
     var _matching_type: MATCHING_TYPE
     var _match_immediately: Bool
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "SimulationBroker(orders=" + String(len(self._open_orders)) + ")"
 
-    fn submit_order(mut self, order: Order) -> None:
+    def submit_order(mut self, order: Order) -> None:
         if order.position_effect == POSITION_EFFECT_MATCH:
             return
         
@@ -49,7 +49,7 @@ struct SimulationBroker(Movable):
         var pair = OrderAccountPair(account="", order=order)
         self._open_orders.append(pair)
 
-    fn cancel_order(mut self, order: Order) -> None:
+    def cancel_order(mut self, order: Order) -> None:
         var new_orders = List[OrderAccountPair]()
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
@@ -57,13 +57,13 @@ struct SimulationBroker(Movable):
                 new_orders.append(pair)
         self._open_orders = new_orders^
 
-    fn get_open_orders(self) -> List[Order]:
+    def get_open_orders(self) -> List[Order]:
         var result = List[Order]()
         for i in range(len(self._open_orders)):
             result.append(self._open_orders[i].order)
         return result^
 
-    fn get_open_orders_for(self, order_book_id: String) -> List[Order]:
+    def get_open_orders_for(self, order_book_id: String) -> List[Order]:
         var result = List[Order]()
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
@@ -71,9 +71,9 @@ struct SimulationBroker(Movable):
                 result.append(pair.order)
         return result^
 
-    fn match_order(mut self, order: Order, bar: BarObject) -> Trade:
+    def match_order(mut self, order: Order, bar: BarObject) -> Trade:
         self._trade_id += 1
-        var price = bar.close
+        var price = bar.close()
         var quantity = order.unfilled_quantity
         
         var trade = create_trade_with_id(
@@ -85,7 +85,7 @@ struct SimulationBroker(Movable):
         
         return trade
 
-    fn match_all_orders(mut self, bars: Dict[String, BarObject]) -> List[Trade]:
+    def match_all_orders(mut self, bars: Dict[String, BarObject]) -> List[Trade]:
         var trades = List[Trade]()
         var remaining_orders = List[OrderAccountPair]()
         
@@ -102,10 +102,10 @@ struct SimulationBroker(Movable):
         self._open_orders = remaining_orders^
         return trades^
 
-    fn on_bar(mut self, bar: BarObject) -> List[Trade]:
+    def on_bar(mut self, bar: BarObject) -> List[Trade]:
         var trades = List[Trade]()
         var remaining_orders = List[OrderAccountPair]()
-        var bar_ob_id = bar.instrument.order_book_id
+        var bar_ob_id = bar.order_book_id()
         
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
@@ -119,10 +119,10 @@ struct SimulationBroker(Movable):
         self._open_orders = remaining_orders^
         return trades^
 
-    fn on_tick(mut self, tick: TickObject) -> List[Trade]:
+    def on_tick(mut self, tick: TickObject) -> List[Trade]:
         var trades = List[Trade]()
         var remaining_orders = List[OrderAccountPair]()
-        var tick_ob_id = tick.instrument.order_book_id
+        var tick_ob_id = tick.order_book_id()
         
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
@@ -142,12 +142,12 @@ struct SimulationBroker(Movable):
         self._open_orders = remaining_orders^
         return trades^
 
-    fn before_trading(mut self) -> None:
+    def before_trading(mut self) -> None:
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
             pair.order.active()
 
-    fn after_trading(mut self) -> None:
+    def after_trading(mut self) -> None:
         var new_orders = List[OrderAccountPair]()
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
@@ -155,13 +155,13 @@ struct SimulationBroker(Movable):
             new_orders.append(pair)
         self._open_orders = new_orders^
 
-    fn pre_settlement(mut self) -> None:
+    def pre_settlement(mut self) -> None:
         pass
 
-    fn get_state(self) -> BrokerState:
+    def get_state(self) -> BrokerState:
         var open_orders_state = List[String]()
         for i in range(len(self._open_orders)):
-            open_orders_state.append(self._open_orders[i].order.get_state())
+            open_orders_state.append(String(self._open_orders[i].order.order_id))
         
         return BrokerState(
             order_count=self._order_count,
@@ -171,12 +171,12 @@ struct SimulationBroker(Movable):
             open_auction_orders_state=List[String]()
         )
 
-    fn set_state(mut self, state: BrokerState) -> None:
+    def set_state(mut self, state: BrokerState) -> None:
         self._order_count = state.order_count
         self._trade_count = state.trade_count
 
 
-fn create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE) -> SimulationBroker:
+def create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE) -> SimulationBroker:
     var match_immediately = (matching_type == MATCHING_TYPE_CURRENT_BAR_CLOSE or matching_type == MATCHING_TYPE_VWAP)
     
     return SimulationBroker(

@@ -8,7 +8,7 @@ from rqmojo.model.instrument import Instrument, create_stock_instrument, create_
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
 from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
-from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018
+from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018, create_trading_dates_mixin_with_november_2024, create_trading_dates_mixin_with_multiple_months
 
 
 @fieldwise_init
@@ -20,7 +20,7 @@ struct DividendInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var payable_date: Int
     var round_lot: Int
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "DividendInfo(ex_date=" + String(self.ex_dividend_date) + ", cash=" + String(self.dividend_cash_before_tax) + ")"
 
 
@@ -29,7 +29,7 @@ struct SplitInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var ex_date: Int
     var split_factor: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "SplitInfo(ex_date=" + String(self.ex_date) + ", factor=" + String(self.split_factor) + ")"
 
 
@@ -49,7 +49,7 @@ struct Snapshot(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var open_interest: Float64
     var prev_settlement: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Snapshot(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ", last=" + String(self.last) + ")"
 
 
@@ -63,7 +63,7 @@ struct OpenAuctionBar(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var volume: Float64
     var total_turnover: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "OpenAuctionBar(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ")"
 
 
@@ -73,11 +73,11 @@ struct YieldCurvePoint(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var tenor: String
     var rate: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "YieldCurvePoint(date=" + String(self.date) + ", tenor=" + self.tenor + ", rate=" + String(self.rate) + ")"
 
 
-fn create_dividend_info(
+def create_dividend_info(
     book_closure_date: Int,
     announcement_date: Int,
     dividend_cash_before_tax: Float64,
@@ -95,11 +95,11 @@ fn create_dividend_info(
     )
 
 
-fn create_split_info(ex_date: Int, split_factor: Float64) -> SplitInfo:
+def create_split_info(ex_date: Int, split_factor: Float64) -> SplitInfo:
     return SplitInfo(ex_date=ex_date, split_factor=split_factor)
 
 
-fn create_snapshot(
+def create_snapshot(
     instrument: Instrument,
     datetime: DateTime,
     open: Float64,
@@ -131,7 +131,7 @@ fn create_snapshot(
     )
 
 
-fn create_open_auction_bar(
+def create_open_auction_bar(
     instrument: Instrument,
     datetime: DateTime,
     open: Float64,
@@ -156,13 +156,13 @@ struct DataProxy(Movable):
     var _data_source_name: String
     var _trading_dates_mixin: TradingDatesMixin
     
-    fn get_instrument(self, order_book_id: String) -> Instrument:
+    def get_instrument(self, order_book_id: String) -> Instrument:
         return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHG)
     
-    fn get_last_price(self, order_book_id: String) -> Float64:
+    def get_last_price(self, order_book_id: String) -> Float64:
         return 10.0
     
-    fn get_all_instruments(self, type: String = "") -> List[Instrument]:
+    def get_all_instruments(self, type: String = "") -> List[Instrument]:
         var result = List[Instrument]()
         result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
         result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
@@ -170,7 +170,7 @@ struct DataProxy(Movable):
         result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE_XSHG))
         return result^
     
-    fn get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
+    def get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
         return create_bar_object(
             order_book_id=order_book_id,
             dt=dt,
@@ -182,7 +182,7 @@ struct DataProxy(Movable):
             total_turnover=10200000.0
         )
     
-    fn get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
+    def get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
         var ins = self.get_instrument(order_book_id)
         return create_tick_object(
             instrument=ins^,
@@ -192,41 +192,41 @@ struct DataProxy(Movable):
             total_turnover=10200000.0
         )
     
-    fn is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
+    def is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
         return False
     
-    fn count_trading_dates(self, start_date: Date, end_date: Date) -> Int:
+    def count_trading_dates(self, start_date: Date, end_date: Date) -> Int:
         return self._trading_dates_mixin.count_trading_dates(
             start_date.year, start_date.month, start_date.day,
             end_date.year, end_date.month, end_date.day
         )
     
-    fn is_trading_date_by_ymd(self, year: Int, month: Int, day: Int) -> Bool:
+    def is_trading_date_by_ymd(self, year: Int, month: Int, day: Int) -> Bool:
         return self._trading_dates_mixin.is_trading_date(year, month, day)
     
-    fn is_trading_date(self, dt: DateTime) -> Bool:
+    def is_trading_date(self, dt: DateTime) -> Bool:
         return self._trading_dates_mixin.is_trading_date(dt.year, dt.month, dt.day)
     
-    fn is_trading_date_from_date(self, d: Date) -> Bool:
+    def is_trading_date_from_date(self, d: Date) -> Bool:
         return self._trading_dates_mixin.is_trading_date(d.year, d.month, d.day)
     
-    fn get_previous_trading_date(self, dt: DateTime) -> DateTime:
+    def get_previous_trading_date(self, dt: DateTime) -> DateTime:
         var result = self._trading_dates_mixin.get_previous_trading_date(dt.year, dt.month, dt.day)
         return DateTime(result.year, result.month, result.day, 0, 0, 0, 0)
     
-    fn get_previous_trading_date_from_date(self, d: Date) -> Date:
+    def get_previous_trading_date_from_date(self, d: Date) -> Date:
         var result = self._trading_dates_mixin.get_previous_trading_date(d.year, d.month, d.day)
         return Date(result.year, result.month, result.day)
     
-    fn get_next_trading_date(self, dt: DateTime) -> DateTime:
+    def get_next_trading_date(self, dt: DateTime) -> DateTime:
         var result = self._trading_dates_mixin.get_next_trading_date(dt.year, dt.month, dt.day)
         return DateTime(result.year, result.month, result.day, 0, 0, 0, 0)
     
-    fn get_next_trading_date_from_date(self, d: Date) -> Date:
+    def get_next_trading_date_from_date(self, d: Date) -> Date:
         var result = self._trading_dates_mixin.get_next_trading_date(d.year, d.month, d.day)
         return Date(result.year, result.month, result.day)
     
-    fn history_bars(
+    def history_bars(
         self,
         instrument: Instrument,
         bar_count: Int,
@@ -260,7 +260,7 @@ struct DataProxy(Movable):
         
         return reversed_result^
     
-    fn _create_mock_bar_with_adjustment(
+    def _create_mock_bar_with_adjustment(
         self,
         instrument: Instrument,
         dt: DateTime,
@@ -275,13 +275,16 @@ struct DataProxy(Movable):
         elif adjust_type == "post":
             adjustment_factor = self._calculate_post_adjustment_factor(instrument, dt)
         
-        var adj_open = base_price * adjustment_factor
-        var adj_close = base_price * 1.02 * adjustment_factor
-        var adj_high = base_price * 1.05 * adjustment_factor
-        var adj_low = base_price * 0.98 * adjustment_factor
+        var days_offset = Float64((dt.year - 2020) * 365 + (dt.month - 1) * 30 + dt.day)
+        var price_variation = 1.0 + 0.001 * days_offset
+        
+        var adj_open = base_price * adjustment_factor * price_variation
+        var adj_close = base_price * 1.02 * adjustment_factor * price_variation
+        var adj_high = base_price * 1.05 * adjustment_factor * price_variation
+        var adj_low = base_price * 0.98 * adjustment_factor * price_variation
         
         return create_bar_object(
-            instrument=instrument,
+            order_book_id=instrument.order_book_id(),
             dt=dt,
             open=adj_open,
             high=adj_high,
@@ -291,13 +294,13 @@ struct DataProxy(Movable):
             total_turnover=1000000.0 * adj_close
         )
     
-    fn _calculate_pre_adjustment_factor(self, instrument: Instrument, dt: DateTime, adjust_orig: DateTime) -> Float64:
+    def _calculate_pre_adjustment_factor(self, instrument: Instrument, dt: DateTime, adjust_orig: DateTime) -> Float64:
         return 1.0
     
-    fn _calculate_post_adjustment_factor(self, instrument: Instrument, dt: DateTime) -> Float64:
+    def _calculate_post_adjustment_factor(self, instrument: Instrument, dt: DateTime) -> Float64:
         return 1.0
     
-    fn history_ticks(self, instrument: Instrument, count: Int, dt: DateTime) -> List[TickObject]:
+    def history_ticks(self, instrument: Instrument, count: Int, dt: DateTime) -> List[TickObject]:
         var result = List[TickObject]()
         var current_dt = dt
         var tick_count = 0
@@ -324,7 +327,7 @@ struct DataProxy(Movable):
         
         return result^
     
-    fn current_snapshot(self, instrument: Instrument, frequency: String, dt: DateTime) -> Snapshot:
+    def current_snapshot(self, instrument: Instrument, frequency: String, dt: DateTime) -> Snapshot:
         var bar = self._create_mock_bar_with_adjustment(instrument, dt, "none", dt)
         var prev_close = self._get_prev_close(instrument, dt)
         var limit_up = bar.close * 1.1
@@ -344,12 +347,12 @@ struct DataProxy(Movable):
             limit_down=limit_down
         )
     
-    fn _get_prev_close(self, instrument: Instrument, dt: DateTime) -> Float64:
+    def _get_prev_close(self, instrument: Instrument, dt: DateTime) -> Float64:
         var prev_dt = self.get_previous_trading_date(dt)
         var prev_bar = self._create_mock_bar_with_adjustment(instrument, prev_dt, "pre", dt)
         return prev_bar.close
     
-    fn get_trading_minutes_for(self, instrument: Instrument, trading_dt: DateTime) -> List[DateTime]:
+    def get_trading_minutes_for(self, instrument: Instrument, trading_dt: DateTime) -> List[DateTime]:
         var result = List[DateTime]()
         
         if instrument.type == INSTRUMENT_TYPE_CS or instrument.type == INSTRUMENT_TYPE_ETF or instrument.type == INSTRUMENT_TYPE_LOF:
@@ -376,7 +379,7 @@ struct DataProxy(Movable):
         
         return result^
     
-    fn get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
+    def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
         if instrument.type != INSTRUMENT_TYPE_CS and instrument.type != INSTRUMENT_TYPE_ETF:
             return Optional[DividendInfo](None)
         
@@ -390,14 +393,14 @@ struct DataProxy(Movable):
         )
         return Optional[DividendInfo](dividend)
     
-    fn get_split(self, instrument: Instrument) -> Optional[SplitInfo]:
+    def get_split(self, instrument: Instrument) -> Optional[SplitInfo]:
         if instrument.type != INSTRUMENT_TYPE_CS:
             return Optional[SplitInfo](None)
         
         var split = create_split_info(ex_date=20230515, split_factor=1.5)
         return Optional[SplitInfo](split)
     
-    fn get_yield_curve(self, start_date: Date, end_date: Date, tenor: String = "") -> List[YieldCurvePoint]:
+    def get_yield_curve(self, start_date: Date, end_date: Date, tenor: String = "") -> List[YieldCurvePoint]:
         var result = List[YieldCurvePoint]()
         
         var tenors = List[String]()
@@ -432,13 +435,13 @@ struct DataProxy(Movable):
         
         return result^
     
-    fn get_settle_price(self, instrument: Instrument, trading_dt: DateTime) -> Float64:
+    def get_settle_price(self, instrument: Instrument, trading_dt: DateTime) -> Float64:
         if instrument.type != INSTRUMENT_TYPE_FUTURE:
             return Float64(0.0)
         
         return 3500.0
     
-    fn get_open_auction_bar(self, instrument: Instrument, dt: DateTime) -> OpenAuctionBar:
+    def get_open_auction_bar(self, instrument: Instrument, dt: DateTime) -> OpenAuctionBar:
         var open_price = 10.0
         var limit_up = open_price * 1.1
         var limit_down = open_price * 0.9
@@ -455,10 +458,10 @@ struct DataProxy(Movable):
             total_turnover=turnover
         )
     
-    fn get_open_auction_volume(self, instrument: Instrument, dt: DateTime) -> Int:
+    def get_open_auction_volume(self, instrument: Instrument, dt: DateTime) -> Int:
         return 50000
     
-    fn _get_instrument_by_id(self, order_book_id: String) -> Instrument:
+    def _get_instrument_by_id(self, order_book_id: String) -> Instrument:
         if order_book_id == "RB1912":
             return create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE_SHFE, "RB", "21:1-23:0,9:1-10:15,10:31-11:30,13:31-15:0")
         elif order_book_id == "AG1912":
@@ -470,7 +473,7 @@ struct DataProxy(Movable):
         else:
             return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHG)
     
-    fn get_trading_period(self, order_book_ids: List[String], default_trading_period: List[TimeRange] = List[TimeRange]()) raises -> List[TimeRange]:
+    def get_trading_period(self, order_book_ids: List[String], default_trading_period: List[TimeRange] = List[TimeRange]()) raises -> List[TimeRange]:
         var trading_period = List[TimeRange]()
         
         for i in range(len(default_trading_period)):
@@ -484,17 +487,17 @@ struct DataProxy(Movable):
         
         return merge_trading_period(trading_period)
     
-    fn is_night_trading(self, order_book_ids: List[String]) raises -> Bool:
+    def is_night_trading(self, order_book_ids: List[String]) raises -> Bool:
         for i in range(len(order_book_ids)):
             var ins = self._get_instrument_by_id(order_book_ids[i])
             if ins.trade_at_night():
                 return True
         return False
     
-    fn available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
+    def available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
         return Tuple[DateTime, DateTime](DateTime(2020, 1, 1, 0, 0, 0, 0), DateTime(2024, 12, 31, 0, 0, 0, 0))
     
-    fn get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+    def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
         var result = List[DateTime]()
         var current = start_date
         while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
@@ -503,7 +506,7 @@ struct DataProxy(Movable):
             current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
         return result^
     
-    fn get_all_instruments(self, type: String = "") -> List[Instrument]:
+    def get_all_instruments(self, type: String = "") -> List[Instrument]:
         var result = List[Instrument]()
         result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
         result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
@@ -511,7 +514,7 @@ struct DataProxy(Movable):
         result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE_XSHG))
         return result^
     
-    fn get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
+    def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
         if instrument.type != INSTRUMENT_TYPE_CS and instrument.type != INSTRUMENT_TYPE_ETF:
             return Optional[DividendInfo](None)
         
@@ -526,7 +529,7 @@ struct DataProxy(Movable):
         return Optional[DividendInfo](dividend)
 
 
-fn merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
+def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
     var result = List[TimeRange]()
     
     var sorted_list = List[TimeRange]()
@@ -565,26 +568,26 @@ fn merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
     return result^
 
 
-fn create_data_proxy() -> DataProxy:
+def create_data_proxy() -> DataProxy:
     return DataProxy(
         _data_source_name="default",
-        _trading_dates_mixin=create_trading_dates_mixin_with_november_2018()
+        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months()
     )
 
 
-fn create_data_proxy_with_name(name: String) -> DataProxy:
+def create_data_proxy_with_name(name: String) -> DataProxy:
     return DataProxy(
         _data_source_name=name,
-        _trading_dates_mixin=create_trading_dates_mixin_with_november_2018()
+        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months()
     )
 
 
-fn create_data_proxy_from_source(var data_source: DataProxy, var price_board: DataProxy) -> DataProxy:
+def create_data_proxy_from_source(var data_source: DataProxy, var price_board: DataProxy) -> DataProxy:
     return DataProxy(
         _data_source_name=data_source._data_source_name,
         _trading_dates_mixin=data_source._trading_dates_mixin
     )
 
 
-fn get_available_data_range(data_proxy: DataProxy, frequency: String) -> Tuple[DateTime, DateTime]:
+def get_available_data_range(data_proxy: DataProxy, frequency: String) -> Tuple[DateTime, DateTime]:
     return Tuple[DateTime, DateTime](DateTime(2020, 1, 1, 0, 0, 0, 0), DateTime(2024, 12, 31, 0, 0, 0, 0))

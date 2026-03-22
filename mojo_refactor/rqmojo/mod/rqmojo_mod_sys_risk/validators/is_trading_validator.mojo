@@ -3,7 +3,7 @@ RQAlpha Mojo - Is Trading Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py
 """
 
-from collections import Optional
+from std.collections import Optional
 from rqmojo.const import INSTRUMENT_TYPE, INSTRUMENT_TYPE_CS
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
@@ -23,7 +23,7 @@ struct IsTradingValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("IsTradingValidator(enabled=", String(self.enabled), ")")
 
-    fn validate_submission(
+    def validate_submission(
         self,
         order: Order,
         account: Optional[Account],
@@ -46,7 +46,7 @@ struct IsTradingValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
 
         return None
 
-    fn validate_cancellation(
+    def validate_cancellation(
         self,
         order: Order,
         account: Optional[Account]
@@ -54,5 +54,5 @@ struct IsTradingValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
         return None
 
 
-fn create_is_trading_validator(env_name: String = "", enabled: Bool = True) -> IsTradingValidator:
+def create_is_trading_validator(env_name: String = "", enabled: Bool = True) -> IsTradingValidator:
     return IsTradingValidator(_env_name=env_name, enabled=enabled, _data_proxy_name="")

@@ -8,7 +8,7 @@ from rqmojo.model.bar import BarObject, BarData
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime
 from rqmojo.const import EXECUTION_PHASE, EXCHANGE, EXCHANGE_XSHE, EXECUTION_PHASE_BEFORE_TRADING
-from collections import Dict
+from std.collections import Dict
 
 
 def nan_f64() -> Float64:

@@ -4,7 +4,7 @@ Ported from rqalpha/data/base_data_source/storages.py
 Uses Python h5py/numpy/pandas for HDF5 operations
 """
 
-from collections import List, Dict
+from std.collections import List, Dict
 from python import Python, PythonObject
 from rqmojo.utils.datetime_func import convert_date_to_date_int, Date, DateTime
 from rqmojo.utils.typing import DateLike
@@ -18,7 +18,7 @@ struct FuturesTradingParameters(Movable, Copyable, ImplicitlyCopyable):
     var long_margin_ratio: Float64
     var short_margin_ratio: Float64
 
-    fn __init__(out self):
+    def __init__(out self):
         self.close_commission_ratio = 0.0
         self.close_commission_today_ratio = 0.0
         self.commission_type = ""
@@ -26,7 +26,7 @@ struct FuturesTradingParameters(Movable, Copyable, ImplicitlyCopyable):
         self.long_margin_ratio = 0.0
         self.short_margin_ratio = 0.0
 
-    fn __init__(
+    def __init__(
         out self,
         close_commission_ratio: Float64,
         close_commission_today_ratio: Float64,
@@ -43,28 +43,28 @@ struct FuturesTradingParameters(Movable, Copyable, ImplicitlyCopyable):
         self.short_margin_ratio = short_margin_ratio
 
 
-fn _py_to_float(obj: PythonObject) raises -> Float64:
+def _py_to_float(obj: PythonObject) raises -> Float64:
     var py = Python()
     var builtins = py.import_module("builtins")
     var f = builtins.float(obj)
     return f
 
 
-fn _py_to_int(obj: PythonObject) raises -> Int:
+def _py_to_int(obj: PythonObject) raises -> Int:
     var py = Python()
     var builtins = py.import_module("builtins")
     var i = builtins.int(obj)
     return i
 
 
-fn _py_to_string(obj: PythonObject) raises -> String:
+def _py_to_string(obj: PythonObject) raises -> String:
     var py = Python()
     var builtins = py.import_module("builtins")
     var s = builtins.str(obj)
     return s
 
 
-fn _is_none(obj: PythonObject) raises -> Bool:
+def _is_none(obj: PythonObject) raises -> Bool:
     var py = Python()
     var builtins = py.import_module("builtins")
     return obj == builtins.None
@@ -73,10 +73,10 @@ fn _is_none(obj: PythonObject) raises -> Bool:
 struct ExchangeTradingCalendarStore(Movable):
     var _f: PythonObject
 
-    fn __init__(out self, f: PythonObject):
+    def __init__(out self, f: PythonObject):
         self._f = f
 
-    fn get_trading_calendar(ref self) raises -> PythonObject:
+    def get_trading_calendar(ref self) raises -> PythonObject:
         var py = Python()
         var np = py.import_module("numpy")
         var pandas = py.import_module("pandas")
@@ -95,7 +95,7 @@ struct FutureInfoStore(Movable):
     var _cache: Dict[String, FuturesTradingParameters]
     var _tick_size_cache: Dict[String, Float64]
 
-    fn __init__(out self, f: String, custom_future_info: PythonObject) raises:
+    def __init__(out self, f: String, custom_future_info: PythonObject) raises:
         var py = Python()
         var json = py.import_module("json")
         var builtins = py.import_module("builtins")
@@ -122,7 +122,7 @@ struct FutureInfoStore(Movable):
         if not ("margin_rate" in first_item):
             raise Error("The bundle data you are using is too old, please update it to lastest before using")
 
-    fn _process_future_info_item(ref self, item: PythonObject) raises -> PythonObject:
+    def _process_future_info_item(ref self, item: PythonObject) raises -> PythonObject:
         var py = Python()
         var builtins = py.import_module("builtins")
         var result = builtins.dict(item)
@@ -133,7 +133,7 @@ struct FutureInfoStore(Movable):
             result["commission_type"] = "by_money"
         return result
 
-    fn get_future_info(mut self, order_book_id: String, underlying_symbol: String) raises -> FuturesTradingParameters:
+    def get_future_info(mut self, order_book_id: String, underlying_symbol: String) raises -> FuturesTradingParameters:
         var cache_key = order_book_id + "|" + underlying_symbol
         try:
             return self._cache[cache_key]
@@ -171,7 +171,7 @@ struct FutureInfoStore(Movable):
         self._cache[cache_key] = result
         return result
 
-    fn _to_namedtuple(ref self, info: PythonObject) raises -> FuturesTradingParameters:
+    def _to_namedtuple(ref self, info: PythonObject) raises -> FuturesTradingParameters:
         var result = FuturesTradingParameters()
         result.close_commission_ratio = _py_to_float(info["close_commission_ratio"])
         result.close_commission_today_ratio = _py_to_float(info["close_commission_today_ratio"])
@@ -182,7 +182,7 @@ struct FutureInfoStore(Movable):
         result.commission_type = _py_to_string(info["commission_type"])
         return result
 
-    fn get_tick_size(mut self, order_book_id: String, underlying_symbol: String) raises -> Float64:
+    def get_tick_size(mut self, order_book_id: String, underlying_symbol: String) raises -> Float64:
         var cache_key = order_book_id + "|" + underlying_symbol
         try:
             return self._tick_size_cache[cache_key]
@@ -221,7 +221,7 @@ struct FutureInfoStore(Movable):
         return tick_size
 
 
-fn load_instruments_from_pkl(pkl_path: String, ref future_info_store: FutureInfoStore) raises -> List[PythonObject]:
+def load_instruments_from_pkl(pkl_path: String, ref future_info_store: FutureInfoStore) raises -> List[PythonObject]:
     var py = Python()
     var pickle = py.import_module("pickle")
     var datetime = py.import_module("datetime")
@@ -251,7 +251,7 @@ fn load_instruments_from_pkl(pkl_path: String, ref future_info_store: FutureInfo
 struct ShareTransformationStore(Movable):
     var _share_transformation: PythonObject
 
-    fn __init__(out self, f: String) raises:
+    def __init__(out self, f: String) raises:
         var py = Python()
         var codecs = py.import_module("codecs")
         var json = py.import_module("json")
@@ -260,7 +260,7 @@ struct ShareTransformationStore(Movable):
         self._share_transformation = json.load(store)
         store.close()
 
-    fn get_share_transformation(ref self, order_book_id: String) raises -> Optional[Tuple[String, Float64]]:
+    def get_share_transformation(ref self, order_book_id: String) raises -> Optional[Tuple[String, Float64]]:
         try:
             var transformation_data = self._share_transformation[order_book_id]
             var successor = _py_to_string(transformation_data["successor"])
@@ -270,7 +270,7 @@ struct ShareTransformationStore(Movable):
             return None
 
 
-fn _file_path(path: String) raises -> PythonObject:
+def _file_path(path: String) raises -> PythonObject:
     var py = Python()
     var sys = py.import_module("sys")
     var locale = py.import_module("locale")
@@ -289,7 +289,7 @@ fn _file_path(path: String) raises -> PythonObject:
     return builtins.str(path)
 
 
-fn _create_dtype(ref np: PythonObject) raises -> PythonObject:
+def _create_dtype(ref np: PythonObject) raises -> PythonObject:
     var py = Python()
     var builtins = py.import_module("builtins")
     var dtype_list = builtins.list()
@@ -308,7 +308,7 @@ fn _create_dtype(ref np: PythonObject) raises -> PythonObject:
     return np.dtype(dtype_list)
 
 
-fn _create_future_dtype(ref np: PythonObject) raises -> PythonObject:
+def _create_future_dtype(ref np: PythonObject) raises -> PythonObject:
     var py = Python()
     var builtins = py.import_module("builtins")
     var base_dtype = _create_dtype(np)
@@ -322,7 +322,7 @@ struct DayBarStore(Movable):
     var _path: String
     var _default_dtype: PythonObject
 
-    fn __init__(out self, path: String) raises:
+    def __init__(out self, path: String) raises:
         var py = Python()
         var os = py.import_module("os")
         var np = py.import_module("numpy")
@@ -333,7 +333,7 @@ struct DayBarStore(Movable):
         self._path = path
         self._default_dtype = _create_dtype(np)
 
-    fn get_bars(ref self, order_book_id: String) raises -> PythonObject:
+    def get_bars(ref self, order_book_id: String) raises -> PythonObject:
         var py = Python()
         var h5py = py.import_module("h5py")
         var np = py.import_module("numpy")
@@ -348,7 +348,7 @@ struct DayBarStore(Movable):
         finally:
             h5.close()
 
-    fn get_date_range(ref self, order_book_id: String) raises -> Tuple[Int, Int]:
+    def get_date_range(ref self, order_book_id: String) raises -> Tuple[Int, Int]:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -371,7 +371,7 @@ struct FutureDayBarStore(Movable):
     var _path: String
     var _default_dtype: PythonObject
 
-    fn __init__(out self, path: String) raises:
+    def __init__(out self, path: String) raises:
         var py = Python()
         var os = py.import_module("os")
         var np = py.import_module("numpy")
@@ -382,7 +382,7 @@ struct FutureDayBarStore(Movable):
         self._default_dtype = _create_future_dtype(np)
         self._path = path
 
-    fn get_bars(ref self, order_book_id: String) raises -> PythonObject:
+    def get_bars(ref self, order_book_id: String) raises -> PythonObject:
         var py = Python()
         var h5py = py.import_module("h5py")
         var np = py.import_module("numpy")
@@ -397,7 +397,7 @@ struct FutureDayBarStore(Movable):
         finally:
             h5.close()
 
-    fn get_date_range(ref self, order_book_id: String) raises -> Tuple[Int, Int]:
+    def get_date_range(ref self, order_book_id: String) raises -> Tuple[Int, Int]:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -419,10 +419,10 @@ struct FutureDayBarStore(Movable):
 struct DividendStore(Movable):
     var _path: String
 
-    fn __init__(out self, path: String):
+    def __init__(out self, path: String):
         self._path = path
 
-    fn get_dividend(ref self, order_book_id: String) raises -> Optional[PythonObject]:
+    def get_dividend(ref self, order_book_id: String) raises -> Optional[PythonObject]:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -440,7 +440,7 @@ struct DividendStore(Movable):
 struct YieldCurveStore(Movable):
     var _data: PythonObject
 
-    fn __init__(out self, path: String) raises:
+    def __init__(out self, path: String) raises:
         var py = Python()
         var h5py = py.import_module("h5py")
         
@@ -451,7 +451,7 @@ struct YieldCurveStore(Movable):
         finally:
             h5.close()
 
-    fn get_yield_curve(ref self, start_date: DateLike, end_date: DateLike, tenor: Optional[String] = None) raises -> Optional[PythonObject]:
+    def get_yield_curve(ref self, start_date: DateLike, end_date: DateLike, tenor: Optional[String] = None) raises -> Optional[PythonObject]:
         var py = Python()
         var pandas = py.import_module("pandas")
         var builtins = py.import_module("builtins")
@@ -490,11 +490,11 @@ struct SimpleFactorStore(Movable):
     var _path: String
     var _cache: Dict[String, PythonObject]
 
-    fn __init__(out self, path: String):
+    def __init__(out self, path: String):
         self._path = path
         self._cache = Dict[String, PythonObject]()
 
-    fn get_factors(mut self, order_book_id: String) raises -> Optional[PythonObject]:
+    def get_factors(mut self, order_book_id: String) raises -> Optional[PythonObject]:
         try:
             return self._cache[order_book_id]
         except:
@@ -516,7 +516,7 @@ struct SimpleFactorStore(Movable):
             h5.close()
 
 
-fn _date_like_to_int(dt: DateLike) -> Int:
+def _date_like_to_int(dt: DateLike) -> Int:
     if dt.isa[Date]():
         return convert_date_to_date_int(dt[Date])
     elif dt.isa[DateTime]():
@@ -534,11 +534,11 @@ struct DateSet(Movable):
     var _f: String
     var _days_cache: Dict[String, PythonObject]
 
-    fn __init__(out self, f: String):
+    def __init__(out self, f: String):
         self._f = f
         self._days_cache = Dict[String, PythonObject]()
 
-    fn _get_days(mut self, order_book_id: String) raises -> PythonObject:
+    def _get_days(mut self, order_book_id: String) raises -> PythonObject:
         try:
             return self._days_cache[order_book_id]
         except:
@@ -563,7 +563,7 @@ struct DateSet(Movable):
         finally:
             h5.close()
 
-    fn contains(mut self, order_book_id: String, dates: List[DateLike]) raises -> Optional[List[Bool]]:
+    def contains(mut self, order_book_id: String, dates: List[DateLike]) raises -> Optional[List[Bool]]:
         var date_set = self._get_days(order_book_id)
         
         if len(date_set) == 0:
@@ -577,29 +577,29 @@ struct DateSet(Movable):
         return result^
 
 
-fn create_exchange_trading_calendar_store(f: PythonObject) -> ExchangeTradingCalendarStore:
+def create_exchange_trading_calendar_store(f: PythonObject) -> ExchangeTradingCalendarStore:
     return ExchangeTradingCalendarStore(f)
 
-fn create_future_info_store(f: String, custom_future_info: PythonObject) raises -> FutureInfoStore:
+def create_future_info_store(f: String, custom_future_info: PythonObject) raises -> FutureInfoStore:
     return FutureInfoStore(f, custom_future_info)
 
-fn create_share_transformation_store(f: String) raises -> ShareTransformationStore:
+def create_share_transformation_store(f: String) raises -> ShareTransformationStore:
     return ShareTransformationStore(f)
 
-fn create_day_bar_store(path: String) raises -> DayBarStore:
+def create_day_bar_store(path: String) raises -> DayBarStore:
     return DayBarStore(path)
 
-fn create_future_day_bar_store(path: String) raises -> FutureDayBarStore:
+def create_future_day_bar_store(path: String) raises -> FutureDayBarStore:
     return FutureDayBarStore(path)
 
-fn create_dividend_store(path: String) -> DividendStore:
+def create_dividend_store(path: String) -> DividendStore:
     return DividendStore(path)
 
-fn create_yield_curve_store(path: String) raises -> YieldCurveStore:
+def create_yield_curve_store(path: String) raises -> YieldCurveStore:
     return YieldCurveStore(path)
 
-fn create_simple_factor_store(path: String) -> SimpleFactorStore:
+def create_simple_factor_store(path: String) -> SimpleFactorStore:
     return SimpleFactorStore(path)
 
-fn create_date_set(f: String) -> DateSet:
+def create_date_set(f: String) -> DateSet:
     return DateSet(f)

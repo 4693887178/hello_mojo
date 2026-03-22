@@ -3,7 +3,7 @@ RQAlpha Mojo - Performance Utilities
 Performance optimization utilities for high-frequency trading
 """
 
-from collections import Dict, List
+from std.collections import Dict, List
 
 
 @fieldwise_init
@@ -13,7 +13,7 @@ struct CacheEntry(Movable):
     var timestamp: Int
     var ttl: Int
 
-    fn is_expired(self, current_time: Int) -> Bool:
+    def is_expired(self, current_time: Int) -> Bool:
         return current_time > self.timestamp + self.ttl
 
 
@@ -25,10 +25,10 @@ struct LRUCache(Movable):
     var _access_order: List[String]
     var _timestamps: Dict[String, Int]
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "LRUCache(size=" + String(self._size) + ", capacity=" + String(self._capacity) + ")"
 
-    fn get(mut self, key: String) -> String:
+    def get(mut self, key: String) -> String:
         try:
             var val = self._cache[key]
             self._update_access(key)
@@ -36,7 +36,7 @@ struct LRUCache(Movable):
         except:
             return ""
 
-    fn put(mut self, key: String, value: String) -> None:
+    def put(mut self, key: String, value: String) -> None:
         try:
             var _ = self._cache[key]
             self._cache[key] = value
@@ -48,14 +48,14 @@ struct LRUCache(Movable):
             self._access_order.append(key)
             self._size += 1
 
-    fn contains(mut self, key: String) -> Bool:
+    def contains(mut self, key: String) -> Bool:
         try:
             var _ = self._cache[key]
             return True
         except:
             return False
 
-    fn remove(mut self, key: String) -> None:
+    def remove(mut self, key: String) -> None:
         try:
             var _ = self._cache[key]
             self._cache[key] = ""
@@ -68,12 +68,12 @@ struct LRUCache(Movable):
         except:
             pass
 
-    fn clear(mut self) -> None:
+    def clear(mut self) -> None:
         self._cache = Dict[String, String]()
         self._access_order = List[String]()
         self._size = 0
 
-    fn _update_access(mut self, key: String) -> None:
+    def _update_access(mut self, key: String) -> None:
         var new_order = List[String]()
         for i in range(len(self._access_order)):
             if self._access_order[i] != key:
@@ -81,13 +81,13 @@ struct LRUCache(Movable):
         new_order.append(key)
         self._access_order = new_order^
 
-    fn _evict_lru(mut self) -> None:
+    def _evict_lru(mut self) -> None:
         if len(self._access_order) > 0:
             var lru_key = self._access_order[0]
             self.remove(lru_key)
 
 
-fn create_lru_cache(capacity: Int = 1000) -> LRUCache:
+def create_lru_cache(capacity: Int = 1000) -> LRUCache:
     return LRUCache(
         _capacity=capacity,
         _size=0,
@@ -104,10 +104,10 @@ struct ObjectPool(Movable):
     var _created: Int
     var _reused: Int
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "ObjectPool(size=" + String(len(self._pool)) + ", created=" + String(self._created) + ", reused=" + String(self._reused) + ")"
 
-    fn acquire(mut self) -> String:
+    def acquire(mut self) -> String:
         if len(self._pool) > 0:
             var obj = self._pool[0]
             var new_pool = List[String]()
@@ -120,18 +120,18 @@ struct ObjectPool(Movable):
             self._created += 1
             return ""
 
-    fn release(mut self, obj: String) -> None:
+    def release(mut self, obj: String) -> None:
         if len(self._pool) < self._max_size:
             self._pool.append(obj)
 
-    fn clear(mut self) -> None:
+    def clear(mut self) -> None:
         self._pool = List[String]()
 
-    fn stats(self) -> Tuple[Int, Int, Int]:
+    def stats(self) -> Tuple[Int, Int, Int]:
         return Tuple(self._created, self._reused, len(self._pool))
 
 
-fn create_object_pool(max_size: Int = 100) -> ObjectPool:
+def create_object_pool(max_size: Int = 100) -> ObjectPool:
     return ObjectPool(
         _pool=List[String](),
         _max_size=max_size,
@@ -148,16 +148,16 @@ struct PerformanceMetrics(Copyable, Movable, ImplicitlyCopyable):
     var min_time_ns: Int
     var max_time_ns: Int
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "PerformanceMetrics(ops=" + String(self.total_operations) + ", avg=" + String(self.avg_time_ns) + "ns)"
 
-    fn ops_per_second(self) -> Float64:
+    def ops_per_second(self) -> Float64:
         if self.total_time_ns == 0:
             return 0.0
         return Float64(self.total_operations) * 1e9 / Float64(self.total_time_ns)
 
 
-fn create_performance_metrics() -> PerformanceMetrics:
+def create_performance_metrics() -> PerformanceMetrics:
     return PerformanceMetrics(
         total_operations=0,
         total_time_ns=0,
@@ -173,20 +173,20 @@ struct BatchProcessor(Movable):
     var _processed: Int
     var _batches: Int
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "BatchProcessor(batch_size=" + String(self._batch_size) + ", processed=" + String(self._processed) + ")"
 
-    fn process_batch(mut self, items: List[String]) -> Int:
+    def process_batch(mut self, items: List[String]) -> Int:
         var count = len(items)
         self._processed += count
         self._batches += 1
         return count
 
-    fn get_stats(self) -> Tuple[Int, Int, Int]:
+    def get_stats(self) -> Tuple[Int, Int, Int]:
         return Tuple(self._processed, self._batches, self._batch_size)
 
 
-fn create_batch_processor(batch_size: Int = 100) -> BatchProcessor:
+def create_batch_processor(batch_size: Int = 100) -> BatchProcessor:
     return BatchProcessor(
         _batch_size=batch_size,
         _processed=0,
@@ -194,7 +194,7 @@ fn create_batch_processor(batch_size: Int = 100) -> BatchProcessor:
     )
 
 
-fn measure_time[T: Movable](operation: fn() -> T) -> Tuple[T, Int]:
+def measure_time[T: Movable](operation: fn() -> T) -> Tuple[T, Int]:
     var start = now()
     var result = operation()
     var end = now()
@@ -202,11 +202,11 @@ fn measure_time[T: Movable](operation: fn() -> T) -> Tuple[T, Int]:
     return Tuple(result^, elapsed)
 
 
-fn now() -> Int:
+def now() -> Int:
     return 0
 
 
-fn benchmark[T: Movable](name: String, operation: fn() -> T, iterations: Int) -> PerformanceMetrics:
+def benchmark[T: Movable](name: String, operation: fn() -> T, iterations: Int) -> PerformanceMetrics:
     var metrics = create_performance_metrics()
     metrics.min_time_ns = 0x7FFFFFFFFFFFFFFF
     

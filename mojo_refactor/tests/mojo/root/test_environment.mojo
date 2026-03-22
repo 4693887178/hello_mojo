@@ -8,7 +8,7 @@ from rqmojo.environment import Environment, create_environment, Config, GlobalVa
 from rqmojo.core.events import EVENT, Event, EventBus
 
 
-fn test_global_vars():
+def test_global_vars():
     print("=== Testing GlobalVars ===")
     var gv = GlobalVars(data_string="test_data")
     print("GlobalVars: " + gv.__str__())
@@ -18,21 +18,21 @@ fn test_global_vars():
     print("")
 
 
-fn test_frontend_validator():
+def test_frontend_validator():
     print("=== Testing FrontendValidator ===")
     var validator = FrontendValidator(name="test_validator", instrument_type=INSTRUMENT_TYPE.CS)
     print("FrontendValidator: " + validator.__str__())
     print("")
 
 
-fn test_transaction_cost_decider():
+def test_transaction_cost_decider():
     print("=== Testing TransactionCostDecider ===")
     var decider = TransactionCostDecider(name="stock_decider", instrument_type=INSTRUMENT_TYPE.CS, market=MARKET.CN)
     print("TransactionCostDecider: " + decider.__str__())
     print("")
 
 
-fn test_create_environment():
+def test_create_environment():
     print("=== Testing create_environment ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -47,7 +47,7 @@ fn test_create_environment():
     print("")
 
 
-fn test_environment_config():
+def test_environment_config():
     print("=== Testing Environment.config ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -59,7 +59,7 @@ fn test_environment_config():
     print("")
 
 
-fn test_environment_time():
+def test_environment_time():
     print("=== Testing Environment time functions ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -78,7 +78,7 @@ fn test_environment_time():
     print("")
 
 
-fn test_environment_initialized():
+def test_environment_initialized():
     print("=== Testing Environment initialization ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -91,7 +91,7 @@ fn test_environment_initialized():
     print("")
 
 
-fn test_environment_hold_strategy():
+def test_environment_hold_strategy():
     print("=== Testing Environment hold strategy ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -107,7 +107,7 @@ fn test_environment_hold_strategy():
     print("")
 
 
-fn test_environment_universe():
+def test_environment_universe():
     print("=== Testing Environment universe ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -125,7 +125,7 @@ fn test_environment_universe():
     print("")
 
 
-fn test_environment_transaction_cost_decider():
+def test_environment_transaction_cost_decider():
     print("=== Testing Environment transaction cost decider ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -140,7 +140,7 @@ fn test_environment_transaction_cost_decider():
     print("")
 
 
-fn test_environment_account_type():
+def test_environment_account_type():
     print("=== Testing Environment account type ===")
     var start_date = DateTime(2024, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2024, 12, 31, 0, 0, 0, 0)
@@ -151,7 +151,7 @@ fn test_environment_account_type():
     print("")
 
 
-fn main():
+def main():
     print("=" * 60)
     print("RQAlpha Mojo environment.mojo Test")
     print("=" * 60)

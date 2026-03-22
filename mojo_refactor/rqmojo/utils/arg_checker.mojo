@@ -4,7 +4,7 @@ Ported from rqalpha/utils/arg_checker.py
 """
 
 from rqmojo.utils.i18n import gettext
-from collections import List
+from std.collections import List
 
 
 comptime __all__: List[String] = [

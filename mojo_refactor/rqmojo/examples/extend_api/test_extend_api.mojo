@@ -6,16 +6,16 @@ Ported from rqalpha/examples/extend_api/test_extend_api.py
 from rqmojo.apis import *
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     var IF1706_df = get_csv_as_df()
     context.IF1706_df = IF1706_df
 
 
-fn before_trading(context: object) -> None:
+def before_trading(context: object) -> None:
     logger.info(context.IF1706_df)
 
 
-alias __config__ = {
+comptime __config__ = {
     "base": {
         "start_date": "2015-01-09",
         "end_date": "2015-01-10",

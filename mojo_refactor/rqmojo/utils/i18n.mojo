@@ -4,7 +4,7 @@ Ported from rqalpha/utils/i18n.py
 Uses Python json module for loading translations, Mojo native for other logic
 """
 
-from collections import Dict
+from std.collections import Dict
 from os import getenv
 from os.path import exists
 from python import Python
@@ -16,10 +16,10 @@ struct I18n(Movable):
     var locale: String
     var translations: Dict[String, Dict[String, String]]
 
-    fn gettext(self, message: String) -> String:
+    def gettext(self, message: String) -> String:
         return message
 
-    fn gettext_with_locale(self, message: String, locale: String) -> String:
+    def gettext_with_locale(self, message: String, locale: String) -> String:
         return message
 
 
@@ -28,12 +28,12 @@ struct Localization(Movable):
     var _initialized: Bool
     var _locale: String
 
-    fn __init__(out self):
+    def __init__(out self):
         self._initialized = False
         self._locale = "en"
         self.translations = Dict[String, String]()
 
-    fn _get_sys_locale(self) -> String:
+    def _get_sys_locale(self) -> String:
         var lang = getenv("LANG")
         if len(lang) > 0:
             var parts = lang.split(".")
@@ -50,7 +50,7 @@ struct Localization(Movable):
         
         return "en"
 
-    fn _ensure_init(mut self):
+    def _ensure_init(mut self):
         if self._initialized:
             return
         
@@ -58,7 +58,7 @@ struct Localization(Movable):
         self._load_translations()
         self._initialized = True
 
-    fn _load_translations(mut self):
+    def _load_translations(mut self):
         var locale_lower = self._locale.lower()
         if "cn" not in locale_lower:
             return
@@ -73,7 +73,7 @@ struct Localization(Movable):
         except:
             system_log().debug("Failed to load translation file")
 
-    fn _load_json_file(mut self, json_path: String) raises:
+    def _load_json_file(mut self, json_path: String) raises:
         var json_module = Python().import_module("json")
         var builtins = Python().import_module("builtins")
         
@@ -89,13 +89,13 @@ struct Localization(Movable):
             var value_str = String(value)
             self.translations[key_str] = value_str
 
-    fn _set_locale(mut self, lc: String):
+    def _set_locale(mut self, lc: String):
         self._locale = lc
         self.translations = Dict[String, String]()
         self._load_translations()
         self._initialized = True
 
-    fn gettext(mut self, message: String) -> String:
+    def gettext(mut self, message: String) -> String:
         self._ensure_init()
         
         var result = self.translations.get(message, "")
@@ -105,24 +105,24 @@ struct Localization(Movable):
         return message
 
 
-fn gettext(message: String) -> String:
+def gettext(message: String) -> String:
     var localization = Localization()
     return localization.gettext(message)
 
 
-fn gettext(message: String, locale: String) -> String:
+def gettext(message: String, locale: String) -> String:
     return message
 
 
-fn set_locale(locale: String):
+def set_locale(locale: String):
     pass
 
 
-fn set_locale():
+def set_locale():
     pass
 
 
-fn get_locale() -> String:
+def get_locale() -> String:
     return "zh_CN"
 
 

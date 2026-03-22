@@ -5,7 +5,7 @@ Uses Mojo native logger module
 """
 
 from std.logger import Logger, Level
-from collections import List
+from std.collections import List
 
 
 comptime DATETIME_FORMAT: String = "%Y-%m-%d %H:%M:%S.%f"

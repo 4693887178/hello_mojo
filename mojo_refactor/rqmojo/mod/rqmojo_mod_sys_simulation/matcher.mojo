@@ -16,7 +16,7 @@ struct Matcher(Movable):
     var slippage: Float64
     var _match_count: Int
     
-    fn match_order(mut self, order: Order, bar: BarObject, dt: DateTime) -> Optional[Trade]:
+    def match_order(mut self, order: Order, bar: BarObject, dt: DateTime) -> Optional[Trade]:
         if order.quantity <= 0:
             return None
         
@@ -39,7 +39,7 @@ struct Matcher(Movable):
             datetime=dt
         )
     
-    fn _get_match_price(self, order: Order, bar: BarObject) -> Float64:
+    def _get_match_price(self, order: Order, bar: BarObject) -> Float64:
         if self.matching_type == MATCHING_TYPE_CURRENT_BAR_CLOSE:
             return bar.close
         elif self.matching_type == MATCHING_TYPE_VWAP:
@@ -51,7 +51,7 @@ struct Matcher(Movable):
         else:
             return bar.close
     
-    fn _apply_slippage(self, order: Order, price: Float64) -> Float64:
+    def _apply_slippage(self, order: Order, price: Float64) -> Float64:
         if self.slippage == 0:
             return price
         
@@ -60,11 +60,11 @@ struct Matcher(Movable):
         else:
             return price * (1.0 - self.slippage)
     
-    fn get_match_count(self) -> Int:
+    def get_match_count(self) -> Int:
         return self._match_count
 
 
-fn create_matcher(matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE, slippage: Float64 = 0.0) -> Matcher:
+def create_matcher(matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE, slippage: Float64 = 0.0) -> Matcher:
     return Matcher(
         matching_type=matching_type,
         slippage=slippage,

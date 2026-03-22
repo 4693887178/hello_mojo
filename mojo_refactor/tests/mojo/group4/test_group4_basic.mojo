@@ -10,7 +10,7 @@ from rqmojo.model.tick import TickObject, create_tick_object
 from rqmojo.model.instrument import Instrument, create_instrument_from_dict
 from rqmojo.utils.datetime_func import DateTime
 from rqmojo.const import MARKET, MARKET_CN
-from collections import Dict
+from std.collections import Dict
 
 
 def test_logger():

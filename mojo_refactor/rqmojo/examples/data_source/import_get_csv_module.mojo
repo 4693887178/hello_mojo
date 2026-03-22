@@ -9,7 +9,7 @@ from python import sys
 from .get_csv_module import get_csv
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     var strategy_file_path = context.config.base.strategy_file
     sys.path.append(os.path.realpath(os.path.dirname(strategy_file_path)))
     
@@ -17,11 +17,11 @@ fn init(context: object) -> None:
     context.IF1706_df = IF1706_df
 
 
-fn before_trading(context: object) -> None:
+def before_trading(context: object) -> None:
     log.info("{}", context.IF1706_df)
 
 
-alias __config__ = {
+comptime __config__ = {
     "base": {
         "start_date": "2015-01-09",
         "end_date": "2015-01-10",

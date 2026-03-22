@@ -5,7 +5,7 @@ Uses Python interop for strategy compilation
 """
 
 from python import Python, PythonObject
-from collections import Dict, List
+from std.collections import Dict, List
 
 
 comptime __all__: List[String] = [

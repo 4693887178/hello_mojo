@@ -3,7 +3,7 @@ Mojo Test for data/base_data_source/deprecated.mojo
 Tests the InstrumentStore class
 """
 
-from collections import Dict, List
+from std.collections import Dict, List
 from rqmojo.const import INSTRUMENT_TYPE_CS
 from rqmojo.model.instrument import Instrument, create_instrument_from_dict
 from rqmojo.data.base_data_source.deprecated import InstrumentStore, create_instrument_store

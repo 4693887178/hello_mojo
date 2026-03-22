@@ -1,7 +1,7 @@
 # json_parser.mojo
 # Simple JSON parser for test data
 
-from collections import Dict
+from std.collections import Dict
 
 
 @fieldwise_init
@@ -12,43 +12,43 @@ struct JSONValue(Copyable, Movable):
     var bool_value: Bool
     var value_type: String  # "string", "int", "float", "bool", "null"
     
-    fn get_string(self) -> String:
+    def get_string(self) -> String:
         return self.string_value
     
-    fn get_int(self) -> Int:
+    def get_int(self) -> Int:
         return self.int_value
     
-    fn get_float(self) -> Float64:
+    def get_float(self) -> Float64:
         return self.float_value
     
-    fn get_bool(self) -> Bool:
+    def get_bool(self) -> Bool:
         return self.bool_value
 
 
-fn create_json_string(s: String) -> JSONValue:
+def create_json_string(s: String) -> JSONValue:
     return JSONValue(string_value=s, int_value=0, float_value=0.0, bool_value=False, value_type="string")
 
-fn create_json_int(i: Int) -> JSONValue:
+def create_json_int(i: Int) -> JSONValue:
     return JSONValue(string_value="", int_value=i, float_value=0.0, bool_value=False, value_type="int")
 
-fn create_json_float(f: Float64) -> JSONValue:
+def create_json_float(f: Float64) -> JSONValue:
     return JSONValue(string_value="", int_value=0, float_value=f, bool_value=False, value_type="float")
 
-fn create_json_bool(b: Bool) -> JSONValue:
+def create_json_bool(b: Bool) -> JSONValue:
     return JSONValue(string_value="", int_value=0, float_value=0.0, bool_value=b, value_type="bool")
 
-fn create_json_null() -> JSONValue:
+def create_json_null() -> JSONValue:
     return JSONValue(string_value="", int_value=0, float_value=0.0, bool_value=False, value_type="null")
 
 
-fn string_contains_dot(s: String) -> Bool:
+def string_contains_dot(s: String) -> Bool:
     for i in range(len(s)):
         if s[i:i+1] == ".":
             return True
     return False
 
 
-fn parse_simple_json_string(json_str: String) raises -> Dict[String, JSONValue]:
+def parse_simple_json_string(json_str: String) raises -> Dict[String, JSONValue]:
     var result = Dict[String, JSONValue]()
     
     var in_object = False
@@ -119,7 +119,7 @@ fn parse_simple_json_string(json_str: String) raises -> Dict[String, JSONValue]:
     return result^
 
 
-fn parse_json_value(value_str: String) raises -> JSONValue:
+def parse_json_value(value_str: String) raises -> JSONValue:
     var trimmed = value_str.strip()
     
     if trimmed == "null":

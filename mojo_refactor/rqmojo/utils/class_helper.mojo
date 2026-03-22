@@ -3,7 +3,7 @@ RQAlpha Mojo - Class Helper
 Ported from rqalpha/utils/class_helper.py
 """
 
-from collections import List, Dict
+from std.collections import List, Dict
 from rqmojo.utils.logger import user_system_log
 from rqmojo.utils.i18n import gettext
 

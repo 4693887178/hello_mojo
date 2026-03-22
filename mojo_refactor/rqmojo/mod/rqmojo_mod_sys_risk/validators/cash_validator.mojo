@@ -3,7 +3,7 @@ RQAlpha Mojo - Cash Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/cash_validator.py
 """
 
-from collections import Optional
+from std.collections import Optional
 from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_EFFECT_OPEN, SIDE_BUY
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
@@ -13,7 +13,7 @@ from rqmojo.utils.datetime_func import DateTime
 from rqmojo.utils.i18n import gettext as _
 
 
-fn validate_cash(
+def validate_cash(
     order: Order,
     cash: Float64,
     instrument: Instrument,
@@ -40,7 +40,7 @@ struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("CashValidator(enabled=", String(self.enabled), ")")
 
-    fn validate_submission(
+    def validate_submission(
         self,
         order: Order,
         account: Optional[Account],
@@ -60,7 +60,7 @@ struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
         var available_cash = acc.available_cash_for(instrument)
         return validate_cash(order, available_cash, instrument, trading_date)
 
-    fn validate_cancellation(
+    def validate_cancellation(
         self,
         order: Order,
         account: Optional[Account]
@@ -68,5 +68,5 @@ struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
         return None
 
 
-fn create_cash_validator(env_name: String = "", enabled: Bool = True) -> CashValidator:
+def create_cash_validator(env_name: String = "", enabled: Bool = True) -> CashValidator:
     return CashValidator(_env_name=env_name, enabled=enabled)

@@ -21,22 +21,22 @@ struct Portfolio(Copyable, Movable, ImplicitlyCopyable):
     var positions_count: Int
     var start_cash: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Portfolio(value=" + String(self.total_value) + ", cash=" + String(self.cash) + ")"
     
-    fn returns(self) -> Float64:
+    def returns(self) -> Float64:
         if self.start_cash == 0:
             return 0.0
         return (self.total_value - self.start_cash) / self.start_cash
     
-    fn update_total_value(mut self, accounts_value: Float64, positions_value: Float64) -> None:
+    def update_total_value(mut self, accounts_value: Float64, positions_value: Float64) -> None:
         self.total_value = accounts_value + positions_value
     
-    fn cal_daily_pnl(mut self, prev_total_value: Float64) -> None:
+    def cal_daily_pnl(mut self, prev_total_value: Float64) -> None:
         self.daily_pnl = self.total_value - prev_total_value
 
 
-fn create_portfolio(start_cash: Float64 = 100000.0) -> Portfolio:
+def create_portfolio(start_cash: Float64 = 100000.0) -> Portfolio:
     return Portfolio(
         total_value=start_cash,
         daily_pnl=0.0,
@@ -57,11 +57,11 @@ struct PortfolioProxy(Copyable, Movable, ImplicitlyCopyable):
     var returns: Float64
     var positions_count: Int
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "PortfolioProxy(value=" + String(self.total_value) + ")"
 
 
-fn create_portfolio_proxy(portfolio: Portfolio) -> PortfolioProxy:
+def create_portfolio_proxy(portfolio: Portfolio) -> PortfolioProxy:
     return PortfolioProxy(
         total_value=portfolio.total_value,
         cash=portfolio.cash,

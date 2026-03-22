@@ -3,7 +3,7 @@ RQAlpha Mojo - Future API for Accounts Mod
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_future.py
 """
 
-from collections import Dict, List, Optional
+from std.collections import Dict, List, Optional
 from rqmojo.const import (
     SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE,
     POSITION_DIRECTION, HEDGE_TYPE, RUN_TYPE,
@@ -31,7 +31,7 @@ struct FutureAccountPositionResult(Movable, Copyable, ImplicitlyCopyable):
     var short_closable: Int
 
 
-fn _get_future_account_position(env: Environment, order_book_id: String) -> FutureAccountPositionResult:
+def _get_future_account_position(env: Environment, order_book_id: String) -> FutureAccountPositionResult:
     return FutureAccountPositionResult(
         total_cash=env.get_portfolio_cash(),
         long_quantity=0,
@@ -41,7 +41,7 @@ fn _get_future_account_position(env: Environment, order_book_id: String) -> Futu
     )
 
 
-fn _submit_order(
+def _submit_order(
     mut env: Environment,
     order_book_id: String,
     amount: Int,
@@ -68,7 +68,7 @@ fn _submit_order(
     return env.submit_order(order)
 
 
-fn buy_open(
+def buy_open(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
@@ -77,7 +77,7 @@ fn buy_open(
     return _submit_order(env, order_book_id, quantity, SIDE_BUY, POSITION_EFFECT_OPEN, style)
 
 
-fn sell_close(
+def sell_close(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
@@ -88,7 +88,7 @@ fn sell_close(
     return _submit_order(env, order_book_id, quantity, SIDE_SELL, position_effect, style)
 
 
-fn sell_open(
+def sell_open(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
@@ -97,7 +97,7 @@ fn sell_open(
     return _submit_order(env, order_book_id, quantity, SIDE_SELL, POSITION_EFFECT_OPEN, style)
 
 
-fn buy_close(
+def buy_close(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
@@ -108,7 +108,7 @@ fn buy_close(
     return _submit_order(env, order_book_id, quantity, SIDE_BUY, position_effect, style)
 
 
-fn future_order(
+def future_order(
     mut env: Environment,
     id_or_ins: String,
     quantity: Int,
@@ -175,7 +175,7 @@ def future_order_to(
     return orders^
 
 
-fn get_future_position(
+def get_future_position(
     env: Environment,
     order_book_id: String,
     direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG
@@ -183,7 +183,7 @@ fn get_future_position(
     return env.portfolio.get_position(order_book_id)
 
 
-fn get_future_positions(env: Environment) -> List[Position]:
+def get_future_positions(env: Environment) -> List[Position]:
     return env.portfolio.get_positions()
 
 
@@ -196,7 +196,7 @@ struct TargetPortfolioItem(Movable, Copyable, ImplicitlyCopyable):
     var last_price: Float64
 
 
-fn _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
+def _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
     var ins = env.get_instrument(order_book_id)
     var round_lot = 1
     if quantity % round_lot != 0:
@@ -308,7 +308,7 @@ def order_target_portfolio_future(
     return orders^
 
 
-fn get_future_contracts(
+def get_future_contracts(
     env: Environment,
     underlying_symbol: String
 ) -> List[String]:
@@ -319,7 +319,7 @@ fn get_future_contracts(
     return result^
 
 
-fn get_dominant_contract(
+def get_dominant_contract(
     env: Environment,
     underlying_symbol: String
 ) -> Optional[String]:

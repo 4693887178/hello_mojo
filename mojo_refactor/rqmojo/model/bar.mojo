@@ -3,7 +3,7 @@ RQAlpha Mojo - Bar Object Model
 Ported from rqalpha/model/bar.py
 """
 
-from collections import Dict, List, Set
+from std.collections import Dict, List, Set
 from rqmojo.const import INSTRUMENT_TYPE, RUN_TYPE, EXECUTION_PHASE, EXCHANGE
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime, convert_int_to_datetime
@@ -36,7 +36,7 @@ struct BarData(Copyable, Movable, ImplicitlyCopyable):
     var last: Float64
 
 
-fn create_nan_bar_data() -> BarData:
+def create_nan_bar_data() -> BarData:
     return BarData(
         open=NAN_VALUE,
         close=NAN_VALUE,
@@ -71,44 +71,44 @@ struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("PartialBarObject(", self._order_book_id, ", dt=", self._dt.__str__(), ")")
 
-    fn order_book_id(self) -> String:
+    def order_book_id(self) -> String:
         return self._order_book_id
 
-    fn symbol(self) -> String:
+    def symbol(self) -> String:
         return self._instrument.symbol()
 
-    fn instrument(self) -> Instrument:
+    def instrument(self) -> Instrument:
         return self._instrument
 
-    fn datetime(self) -> DateTime:
+    def datetime(self) -> DateTime:
         if self._dt.year > 1970:
             return self._dt
         if self._data.datetime_int > 0:
             return convert_int_to_datetime(self._data.datetime_int)
         return self._dt
 
-    fn open(self) -> Float64:
+    def open(self) -> Float64:
         return self._data.open
 
-    fn close(self) -> Float64:
+    def close(self) -> Float64:
         return self._data.close
 
-    fn high(self) -> Float64:
+    def high(self) -> Float64:
         return self._data.high
 
-    fn low(self) -> Float64:
+    def low(self) -> Float64:
         return self._data.low
 
-    fn last(self) -> Float64:
+    def last(self) -> Float64:
         return self._data.last
 
-    fn volume(self) -> Float64:
+    def volume(self) -> Float64:
         return self._data.volume
 
-    fn total_turnover(self) -> Float64:
+    def total_turnover(self) -> Float64:
         return self._data.total_turnover
 
-    fn limit_up(self) -> Float64:
+    def limit_up(self) -> Float64:
         if self._limit_up != 0.0:
             return self._limit_up
         var v = self._data.limit_up
@@ -116,7 +116,7 @@ struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
             return v
         return NAN_VALUE
 
-    fn limit_down(self) -> Float64:
+    def limit_down(self) -> Float64:
         if self._limit_down != 0.0:
             return self._limit_down
         var v = self._data.limit_down
@@ -124,13 +124,13 @@ struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
             return v
         return NAN_VALUE
 
-    fn prev_close(self) -> Float64:
+    def prev_close(self) -> Float64:
         return self._data.prev_close
 
-    fn prev_settlement(self) -> Float64:
+    def prev_settlement(self) -> Float64:
         return self._data.prev_settlement
 
-    fn isnan(self) -> Bool:
+    def isnan(self) -> Bool:
         return self._data.close != self._data.close
 
 
@@ -148,44 +148,44 @@ struct BarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("BarObject(", self._order_book_id, ", ", self._dt.__str__(), ", close=", String(self.close()), ")")
 
-    fn order_book_id(self) -> String:
+    def order_book_id(self) -> String:
         return self._order_book_id
 
-    fn symbol(self) -> String:
+    def symbol(self) -> String:
         return self._instrument.symbol()
 
-    fn instrument(self) -> Instrument:
+    def instrument(self) -> Instrument:
         return self._instrument
 
-    fn datetime(self) -> DateTime:
+    def datetime(self) -> DateTime:
         if self._dt.year > 1970:
             return self._dt
         if self._data.datetime_int > 0:
             return convert_int_to_datetime(self._data.datetime_int)
         return self._dt
 
-    fn open(self) -> Float64:
+    def open(self) -> Float64:
         return self._data.open
 
-    fn close(self) -> Float64:
+    def close(self) -> Float64:
         return self._data.close
 
-    fn high(self) -> Float64:
+    def high(self) -> Float64:
         return self._data.high
 
-    fn low(self) -> Float64:
+    def low(self) -> Float64:
         return self._data.low
 
-    fn last(self) -> Float64:
+    def last(self) -> Float64:
         return self._data.close
 
-    fn volume(self) -> Float64:
+    def volume(self) -> Float64:
         return self._data.volume
 
-    fn total_turnover(self) -> Float64:
+    def total_turnover(self) -> Float64:
         return self._data.total_turnover
 
-    fn limit_up(self) -> Float64:
+    def limit_up(self) -> Float64:
         if self._limit_up != 0.0:
             return self._limit_up
         var v = self._data.limit_up
@@ -193,7 +193,7 @@ struct BarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
             return v
         return NAN_VALUE
 
-    fn limit_down(self) -> Float64:
+    def limit_down(self) -> Float64:
         if self._limit_down != 0.0:
             return self._limit_down
         var v = self._data.limit_down
@@ -201,49 +201,49 @@ struct BarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
             return v
         return NAN_VALUE
 
-    fn settlement(self) -> Float64:
+    def settlement(self) -> Float64:
         return self._data.settlement
 
-    fn prev_settlement(self) -> Float64:
+    def prev_settlement(self) -> Float64:
         return self._data.prev_settlement
 
-    fn prev_close(self) -> Float64:
+    def prev_close(self) -> Float64:
         return self._data.prev_close
 
-    fn open_interest(self) -> Float64:
+    def open_interest(self) -> Float64:
         return self._data.open_interest
 
-    fn discount_rate(self) -> Float64:
+    def discount_rate(self) -> Float64:
         return self._data.discount_rate
 
-    fn acc_net_value(self) -> Float64:
+    def acc_net_value(self) -> Float64:
         return self._data.acc_net_value
 
-    fn unit_net_value(self) -> Float64:
+    def unit_net_value(self) -> Float64:
         return self._data.unit_net_value
 
-    fn basis_spread(self) -> Float64:
+    def basis_spread(self) -> Float64:
         return self._data.basis_spread
 
-    fn is_trading(self) -> Bool:
+    def is_trading(self) -> Bool:
         return self._data.volume > 0
 
-    fn suspended(self) -> Bool:
+    def suspended(self) -> Bool:
         return self._suspended
 
-    fn isnan(self) -> Bool:
+    def isnan(self) -> Bool:
         return self._data.close != self._data.close
 
-    fn vwap(self) -> Float64:
+    def vwap(self) -> Float64:
         if self._data.volume > 0:
             return self._data.total_turnover / self._data.volume
         else:
             return 0.0
 
-    fn mavg(self, n: Int, frequency: String = "1d") -> Float64:
+    def mavg(self, n: Int, frequency: String = "1d") -> Float64:
         return self._data.close
 
-    fn vwap_avg(self, n: Int, frequency: String = "1d") -> Float64:
+    def vwap_avg(self, n: Int, frequency: String = "1d") -> Float64:
         if self._data.volume > 0:
             return self._data.total_turnover / self._data.volume
         return 0.0
@@ -255,32 +255,32 @@ struct BarMap(Movable):
     var _cache: Dict[String, BarObject]
     var _universe: Set[String]
 
-    fn __init__(out self):
+    def __init__(out self):
         self._dt = DateTime(1970, 1, 1, 0, 0, 0, 0)
         self._frequency = "1d"
         self._cache = Dict[String, BarObject]()
         self._universe = Set[String]()
 
-    fn __init__(out self, frequency: String):
+    def __init__(out self, frequency: String):
         self._dt = DateTime(1970, 1, 1, 0, 0, 0, 0)
         self._frequency = frequency
         self._cache = Dict[String, BarObject]()
         self._universe = Set[String]()
 
-    fn update_dt(mut self, dt: DateTime) -> None:
+    def update_dt(mut self, dt: DateTime) -> None:
         self._dt = dt
         self._cache = Dict[String, BarObject]()
 
-    fn update_universe(mut self, var universe: Set[String]) -> None:
+    def update_universe(mut self, var universe: Set[String]) -> None:
         self._universe = universe^
 
-    fn dt(self) -> DateTime:
+    def dt(self) -> DateTime:
         return self._dt
 
-    fn frequency(self) -> String:
+    def frequency(self) -> String:
         return self._frequency
 
-    fn items(self) -> List[Tuple[String, BarObject]]:
+    def items(self) -> List[Tuple[String, BarObject]]:
         var result = List[Tuple[String, BarObject]]()
         for obid in self._universe:
             try:
@@ -290,13 +290,13 @@ struct BarMap(Movable):
                 pass
         return result^
 
-    fn keys(self) -> Set[String]:
+    def keys(self) -> Set[String]:
         var result = Set[String]()
         for item in self._universe:
             result.add(item)
         return result^
 
-    fn values(self) -> List[BarObject]:
+    def values(self) -> List[BarObject]:
         var result = List[BarObject]()
         for obid in self._universe:
             try:
@@ -305,13 +305,13 @@ struct BarMap(Movable):
                 pass
         return result^
 
-    fn __contains__(self, key: String) -> Bool:
+    def __contains__(self, key: String) -> Bool:
         return key in self._universe
 
-    fn len(self) -> Int:
+    def len(self) -> Int:
         return len(self._universe)
 
-    fn get(mut self, key: String) raises -> BarObject:
+    def get(mut self, key: String) raises -> BarObject:
         try:
             return self._cache[key]
         except:
@@ -319,7 +319,7 @@ struct BarMap(Movable):
             self._cache[key] = nan_bar
             return nan_bar
 
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         var keys_list = List[String]()
         var count = 0
         for k in self._universe:
@@ -332,7 +332,7 @@ struct BarMap(Movable):
         return "BarMap(" + s + ")"
 
 
-fn create_bar_object(
+def create_bar_object(
     order_book_id: String,
     dt: DateTime,
     open: Float64,
@@ -383,7 +383,7 @@ fn create_bar_object(
     )
 
 
-fn create_bar_object_with_instrument(
+def create_bar_object_with_instrument(
     instrument: Instrument,
     dt: DateTime,
     data: BarData,
@@ -401,7 +401,7 @@ fn create_bar_object_with_instrument(
     )
 
 
-fn create_simple_bar(
+def create_simple_bar(
     order_book_id: String,
     dt: DateTime,
     open: Float64,
@@ -422,7 +422,7 @@ fn create_simple_bar(
     )
 
 
-fn create_nan_bar_object(order_book_id: String) -> BarObject:
+def create_nan_bar_object(order_book_id: String) -> BarObject:
     var nan_data = create_nan_bar_data()
     var ins = create_stock_instrument(order_book_id, order_book_id, DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
     return BarObject(
@@ -437,11 +437,11 @@ fn create_nan_bar_object(order_book_id: String) -> BarObject:
     )
 
 
-fn create_bar_map(frequency: String = "1d") -> BarMap:
+def create_bar_map(frequency: String = "1d") -> BarMap:
     return BarMap(frequency=frequency)
 
 
-fn bar_object_from_dict(order_book_id: String, dt: DateTime, data: Dict[String, Float64]) -> BarObject:
+def bar_object_from_dict(order_book_id: String, dt: DateTime, data: Dict[String, Float64]) -> BarObject:
     var open_val: Float64 = NAN_VALUE
     var close_val: Float64 = NAN_VALUE
     var high_val: Float64 = NAN_VALUE

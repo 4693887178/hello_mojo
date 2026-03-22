@@ -8,7 +8,7 @@ from python import time
 from python import talib
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.s1 = "000001.XSHE"
     context.SHORTPERIOD = 20
     context.LONGPERIOD = 120
@@ -16,12 +16,12 @@ fn init(context: object) -> None:
     print("init")
 
 
-fn before_trading(context: object) -> None:
+def before_trading(context: object) -> None:
     print("before_trading {}", context.count)
     time.sleep(1)
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     print("handle_bar {}", context.count)
     context.count += 1
     
@@ -37,5 +37,5 @@ fn handle_bar(context: object, bar_dict: object) -> None:
     print("{}", get_positions())
 
 
-fn after_trading(context: object) -> None:
+def after_trading(context: object) -> None:
     print("after_trading {}", context.count)

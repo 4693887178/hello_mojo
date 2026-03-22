@@ -4,7 +4,7 @@ Ported from rqalpha/data/base_data_source/storage_interface.py
 Reference: C++ implementation with DataArray columnar storage
 """
 
-from collections import List, Dict
+from std.collections import List, Dict
 from utils import Variant
 
 
@@ -16,23 +16,23 @@ struct DataArray(Movable):
     var columns: List[ColumnData]
     var _field_index: Dict[String, Int]
 
-    fn __init__(out self):
+    def __init__(out self):
         self.field_names = List[String]()
         self.columns = List[ColumnData]()
         self._field_index = Dict[String, Int]()
 
-    fn build_index(mut self):
+    def build_index(mut self):
         self._field_index = Dict[String, Int]()
         for i in range(len(self.field_names)):
             self._field_index[self.field_names[i]] = i
 
-    fn column_index(self, field_name: String) -> Optional[Int]:
+    def column_index(self, field_name: String) -> Optional[Int]:
         try:
             return self._field_index[field_name]
         except:
             return None
 
-    fn get_int(ref self, field_name: String, row: Int) -> Optional[Int]:
+    def get_int(ref self, field_name: String, row: Int) -> Optional[Int]:
         var idx = self.column_index(field_name)
         if idx == None:
             return None
@@ -42,7 +42,7 @@ struct DataArray(Movable):
                 return col_ref[List[Int]][row]
         return None
 
-    fn get_float(ref self, field_name: String, row: Int) -> Optional[Float64]:
+    def get_float(ref self, field_name: String, row: Int) -> Optional[Float64]:
         var idx = self.column_index(field_name)
         if idx == None:
             return None
@@ -52,7 +52,7 @@ struct DataArray(Movable):
                 return col_ref[List[Float64]][row]
         return None
 
-    fn row_count(self) -> Int:
+    def row_count(self) -> Int:
         if len(self.columns) == 0:
             return 0
         var col_ref = self.columns[0]
@@ -62,20 +62,20 @@ struct DataArray(Movable):
             return len(col_ref[List[Float64]])
         return 0
 
-    fn is_empty(self) -> Bool:
+    def is_empty(self) -> Bool:
         return len(self.columns) == 0
 
-    fn add_int_column(mut self, name: String, var data: List[Int]):
+    def add_int_column(mut self, name: String, var data: List[Int]):
         self.field_names.append(name)
         self.columns.append(ColumnData(data^))
         self.build_index()
 
-    fn add_float_column(mut self, name: String, var data: List[Float64]):
+    def add_float_column(mut self, name: String, var data: List[Float64]):
         self.field_names.append(name)
         self.columns.append(ColumnData(data^))
         self.build_index()
 
-    fn slice(mut self, start: Int, end: Int) -> DataArray:
+    def slice(mut self, start: Int, end: Int) -> DataArray:
         var result = DataArray()
         for name in self.field_names:
             result.field_names.append(name)
@@ -99,5 +99,5 @@ struct DataArray(Movable):
         return result^
 
 
-fn create_data_array() -> DataArray:
+def create_data_array() -> DataArray:
     return DataArray()

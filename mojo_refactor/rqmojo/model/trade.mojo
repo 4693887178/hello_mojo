@@ -15,12 +15,12 @@ struct TradeIdGenerator(Writable, Movable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("TradeIdGenerator(", String(self.counter), ")")
     
-    fn next(mut self) -> Int:
+    def next(mut self) -> Int:
         self.counter += 1
         return self.counter
 
 
-fn create_trade_id_generator() -> TradeIdGenerator:
+def create_trade_id_generator() -> TradeIdGenerator:
     return TradeIdGenerator(counter=0)
 
 
@@ -43,7 +43,7 @@ struct Trade(Writable, Copyable, Movable, ImplicitlyCopyable):
         writer.write("Trade(", String(self.trade_id), ", ", self.order_book_id, ", ", String(self.side.value()), ", qty=", String(self.quantity), ", price=", String(self.price), ")")
 
 
-fn create_trade_with_id(
+def create_trade_with_id(
     trade_id: Int,
     order: Order,
     quantity: Int,
@@ -67,7 +67,7 @@ fn create_trade_with_id(
     )
 
 
-fn create_trade(
+def create_trade(
     order: Order,
     quantity: Int,
     price: Float64,
@@ -77,7 +77,7 @@ fn create_trade(
     return create_trade_with_id(1, order, quantity, price, commission, tax)
 
 
-fn create_trade_from_order(
+def create_trade_from_order(
     trade_id: Int,
     order_id: Int,
     order_book_id: String,

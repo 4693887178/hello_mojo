@@ -7,7 +7,7 @@ from rqmojo.apis import *
 from python import talib
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.s1 = "000001.XSHE"
     context.s2 = "601988.XSHG"
     context.s3 = "000068.XSHE"
@@ -18,7 +18,7 @@ fn init(context: object) -> None:
     context.ORDER_PERCENT = 0.3
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     for stock in context.stocks:
         var prices = history_bars(stock, context.TIME_PERIOD + 1, "1d", "close")
         

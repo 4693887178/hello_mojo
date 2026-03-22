@@ -21,10 +21,10 @@ struct PlotFigure(Movable):
     var width: Int
     var height: Int
     
-    fn add_line(mut self, name: String, color: Color = Color.BLUE()) -> None:
+    def add_line(mut self, name: String, color: Color = Color.BLUE()) -> None:
         pass
     
-    fn add_bar(mut self, name: String, color: Color = Color.RED()) -> None:
+    def add_bar(mut self, name: String, color: Color = Color.RED()) -> None:
         pass
 
 
@@ -32,10 +32,10 @@ struct PlotFigure(Movable):
 struct PlotStore(Movable):
     var _figure_count: Int
     
-    fn add_figure(mut self, title: String, x_label: String = "Date", y_label: String = "Value") -> None:
+    def add_figure(mut self, title: String, x_label: String = "Date", y_label: String = "Value") -> None:
         self._figure_count += 1
     
-    fn create_figure(mut self, title: String, x_label: String = "Date", y_label: String = "Value") -> PlotFigure:
+    def create_figure(mut self, title: String, x_label: String = "Date", y_label: String = "Value") -> PlotFigure:
         return PlotFigure(
             title=title,
             x_label=x_label,
@@ -44,12 +44,12 @@ struct PlotStore(Movable):
             height=400
         )
     
-    fn get_figure_count(self) -> Int:
+    def get_figure_count(self) -> Int:
         return self._figure_count
     
-    fn clear(mut self) -> None:
+    def clear(mut self) -> None:
         self._figure_count = 0
 
 
-fn create_plot_store() -> PlotStore:
+def create_plot_store() -> PlotStore:
     return PlotStore(_figure_count=0)

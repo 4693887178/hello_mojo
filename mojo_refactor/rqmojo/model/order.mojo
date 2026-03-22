@@ -15,12 +15,12 @@ struct OrderIdGenerator(Writable, Movable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("OrderIdGenerator(", String(self.counter), ")")
     
-    fn next(mut self) -> Int:
+    def next(mut self) -> Int:
         self.counter += 1
         return self.counter
 
 
-fn create_order_id_generator() -> OrderIdGenerator:
+def create_order_id_generator() -> OrderIdGenerator:
     return OrderIdGenerator(counter=0)
 
 
@@ -36,11 +36,11 @@ struct OrderStyle(Writable, Copyable, Movable, ImplicitlyCopyable):
             writer.write("LimitOrder(", String(self.limit_price), ")")
 
 
-fn MarketOrder() -> OrderStyle:
+def MarketOrder() -> OrderStyle:
     return OrderStyle(style_type=ORDER_TYPE_MARKET, limit_price=0.0)
 
 
-fn LimitOrder(price: Float64) -> OrderStyle:
+def LimitOrder(price: Float64) -> OrderStyle:
     return OrderStyle(style_type=ORDER_TYPE_LIMIT, limit_price=price)
 
 
@@ -91,7 +91,7 @@ struct Order(Writable, Copyable, Movable, ImplicitlyCopyable):
         return self.status == ORDER_STATUS_REJECTED
 
 
-fn create_order_with_id(
+def create_order_with_id(
     order_id: Int,
     order_book_id: String,
     side: SIDE,
@@ -117,9 +117,9 @@ fn create_order_with_id(
     )
 
 
-fn buy(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
+def buy(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
     return create_order_with_id(1, order_book_id, SIDE_BUY, quantity, style, POSITION_EFFECT_OPEN)
 
 
-fn sell(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
+def sell(order_book_id: String, quantity: Int, style: OrderStyle = MarketOrder()) -> Order:
     return create_order_with_id(2, order_book_id, SIDE_SELL, quantity, style, POSITION_EFFECT_CLOSE)

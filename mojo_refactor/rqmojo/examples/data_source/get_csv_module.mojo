@@ -7,11 +7,11 @@ from python import os
 from python import pandas as pd
 
 
-fn read_csv_as_df(csv_path: String) -> object:
+def read_csv_as_df(csv_path: String) -> object:
     var data = pd.read_csv(csv_path)
     return data
 
 
-fn get_csv() -> object:
+def get_csv() -> object:
     var csv_path = os.path.join(os.path.dirname(__file__), "../IF1706_20161108.csv")
     return read_csv_as_df(csv_path)

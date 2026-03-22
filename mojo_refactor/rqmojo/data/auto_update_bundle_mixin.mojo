@@ -14,7 +14,7 @@ struct OpenAuctionData(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var datetime: DateTime
     var volume: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "OpenAuctionData(" + self.order_book_id + ", volume=" + String(self.volume) + ")"
 
 
@@ -25,28 +25,28 @@ struct AutomaticUpdateBundle(Movable):
     var _end_date: Date
     var _data: List[OpenAuctionData]
     
-    fn add_data(mut self, data: OpenAuctionData) -> None:
+    def add_data(mut self, data: OpenAuctionData) -> None:
         self._data.append(data)
     
-    fn get_data(self, order_book_id: String, dt: Date) -> OpenAuctionData:
+    def get_data(self, order_book_id: String, dt: Date) -> OpenAuctionData:
         for i in range(len(self._data)):
             var d = self._data[i]
             if d.order_book_id == order_book_id:
                 return d
         return OpenAuctionData("", DateTime(1970, 1, 1, 0, 0, 0, 0), 0.0)
     
-    fn has_data(self, order_book_id: String, dt: Date) -> Bool:
+    def has_data(self, order_book_id: String, dt: Date) -> Bool:
         for i in range(len(self._data)):
             var d = self._data[i]
             if d.order_book_id == order_book_id:
                 return True
         return False
     
-    fn file_exists(self) -> Bool:
+    def file_exists(self) -> Bool:
         return len(self._data) > 0
 
 
-fn create_auto_update_bundle(path: String, filename: String, end_date: Date) -> AutomaticUpdateBundle:
+def create_auto_update_bundle(path: String, filename: String, end_date: Date) -> AutomaticUpdateBundle:
     return AutomaticUpdateBundle(
         _path=path,
         _filename=filename,
@@ -55,7 +55,7 @@ fn create_auto_update_bundle(path: String, filename: String, end_date: Date) -> 
     )
 
 
-fn create_auto_update_bundle_with_test_data() -> AutomaticUpdateBundle:
+def create_auto_update_bundle_with_test_data() -> AutomaticUpdateBundle:
     var end_date = Date(2024, 2, 28)
     var bundle = create_auto_update_bundle("/tmp/test_bundle", "open_auction_volume.h5", end_date)
     

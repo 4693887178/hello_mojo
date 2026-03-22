@@ -16,7 +16,7 @@ struct Event(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var trading_dt: DateTime
     var order_book_id: String
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Event(" + self.event_type + ", " + self.calendar_dt.__str__() + ")"
 
 
@@ -27,16 +27,16 @@ struct SimulationEventSource(Movable):
     var _frequency: String
     var _events: List[Event]
     
-    fn add_event(mut self, event: Event) -> None:
+    def add_event(mut self, event: Event) -> None:
         self._events.append(event)
     
-    fn get_event(self, index: Int) -> Event:
+    def get_event(self, index: Int) -> Event:
         return self._events[index]
     
-    fn events_count(self) -> Int:
+    def events_count(self) -> Int:
         return len(self._events)
     
-    fn generate_daily_events(mut self, trading_dates: List[Date]) -> None:
+    def generate_daily_events(mut self, trading_dates: List[Date]) -> None:
         for i in range(len(trading_dates)):
             var date = trading_dates[i]
             var dt_before_trading = DateTime(date.year, date.month, date.day, 0, 0, 0, 0)
@@ -48,14 +48,14 @@ struct SimulationEventSource(Movable):
             self._events.append(Event("BAR", dt_bar, dt_bar, ""))
             self._events.append(Event("AFTER_TRADING", dt_after_trading, dt_after_trading, ""))
     
-    fn generate_tick_events(mut self, ticks: List[TickObject]) -> None:
+    def generate_tick_events(mut self, ticks: List[TickObject]) -> None:
         for i in range(len(ticks)):
             var tick = ticks[i]
             var ob_id = tick.instrument.order_book_id
             self._events.append(Event("TICK", tick.datetime, tick.datetime, ob_id))
 
 
-fn create_simulation_event_source(start_date: DateTime, end_date: DateTime, frequency: String) -> SimulationEventSource:
+def create_simulation_event_source(start_date: DateTime, end_date: DateTime, frequency: String) -> SimulationEventSource:
     return SimulationEventSource(
         _start_date=start_date,
         _end_date=end_date,
@@ -64,7 +64,7 @@ fn create_simulation_event_source(start_date: DateTime, end_date: DateTime, freq
     )
 
 
-fn create_simulation_event_source_with_test_data() -> SimulationEventSource:
+def create_simulation_event_source_with_test_data() -> SimulationEventSource:
     var source = create_simulation_event_source(DateTime(2018, 9, 14, 0, 0, 0, 0), DateTime(2018, 9, 14, 23, 59, 59, 0), "tick")
     
     source.add_event(Event("BEFORE_TRADING", DateTime(2018, 9, 13, 20, 29, 0, 500000), DateTime(2018, 9, 14, 20, 29, 0, 500000), ""))

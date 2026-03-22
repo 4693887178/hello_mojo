@@ -3,16 +3,16 @@ RQAlpha Mojo - Deprecated Functions
 Ported from rqalpha/data/base_data_source/deprecated.py
 """
 
-from collections import Dict, List, Set
+from std.collections import Dict, List, Set
 from rqmojo.const import INSTRUMENT_TYPE
 from rqmojo.model.instrument import Instrument
 
 
-fn deprecated_get_price(order_book_id: String, dt: String) -> Float64:
+def deprecated_get_price(order_book_id: String, dt: String) -> Float64:
     return 0.0
 
 
-fn deprecated_get_volume(order_book_id: String, dt: String) -> Int:
+def deprecated_get_volume(order_book_id: String, dt: String) -> Int:
     return 0
 
 
@@ -24,7 +24,7 @@ struct DeprecatedWarning(Movable):
     var removed_in_version: String
 
 
-fn warn_deprecated(warning: DeprecatedWarning) -> None:
+def warn_deprecated(warning: DeprecatedWarning) -> None:
     print("DeprecationWarning: " + warning.function_name + " is deprecated since version " + warning.since_version + ". " + warning.message)
 
 
@@ -38,7 +38,7 @@ struct InstrumentStore(Movable):
     var _instruments: Dict[String, Instrument]
     var _sym_id_map: Dict[String, String]
 
-    def __init__(inout self, instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE):
+    def __init__(mut self, instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE):
         self._instrument_type = instrument_type
         self._instruments = Dict[String, Instrument]()
         self._sym_id_map = Dict[String, String]()
@@ -84,5 +84,5 @@ struct InstrumentStore(Movable):
         return result^
 
 
-fn create_instrument_store(instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE) -> InstrumentStore:
+def create_instrument_store(instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE) -> InstrumentStore:
     return InstrumentStore(instruments=instruments, instrument_type=instrument_type)

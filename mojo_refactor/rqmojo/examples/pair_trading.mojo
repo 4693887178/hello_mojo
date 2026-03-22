@@ -7,7 +7,7 @@ from rqmojo.apis import *
 from python import numpy as np
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.s1 = "AG1612"
     context.s2 = "AU1612"
     context.counter = 0
@@ -19,11 +19,11 @@ fn init(context: object) -> None:
     subscribe([context.s1, context.s2])
 
 
-fn before_trading(context: object) -> None:
+def before_trading(context: object) -> None:
     context.counter = 0
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     var long_pos_a = get_position(context.s1, POSITION_DIRECTION_LONG)
     var short_pos_a = get_position(context.s1, POSITION_DIRECTION_SHORT)
     var long_pos_b = get_position(context.s2, POSITION_DIRECTION_LONG)

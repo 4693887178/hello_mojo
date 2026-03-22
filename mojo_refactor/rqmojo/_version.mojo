@@ -9,7 +9,7 @@ struct Version:
     comptime VERSION: String = "0.1.0"
 
 
-fn get_version() -> String:
+def get_version() -> String:
     return Version.VERSION
 
 

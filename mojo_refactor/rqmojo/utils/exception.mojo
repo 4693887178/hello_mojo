@@ -3,7 +3,7 @@ RQAlpha Mojo - Exception Handling
 Ported from rqalpha/utils/exception.py
 """
 
-from collections import List
+from std.collections import List
 from rqmojo.const import EXC_TYPE
 
 

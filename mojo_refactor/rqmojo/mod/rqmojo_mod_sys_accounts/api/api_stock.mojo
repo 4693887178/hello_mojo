@@ -3,7 +3,7 @@ RQAlpha Mojo - Stock API for Accounts Mod
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_stock.py
 """
 
-from collections import Dict, List
+from std.collections import Dict, List
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, INSTRUMENT_TYPE_CS, ORDER_TYPE_LIMIT, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
@@ -23,15 +23,15 @@ struct AccountPositionResult(Copyable, Movable, ImplicitlyCopyable):
     var position_closable: Int
 
 
-fn KSH_MIN_AMOUNT() -> Int:
+def KSH_MIN_AMOUNT() -> Int:
     return 200
 
 
-fn BJSE_MIN_AMOUNT() -> Int:
+def BJSE_MIN_AMOUNT() -> Int:
     return 100
 
 
-fn _get_account_position(env: Environment, order_book_id: String) -> AccountPositionResult raises:
+def _get_account_position(env: Environment, order_book_id: String) -> AccountPositionResult raises:
     var position = env.portfolio.get_stock_position(order_book_id)
     return AccountPositionResult(
         total_cash=env._portfolio_cash,
@@ -42,7 +42,7 @@ fn _get_account_position(env: Environment, order_book_id: String) -> AccountPosi
     )
 
 
-fn _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = "floor") -> Int:
+def _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = "floor") -> Int:
     var ins_type = ins.type()
     var board_type = ins.board_type()
     if ins_type == INSTRUMENT_TYPE_CS and board_type == "KSH":
@@ -66,17 +66,17 @@ fn _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = 
         return lots * round_lot * (1 if quantity >= 0 else -1)
 
 
-fn _get_order_style_price(env: Environment, order_book_id: String, style: OrderStyle) -> Float64:
+def _get_order_style_price(env: Environment, order_book_id: String, style: OrderStyle) -> Float64:
     if style.style_type == ORDER_TYPE_LIMIT:
         return style.limit_price
     return env.get_last_price_from_proxy(order_book_id)
 
 
-fn _estimate_transaction_cost(env: Environment, ins: Instrument, delta_quantity: Int, price: Float64) -> Float64:
+def _estimate_transaction_cost(env: Environment, ins: Instrument, delta_quantity: Int, price: Float64) -> Float64:
     return 0.0
 
 
-fn _submit_order(
+def _submit_order(
     mut env: Environment,
     order_book_id: String,
     amount: Int,
@@ -115,7 +115,7 @@ fn _submit_order(
     return env.submit_order(order)
 
 
-fn _order_shares(
+def _order_shares(
     mut env: Environment,
     order_book_id: String,
     amount: Int,
@@ -140,7 +140,7 @@ fn _order_shares(
     )
 
 
-fn _order_value(
+def _order_value(
     mut env: Environment,
     account_result: AccountPositionResult,
     order_book_id: String,
@@ -184,7 +184,7 @@ fn _order_value(
     )
 
 
-fn stock_order_shares(
+def stock_order_shares(
     mut env: Environment,
     id_or_ins: String,
     amount: Int,
@@ -196,7 +196,7 @@ fn stock_order_shares(
     )
 
 
-fn stock_order_lots(
+def stock_order_lots(
     mut env: Environment,
     id_or_ins: String,
     lots: Int,
@@ -209,7 +209,7 @@ fn stock_order_lots(
     return stock_order_shares(env, id_or_ins, lots * round_lot, style)
 
 
-fn stock_order_value(
+def stock_order_value(
     mut env: Environment,
     id_or_ins: String,
     cash_amount: Float64,
@@ -219,7 +219,7 @@ fn stock_order_value(
     return _order_value(env, result, id_or_ins, cash_amount, style)
 
 
-fn stock_order_percent(
+def stock_order_percent(
     mut env: Environment,
     id_or_ins: String,
     percent: Float64,
@@ -230,7 +230,7 @@ fn stock_order_percent(
     return _order_value(env, result, id_or_ins, cash_amount, style)
 
 
-fn stock_order_target_value(
+def stock_order_target_value(
     mut env: Environment,
     id_or_ins: String,
     cash_amount: Float64,
@@ -250,7 +250,7 @@ fn stock_order_target_value(
     return _order_value(env, result, id_or_ins, delta, style, zero_amount_as_exception=False)
 
 
-fn stock_order_target_percent(
+def stock_order_target_percent(
     mut env: Environment,
     id_or_ins: String,
     percent: Float64,
@@ -270,7 +270,7 @@ fn stock_order_target_percent(
     return _order_value(env, result, id_or_ins, delta, style, zero_amount_as_exception=False)
 
 
-fn stock_order(
+def stock_order(
     mut env: Environment,
     id_or_ins: String,
     quantity: Int,
@@ -283,7 +283,7 @@ fn stock_order(
     return orders^
 
 
-fn stock_order_to(
+def stock_order_to(
     mut env: Environment,
     id_or_ins: String,
     quantity: Int,

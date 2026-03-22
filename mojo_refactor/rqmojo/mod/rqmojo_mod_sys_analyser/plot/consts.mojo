@@ -9,19 +9,19 @@ struct ChartType(Stringable, Copyable, Movable, Equatable):
     var name: String
     var value: String
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return self.value
     
     @staticmethod
-    fn LINE() -> ChartType:
+    def LINE() -> ChartType:
         return ChartType(name="LINE", value="line")
     
     @staticmethod
-    fn BAR() -> ChartType:
+    def BAR() -> ChartType:
         return ChartType(name="BAR", value="bar")
     
     @staticmethod
-    fn SCATTER() -> ChartType:
+    def SCATTER() -> ChartType:
         return ChartType(name="SCATTER", value="scatter")
 
 
@@ -32,23 +32,23 @@ struct Color(Stringable, Copyable, Movable, Equatable):
     var b: Int
     var a: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "rgba(" + String(self.r) + "," + String(self.g) + "," + String(self.b) + "," + String(self.a) + ")"
     
     @staticmethod
-    fn RED() -> Color:
+    def RED() -> Color:
         return Color(r=255, g=0, b=0, a=1.0)
     
     @staticmethod
-    fn GREEN() -> Color:
+    def GREEN() -> Color:
         return Color(r=0, g=255, b=0, a=1.0)
     
     @staticmethod
-    fn BLUE() -> Color:
+    def BLUE() -> Color:
         return Color(r=0, g=0, b=255, a=1.0)
     
     @staticmethod
-    fn BLACK() -> Color:
+    def BLACK() -> Color:
         return Color(r=0, g=0, b=0, a=1.0)
 
 

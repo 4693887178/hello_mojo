@@ -11,7 +11,7 @@ from rqmojo.model.trade import Trade, create_trade_from_order
 from rqmojo.utils.datetime_func import DateTime, Date
 
 
-fn test_position_queue_basic() raises:
+def test_position_queue_basic() raises:
     print("=== Testing PositionQueue Basic ===")
     
     var queue = create_position_queue()
@@ -29,7 +29,7 @@ fn test_position_queue_basic() raises:
     print("Test test_position_queue_basic: PASSED")
 
 
-fn test_position_queue_fifo() raises:
+def test_position_queue_fifo() raises:
     print("=== Testing PositionQueue FIFO ===")
     
     var queue = create_position_queue()
@@ -56,7 +56,7 @@ fn test_position_queue_fifo() raises:
     print("Test test_position_queue_fifo: PASSED")
 
 
-fn test_position_queue_clear() raises:
+def test_position_queue_clear() raises:
     print("=== Testing PositionQueue Clear ===")
     
     var queue = create_position_queue()
@@ -76,7 +76,7 @@ fn test_position_queue_clear() raises:
     print("Test test_position_queue_clear: PASSED")
 
 
-fn test_position_with_queue() raises:
+def test_position_with_queue() raises:
     print("=== Testing Position with PositionQueue ===")
     
     var pos = create_stock_position("000001.XSHE")
@@ -108,7 +108,7 @@ fn test_position_with_queue() raises:
     print("Test test_position_with_queue: PASSED")
 
 
-fn test_position_queue_close() raises:
+def test_position_queue_close() raises:
     print("=== Testing PositionQueue Close ===")
     
     var pos = create_stock_position("000001.XSHE")
@@ -141,7 +141,7 @@ fn test_position_queue_close() raises:
     print("Test test_position_queue_close: PASSED")
 
 
-fn test_position_queue_full_close() raises:
+def test_position_queue_full_close() raises:
     print("=== Testing PositionQueue Full Close ===")
     
     var pos = create_stock_position("000001.XSHE")
@@ -165,7 +165,7 @@ fn test_position_queue_full_close() raises:
     print("Test test_position_queue_full_close: PASSED")
 
 
-fn test_position_queue_multiple_operations() raises:
+def test_position_queue_multiple_operations() raises:
     print("=== Testing PositionQueue Multiple Operations ===")
     
     var pos = create_stock_position("000001.XSHE")
@@ -204,7 +204,7 @@ fn test_position_queue_multiple_operations() raises:
     print("Test test_position_queue_multiple_operations: PASSED")
 
 
-fn main() raises:
+def main() raises:
     print("=" * 60)
     print("Running test_position_queue.mojo")
     print("=" * 60)

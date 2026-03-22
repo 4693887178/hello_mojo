@@ -7,7 +7,7 @@ TDD-style comprehensive testing
 from rqmojo.const import *
 
 
-fn test_execution_phase():
+def test_execution_phase():
     print("=== Testing EXECUTION_PHASE ===")
     
     var global_phase = EXECUTION_PHASE.GLOBAL
@@ -57,7 +57,7 @@ fn test_execution_phase():
     print("")
 
 
-fn test_run_type():
+def test_run_type():
     print("=== Testing RUN_TYPE ===")
     
     var backtest = RUN_TYPE.BACKTEST
@@ -77,7 +77,7 @@ fn test_run_type():
     print("")
 
 
-fn test_default_account_type():
+def test_default_account_type():
     print("=== Testing DEFAULT_ACCOUNT_TYPE ===")
     
     var stock = DEFAULT_ACCOUNT_TYPE.STOCK
@@ -97,7 +97,7 @@ fn test_default_account_type():
     print("")
 
 
-fn test_matching_type():
+def test_matching_type():
     print("=== Testing MATCHING_TYPE ===")
     
     var current_bar_close = MATCHING_TYPE.CURRENT_BAR_CLOSE
@@ -123,7 +123,7 @@ fn test_matching_type():
     print("")
 
 
-fn test_order_type():
+def test_order_type():
     print("=== Testing ORDER_TYPE ===")
     
     var market = ORDER_TYPE.MARKET
@@ -137,7 +137,7 @@ fn test_order_type():
     print("")
 
 
-fn test_algo():
+def test_algo():
     print("=== Testing ALGO ===")
     
     var twap = ALGO.TWAP
@@ -148,7 +148,7 @@ fn test_algo():
     print("")
 
 
-fn test_order_status():
+def test_order_status():
     print("=== Testing ORDER_STATUS ===")
     
     var pending_new = ORDER_STATUS.PENDING_NEW
@@ -171,7 +171,7 @@ fn test_order_status():
     print("")
 
 
-fn test_side():
+def test_side():
     print("=== Testing SIDE ===")
     
     var buy = SIDE.BUY
@@ -203,7 +203,7 @@ fn test_side():
     print("")
 
 
-fn test_position_effect():
+def test_position_effect():
     print("=== Testing POSITION_EFFECT ===")
     
     var open = POSITION_EFFECT.OPEN
@@ -223,7 +223,7 @@ fn test_position_effect():
     print("")
 
 
-fn test_position_direction():
+def test_position_direction():
     print("=== Testing POSITION_DIRECTION ===")
     
     var long = POSITION_DIRECTION.LONG
@@ -234,7 +234,7 @@ fn test_position_direction():
     print("")
 
 
-fn test_exc_type():
+def test_exc_type():
     print("=== Testing EXC_TYPE ===")
     
     var user_exc = EXC_TYPE.USER_EXC
@@ -248,7 +248,7 @@ fn test_exc_type():
     print("")
 
 
-fn test_instrument_type():
+def test_instrument_type():
     print("=== Testing INSTRUMENT_TYPE ===")
     
     var cs = INSTRUMENT_TYPE.CS
@@ -295,7 +295,7 @@ fn test_instrument_type():
     print("")
 
 
-fn test_persist_mode():
+def test_persist_mode():
     print("=== Testing PERSIST_MODE ===")
     
     var on_crash = PERSIST_MODE.ON_CRASH
@@ -309,7 +309,7 @@ fn test_persist_mode():
     print("")
 
 
-fn test_commission_type():
+def test_commission_type():
     print("=== Testing COMMISSION_TYPE ===")
     
     var by_money = COMMISSION_TYPE.BY_MONEY
@@ -320,7 +320,7 @@ fn test_commission_type():
     print("")
 
 
-fn test_exit_code():
+def test_exit_code():
     print("=== Testing EXIT_CODE ===")
     
     var exit_success = EXIT_CODE.EXIT_SUCCESS
@@ -334,7 +334,7 @@ fn test_exit_code():
     print("")
 
 
-fn test_hedge_type():
+def test_hedge_type():
     print("=== Testing HEDGE_TYPE ===")
     
     var hedge = HEDGE_TYPE.HEDGE
@@ -348,14 +348,14 @@ fn test_hedge_type():
     print("")
 
 
-fn test_days_cnt():
+def test_days_cnt():
     print("=== Testing DAYS_CNT ===")
     print("DAYS_A_YEAR: " + String(DAYS_CNT.DAYS_A_YEAR))
     print("TRADING_DAYS_A_YEAR: " + String(DAYS_CNT.TRADING_DAYS_A_YEAR))
     print("")
 
 
-fn test_exchange():
+def test_exchange():
     print("=== Testing EXCHANGE ===")
     
     var xshe = EXCHANGE.XSHE
@@ -387,7 +387,7 @@ fn test_exchange():
     print("")
 
 
-fn test_trading_calendar_type():
+def test_trading_calendar_type():
     print("=== Testing TRADING_CALENDAR_TYPE ===")
     
     var cn_stock = TRADING_CALENDAR_TYPE.CN_STOCK
@@ -407,7 +407,7 @@ fn test_trading_calendar_type():
     print("")
 
 
-fn test_market():
+def test_market():
     print("=== Testing MARKET ===")
     
     var cn = MARKET.CN
@@ -418,7 +418,7 @@ fn test_market():
     print("")
 
 
-fn test_equality():
+def test_equality():
     print("=== Testing Equality ===")
     
     var buy1 = SIDE.BUY
@@ -451,7 +451,7 @@ fn test_equality():
     print("")
 
 
-fn test_writable():
+def test_writable():
     print("=== Testing Writable (print) ===")
     
     var buy = SIDE.BUY
@@ -465,7 +465,7 @@ fn test_writable():
     print("")
 
 
-fn test_hashable():
+def test_hashable():
     print("=== Testing Hashable ===")
     
     var buy = SIDE.BUY
@@ -487,7 +487,7 @@ fn test_hashable():
     print("")
 
 
-fn main():
+def main():
     print("=" * 60)
     print("RQAlpha Mojo const.mojo Test (Complete Coverage)")
     print("=" * 60)

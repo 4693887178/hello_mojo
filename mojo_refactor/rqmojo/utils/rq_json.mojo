@@ -5,7 +5,7 @@ Uses Python simplejson module
 """
 
 from python import Python, PythonObject
-from collections import List
+from std.collections import List
 
 
 comptime __all__: List[String] = [

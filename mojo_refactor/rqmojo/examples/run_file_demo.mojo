@@ -6,7 +6,7 @@ Ported from rqalpha/examples/run_file_demo.py
 from rqmojo import run_file
 
 
-fn main() -> None:
+def main() -> None:
     var config = {
         "base": {
             "start_date": "2016-06-01",

@@ -13,7 +13,7 @@ struct ModInfo(Copyable, Movable, ImplicitlyCopyable):
     var version: String
     var enabled: Bool
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Mod(" + self.name + ", v" + self.version + ")"
 
 
@@ -22,21 +22,21 @@ struct ModHandler(Copyable, Movable, ImplicitlyCopyable):
     var mod_count: Int
     var enabled: Bool
     
-    fn start(self) -> None:
+    def start(self) -> None:
         pass
     
-    fn stop(self) -> None:
+    def stop(self) -> None:
         pass
     
-    fn add_mod(mut self, mod_name: String) -> None:
+    def add_mod(mut self, mod_name: String) -> None:
         self.mod_count += 1
     
-    fn get_mod_count(self) -> Int:
+    def get_mod_count(self) -> Int:
         return self.mod_count
     
-    fn is_enabled(self) -> Bool:
+    def is_enabled(self) -> Bool:
         return self.enabled
 
 
-fn create_mod_handler() -> ModHandler:
+def create_mod_handler() -> ModHandler:
     return ModHandler(mod_count=0, enabled=True)

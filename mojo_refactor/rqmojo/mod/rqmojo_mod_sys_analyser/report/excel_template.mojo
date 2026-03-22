@@ -11,7 +11,7 @@ struct ExcelTemplate:
     alias SHEET_POSITIONS: String = "Positions"
 
 
-fn generate_csv_content(headers: List[String], rows: List[List[String]]) -> String:
+def generate_csv_content(headers: List[String], rows: List[List[String]]) -> String:
     var content = ""
     
     for i in range(len(headers)):
@@ -30,7 +30,7 @@ fn generate_csv_content(headers: List[String], rows: List[List[String]]) -> Stri
     return content
 
 
-fn generate_summary_csv(result: Dict[String, String]) -> String:
+def generate_summary_csv(result: Dict[String, String]) -> String:
     var headers = List[String]()
     headers.append("Metric")
     headers.append("Value")

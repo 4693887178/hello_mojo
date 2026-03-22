@@ -3,7 +3,7 @@ RQAlpha Mojo - Order Target Portfolio API
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py
 """
 
-from collections import Dict, List, Optional
+from std.collections import Dict, List, Optional
 from rqmojo.const import (
     SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE,
     SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
@@ -29,7 +29,7 @@ struct TargetPortfolioItem(Movable, Copyable, ImplicitlyCopyable):
     var last_price: Float64
 
 
-fn _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
+def _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
     var ins = env.get_instrument(order_book_id)
     var round_lot = 1
     if quantity % round_lot != 0:

@@ -3,7 +3,7 @@ RQAlpha Mojo - Strategy Context
 Ported from rqalpha/core/strategy_context.py
 """
 
-from collections import Dict, Set
+from std.collections import Dict, Set
 from rqmojo.const import INSTRUMENT_TYPE, RUN_TYPE, MATCHING_TYPE, DEFAULT_ACCOUNT_TYPE, PERSIST_MODE, RUN_TYPE_BACKTEST, MATCHING_TYPE_CURRENT_BAR_CLOSE, PERSIST_MODE_ON_CRASH, RUN_TYPE_BACKTEST, MATCHING_TYPE_CURRENT_BAR_CLOSE, PERSIST_MODE_ON_CRASH
 from rqmojo.environment import Environment, Config
 from rqmojo.model.instrument import Instrument
@@ -31,44 +31,44 @@ struct RunInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var _stock_commission_multiplier: Float64
     var _futures_commission_multiplier: Float64
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "RunInfo(" + self._start_date.__str__() + " to " + self._end_date.__str__() + ")"
     
-    fn start_date(self) -> Date:
+    def start_date(self) -> Date:
         return self._start_date
     
-    fn end_date(self) -> Date:
+    def end_date(self) -> Date:
         return self._end_date
     
-    fn frequency(self) -> String:
+    def frequency(self) -> String:
         return self._frequency
     
-    fn stock_starting_cash(self) -> Float64:
+    def stock_starting_cash(self) -> Float64:
         return self._stock_starting_cash
     
-    fn future_starting_cash(self) -> Float64:
+    def future_starting_cash(self) -> Float64:
         return self._future_starting_cash
     
-    fn margin_multiplier(self) -> Float64:
+    def margin_multiplier(self) -> Float64:
         return self._margin_multiplier
     
-    fn run_type(self) -> RUN_TYPE:
+    def run_type(self) -> RUN_TYPE:
         return self._run_type
     
-    fn matching_type(self) -> MATCHING_TYPE:
+    def matching_type(self) -> MATCHING_TYPE:
         return self._matching_type
     
-    fn slippage(self) -> Float64:
+    def slippage(self) -> Float64:
         return self._slippage
     
-    fn stock_commission_multiplier(self) -> Float64:
+    def stock_commission_multiplier(self) -> Float64:
         return self._stock_commission_multiplier
     
-    fn futures_commission_multiplier(self) -> Float64:
+    def futures_commission_multiplier(self) -> Float64:
         return self._futures_commission_multiplier
 
 
-fn create_run_info(
+def create_run_info(
     start_date: Date,
     end_date: Date,
     frequency: String,
@@ -110,19 +110,19 @@ struct StrategyContext(Movable):
     var _config: RQAlphaConfig
     var _state_data: Dict[String, String]
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "Context(now=" + self.current_dt().__str__() + ", universe_size=" + String(self._universe.__len__()) + ")"
     
-    fn current_dt(self) -> DateTime:
+    def current_dt(self) -> DateTime:
         return DateTime(self._start_year, self._start_month, self._start_day, 0, 0, 0, 0)
     
-    fn universe(self) -> Set[String]:
+    def universe(self) -> Set[String]:
         return self._universe.copy()
     
-    fn now(self) -> DateTime:
+    def now(self) -> DateTime:
         return self._env.calendar_dt()
     
-    fn run_info(self) -> RunInfo:
+    def run_info(self) -> RunInfo:
         var cfg = self._env.config()
         return create_run_info(
             start_date=cfg.base__start_date.date(),
@@ -133,19 +133,19 @@ struct StrategyContext(Movable):
             run_type=cfg.base__run_type
         )
     
-    fn portfolio(self) -> Portfolio:
+    def portfolio(self) -> Portfolio:
         return self._portfolio
     
-    fn stock_account(self) -> Account:
+    def stock_account(self) -> Account:
         return self._stock_account
     
-    fn future_account(self) -> Account:
+    def future_account(self) -> Account:
         return self._future_account
     
-    fn config(self) -> RQAlphaConfig:
+    def config(self) -> RQAlphaConfig:
         return self._config
     
-    fn get_state(self) -> String:
+    def get_state(self) -> String:
         var result = "STATE_START\n"
         for key in self._state_data.keys():
             try:
@@ -156,7 +156,7 @@ struct StrategyContext(Movable):
         result += "STATE_END"
         return result
     
-    fn set_state(mut self, state: String) -> None:
+    def set_state(mut self, state: String) -> None:
         var lines = state.split("\n")
         for line in lines:
             if line == "STATE_START" or line == "STATE_END":
@@ -167,41 +167,41 @@ struct StrategyContext(Movable):
                 var val_str = String(parts[1])
                 self._state_data[key_str] = val_str
     
-    fn get_instrument(self, order_book_id: String) -> Instrument:
+    def get_instrument(self, order_book_id: String) -> Instrument:
         return self._data_proxy.get_instrument(order_book_id)
     
-    fn get_bar(self, order_book_id: String) -> BarObject:
+    def get_bar(self, order_book_id: String) -> BarObject:
         return self._data_proxy.get_bar(order_book_id, self.current_dt())
     
-    fn get_tick(self, order_book_id: String) -> TickObject:
+    def get_tick(self, order_book_id: String) -> TickObject:
         return self._data_proxy.get_tick(order_book_id, self.current_dt())
     
-    fn is_suspended(self, order_book_id: String) -> Bool:
+    def is_suspended(self, order_book_id: String) -> Bool:
         return self._data_proxy.is_suspended(order_book_id, self.current_dt())
     
-    fn order_shares(self, order_book_id: String, quantity: Int) -> Order:
+    def order_shares(self, order_book_id: String, quantity: Int) -> Order:
         return buy(order_book_id, quantity)
     
-    fn order_percent(self, order_book_id: String, percent: Float64) -> Order:
+    def order_percent(self, order_book_id: String, percent: Float64) -> Order:
         return buy(order_book_id, 100)
     
-    fn order_target_value(self, order_book_id: String, target_value: Float64) -> Order:
+    def order_target_value(self, order_book_id: String, target_value: Float64) -> Order:
         return buy(order_book_id, 100)
     
-    fn cancel_order(self, order_id: Int) -> None:
+    def cancel_order(self, order_id: Int) -> None:
         pass
     
-    fn update_universe(mut self, var universe: Set[String]) -> None:
+    def update_universe(mut self, var universe: Set[String]) -> None:
         self._universe = universe^
     
-    fn subscribe(mut self, order_book_id: String) -> None:
+    def subscribe(mut self, order_book_id: String) -> None:
         self._universe.add(order_book_id)
     
-    fn unsubscribe(mut self, order_book_id: String) -> None:
+    def unsubscribe(mut self, order_book_id: String) -> None:
         self._universe.discard(order_book_id)
 
 
-fn create_strategy_context(var env: Environment, var data_proxy: DataProxy) -> StrategyContext:
+def create_strategy_context(var env: Environment, var data_proxy: DataProxy) -> StrategyContext:
     var start = env.start_date()
     var universe = Set[String]()
     var portfolio = Portfolio(

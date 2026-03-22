@@ -3,7 +3,7 @@ RQAlpha Mojo - Function Tools
 Ported from rqalpha/utils/functools.py
 """
 
-from collections import Dict
+from std.collections import Dict
 from rqmojo.utils.i18n import gettext
 from rqmojo.const import RUN_TYPE
 

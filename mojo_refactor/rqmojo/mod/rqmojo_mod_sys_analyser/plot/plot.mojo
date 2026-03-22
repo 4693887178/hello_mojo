@@ -26,7 +26,7 @@ struct PlotFigure(Movable):
     var height: Int
     var data_series: List[PlotData]
     
-    fn add_line(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.BLUE()) -> None:
+    def add_line(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.BLUE()) -> None:
         var data = PlotData(
             x=x,
             y=y,
@@ -36,7 +36,7 @@ struct PlotFigure(Movable):
         )
         self.data_series.append(data)
     
-    fn add_bar(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.RED()) -> None:
+    def add_bar(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.RED()) -> None:
         var data = PlotData(
             x=x,
             y=y,
@@ -46,7 +46,7 @@ struct PlotFigure(Movable):
         )
         self.data_series.append(data)
     
-    fn to_json(self) -> String:
+    def to_json(self) -> String:
         var json = "{\"title\":\"" + self.title + "\","
         json += "\"x_label\":\"" + self.x_label + "\","
         json += "\"y_label\":\"" + self.y_label + "\","
@@ -77,7 +77,7 @@ struct PlotFigure(Movable):
         return json
 
 
-fn create_figure(title: String = "", x_label: String = "Date", y_label: String = "Value", width: Int = 800, height: Int = 400) -> PlotFigure:
+def create_figure(title: String = "", x_label: String = "Date", y_label: String = "Value", width: Int = 800, height: Int = 400) -> PlotFigure:
     return PlotFigure(
         title=title,
         x_label=x_label,

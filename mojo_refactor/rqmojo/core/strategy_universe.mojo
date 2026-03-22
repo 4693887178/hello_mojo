@@ -3,7 +3,7 @@ RQAlpha Mojo - Strategy Universe
 Ported from rqalpha/core/strategy_universe.py
 """
 
-from collections import Dict, Set
+from std.collections import Dict, Set
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.environment import Environment
 from rqmojo.model.instrument import Instrument

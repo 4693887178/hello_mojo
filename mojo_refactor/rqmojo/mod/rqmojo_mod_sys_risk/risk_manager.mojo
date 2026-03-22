@@ -15,18 +15,18 @@ struct ValidationResult(Copyable, Movable, ImplicitlyCopyable):
     var is_valid: Bool
     var error_message: String
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         if self.is_valid:
             return "Valid"
         else:
             return "Invalid: " + self.error_message
 
 
-fn valid_result() -> ValidationResult:
+def valid_result() -> ValidationResult:
     return ValidationResult(is_valid=True, error_message="")
 
 
-fn invalid_result(message: String) -> ValidationResult:
+def invalid_result(message: String) -> ValidationResult:
     return ValidationResult(is_valid=False, error_message=message)
 
 
@@ -34,10 +34,10 @@ fn invalid_result(message: String) -> ValidationResult:
 struct PriceValidator(Movable):
     var _enabled: Bool
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "PriceValidator(enabled=" + String(self._enabled) + ")"
     
-    fn validate_submission(self, order: Order, instrument: Instrument, last_price: Float64) -> ValidationResult:
+    def validate_submission(self, order: Order, instrument: Instrument, last_price: Float64) -> ValidationResult:
         if not self._enabled:
             return valid_result()
         
@@ -56,11 +56,11 @@ struct PriceValidator(Movable):
         
         return valid_result()
     
-    fn validate_cancellation(self, order: Order) -> ValidationResult:
+    def validate_cancellation(self, order: Order) -> ValidationResult:
         return valid_result()
 
 
-fn create_price_validator(enabled: Bool = True) -> PriceValidator:
+def create_price_validator(enabled: Bool = True) -> PriceValidator:
     return PriceValidator(_enabled=enabled)
 
 
@@ -68,10 +68,10 @@ fn create_price_validator(enabled: Bool = True) -> PriceValidator:
 struct CashValidator(Movable):
     var _enabled: Bool
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "CashValidator(enabled=" + String(self._enabled) + ")"
     
-    fn validate_submission(self, order: Order, account: Account, instrument: Instrument) -> ValidationResult:
+    def validate_submission(self, order: Order, account: Account, instrument: Instrument) -> ValidationResult:
         if not self._enabled:
             return valid_result()
         
@@ -94,11 +94,11 @@ struct CashValidator(Movable):
         
         return valid_result()
     
-    fn validate_cancellation(self, order: Order) -> ValidationResult:
+    def validate_cancellation(self, order: Order) -> ValidationResult:
         return valid_result()
 
 
-fn create_cash_validator(enabled: Bool = True) -> CashValidator:
+def create_cash_validator(enabled: Bool = True) -> CashValidator:
     return CashValidator(_enabled=enabled)
 
 
@@ -106,10 +106,10 @@ fn create_cash_validator(enabled: Bool = True) -> CashValidator:
 struct IsTradingValidator(Movable):
     var _enabled: Bool
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "IsTradingValidator(enabled=" + String(self._enabled) + ")"
     
-    fn validate_submission(self, order: Order, instrument: Instrument, dt: DateTime) -> ValidationResult:
+    def validate_submission(self, order: Order, instrument: Instrument, dt: DateTime) -> ValidationResult:
         if not self._enabled:
             return valid_result()
         
@@ -121,11 +121,11 @@ struct IsTradingValidator(Movable):
         
         return valid_result()
     
-    fn validate_cancellation(self, order: Order) -> ValidationResult:
+    def validate_cancellation(self, order: Order) -> ValidationResult:
         return valid_result()
 
 
-fn create_is_trading_validator(enabled: Bool = True) -> IsTradingValidator:
+def create_is_trading_validator(enabled: Bool = True) -> IsTradingValidator:
     return IsTradingValidator(_enabled=enabled)
 
 
@@ -133,10 +133,10 @@ fn create_is_trading_validator(enabled: Bool = True) -> IsTradingValidator:
 struct PositionValidator(Movable):
     var _enabled: Bool
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "PositionValidator(enabled=" + String(self._enabled) + ")"
     
-    fn validate_submission(self, order: Order, account: Account) -> ValidationResult:
+    def validate_submission(self, order: Order, account: Account) -> ValidationResult:
         if not self._enabled:
             return valid_result()
         
@@ -148,11 +148,11 @@ struct PositionValidator(Movable):
         
         return valid_result()
     
-    fn validate_cancellation(self, order: Order) -> ValidationResult:
+    def validate_cancellation(self, order: Order) -> ValidationResult:
         return valid_result()
 
 
-fn create_position_validator(enabled: Bool = True) -> PositionValidator:
+def create_position_validator(enabled: Bool = True) -> PositionValidator:
     return PositionValidator(_enabled=enabled)
 
 
@@ -163,10 +163,10 @@ struct RiskManager(Movable):
     var _is_trading_validator: IsTradingValidator
     var _position_validator: PositionValidator
     
-    fn __str__(self) -> String:
+    def __str__(self) -> String:
         return "RiskManager"
     
-    fn validate_order(self, order: Order, account: Account, instrument: Instrument, dt: DateTime) -> ValidationResult:
+    def validate_order(self, order: Order, account: Account, instrument: Instrument, dt: DateTime) -> ValidationResult:
         var result = self._price_validator.validate_submission(order, instrument, instrument.last_price)
         if not result.is_valid:
             return result
@@ -185,15 +185,15 @@ struct RiskManager(Movable):
         
         return valid_result()
     
-    fn can_submit_order(self, order: Order, account: Account, instrument: Instrument, dt: DateTime) -> Bool:
+    def can_submit_order(self, order: Order, account: Account, instrument: Instrument, dt: DateTime) -> Bool:
         var result = self.validate_order(order, account, instrument, dt)
         return result.is_valid
     
-    fn can_cancel_order(self, order: Order) -> Bool:
+    def can_cancel_order(self, order: Order) -> Bool:
         return True
 
 
-fn create_risk_manager(
+def create_risk_manager(
     validate_price: Bool = True,
     validate_cash: Bool = True,
     validate_is_trading: Bool = True,

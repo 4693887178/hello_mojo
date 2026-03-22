@@ -7,7 +7,7 @@ from rqmojo.apis import *
 from python import talib
 
 
-fn init(context: object) -> None:
+def init(context: object) -> None:
     context.s1 = "000001.XSHE"
     context.SHORTPERIOD = 12
     context.LONGPERIOD = 26
@@ -15,7 +15,7 @@ fn init(context: object) -> None:
     context.OBSERVATION = 100
 
 
-fn handle_bar(context: object, bar_dict: object) -> None:
+def handle_bar(context: object, bar_dict: object) -> None:
     var prices = history_bars(context.s1, context.OBSERVATION, "1d", "close")
     
     var macd_result = talib.MACD(prices, context.SHORTPERIOD, context.LONGPERIOD, context.SMOOTHPERIOD)

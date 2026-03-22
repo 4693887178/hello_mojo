@@ -13,19 +13,19 @@ struct InstrumentsMixin(Movable):
     var _instruments: List[Instrument]
     var _default_instrument: Instrument
     
-    fn get_instrument(self, order_book_id: String) -> Instrument:
+    def get_instrument(self, order_book_id: String) -> Instrument:
         for i in range(len(self._instruments)):
             if self._instruments[i].order_book_id() == order_book_id:
                 return self._instruments[i]
         return self._default_instrument
     
-    fn has_instrument(self, order_book_id: String) -> Bool:
+    def has_instrument(self, order_book_id: String) -> Bool:
         for i in range(len(self._instruments)):
             if self._instruments[i].order_book_id() == order_book_id:
                 return True
         return False
     
-    fn get_trading_period(self, order_book_ids: List[String]) -> List[TimeRange]:
+    def get_trading_period(self, order_book_ids: List[String]) -> List[TimeRange]:
         var result = List[TimeRange]()
         for i in range(len(order_book_ids)):
             var order_book_id = order_book_ids[i]
@@ -44,7 +44,7 @@ struct InstrumentsMixin(Movable):
                 result.append(TimeRange(13, 1, 15, 15))
         return result^
     
-    fn is_night_trading(self, order_book_ids: List[String]) -> Bool:
+    def is_night_trading(self, order_book_ids: List[String]) -> Bool:
         for i in range(len(order_book_ids)):
             var order_book_id = order_book_ids[i]
             if order_book_id == "AG1912" or order_book_id == "RB1912":
@@ -52,7 +52,7 @@ struct InstrumentsMixin(Movable):
         return False
 
 
-fn create_instruments_mixin_with_test_data() -> InstrumentsMixin:
+def create_instruments_mixin_with_test_data() -> InstrumentsMixin:
     var instruments = List[Instrument]()
     var default_ins = create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHE)
     

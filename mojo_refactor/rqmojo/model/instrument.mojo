@@ -7,11 +7,11 @@ from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET
 from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
 
 
-fn is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
+def is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
     return ins_type == INSTRUMENT_TYPE_CS or ins_type == INSTRUMENT_TYPE_ETF or ins_type == INSTRUMENT_TYPE_LOF or ins_type == INSTRUMENT_TYPE_INDX or ins_type == INSTRUMENT_TYPE_BOND
 
 
-fn fix_date(ds: String, dflt: DateTime) raises -> DateTime:
+def fix_date(ds: String, dflt: DateTime) raises -> DateTime:
     if len(ds) == 0 or ds == "0000-00-00":
         return dflt
     
@@ -40,49 +40,49 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     var market_val: MARKET
     var trading_hours_str: String
     
-    fn write_to(self, mut writer: Some[Writer]):
+    def write_to(self, mut writer: Some[Writer]):
         writer.write("Instrument(", self.order_book_id(), ", ", self.symbol(), ")")
     
-    fn __hash__(self) -> Int:
+    def __hash__(self) -> Int:
         return Int(hash(self.order_book_id()))
     
-    fn order_book_id(self) -> String:
+    def order_book_id(self) -> String:
         return self.order_book_id_val
     
-    fn symbol(self) -> String:
+    def symbol(self) -> String:
         return self.symbol_val
     
-    fn round_lot(self) -> Int:
+    def round_lot(self) -> Int:
         return self.round_lot_val
     
-    fn listed_date(self) -> DateTime:
+    def listed_date(self) -> DateTime:
         try:
             return fix_date(self.listed_date_str, DateTime(1990, 1, 1, 0, 0, 0, 0))
         except:
             return DateTime(1990, 1, 1, 0, 0, 0, 0)
     
-    fn de_listed_date(self) -> DateTime:
+    def de_listed_date(self) -> DateTime:
         try:
             return fix_date(self.de_listed_date_str, DateTime(2999, 12, 31, 0, 0, 0, 0))
         except:
             return DateTime(2999, 12, 31, 0, 0, 0, 0)
     
-    fn type(self) -> INSTRUMENT_TYPE:
+    def type(self) -> INSTRUMENT_TYPE:
         return self.type_val
     
-    fn exchange(self) -> EXCHANGE:
+    def exchange(self) -> EXCHANGE:
         return self.exchange_val
     
-    fn market(self) -> MARKET:
+    def market(self) -> MARKET:
         return self.market_val
     
-    fn contract_multiplier(self) -> Float64:
+    def contract_multiplier(self) -> Float64:
         return self.contract_multiplier_val
     
-    fn underlying_symbol(self) -> String:
+    def underlying_symbol(self) -> String:
         return self.underlying_symbol_val
     
-    fn board_type(self) -> String:
+    def board_type(self) -> String:
         if self.type_val == INSTRUMENT_TYPE_CS:
             if self.order_book_id_val.startswith("688"):
                 return "KSH"
@@ -90,22 +90,22 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
                 return "BJS"
         return ""
     
-    fn account_type(self) -> DEFAULT_ACCOUNT_TYPE:
+    def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type_val):
             return DEFAULT_ACCOUNT_TYPE_STOCK
         return DEFAULT_ACCOUNT_TYPE_FUTURE
     
-    fn is_future(self) -> Bool:
+    def is_future(self) -> Bool:
         return self.type_val == INSTRUMENT_TYPE_FUTURE
     
-    fn trading_hours(self) -> List[TimeRange]:
+    def trading_hours(self) -> List[TimeRange]:
         if len(self.trading_hours_str) > 0:
             return self._get_trading_hours_by_instrument()
         if is_instrument_type_in_stock_account(self.type_val):
             return self._stock_trading_period()
         return List[TimeRange]()
     
-    fn _get_trading_hours_by_instrument(self) -> List[TimeRange]:
+    def _get_trading_hours_by_instrument(self) -> List[TimeRange]:
         var result = List[TimeRange]()
         var obid = self.order_book_id_val
         
@@ -128,13 +128,13 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         
         return result^
     
-    fn _stock_trading_period(self) -> List[TimeRange]:
+    def _stock_trading_period(self) -> List[TimeRange]:
         var result = List[TimeRange]()
         result.append(TimeRange(9, 31, 11, 30))
         result.append(TimeRange(13, 1, 15, 0))
         return result^
     
-    fn trade_at_night(self) -> Bool:
+    def trade_at_night(self) -> Bool:
         var hours = self.trading_hours()
         for i in range(len(hours)):
             var r = hours[i]
@@ -143,7 +143,7 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         return False
 
 
-fn create_stock_instrument(order_book_id: String, symbol: String, listed_date: DateTime, exchange: EXCHANGE) -> Instrument:
+def create_stock_instrument(order_book_id: String, symbol: String, listed_date: DateTime, exchange: EXCHANGE) -> Instrument:
     return Instrument(
         order_book_id_val=order_book_id,
         symbol_val=symbol,
@@ -159,7 +159,7 @@ fn create_stock_instrument(order_book_id: String, symbol: String, listed_date: D
     )
 
 
-fn create_future_instrument(order_book_id: String, symbol: String, listed_date: DateTime, maturity_date: DateTime, de_listed_date: DateTime, contract_multiplier: Float64, exchange: EXCHANGE, underlying_symbol: String, trading_hours: String = "") -> Instrument:
+def create_future_instrument(order_book_id: String, symbol: String, listed_date: DateTime, maturity_date: DateTime, de_listed_date: DateTime, contract_multiplier: Float64, exchange: EXCHANGE, underlying_symbol: String, trading_hours: String = "") -> Instrument:
     return Instrument(
         order_book_id_val=order_book_id,
         symbol_val=symbol,

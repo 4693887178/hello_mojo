@@ -12,25 +12,25 @@ from rqmojo.interface import FrontendValidatorInterface
 struct AccountValidator(FrontendValidatorInterface, Movable):
     var enabled: Bool
     
-    fn validate_order(self, order: Order) -> Bool:
+    def validate_order(self, order: Order) -> Bool:
         if not self.enabled:
             return True
         return True
     
-    fn can_submit_order(self, order: Order) -> Bool:
+    def can_submit_order(self, order: Order) -> Bool:
         return True
     
-    fn can_cancel_order(self, order_id: Int) -> Bool:
+    def can_cancel_order(self, order_id: Int) -> Bool:
         return True
     
-    fn validate_submission(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
         if not self.enabled:
             return None
         return None
     
-    fn validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
         return None
 
 
-fn create_account_validator(enabled: Bool = True) -> AccountValidator:
+def create_account_validator(enabled: Bool = True) -> AccountValidator:
     return AccountValidator(enabled=enabled)

@@ -3,7 +3,7 @@ RQAlpha Mojo - Abstract API
 Ported from rqalpha/apis/api_abstract.py
 """
 
-from collections import Dict, List, Optional
+from std.collections import Dict, List, Optional
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, EXECUTION_PHASE, INSTRUMENT_TYPE, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
@@ -28,7 +28,7 @@ struct OrderParams(Movable, Copyable, ImplicitlyCopyable):
     var price: Float64
 
 
-fn cal_style(
+def cal_style(
     price: Optional[Float64],
     style: Optional[OrderStyle],
     price_or_style: Optional[OrderStyle]
@@ -45,15 +45,15 @@ fn cal_style(
     return MarketOrder()
 
 
-fn assure_active_ins_for_order_api(order_book_id: String) -> Optional[Instrument]:
+def assure_active_ins_for_order_api(order_book_id: String) -> Optional[Instrument]:
     return None
 
 
-fn is_valid_price(price: Float64) -> Bool:
+def is_valid_price(price: Float64) -> Bool:
     return price > 0.0 and price == price
 
 
-fn _submit_order_helper(
+def _submit_order_helper(
     mut env: Environment,
     order_book_id: String,
     amount: Int,
@@ -76,7 +76,7 @@ fn _submit_order_helper(
     return env.submit_order(order)
 
 
-fn _order_helper(
+def _order_helper(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
@@ -109,7 +109,7 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("AbstractAPI(enabled=", String(self._enabled), ")")
 
-    fn order_shares(
+    def order_shares(
         mut self,
         mut env: Environment,
         id_or_ins: String,
@@ -123,7 +123,7 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         var effect = POSITION_EFFECT_OPEN if amount > 0 else POSITION_EFFECT_CLOSE
         return _submit_order_helper(env, id_or_ins, abs(amount), side, effect, style)
 
-    fn order_value(
+    def order_value(
         mut self,
         mut env: Environment,
         id_or_ins: String,
@@ -138,7 +138,7 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         var quantity = Int(abs(cash_amount) / 10.0)
         return _submit_order_helper(env, id_or_ins, quantity, side, effect, style)
 
-    fn order_percent(
+    def order_percent(
         mut self,
         mut env: Environment,
         id_or_ins: String,
@@ -153,13 +153,13 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         var quantity = Int(abs(percent) * 1000.0)
         return _submit_order_helper(env, id_or_ins, quantity, side, effect, style)
 
-    fn cancel_order(mut self, mut env: Environment, order: Order) -> None:
+    def cancel_order(mut self, mut env: Environment, order: Order) -> None:
         pass
 
-    fn get_open_orders(self, env: Environment, order_book_id: String = "") -> List[Order]:
+    def get_open_orders(self, env: Environment, order_book_id: String = "") -> List[Order]:
         var orders = List[Order]()
         return orders^
 
 
-fn create_abstract_api(ctx_name: String = "", enabled: Bool = True) -> AbstractAPI:
+def create_abstract_api(ctx_name: String = "", enabled: Bool = True) -> AbstractAPI:
     return AbstractAPI(_ctx_name=ctx_name, _enabled=enabled)
