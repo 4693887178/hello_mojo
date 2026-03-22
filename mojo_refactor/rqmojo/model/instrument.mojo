@@ -15,9 +15,9 @@ fn fix_date(ds: String, dflt: DateTime) raises -> DateTime:
     if len(ds) == 0 or ds == "0000-00-00":
         return dflt
     
-    var year_str = ds[0:4]
-    var month_str = ds[5:7]
-    var day_str = ds[8:10]
+    var year_str = ds[byte=0:4]
+    var month_str = ds[byte=5:7]
+    var day_str = ds[byte=8:10]
     
     var year = Int(year_str)
     var month = Int(month_str)
@@ -38,6 +38,7 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     var contract_multiplier_val: Float64
     var underlying_symbol_val: String
     var market_val: MARKET
+    var trading_hours_str: String
     
     fn write_to(self, mut writer: Some[Writer]):
         writer.write("Instrument(", self.order_book_id(), ", ", self.symbol(), ")")
@@ -96,6 +97,50 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     
     fn is_future(self) -> Bool:
         return self.type_val == INSTRUMENT_TYPE_FUTURE
+    
+    fn trading_hours(self) -> List[TimeRange]:
+        if len(self.trading_hours_str) > 0:
+            return self._get_trading_hours_by_instrument()
+        if is_instrument_type_in_stock_account(self.type_val):
+            return self._stock_trading_period()
+        return List[TimeRange]()
+    
+    fn _get_trading_hours_by_instrument(self) -> List[TimeRange]:
+        var result = List[TimeRange]()
+        var obid = self.order_book_id_val
+        
+        if obid.startswith("RB"):
+            result.append(TimeRange(21, 1, 23, 0))
+            result.append(TimeRange(9, 1, 10, 15))
+            result.append(TimeRange(10, 31, 11, 30))
+            result.append(TimeRange(13, 31, 15, 0))
+        elif obid.startswith("AG"):
+            result.append(TimeRange(21, 1, 23, 59))
+            result.append(TimeRange(0, 0, 2, 30))
+            result.append(TimeRange(9, 1, 11, 30))
+            result.append(TimeRange(13, 31, 15, 15))
+        elif obid.startswith("TF") or obid.startswith("T"):
+            result.append(TimeRange(9, 15, 11, 30))
+            result.append(TimeRange(13, 0, 15, 15))
+        else:
+            result.append(TimeRange(9, 31, 11, 30))
+            result.append(TimeRange(13, 1, 15, 0))
+        
+        return result^
+    
+    fn _stock_trading_period(self) -> List[TimeRange]:
+        var result = List[TimeRange]()
+        result.append(TimeRange(9, 31, 11, 30))
+        result.append(TimeRange(13, 1, 15, 0))
+        return result^
+    
+    fn trade_at_night(self) -> Bool:
+        var hours = self.trading_hours()
+        for i in range(len(hours)):
+            var r = hours[i]
+            if r.start_hour <= 4 or r.end_hour >= 19:
+                return True
+        return False
 
 
 fn create_stock_instrument(order_book_id: String, symbol: String, listed_date: DateTime, exchange: EXCHANGE) -> Instrument:
@@ -109,11 +154,12 @@ fn create_stock_instrument(order_book_id: String, symbol: String, listed_date: D
         round_lot_val=100,
         contract_multiplier_val=1.0,
         underlying_symbol_val="",
-        market_val=MARKET_CN
+        market_val=MARKET_CN,
+        trading_hours_str=""
     )
 
 
-fn create_future_instrument(order_book_id: String, symbol: String, listed_date: DateTime, maturity_date: DateTime, de_listed_date: DateTime, contract_multiplier: Float64, exchange: EXCHANGE, underlying_symbol: String) -> Instrument:
+fn create_future_instrument(order_book_id: String, symbol: String, listed_date: DateTime, maturity_date: DateTime, de_listed_date: DateTime, contract_multiplier: Float64, exchange: EXCHANGE, underlying_symbol: String, trading_hours: String = "") -> Instrument:
     return Instrument(
         order_book_id_val=order_book_id,
         symbol_val=symbol,
@@ -124,5 +170,6 @@ fn create_future_instrument(order_book_id: String, symbol: String, listed_date: 
         round_lot_val=1,
         contract_multiplier_val=contract_multiplier,
         underlying_symbol_val=underlying_symbol,
-        market_val=MARKET_CN
+        market_val=MARKET_CN,
+        trading_hours_str=trading_hours
     )

@@ -460,11 +460,11 @@ struct DataProxy(Movable):
     
     fn _get_instrument_by_id(self, order_book_id: String) -> Instrument:
         if order_book_id == "RB1912":
-            return create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE_SHFE, "RB")
+            return create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE_SHFE, "RB", "21:1-23:0,9:1-10:15,10:31-11:30,13:31-15:0")
         elif order_book_id == "AG1912":
-            return create_future_instrument("AG1912", "白银1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 15.0, EXCHANGE_SHFE, "AG")
+            return create_future_instrument("AG1912", "白银1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 15.0, EXCHANGE_SHFE, "AG", "21:1-23:59,0:0-2:30,9:1-11:30,13:31-15:15")
         elif order_book_id == "TF1912":
-            return create_future_instrument("TF1912", "五年期国债1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10000.0, EXCHANGE_CFFEX, "TF")
+            return create_future_instrument("TF1912", "五年期国债1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10000.0, EXCHANGE_CFFEX, "TF", "9:15-11:30,13:0-15:15")
         elif order_book_id == "000001.XSHE":
             return create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE)
         else:

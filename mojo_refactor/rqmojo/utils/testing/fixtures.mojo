@@ -3,92 +3,111 @@ RQAlpha Mojo - Testing Fixtures
 Ported from rqalpha/utils/testing/fixtures.py
 """
 
-from rqmojo.environment import Environment, create_environment
-from rqmojo.const import RUN_TYPE, RUN_TYPE_BACKTEST, RUN_TYPE_BACKTEST
-from rqmojo.utils.datetime_func import DateTime, Date
+from std.collections import Dict, List
+from rqmojo.utils import RqAttrDict, RqValue
+from rqmojo.environment import Environment
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
 
 
-@fieldwise_init
-struct BacktestFixture(Movable):
-    var env: Environment
-    var start_date: DateTime
-    var end_date: DateTime
-    
-    fn setup(mut self) -> None:
-        pass
-    
-    fn teardown(mut self) -> None:
+struct RQAlphaFixture:
+    def init_fixture(mut self):
         pass
 
 
-fn create_backtest_fixture(start_date: DateTime = DateTime(2020, 1, 1, 0, 0, 0, 0), end_date: DateTime = DateTime(2020, 12, 31, 0, 0, 0, 0)) -> BacktestFixture:
-    var env = create_environment(
-        start_date=start_date,
-        end_date=end_date,
-        run_type=RUN_TYPE_BACKTEST
-    )
+struct EnvironmentFixture:
+    var env_config: RqAttrDict
+    var env: Optional[Environment]
     
-    return BacktestFixture(
-        env=env,
-        start_date=start_date,
-        end_date=end_date
-    )
+    def __init__(out self):
+        self.env_config = RqAttrDict()
+        self.env = None
+    
+    def init_fixture(mut self):
+        pass
 
 
-@fieldwise_init
-struct DataProxyFixture(Movable):
+struct TempDirFixture:
+    var temp_dir: Optional[String]
+    
+    def __init__(out self):
+        self.temp_dir = None
+    
+    def init_fixture(mut self):
+        pass
+
+
+struct BaseDataSourceFixture:
+    var default_bundle_path: String
+    var env_config: RqAttrDict
+    var base_data_source: Optional[DataProxy]
+    var temp_dir: Optional[String]
+    var env: Optional[Environment]
+    
+    def __init__(out self):
+        self.default_bundle_path = ""
+        self.env_config = RqAttrDict()
+        self.base_data_source = None
+        self.temp_dir = None
+        self.env = None
+    
+    def init_fixture(mut self):
+        pass
+
+
+struct BarDictPriceBoardFixture:
+    var price_board: Optional[DataProxy]
+    var env: Optional[Environment]
+    var env_config: RqAttrDict
+    
+    def __init__(out self):
+        self.price_board = None
+        self.env = None
+        self.env_config = RqAttrDict()
+    
+    def init_fixture(mut self):
+        pass
+
+
+struct DataProxyFixture:
     var data_proxy: DataProxy
-    var start_date: DateTime
-    var end_date: DateTime
+    var temp_dir: Optional[String]
+    var env: Optional[Environment]
+    var env_config: RqAttrDict
+    var default_bundle_path: String
+    var _initialized: Bool
     
-    fn init_fixture(mut self) -> None:
+    def __init__(out self):
+        self.data_proxy = create_data_proxy()
+        self.temp_dir = None
+        self.env = None
+        self.env_config = RqAttrDict()
+        self.default_bundle_path = ""
+        self._initialized = False
+    
+    def init_fixture(mut self):
+        if not self._initialized:
+            self.data_proxy = create_data_proxy()
+            self._initialized = True
+    
+    def data_source(mut self) -> DataProxy:
+        return self.data_proxy^
+    
+    def base_data_source(mut self) -> DataProxy:
+        return self.data_proxy^
+    
+    def price_board(mut self) -> DataProxy:
+        return self.data_proxy^
+
+
+struct MatcherFixture:
+    var env_config: RqAttrDict
+    var env: Optional[Environment]
+    var matcher: Optional[String]
+    
+    def __init__(out self):
+        self.env_config = RqAttrDict()
+        self.env = None
+        self.matcher = None
+    
+    def init_fixture(mut self):
         pass
-
-
-fn create_data_proxy_fixture(start_date: DateTime = DateTime(2016, 1, 1, 0, 0, 0, 0), end_date: DateTime = DateTime(2023, 12, 28, 0, 0, 0, 0)) -> DataProxyFixture:
-    var data_proxy = create_data_proxy()
-    
-    return DataProxyFixture(
-        data_proxy=data_proxy^,
-        start_date=start_date,
-        end_date=end_date
-    )
-
-
-@fieldwise_init
-struct RQAlphaTestCase(Movable):
-    var _test_count: Int
-    var _pass_count: Int
-    
-    fn init_fixture(mut self) -> None:
-        pass
-    
-    fn assert_set_equal(mut self, set1: List[String], set2: List[String], test_name: String) -> None:
-        self._test_count += 1
-        
-        if len(set1) != len(set2):
-            print("FAIL: " + test_name + " - set sizes differ")
-            return
-        
-        var matched = List[Bool]()
-        for i in range(len(set2)):
-            matched.append(False)
-        
-        for i in range(len(set1)):
-            var found = False
-            for j in range(len(set2)):
-                if not matched[j] and set1[i] == set2[j]:
-                    matched[j] = True
-                    found = True
-                    break
-            if not found:
-                print("FAIL: " + test_name + " - sets not equal")
-                return
-        
-        self._pass_count += 1
-        print("PASS: " + test_name)
-
-
-fn create_rqalpha_test_case() -> RQAlphaTestCase:
-    return RQAlphaTestCase(_test_count=0, _pass_count=0)
