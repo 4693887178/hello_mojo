@@ -1,29 +1,26 @@
 """
-RQAlpha Mojo - Constants and Enumerations (Improved Version)
+RQAlpha Mojo - Constants and Enumerations (Optimized Version)
 Ported from rqalpha/const.py
-Mojo 0.26+ compatible - Optimized with Traits
+Mojo 0.26+ compatible - Optimized with Variant Registry and Reflection
 
 改进点:
-1. 使用 Trait 抽象公共接口，消除代码重复
-2. 保持与 Python 版本的功能完全等价
-3. 更清晰的代码结构
+1. 使用 Variant 存储所有枚举列表
+2. 使用反射访问字段，无需 name()/value() 方法
+3. 每个枚举类只需定义字段和常量
+4. 统一在 EnumRegistry 中提供 to_string 方法
 """
 
-# ============================================================
-# EnumTrait - 公共枚举特性
-# ============================================================
-trait EnumTrait:
-    def name(self) -> String: ...
-    def value(self) -> String: ...
+from std.reflection import get_base_type_name, struct_field_index_by_name
+from std.utils import Variant
 
 
 # ============================================================
-# EXECUTION_PHASE
+# 枚举类定义 - 只需定义字段和常量
 # ============================================================
 @fieldwise_init
-struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime GLOBAL = EXECUTION_PHASE("GLOBAL", "[全局]")
     comptime ON_INIT = EXECUTION_PHASE("ON_INIT", "[程序初始化]")
@@ -35,121 +32,31 @@ struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTr
     comptime FINALIZED = EXECUTION_PHASE("FINALIZED", "[程序结束]")
     comptime SCHEDULED = EXECUTION_PHASE("SCHEDULED", "[scheduler函数内]")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[EXECUTION_PHASE]:
-        if name == "GLOBAL": return Self.GLOBAL
-        elif name == "ON_INIT": return Self.ON_INIT
-        elif name == "BEFORE_TRADING": return Self.BEFORE_TRADING
-        elif name == "OPEN_AUCTION": return Self.OPEN_AUCTION
-        elif name == "ON_BAR": return Self.ON_BAR
-        elif name == "ON_TICK": return Self.ON_TICK
-        elif name == "AFTER_TRADING": return Self.AFTER_TRADING
-        elif name == "FINALIZED": return Self.FINALIZED
-        elif name == "SCHEDULED": return Self.SCHEDULED
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[EXECUTION_PHASE]:
-        if value == "[全局]": return Self.GLOBAL
-        elif value == "[程序初始化]": return Self.ON_INIT
-        elif value == "[日内交易前]": return Self.BEFORE_TRADING
-        elif value == "[集合竞价]": return Self.OPEN_AUCTION
-        elif value == "[盘中 handle_bar 函数]": return Self.ON_BAR
-        elif value == "[盘中 handle_tick 函数]": return Self.ON_TICK
-        elif value == "[日内交易后]": return Self.AFTER_TRADING
-        elif value == "[程序结束]": return Self.FINALIZED
-        elif value == "[scheduler函数内]": return Self.SCHEDULED
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("EXECUTION_PHASE.", self._name)
-
-
-# ============================================================
-# RUN_TYPE
-# ============================================================
 @fieldwise_init
-struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime BACKTEST = RUN_TYPE("BACKTEST", "BACKTEST")
     comptime PAPER_TRADING = RUN_TYPE("PAPER_TRADING", "PAPER_TRADING")
     comptime LIVE_TRADING = RUN_TYPE("LIVE_TRADING", "LIVE_TRADING")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[RUN_TYPE]:
-        if name == "BACKTEST": return Self.BACKTEST
-        elif name == "PAPER_TRADING": return Self.PAPER_TRADING
-        elif name == "LIVE_TRADING": return Self.LIVE_TRADING
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[RUN_TYPE]:
-        if value == "BACKTEST": return Self.BACKTEST
-        elif value == "PAPER_TRADING": return Self.PAPER_TRADING
-        elif value == "LIVE_TRADING": return Self.LIVE_TRADING
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("RUN_TYPE.", self._name)
-
-
-# ============================================================
-# DEFAULT_ACCOUNT_TYPE
-# ============================================================
 @fieldwise_init
-struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime STOCK = DEFAULT_ACCOUNT_TYPE("STOCK", "STOCK")
     comptime FUTURE = DEFAULT_ACCOUNT_TYPE("FUTURE", "FUTURE")
     comptime BOND = DEFAULT_ACCOUNT_TYPE("BOND", "BOND")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[DEFAULT_ACCOUNT_TYPE]:
-        if name == "STOCK": return Self.STOCK
-        elif name == "FUTURE": return Self.FUTURE
-        elif name == "BOND": return Self.BOND
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[DEFAULT_ACCOUNT_TYPE]:
-        if value == "STOCK": return Self.STOCK
-        elif value == "FUTURE": return Self.FUTURE
-        elif value == "BOND": return Self.BOND
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("DEFAULT_ACCOUNT_TYPE.", self._name)
-
-
-# ============================================================
-# MATCHING_TYPE
-# ============================================================
 @fieldwise_init
-struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime CURRENT_BAR_CLOSE = MATCHING_TYPE("CURRENT_BAR_CLOSE", "CURRENT_BAR_CLOSE")
     comptime VWAP = MATCHING_TYPE("VWAP", "VWAP")
@@ -159,114 +66,30 @@ struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrai
     comptime NEXT_TICK_BEST_OWN = MATCHING_TYPE("NEXT_TICK_BEST_OWN", "NEXT_TICK_BEST_OWN")
     comptime NEXT_TICK_BEST_COUNTERPARTY = MATCHING_TYPE("NEXT_TICK_BEST_COUNTERPARTY", "NEXT_TICK_BEST_COUNTERPARTY")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[MATCHING_TYPE]:
-        if name == "CURRENT_BAR_CLOSE": return Self.CURRENT_BAR_CLOSE
-        elif name == "VWAP": return Self.VWAP
-        elif name == "COUNTERPARTY_OFFER": return Self.COUNTERPARTY_OFFER
-        elif name == "NEXT_BAR_OPEN": return Self.NEXT_BAR_OPEN
-        elif name == "NEXT_TICK_LAST": return Self.NEXT_TICK_LAST
-        elif name == "NEXT_TICK_BEST_OWN": return Self.NEXT_TICK_BEST_OWN
-        elif name == "NEXT_TICK_BEST_COUNTERPARTY": return Self.NEXT_TICK_BEST_COUNTERPARTY
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[MATCHING_TYPE]:
-        if value == "CURRENT_BAR_CLOSE": return Self.CURRENT_BAR_CLOSE
-        elif value == "VWAP": return Self.VWAP
-        elif value == "COUNTERPARTY_OFFER": return Self.COUNTERPARTY_OFFER
-        elif value == "NEXT_BAR_OPEN": return Self.NEXT_BAR_OPEN
-        elif value == "NEXT_TICK_LAST": return Self.NEXT_TICK_LAST
-        elif value == "NEXT_TICK_BEST_OWN": return Self.NEXT_TICK_BEST_OWN
-        elif value == "NEXT_TICK_BEST_COUNTERPARTY": return Self.NEXT_TICK_BEST_COUNTERPARTY
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("MATCHING_TYPE.", self._name)
-
-
-# ============================================================
-# ORDER_TYPE
-# ============================================================
 @fieldwise_init
-struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime MARKET = ORDER_TYPE("MARKET", "MARKET")
     comptime LIMIT = ORDER_TYPE("LIMIT", "LIMIT")
     comptime ALGO = ORDER_TYPE("ALGO", "ALGO")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[ORDER_TYPE]:
-        if name == "MARKET": return Self.MARKET
-        elif name == "LIMIT": return Self.LIMIT
-        elif name == "ALGO": return Self.ALGO
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[ORDER_TYPE]:
-        if value == "MARKET": return Self.MARKET
-        elif value == "LIMIT": return Self.LIMIT
-        elif value == "ALGO": return Self.ALGO
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("ORDER_TYPE.", self._name)
-
-
-# ============================================================
-# ALGO
-# ============================================================
 @fieldwise_init
-struct ALGO(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct ALGO(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime TWAP = ALGO("TWAP", "TWAP")
     comptime VWAP = ALGO("VWAP", "VWAP")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[ALGO]:
-        if name == "TWAP": return Self.TWAP
-        elif name == "VWAP": return Self.VWAP
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[ALGO]:
-        if value == "TWAP": return Self.TWAP
-        elif value == "VWAP": return Self.VWAP
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("ALGO.", self._name)
-
-
-# ============================================================
-# ORDER_STATUS
-# ============================================================
 @fieldwise_init
-struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime PENDING_NEW = ORDER_STATUS("PENDING_NEW", "PENDING_NEW")
     comptime ACTIVE = ORDER_STATUS("ACTIVE", "ACTIVE")
@@ -275,43 +98,11 @@ struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait
     comptime PENDING_CANCEL = ORDER_STATUS("PENDING_CANCEL", "PENDING_CANCEL")
     comptime CANCELLED = ORDER_STATUS("CANCELLED", "CANCELLED")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[ORDER_STATUS]:
-        if name == "PENDING_NEW": return Self.PENDING_NEW
-        elif name == "ACTIVE": return Self.ACTIVE
-        elif name == "FILLED": return Self.FILLED
-        elif name == "REJECTED": return Self.REJECTED
-        elif name == "PENDING_CANCEL": return Self.PENDING_CANCEL
-        elif name == "CANCELLED": return Self.CANCELLED
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[ORDER_STATUS]:
-        if value == "PENDING_NEW": return Self.PENDING_NEW
-        elif value == "ACTIVE": return Self.ACTIVE
-        elif value == "FILLED": return Self.FILLED
-        elif value == "REJECTED": return Self.REJECTED
-        elif value == "PENDING_CANCEL": return Self.PENDING_CANCEL
-        elif value == "CANCELLED": return Self.CANCELLED
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("ORDER_STATUS.", self._name)
-
-
-# ============================================================
-# SIDE
-# ============================================================
 @fieldwise_init
-struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct SIDE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime BUY = SIDE("BUY", "BUY")
     comptime SELL = SIDE("SELL", "SELL")
@@ -319,41 +110,11 @@ struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
     comptime MARGIN = SIDE("MARGIN", "MARGIN")
     comptime CONVERT_STOCK = SIDE("CONVERT_STOCK", "CONVERT_STOCK")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[SIDE]:
-        if name == "BUY": return Self.BUY
-        elif name == "SELL": return Self.SELL
-        elif name == "FINANCING": return Self.FINANCING
-        elif name == "MARGIN": return Self.MARGIN
-        elif name == "CONVERT_STOCK": return Self.CONVERT_STOCK
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[SIDE]:
-        if value == "BUY": return Self.BUY
-        elif value == "SELL": return Self.SELL
-        elif value == "FINANCING": return Self.FINANCING
-        elif value == "MARGIN": return Self.MARGIN
-        elif value == "CONVERT_STOCK": return Self.CONVERT_STOCK
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("SIDE.", self._name)
-
-
-# ============================================================
-# POSITION_EFFECT
-# ============================================================
 @fieldwise_init
-struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime OPEN = POSITION_EFFECT("OPEN", "OPEN")
     comptime CLOSE = POSITION_EFFECT("CLOSE", "CLOSE")
@@ -361,110 +122,30 @@ struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTr
     comptime EXERCISE = POSITION_EFFECT("EXERCISE", "EXERCISE")
     comptime MATCH = POSITION_EFFECT("MATCH", "MATCH")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[POSITION_EFFECT]:
-        if name == "OPEN": return Self.OPEN
-        elif name == "CLOSE": return Self.CLOSE
-        elif name == "CLOSE_TODAY": return Self.CLOSE_TODAY
-        elif name == "EXERCISE": return Self.EXERCISE
-        elif name == "MATCH": return Self.MATCH
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[POSITION_EFFECT]:
-        if value == "OPEN": return Self.OPEN
-        elif value == "CLOSE": return Self.CLOSE
-        elif value == "CLOSE_TODAY": return Self.CLOSE_TODAY
-        elif value == "EXERCISE": return Self.EXERCISE
-        elif value == "MATCH": return Self.MATCH
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("POSITION_EFFECT.", self._name)
-
-
-# ============================================================
-# POSITION_DIRECTION
-# ============================================================
 @fieldwise_init
-struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime LONG = POSITION_DIRECTION("LONG", "LONG")
     comptime SHORT = POSITION_DIRECTION("SHORT", "SHORT")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[POSITION_DIRECTION]:
-        if name == "LONG": return Self.LONG
-        elif name == "SHORT": return Self.SHORT
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[POSITION_DIRECTION]:
-        if value == "LONG": return Self.LONG
-        elif value == "SHORT": return Self.SHORT
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("POSITION_DIRECTION.", self._name)
-
-
-# ============================================================
-# EXC_TYPE
-# ============================================================
 @fieldwise_init
-struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime USER_EXC = EXC_TYPE("USER_EXC", "USER_EXC")
     comptime SYSTEM_EXC = EXC_TYPE("SYSTEM_EXC", "SYSTEM_EXC")
     comptime NOTSET = EXC_TYPE("NOTSET", "NOTSET")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[EXC_TYPE]:
-        if name == "USER_EXC": return Self.USER_EXC
-        elif name == "SYSTEM_EXC": return Self.SYSTEM_EXC
-        elif name == "NOTSET": return Self.NOTSET
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[EXC_TYPE]:
-        if value == "USER_EXC": return Self.USER_EXC
-        elif value == "SYSTEM_EXC": return Self.SYSTEM_EXC
-        elif value == "NOTSET": return Self.NOTSET
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("EXC_TYPE.", self._name)
-
-
-# ============================================================
-# INSTRUMENT_TYPE
-# ============================================================
 @fieldwise_init
-struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime CS = INSTRUMENT_TYPE("CS", "CS")
     comptime FUTURE = INSTRUMENT_TYPE("FUTURE", "Future")
@@ -481,208 +162,55 @@ struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTr
     comptime REITs = INSTRUMENT_TYPE("REITs", "REITs")
     comptime FutureArbitrage = INSTRUMENT_TYPE("FutureArbitrage", "FutureArbitrage")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[INSTRUMENT_TYPE]:
-        if name == "CS": return Self.CS
-        elif name == "FUTURE": return Self.FUTURE
-        elif name == "OPTION": return Self.OPTION
-        elif name == "ETF": return Self.ETF
-        elif name == "LOF": return Self.LOF
-        elif name == "INDX": return Self.INDX
-        elif name == "PUBLIC_FUND": return Self.PUBLIC_FUND
-        elif name == "FUND": return Self.FUND
-        elif name == "BOND": return Self.BOND
-        elif name == "CONVERTIBLE": return Self.CONVERTIBLE
-        elif name == "SPOT": return Self.SPOT
-        elif name == "REPO": return Self.REPO
-        elif name == "REITs": return Self.REITs
-        elif name == "FutureArbitrage": return Self.FutureArbitrage
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[INSTRUMENT_TYPE]:
-        if value == "CS": return Self.CS
-        elif value == "Future": return Self.FUTURE
-        elif value == "Option": return Self.OPTION
-        elif value == "ETF": return Self.ETF
-        elif value == "LOF": return Self.LOF
-        elif value == "INDX": return Self.INDX
-        elif value == "PublicFund": return Self.PUBLIC_FUND
-        elif value == "Fund": return Self.FUND
-        elif value == "Bond": return Self.BOND
-        elif value == "Convertible": return Self.CONVERTIBLE
-        elif value == "Spot": return Self.SPOT
-        elif value == "Repo": return Self.REPO
-        elif value == "REITs": return Self.REITs
-        elif value == "FutureArbitrage": return Self.FutureArbitrage
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("INSTRUMENT_TYPE.", self._name)
-
-
-# ============================================================
-# PERSIST_MODE
-# ============================================================
 @fieldwise_init
-struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime ON_CRASH = PERSIST_MODE("ON_CRASH", "ON_CRASH")
     comptime REAL_TIME = PERSIST_MODE("REAL_TIME", "REAL_TIME")
     comptime ON_NORMAL_EXIT = PERSIST_MODE("ON_NORMAL_EXIT", "ON_NORMAL_EXIT")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[PERSIST_MODE]:
-        if name == "ON_CRASH": return Self.ON_CRASH
-        elif name == "REAL_TIME": return Self.REAL_TIME
-        elif name == "ON_NORMAL_EXIT": return Self.ON_NORMAL_EXIT
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[PERSIST_MODE]:
-        if value == "ON_CRASH": return Self.ON_CRASH
-        elif value == "REAL_TIME": return Self.REAL_TIME
-        elif value == "ON_NORMAL_EXIT": return Self.ON_NORMAL_EXIT
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("PERSIST_MODE.", self._name)
-
-
-# ============================================================
-# COMMISSION_TYPE
-# ============================================================
 @fieldwise_init
-struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime BY_MONEY = COMMISSION_TYPE("BY_MONEY", "BY_MONEY")
     comptime BY_VOLUME = COMMISSION_TYPE("BY_VOLUME", "BY_VOLUME")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[COMMISSION_TYPE]:
-        if name == "BY_MONEY": return Self.BY_MONEY
-        elif name == "BY_VOLUME": return Self.BY_VOLUME
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[COMMISSION_TYPE]:
-        if value == "BY_MONEY": return Self.BY_MONEY
-        elif value == "BY_VOLUME": return Self.BY_VOLUME
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("COMMISSION_TYPE.", self._name)
-
-
-# ============================================================
-# EXIT_CODE
-# ============================================================
 @fieldwise_init
-struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime EXIT_SUCCESS = EXIT_CODE("EXIT_SUCCESS", "EXIT_SUCCESS")
     comptime EXIT_USER_ERROR = EXIT_CODE("EXIT_USER_ERROR", "EXIT_USER_ERROR")
     comptime EXIT_INTERNAL_ERROR = EXIT_CODE("EXIT_INTERNAL_ERROR", "EXIT_INTERNAL_ERROR")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[EXIT_CODE]:
-        if name == "EXIT_SUCCESS": return Self.EXIT_SUCCESS
-        elif name == "EXIT_USER_ERROR": return Self.EXIT_USER_ERROR
-        elif name == "EXIT_INTERNAL_ERROR": return Self.EXIT_INTERNAL_ERROR
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[EXIT_CODE]:
-        if value == "EXIT_SUCCESS": return Self.EXIT_SUCCESS
-        elif value == "EXIT_USER_ERROR": return Self.EXIT_USER_ERROR
-        elif value == "EXIT_INTERNAL_ERROR": return Self.EXIT_INTERNAL_ERROR
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("EXIT_CODE.", self._name)
-
-
-# ============================================================
-# HEDGE_TYPE
-# ============================================================
 @fieldwise_init
-struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime HEDGE = HEDGE_TYPE("HEDGE", "hedge")
     comptime SPECULATION = HEDGE_TYPE("SPECULATION", "speculation")
     comptime ARBITRAGE = HEDGE_TYPE("ARBITRAGE", "arbitrage")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[HEDGE_TYPE]:
-        if name == "HEDGE": return Self.HEDGE
-        elif name == "SPECULATION": return Self.SPECULATION
-        elif name == "ARBITRAGE": return Self.ARBITRAGE
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[HEDGE_TYPE]:
-        if value == "hedge": return Self.HEDGE
-        elif value == "speculation": return Self.SPECULATION
-        elif value == "arbitrage": return Self.ARBITRAGE
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("HEDGE_TYPE.", self._name)
-
-
-# ============================================================
-# DAYS_CNT
-# ============================================================
 struct DAYS_CNT:
     comptime DAYS_A_YEAR: Int = 365
     comptime TRADING_DAYS_A_YEAR: Int = 252
 
 
-# ============================================================
-# EXCHANGE
-# ============================================================
 @fieldwise_init
-struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime XSHE = EXCHANGE("XSHE", "XSHE")
     comptime XSHG = EXCHANGE("XSHG", "XSHG")
@@ -694,49 +222,11 @@ struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
     comptime SGEX = EXCHANGE("SGEX", "SGEX")
     comptime BJSE = EXCHANGE("BJSE", "BJSE")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[EXCHANGE]:
-        if name == "XSHE": return Self.XSHE
-        elif name == "XSHG": return Self.XSHG
-        elif name == "SHFE": return Self.SHFE
-        elif name == "INE": return Self.INE
-        elif name == "DCE": return Self.DCE
-        elif name == "CZCE": return Self.CZCE
-        elif name == "CFFEX": return Self.CFFEX
-        elif name == "SGEX": return Self.SGEX
-        elif name == "BJSE": return Self.BJSE
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[EXCHANGE]:
-        if value == "XSHE": return Self.XSHE
-        elif value == "XSHG": return Self.XSHG
-        elif value == "SHFE": return Self.SHFE
-        elif value == "INE": return Self.INE
-        elif value == "DCE": return Self.DCE
-        elif value == "CZCE": return Self.CZCE
-        elif value == "CFFEX": return Self.CFFEX
-        elif value == "SGEX": return Self.SGEX
-        elif value == "BJSE": return Self.BJSE
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("EXCHANGE.", self._name)
-
-
-# ============================================================
-# TRADING_CALENDAR_TYPE
-# ============================================================
 @fieldwise_init
-struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime CN_STOCK = TRADING_CALENDAR_TYPE("CN_STOCK", "CN_STOCK")
     comptime HK_STOCK = TRADING_CALENDAR_TYPE("HK_STOCK", "HK_STOCK")
@@ -744,61 +234,125 @@ struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable, 
     comptime INTER_BANK = TRADING_CALENDAR_TYPE("INTER_BANK", "INTERBANK")
     comptime EXCHANGE = TRADING_CALENDAR_TYPE("CN_STOCK", "CN_STOCK")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
-
-    @staticmethod
-    def from_name(name: String) -> Optional[TRADING_CALENDAR_TYPE]:
-        if name == "CN_STOCK": return Self.CN_STOCK
-        elif name == "HK_STOCK": return Self.HK_STOCK
-        elif name == "SOUTHBOUND": return Self.SOUTHBOUND
-        elif name == "INTER_BANK": return Self.INTER_BANK
-        elif name == "EXCHANGE": return Self.EXCHANGE
-        return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[TRADING_CALENDAR_TYPE]:
-        if value == "CN_STOCK": return Self.CN_STOCK
-        elif value == "HK_STOCK": return Self.HK_STOCK
-        elif value == "SOUTHBOUND": return Self.SOUTHBOUND
-        elif value == "INTERBANK": return Self.INTER_BANK
-        return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("TRADING_CALENDAR_TYPE.", self._name)
-
-
-# ============================================================
-# MARKET
-# ============================================================
 @fieldwise_init
-struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable, EnumTrait):
-    var _name: String
-    var _value: String
+struct MARKET(Equatable, ImplicitlyCopyable, Hashable):
+    var name: String
+    var value: String
 
     comptime CN = MARKET("CN", "CN")
     comptime HK = MARKET("HK", "HK")
 
-    def name(self) -> String:
-        return self._name
 
-    def value(self) -> String:
-        return self._value
+# ============================================================
+# Variant 类型定义 - 包含所有枚举类型的列表
+# ============================================================
+comptime EnumListVariant = Variant[
+    List[EXECUTION_PHASE],
+    List[RUN_TYPE],
+    List[DEFAULT_ACCOUNT_TYPE],
+    List[MATCHING_TYPE],
+    List[ORDER_TYPE],
+    List[ALGO],
+    List[ORDER_STATUS],
+    List[SIDE],
+    List[POSITION_EFFECT],
+    List[POSITION_DIRECTION],
+    List[EXC_TYPE],
+    List[INSTRUMENT_TYPE],
+    List[PERSIST_MODE],
+    List[COMMISSION_TYPE],
+    List[EXIT_CODE],
+    List[HEDGE_TYPE],
+    List[EXCHANGE],
+    List[TRADING_CALENDAR_TYPE],
+    List[MARKET],
+]
 
-    @staticmethod
-    def from_name(name: String) -> Optional[MARKET]:
-        if name == "CN": return Self.CN
-        elif name == "HK": return Self.HK
+
+# ============================================================
+# EnumRegistry - 枚举注册表
+# ============================================================
+struct EnumRegistry:
+    var registry: Dict[String, EnumListVariant]
+    
+    def __init__(out self):
+        self.registry = {
+            "EXECUTION_PHASE": EnumListVariant([
+                EXECUTION_PHASE.GLOBAL, EXECUTION_PHASE.ON_INIT, EXECUTION_PHASE.BEFORE_TRADING,
+                EXECUTION_PHASE.OPEN_AUCTION, EXECUTION_PHASE.ON_BAR, EXECUTION_PHASE.ON_TICK,
+                EXECUTION_PHASE.AFTER_TRADING, EXECUTION_PHASE.FINALIZED, EXECUTION_PHASE.SCHEDULED
+            ]),
+            "RUN_TYPE": EnumListVariant([RUN_TYPE.BACKTEST, RUN_TYPE.PAPER_TRADING, RUN_TYPE.LIVE_TRADING]),
+            "DEFAULT_ACCOUNT_TYPE": EnumListVariant([DEFAULT_ACCOUNT_TYPE.STOCK, DEFAULT_ACCOUNT_TYPE.FUTURE, DEFAULT_ACCOUNT_TYPE.BOND]),
+            "MATCHING_TYPE": EnumListVariant([
+                MATCHING_TYPE.CURRENT_BAR_CLOSE, MATCHING_TYPE.VWAP, MATCHING_TYPE.COUNTERPARTY_OFFER,
+                MATCHING_TYPE.NEXT_BAR_OPEN, MATCHING_TYPE.NEXT_TICK_LAST, MATCHING_TYPE.NEXT_TICK_BEST_OWN,
+                MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY
+            ]),
+            "ORDER_TYPE": EnumListVariant([ORDER_TYPE.MARKET, ORDER_TYPE.LIMIT, ORDER_TYPE.ALGO]),
+            "ALGO": EnumListVariant([ALGO.TWAP, ALGO.VWAP]),
+            "ORDER_STATUS": EnumListVariant([
+                ORDER_STATUS.PENDING_NEW, ORDER_STATUS.ACTIVE, ORDER_STATUS.FILLED,
+                ORDER_STATUS.REJECTED, ORDER_STATUS.PENDING_CANCEL, ORDER_STATUS.CANCELLED
+            ]),
+            "SIDE": EnumListVariant([SIDE.BUY, SIDE.SELL, SIDE.FINANCING, SIDE.MARGIN, SIDE.CONVERT_STOCK]),
+            "POSITION_EFFECT": EnumListVariant([
+                POSITION_EFFECT.OPEN, POSITION_EFFECT.CLOSE, POSITION_EFFECT.CLOSE_TODAY,
+                POSITION_EFFECT.EXERCISE, POSITION_EFFECT.MATCH
+            ]),
+            "POSITION_DIRECTION": EnumListVariant([POSITION_DIRECTION.LONG, POSITION_DIRECTION.SHORT]),
+            "EXC_TYPE": EnumListVariant([EXC_TYPE.USER_EXC, EXC_TYPE.SYSTEM_EXC, EXC_TYPE.NOTSET]),
+            "INSTRUMENT_TYPE": EnumListVariant([
+                INSTRUMENT_TYPE.CS, INSTRUMENT_TYPE.FUTURE, INSTRUMENT_TYPE.OPTION, INSTRUMENT_TYPE.ETF,
+                INSTRUMENT_TYPE.LOF, INSTRUMENT_TYPE.INDX, INSTRUMENT_TYPE.PUBLIC_FUND, INSTRUMENT_TYPE.FUND,
+                INSTRUMENT_TYPE.BOND, INSTRUMENT_TYPE.CONVERTIBLE, INSTRUMENT_TYPE.SPOT, INSTRUMENT_TYPE.REPO,
+                INSTRUMENT_TYPE.REITs, INSTRUMENT_TYPE.FutureArbitrage
+            ]),
+            "PERSIST_MODE": EnumListVariant([PERSIST_MODE.ON_CRASH, PERSIST_MODE.REAL_TIME, PERSIST_MODE.ON_NORMAL_EXIT]),
+            "COMMISSION_TYPE": EnumListVariant([COMMISSION_TYPE.BY_MONEY, COMMISSION_TYPE.BY_VOLUME]),
+            "EXIT_CODE": EnumListVariant([EXIT_CODE.EXIT_SUCCESS, EXIT_CODE.EXIT_USER_ERROR, EXIT_CODE.EXIT_INTERNAL_ERROR]),
+            "HEDGE_TYPE": EnumListVariant([HEDGE_TYPE.HEDGE, HEDGE_TYPE.SPECULATION, HEDGE_TYPE.ARBITRAGE]),
+            "EXCHANGE": EnumListVariant([
+                EXCHANGE.XSHE, EXCHANGE.XSHG, EXCHANGE.SHFE, EXCHANGE.INE, EXCHANGE.DCE,
+                EXCHANGE.CZCE, EXCHANGE.CFFEX, EXCHANGE.SGEX, EXCHANGE.BJSE
+            ]),
+            "TRADING_CALENDAR_TYPE": EnumListVariant([
+                TRADING_CALENDAR_TYPE.CN_STOCK, TRADING_CALENDAR_TYPE.HK_STOCK,
+                TRADING_CALENDAR_TYPE.SOUTHBOUND, TRADING_CALENDAR_TYPE.INTER_BANK, TRADING_CALENDAR_TYPE.EXCHANGE
+            ]),
+            "MARKET": EnumListVariant([MARKET.CN, MARKET.HK]),
+        }
+    
+    def get[T: Movable & Copyable](self, name: String) raises -> Optional[T]:
+        comptime type_name = get_base_type_name[T]()
+        comptime name_idx = struct_field_index_by_name[T, "name"]()
+        
+        var val = self.registry[type_name]
+        for v in val[List[T]]:
+            ref field_ref = __struct_field_ref(name_idx, v)
+            var field_val = rebind[String](field_ref)
+            if field_val == name:
+                return v.copy()
+        
         return None
-
-    @staticmethod
-    def from_value(value: String) -> Optional[MARKET]:
-        if value == "CN": return Self.CN
-        elif value == "HK": return Self.HK
+    
+    def get_by_value[T: Movable & Copyable](self, value: String) raises -> Optional[T]:
+        comptime type_name = get_base_type_name[T]()
+        comptime value_idx = struct_field_index_by_name[T, "value"]()
+        
+        var val = self.registry[type_name]
+        for v in val[List[T]]:
+            ref field_ref = __struct_field_ref(value_idx, v)
+            var field_val = rebind[String](field_ref)
+            if field_val == value:
+                return v.copy()
+        
         return None
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("MARKET.", self._name)
+    
+    def to_string[T: Movable](self, obj: T) raises -> String:
+        comptime type_name = get_base_type_name[T]()
+        comptime name_idx = struct_field_index_by_name[T, "name"]()
+        ref name_ref = __struct_field_ref(name_idx, obj)
+        var name_val = rebind[String](name_ref)
+        return String(type_name, ".", name_val)
