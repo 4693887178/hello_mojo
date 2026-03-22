@@ -564,6 +564,6 @@ fn create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TY
         _data_proxy=create_data_proxy(),
         _order_id_generator=create_order_id_generator(),
         portfolio=create_portfolio(100000.0),
-        _execution_phase=EXECUTION_PHASE.GLOBAL(),
+        _execution_phase=EXECUTION_PHASE.GLOBAL,
         _broker="simulation"
     )
