@@ -4,7 +4,21 @@ Ported from rqalpha/data/trading_dates_mixin.py
 """
 
 from rqmojo.const import TRADING_CALENDAR_TYPE
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTimeDate, DateLike
+
+
+def _to_timestamp(d: DateLike) -> DateTimeDate:
+    if d.isa[DateTimeDate]():
+        return d[DateTimeDate]
+    elif d.isa[Int]():
+        var date_int = d[Int]
+        var year = date_int // 10000
+        var r = date_int % 10000
+        var month = r // 100
+        var day = r % 100
+        return DateTimeDate(year, month, day)
+    else:
+        return DateTimeDate(1970, 1, 1)
 
 
 @fieldwise_init
@@ -16,8 +30,8 @@ struct TradingDateResult(Stringable, Copyable, Movable, ImplicitlyCopyable):
     def __str__(self) -> String:
         return String(self.year) + "-" + String(self.month) + "-" + String(self.day)
     
-    def to_date(self) -> Date:
-        return Date(self.year, self.month, self.day)
+    def to_date(self) -> DateTimeDate:
+        return DateTimeDate(self.year, self.month, self.day)
 
 
 def create_trading_date_result(year: Int, month: Int, day: Int) -> TradingDateResult:
