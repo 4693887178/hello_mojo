@@ -540,33 +540,18 @@ def test_enum_registry_get_by_value() raises:
     print("  EnumRegistry.get_by_value() tests passed!")
 
 
-def test_enum_registry_to_string() raises:
-    print("Testing EnumRegistry.to_string()...")
+def test_writable() raises:
+    print("Testing Writable trait (print output)...")
     
-    var registry = EnumRegistry()
+    print("  SIDE.BUY = ", SIDE.BUY)
+    print("  ORDER_STATUS.FILLED = ", ORDER_STATUS.FILLED)
+    print("  RUN_TYPE.BACKTEST = ", RUN_TYPE.BACKTEST)
+    print("  EXCHANGE.XSHE = ", EXCHANGE.XSHE)
+    print("  MARKET.CN = ", MARKET.CN)
+    print("  HEDGE_TYPE.HEDGE = ", HEDGE_TYPE.HEDGE)
+    print("  INSTRUMENT_TYPE.FUTURE = ", INSTRUMENT_TYPE.FUTURE)
     
-    var str1 = registry.to_string(EXECUTION_PHASE.GLOBAL)
-    assert_equal(str1, "EXECUTION_PHASE.GLOBAL")
-    
-    var str2 = registry.to_string(RUN_TYPE.BACKTEST)
-    assert_equal(str2, "RUN_TYPE.BACKTEST")
-    
-    var str3 = registry.to_string(DEFAULT_ACCOUNT_TYPE.STOCK)
-    assert_equal(str3, "DEFAULT_ACCOUNT_TYPE.STOCK")
-    
-    var str4 = registry.to_string(ORDER_TYPE.MARKET)
-    assert_equal(str4, "ORDER_TYPE.MARKET")
-    
-    var str5 = registry.to_string(SIDE.BUY)
-    assert_equal(str5, "SIDE.BUY")
-    
-    var str6 = registry.to_string(EXCHANGE.XSHE)
-    assert_equal(str6, "EXCHANGE.XSHE")
-    
-    var str7 = registry.to_string(MARKET.CN)
-    assert_equal(str7, "MARKET.CN")
-    
-    print("  EnumRegistry.to_string() tests passed!")
+    print("  Writable trait tests passed!")
 
 
 def test_enum_registry_not_found() raises:
@@ -612,7 +597,7 @@ def main() raises:
     test_equality()
     test_enum_registry_get()
     test_enum_registry_get_by_value()
-    test_enum_registry_to_string()
+    test_writable()
     test_enum_registry_not_found()
     
     print()

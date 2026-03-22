@@ -7,7 +7,7 @@ Mojo 0.26+ compatible - Optimized with Variant Registry and Reflection
 1. 使用 Variant 存储所有枚举列表
 2. 使用反射访问字段，无需 name()/value() 方法
 3. 每个枚举类只需定义字段和常量
-4. 统一在 EnumRegistry 中提供 to_string 方法
+4. 实现 Writable trait，支持 print() 输出
 """
 
 from std.reflection import get_base_type_name, struct_field_index_by_name
@@ -18,7 +18,7 @@ from std.utils import Variant
 # 枚举类定义 - 只需定义字段和常量
 # ============================================================
 @fieldwise_init
-struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable):
+struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -32,9 +32,13 @@ struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable):
     comptime FINALIZED = EXECUTION_PHASE("FINALIZED", "[程序结束]")
     comptime SCHEDULED = EXECUTION_PHASE("SCHEDULED", "[scheduler函数内]")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -42,9 +46,13 @@ struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime PAPER_TRADING = RUN_TYPE("PAPER_TRADING", "PAPER_TRADING")
     comptime LIVE_TRADING = RUN_TYPE("LIVE_TRADING", "LIVE_TRADING")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -52,9 +60,13 @@ struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime FUTURE = DEFAULT_ACCOUNT_TYPE("FUTURE", "FUTURE")
     comptime BOND = DEFAULT_ACCOUNT_TYPE("BOND", "BOND")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -66,9 +78,13 @@ struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime NEXT_TICK_BEST_OWN = MATCHING_TYPE("NEXT_TICK_BEST_OWN", "NEXT_TICK_BEST_OWN")
     comptime NEXT_TICK_BEST_COUNTERPARTY = MATCHING_TYPE("NEXT_TICK_BEST_COUNTERPARTY", "NEXT_TICK_BEST_COUNTERPARTY")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -76,18 +92,26 @@ struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime LIMIT = ORDER_TYPE("LIMIT", "LIMIT")
     comptime ALGO = ORDER_TYPE("ALGO", "ALGO")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct ALGO(Equatable, ImplicitlyCopyable, Hashable):
+struct ALGO(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
     comptime TWAP = ALGO("TWAP", "TWAP")
     comptime VWAP = ALGO("VWAP", "VWAP")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable):
+struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -98,9 +122,13 @@ struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable):
     comptime PENDING_CANCEL = ORDER_STATUS("PENDING_CANCEL", "PENDING_CANCEL")
     comptime CANCELLED = ORDER_STATUS("CANCELLED", "CANCELLED")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct SIDE(Equatable, ImplicitlyCopyable, Hashable):
+struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -110,9 +138,13 @@ struct SIDE(Equatable, ImplicitlyCopyable, Hashable):
     comptime MARGIN = SIDE("MARGIN", "MARGIN")
     comptime CONVERT_STOCK = SIDE("CONVERT_STOCK", "CONVERT_STOCK")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable):
+struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -122,18 +154,26 @@ struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable):
     comptime EXERCISE = POSITION_EFFECT("EXERCISE", "EXERCISE")
     comptime MATCH = POSITION_EFFECT("MATCH", "MATCH")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable):
+struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
     comptime LONG = POSITION_DIRECTION("LONG", "LONG")
     comptime SHORT = POSITION_DIRECTION("SHORT", "SHORT")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -141,9 +181,13 @@ struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime SYSTEM_EXC = EXC_TYPE("SYSTEM_EXC", "SYSTEM_EXC")
     comptime NOTSET = EXC_TYPE("NOTSET", "NOTSET")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -162,9 +206,13 @@ struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime REITs = INSTRUMENT_TYPE("REITs", "REITs")
     comptime FutureArbitrage = INSTRUMENT_TYPE("FutureArbitrage", "FutureArbitrage")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable):
+struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -172,18 +220,26 @@ struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable):
     comptime REAL_TIME = PERSIST_MODE("REAL_TIME", "REAL_TIME")
     comptime ON_NORMAL_EXIT = PERSIST_MODE("ON_NORMAL_EXIT", "ON_NORMAL_EXIT")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
     comptime BY_MONEY = COMMISSION_TYPE("BY_MONEY", "BY_MONEY")
     comptime BY_VOLUME = COMMISSION_TYPE("BY_VOLUME", "BY_VOLUME")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable):
+struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -191,15 +247,23 @@ struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable):
     comptime EXIT_USER_ERROR = EXIT_CODE("EXIT_USER_ERROR", "EXIT_USER_ERROR")
     comptime EXIT_INTERNAL_ERROR = EXIT_CODE("EXIT_INTERNAL_ERROR", "EXIT_INTERNAL_ERROR")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
     comptime HEDGE = HEDGE_TYPE("HEDGE", "hedge")
     comptime SPECULATION = HEDGE_TYPE("SPECULATION", "speculation")
     comptime ARBITRAGE = HEDGE_TYPE("ARBITRAGE", "arbitrage")
+
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
 
 
 struct DAYS_CNT:
@@ -208,7 +272,7 @@ struct DAYS_CNT:
 
 
 @fieldwise_init
-struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable):
+struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -222,9 +286,13 @@ struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable):
     comptime SGEX = EXCHANGE("SGEX", "SGEX")
     comptime BJSE = EXCHANGE("BJSE", "BJSE")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable):
+struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
@@ -234,14 +302,22 @@ struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable):
     comptime INTER_BANK = TRADING_CALENDAR_TYPE("INTER_BANK", "INTERBANK")
     comptime EXCHANGE = TRADING_CALENDAR_TYPE("CN_STOCK", "CN_STOCK")
 
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
+
 
 @fieldwise_init
-struct MARKET(Equatable, ImplicitlyCopyable, Hashable):
+struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
     comptime CN = MARKET("CN", "CN")
     comptime HK = MARKET("HK", "HK")
+
+    def write_to(self, mut writer: Some[Writer]):
+        comptime type_name = get_base_type_name[Self]()
+        writer.write(type_name, ".", self.name)
 
 
 # ============================================================
@@ -349,10 +425,3 @@ struct EnumRegistry:
                 return v.copy()
         
         return None
-    
-    def to_string[T: Movable](self, obj: T) raises -> String:
-        comptime type_name = get_base_type_name[T]()
-        comptime name_idx = struct_field_index_by_name[T, "name"]()
-        ref name_ref = __struct_field_ref(name_idx, obj)
-        var name_val = rebind[String](name_ref)
-        return String(type_name, ".", name_val)
