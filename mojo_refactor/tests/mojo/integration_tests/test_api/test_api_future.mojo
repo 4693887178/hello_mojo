@@ -7,11 +7,7 @@ Ported from tests/integration_tests/test_api/test_api_future.py
 from std.testing import assert_equal, assert_true, assert_false
 from std.collections import Dict, List, Set
 from rqmojo.const import (
-    SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, POSITION_DIRECTION,
-    SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
-    ORDER_STATUS_FILLED, ORDER_STATUS_CANCELLED, POSITION_DIRECTION_LONG,
-    POSITION_DIRECTION_SHORT, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET,
-    POSITION_EFFECT_CLOSE_TODAY
+    SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, POSITION_DIRECTION
 )
 from rqmojo.model.order import Order, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument, create_future_instrument
@@ -33,16 +29,16 @@ def test_buy_open() raises:
     var order = create_order_with_id(
         1,
         "P88",
-        SIDE_BUY,
+        SIDE.BUY,
         1,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "P88")
     assert_equal(order.quantity, 1)
-    assert_equal(order.side, SIDE_BUY)
-    assert_equal(order.position_effect, POSITION_EFFECT_OPEN)
+    assert_equal(order.side, SIDE.BUY)
+    assert_equal(order.position_effect, POSITION_EFFECT.OPEN)
     
     print("Test test_buy_open: PASSED")
 
@@ -59,16 +55,16 @@ def test_sell_open() raises:
     var order = create_order_with_id(
         1,
         "P88",
-        SIDE_SELL,
+        SIDE.SELL,
         1,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "P88")
     assert_equal(order.quantity, 1)
-    assert_equal(order.side, SIDE_SELL)
-    assert_equal(order.position_effect, POSITION_EFFECT_OPEN)
+    assert_equal(order.side, SIDE.SELL)
+    assert_equal(order.position_effect, POSITION_EFFECT.OPEN)
     
     print("Test test_sell_open: PASSED")
 
@@ -85,16 +81,16 @@ def test_buy_close() raises:
     var order = create_order_with_id(
         1,
         "P88",
-        SIDE_BUY,
+        SIDE.BUY,
         1,
         style,
-        POSITION_EFFECT_CLOSE
+        POSITION_EFFECT.CLOSE
     )
     
     assert_equal(order.order_book_id, "P88")
     assert_equal(order.quantity, 1)
-    assert_equal(order.side, SIDE_BUY)
-    assert_equal(order.position_effect, POSITION_EFFECT_CLOSE)
+    assert_equal(order.side, SIDE.BUY)
+    assert_equal(order.position_effect, POSITION_EFFECT.CLOSE)
     
     print("Test test_buy_close: PASSED")
 
@@ -111,16 +107,16 @@ def test_sell_close() raises:
     var order = create_order_with_id(
         1,
         "P88",
-        SIDE_SELL,
+        SIDE.SELL,
         1,
         style,
-        POSITION_EFFECT_CLOSE
+        POSITION_EFFECT.CLOSE
     )
     
     assert_equal(order.order_book_id, "P88")
     assert_equal(order.quantity, 1)
-    assert_equal(order.side, SIDE_SELL)
-    assert_equal(order.position_effect, POSITION_EFFECT_CLOSE)
+    assert_equal(order.side, SIDE.SELL)
+    assert_equal(order.position_effect, POSITION_EFFECT.CLOSE)
     
     print("Test test_sell_close: PASSED")
 
@@ -137,22 +133,22 @@ def test_close_today() raises:
     var order1 = create_order_with_id(
         1,
         "P88",
-        SIDE_BUY,
+        SIDE.BUY,
         2,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     var order2 = create_order_with_id(
         2,
         "P88",
-        SIDE_SELL,
+        SIDE.SELL,
         1,
         style,
-        POSITION_EFFECT_CLOSE_TODAY
+        POSITION_EFFECT.CLOSE_TODAY
     )
     
-    assert_equal(order2.position_effect, POSITION_EFFECT_CLOSE_TODAY)
+    assert_equal(order2.position_effect, POSITION_EFFECT.CLOSE_TODAY)
     
     print("Test test_close_today: PASSED")
 
@@ -210,8 +206,8 @@ def test_future_account() raises:
 def test_position_effect_close_today() raises:
     print("=== Testing POSITION_EFFECT_CLOSE_TODAY ===")
     
-    assert_equal(POSITION_EFFECT_CLOSE_TODAY.name(), "CLOSE_TODAY")
-    assert_equal(POSITION_EFFECT_CLOSE_TODAY.value(), "CLOSE_TODAY")
+    assert_equal(POSITION_EFFECT.CLOSE_TODAY.name(), "CLOSE_TODAY")
+    assert_equal(POSITION_EFFECT.CLOSE_TODAY.value(), "CLOSE_TODAY")
     
     print("Test test_position_effect_close_today: PASSED")
 
@@ -223,16 +219,16 @@ def test_future_order_with_limit() raises:
     var order = create_order_with_id(
         1,
         "IF1603",
-        SIDE_BUY,
+        SIDE.BUY,
         1,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "IF1603")
     assert_equal(order.quantity, 1)
-    assert_equal(order.side, SIDE_BUY)
-    assert_equal(order.position_effect, POSITION_EFFECT_OPEN)
+    assert_equal(order.side, SIDE.BUY)
+    assert_equal(order.position_effect, POSITION_EFFECT.OPEN)
     assert_equal(order.style.limit_price, 3000.0)
     
     print("Test test_future_order_with_limit: PASSED")

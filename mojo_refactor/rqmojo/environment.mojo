@@ -6,8 +6,7 @@ Ported from rqalpha/environment.py
 from std.collections import Dict, List, Set, Optional
 from rqmojo.const import (
     RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE,
-    RUN_TYPE_BACKTEST, DEFAULT_ACCOUNT_TYPE_STOCK, INSTRUMENT_TYPE_CS, MARKET_CN,
-    POSITION_DIRECTION_LONG, EXECUTION_PHASE
+    EXECUTION_PHASE
 )
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
@@ -109,7 +108,7 @@ struct Portfolio(Movable):
         return "Portfolio(value=" + String(self.total_value) + ", cash=" + String(self.total_cash) + ")"
     
     def get_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
     
     def get_positions(self) -> List[Position]:
         var result = List[Position]()
@@ -119,10 +118,10 @@ struct Portfolio(Movable):
         return result^
     
     def get_stock_position(self, order_book_id: String) -> Position:
-        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
+        return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
 
     def get_future_position(self, order_book_id: String) -> Position:
-        return self._future_account.get_position(order_book_id, POSITION_DIRECTION_LONG)
+        return self._future_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
 
     def total_market_value(self) -> Float64:
         return self.total_value - self.total_cash
@@ -253,7 +252,7 @@ struct Environment(Movable):
     def submit_order(mut self, order: Order) -> Order:
         return order
 
-    def add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE_CS) raises -> None:
+    def add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE.CS) raises -> None:
         var key = instrument_type.value
         try:
             self._frontend_validators[key].append(validator)
@@ -277,7 +276,7 @@ struct Environment(Movable):
         return result^
 
     def can_submit_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE_CS
+        var instrument_type = INSTRUMENT_TYPE.CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_submission(order, "")
@@ -289,7 +288,7 @@ struct Environment(Movable):
         return True
 
     def can_cancel_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE_CS
+        var instrument_type = INSTRUMENT_TYPE.CS
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
             var reason = v.validate_cancellation(order, "")
@@ -333,17 +332,17 @@ struct Environment(Movable):
         return self._data_proxy.get_dividend(ins)
 
     def get_account_type(self, order_book_id: String) -> DEFAULT_ACCOUNT_TYPE:
-        return DEFAULT_ACCOUNT_TYPE_STOCK
+        return DEFAULT_ACCOUNT_TYPE.STOCK
 
     def get_open_orders(self) -> List[Order]:
         var orders = List[Order]()
         return orders^
 
-    def set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET_CN) -> None:
+    def set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET.CN) -> None:
         var key = instrument_type.value + "_" + market.value
         self._transaction_cost_deciders[key] = decider
 
-    def get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET_CN) -> TransactionCostDecider:
+    def get_transaction_cost_decider(self, instrument_type: INSTRUMENT_TYPE, market: MARKET = MARKET.CN) -> TransactionCostDecider:
         var key = instrument_type.value + "_" + market.value
         try:
             return self._transaction_cost_deciders[key]
@@ -412,7 +411,7 @@ struct Environment(Movable):
         return self._future_account
 
     def get_account(self, account_type: DEFAULT_ACCOUNT_TYPE) -> Optional[Account]:
-        if account_type == DEFAULT_ACCOUNT_TYPE_STOCK:
+        if account_type == DEFAULT_ACCOUNT_TYPE.STOCK:
             return self._stock_account
         return None
 
@@ -538,7 +537,7 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
     )
 
 
-def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE_BACKTEST) -> Environment:
+def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_TYPE = RUN_TYPE.BACKTEST) -> Environment:
     return Environment(
         _start_date=start_date,
         _end_date=end_date,

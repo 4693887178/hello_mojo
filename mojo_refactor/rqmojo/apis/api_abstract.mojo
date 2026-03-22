@@ -4,7 +4,7 @@ Ported from rqalpha/apis/api_abstract.py
 """
 
 from std.collections import Dict, List, Optional
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, EXECUTION_PHASE, INSTRUMENT_TYPE, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, EXECUTION_PHASE, INSTRUMENT_TYPE
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
 from rqmojo.model.bar import BarObject
@@ -90,11 +90,11 @@ def _order_helper(
         net_quantity = quantity
     
     if net_quantity > 0:
-        var order = _submit_order_helper(env, order_book_id, net_quantity, SIDE_BUY, POSITION_EFFECT_OPEN, style)
+        var order = _submit_order_helper(env, order_book_id, net_quantity, SIDE.BUY, POSITION_EFFECT.OPEN, style)
         if order != None:
             orders.append(order.value())
     elif net_quantity < 0:
-        var order = _submit_order_helper(env, order_book_id, -net_quantity, SIDE_SELL, POSITION_EFFECT_CLOSE, style)
+        var order = _submit_order_helper(env, order_book_id, -net_quantity, SIDE.SELL, POSITION_EFFECT.CLOSE, style)
         if order != None:
             orders.append(order.value())
     
@@ -119,8 +119,8 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         if not self._enabled:
             return None
         var style = cal_style(None, None, price_or_style)
-        var side = SIDE_BUY if amount > 0 else SIDE_SELL
-        var effect = POSITION_EFFECT_OPEN if amount > 0 else POSITION_EFFECT_CLOSE
+        var side = SIDE.BUY if amount > 0 else SIDE.SELL
+        var effect = POSITION_EFFECT.OPEN if amount > 0 else POSITION_EFFECT.CLOSE
         return _submit_order_helper(env, id_or_ins, abs(amount), side, effect, style)
 
     def order_value(
@@ -133,8 +133,8 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         if not self._enabled:
             return None
         var style = cal_style(None, None, price_or_style)
-        var side = SIDE_BUY if cash_amount > 0 else SIDE_SELL
-        var effect = POSITION_EFFECT_OPEN if cash_amount > 0 else POSITION_EFFECT_CLOSE
+        var side = SIDE.BUY if cash_amount > 0 else SIDE.SELL
+        var effect = POSITION_EFFECT.OPEN if cash_amount > 0 else POSITION_EFFECT.CLOSE
         var quantity = Int(abs(cash_amount) / 10.0)
         return _submit_order_helper(env, id_or_ins, quantity, side, effect, style)
 
@@ -148,8 +148,8 @@ struct AbstractAPI(Writable, Movable, Copyable, ImplicitlyCopyable):
         if not self._enabled:
             return None
         var style = cal_style(None, None, price_or_style)
-        var side = SIDE_BUY if percent > 0 else SIDE_SELL
-        var effect = POSITION_EFFECT_OPEN if percent > 0 else POSITION_EFFECT_CLOSE
+        var side = SIDE.BUY if percent > 0 else SIDE.SELL
+        var effect = POSITION_EFFECT.OPEN if percent > 0 else POSITION_EFFECT.CLOSE
         var quantity = Int(abs(percent) * 1000.0)
         return _submit_order_helper(env, id_or_ins, quantity, side, effect, style)
 

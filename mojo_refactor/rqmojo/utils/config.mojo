@@ -4,7 +4,7 @@ Ported from rqalpha/utils/config.py
 """
 
 from std.collections import Dict, List
-from rqmojo.const import RUN_TYPE, PERSIST_MODE, COMMISSION_TYPE, RUN_TYPE_BACKTEST, RUN_TYPE_PAPER_TRADING, RUN_TYPE_LIVE_TRADING, PERSIST_MODE_REAL_TIME, PERSIST_MODE_ON_CRASH, PERSIST_MODE_ON_NORMAL_EXIT, RUN_TYPE_BACKTEST, RUN_TYPE_PAPER_TRADING, RUN_TYPE_LIVE_TRADING, PERSIST_MODE_REAL_TIME, PERSIST_MODE_ON_CRASH, PERSIST_MODE_ON_NORMAL_EXIT
+from rqmojo.const import RUN_TYPE, PERSIST_MODE, COMMISSION_TYPE
 from rqmojo.utils.datetime_func import DateTime, Date
 
 
@@ -45,24 +45,24 @@ struct RQAlphaConfig(Movable, ImplicitlyCopyable):
 
 def parse_run_type(rt_str: String) -> RUN_TYPE:
     if rt_str == "b" or rt_str == "backtest":
-        return RUN_TYPE_BACKTEST
+        return RUN_TYPE.BACKTEST
     elif rt_str == "p" or rt_str == "paper_trading":
-        return RUN_TYPE_PAPER_TRADING
+        return RUN_TYPE.PAPER_TRADING
     elif rt_str == "r" or rt_str == "live_trading":
-        return RUN_TYPE_LIVE_TRADING
+        return RUN_TYPE.LIVE_TRADING
     else:
-        return RUN_TYPE_BACKTEST
+        return RUN_TYPE.BACKTEST
 
 
 def parse_persist_mode(mode_str: String) -> PERSIST_MODE:
     if mode_str == "real_time":
-        return PERSIST_MODE_REAL_TIME
+        return PERSIST_MODE.REAL_TIME
     elif mode_str == "on_crash":
-        return PERSIST_MODE_ON_CRASH
+        return PERSIST_MODE.ON_CRASH
     elif mode_str == "on_normal_exit":
-        return PERSIST_MODE_ON_NORMAL_EXIT
+        return PERSIST_MODE.ON_NORMAL_EXIT
     else:
-        return PERSIST_MODE_ON_CRASH
+        return PERSIST_MODE.ON_CRASH
 
 
 def default_base_config() -> BaseConfig:
@@ -70,10 +70,10 @@ def default_base_config() -> BaseConfig:
         start_date=DateTime(2020, 1, 1, 0, 0, 0, 0),
         end_date=DateTime(2020, 12, 31, 0, 0, 0, 0),
         frequency="1d",
-        run_type=RUN_TYPE_BACKTEST,
+        run_type=RUN_TYPE.BACKTEST,
         data_bundle_path="~/.rqalpha/bundle",
         strategy_file="",
-        persist_mode=PERSIST_MODE_ON_CRASH,
+        persist_mode=PERSIST_MODE.ON_CRASH,
         initial_cash=100000.0,
         rqdatac_uri=""
     )
@@ -103,7 +103,7 @@ def create_config(
     start_date: DateTime,
     end_date: DateTime,
     frequency: String = "1d",
-    run_type: RUN_TYPE = RUN_TYPE_BACKTEST
+    run_type: RUN_TYPE = RUN_TYPE.BACKTEST
 ) -> RQAlphaConfig:
     return RQAlphaConfig(
         base=BaseConfig(
@@ -113,7 +113,7 @@ def create_config(
             run_type=run_type,
             data_bundle_path="~/.rqalpha/bundle",
             strategy_file="",
-            persist_mode=PERSIST_MODE_ON_CRASH,
+            persist_mode=PERSIST_MODE.ON_CRASH,
             initial_cash=100000.0,
             rqdatac_uri=""
         ),

@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_simulation/simulation_broker.py
 """
 
 from std.collections import Dict, List
-from rqmojo.const import ORDER_STATUS, INSTRUMENT_TYPE, MATCHING_TYPE, POSITION_EFFECT, EXECUTION_PHASE, POSITION_EFFECT_MATCH, MATCHING_TYPE_CURRENT_BAR_CLOSE, MATCHING_TYPE_VWAP, POSITION_EFFECT_MATCH, MATCHING_TYPE_CURRENT_BAR_CLOSE, MATCHING_TYPE_VWAP
+from rqmojo.const import ORDER_STATUS, INSTRUMENT_TYPE, MATCHING_TYPE, POSITION_EFFECT, EXECUTION_PHASE
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade_with_id
 from rqmojo.model.bar import BarObject
@@ -42,7 +42,7 @@ struct SimulationBroker(Movable):
         return "SimulationBroker(orders=" + String(len(self._open_orders)) + ")"
 
     def submit_order(mut self, order: Order) -> None:
-        if order.position_effect == POSITION_EFFECT_MATCH:
+        if order.position_effect == POSITION_EFFECT.MATCH:
             return
         
         self._order_count += 1
@@ -176,8 +176,8 @@ struct SimulationBroker(Movable):
         self._trade_count = state.trade_count
 
 
-def create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE_CURRENT_BAR_CLOSE) -> SimulationBroker:
-    var match_immediately = (matching_type == MATCHING_TYPE_CURRENT_BAR_CLOSE or matching_type == MATCHING_TYPE_VWAP)
+def create_simulation_broker(matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE) -> SimulationBroker:
+    var match_immediately = (matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE or matching_type == MATCHING_TYPE.VWAP)
     
     return SimulationBroker(
         _name="simulation",

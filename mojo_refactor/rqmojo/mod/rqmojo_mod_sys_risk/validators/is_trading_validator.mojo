@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py
 """
 
 from std.collections import Optional
-from rqmojo.const import INSTRUMENT_TYPE, INSTRUMENT_TYPE_CS
+from rqmojo.const import INSTRUMENT_TYPE
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 from rqmojo.model.instrument import Instrument
@@ -39,7 +39,7 @@ struct IsTradingValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
 
         var ins = instrument
 
-        if ins.instrument_type == INSTRUMENT_TYPE_CS:
+        if ins.instrument_type == INSTRUMENT_TYPE.CS:
             if is_suspended:
                 var reason = "Order Creation Failed: security " + order.order_book_id + " is suspended on " + trading_date.__str__()
                 return reason

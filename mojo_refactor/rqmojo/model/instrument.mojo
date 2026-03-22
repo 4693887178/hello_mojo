@@ -3,7 +3,7 @@ RQAlpha Mojo - Instrument Model
 Ported from rqalpha/model/instrument.py
 """
 
-from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET, POSITION_DIRECTION, INSTRUMENT_TYPE_CS, INSTRUMENT_TYPE_ETF, INSTRUMENT_TYPE_LOF, INSTRUMENT_TYPE_INDX, INSTRUMENT_TYPE_BOND, INSTRUMENT_TYPE_FUTURE, INSTRUMENT_TYPE_OPTION, INSTRUMENT_TYPE_CONVERTIBLE, EXCHANGE_XSHG, EXCHANGE_XSHE, EXCHANGE_SHFE, EXCHANGE_DCE, EXCHANGE_CZCE, EXCHANGE_CFFEX, EXCHANGE_INE, DEFAULT_ACCOUNT_TYPE_STOCK, DEFAULT_ACCOUNT_TYPE_FUTURE, POSITION_DIRECTION_SHORT, MARKET_CN
+from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET, POSITION_DIRECTION
 from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
 
 
@@ -92,8 +92,8 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     
     def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type_val):
-            return DEFAULT_ACCOUNT_TYPE_STOCK
-        return DEFAULT_ACCOUNT_TYPE_FUTURE
+            return DEFAULT_ACCOUNT_TYPE.STOCK
+        return DEFAULT_ACCOUNT_TYPE.FUTURE
     
     def is_future(self) -> Bool:
         return self.type_val == INSTRUMENT_TYPE_FUTURE
@@ -147,14 +147,14 @@ def create_stock_instrument(order_book_id: String, symbol: String, listed_date: 
     return Instrument(
         order_book_id_val=order_book_id,
         symbol_val=symbol,
-        type_val=INSTRUMENT_TYPE_CS,
+        type_val=INSTRUMENT_TYPE.CS,
         exchange_val=exchange,
         listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
         de_listed_date_str="2999-12-31",
         round_lot_val=100,
         contract_multiplier_val=1.0,
         underlying_symbol_val="",
-        market_val=MARKET_CN,
+        market_val=MARKET.CN,
         trading_hours_str=""
     )
 
@@ -163,13 +163,13 @@ def create_future_instrument(order_book_id: String, symbol: String, listed_date:
     return Instrument(
         order_book_id_val=order_book_id,
         symbol_val=symbol,
-        type_val=INSTRUMENT_TYPE_FUTURE,
+        type_val=INSTRUMENT_TYPE.FUTURE,
         exchange_val=exchange,
         listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
         de_listed_date_str=String(de_listed_date.year) + "-" + String(de_listed_date.month) + "-" + String(de_listed_date.day),
         round_lot_val=1,
         contract_multiplier_val=contract_multiplier,
         underlying_symbol_val=underlying_symbol,
-        market_val=MARKET_CN,
+        market_val=MARKET.CN,
         trading_hours_str=trading_hours
     )

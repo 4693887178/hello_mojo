@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/cash_validator.py
 """
 
 from std.collections import Optional
-from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_EFFECT_OPEN, SIDE_BUY
+from rqmojo.const import SIDE, POSITION_EFFECT
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 from rqmojo.portfolio.account import Account
@@ -53,7 +53,7 @@ struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
         if account is None:
             return None
 
-        if order.position_effect != POSITION_EFFECT_OPEN:
+        if order.position_effect != POSITION_EFFECT.OPEN:
             return None
 
         var acc = account

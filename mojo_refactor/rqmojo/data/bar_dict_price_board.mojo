@@ -7,7 +7,7 @@ from rqmojo.interface import PriceBoard
 from rqmojo.model.bar import BarObject, BarData
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime
-from rqmojo.const import EXECUTION_PHASE, EXCHANGE, EXCHANGE_XSHE, EXECUTION_PHASE_BEFORE_TRADING
+from rqmojo.const import EXECUTION_PHASE, EXCHANGE
 from std.collections import Dict
 
 
@@ -38,7 +38,7 @@ def create_empty_bar() -> BarObject:
     )
     return BarObject(
         _order_book_id="",
-        _instrument=create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHE),
+        _instrument=create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHE),
         _dt=DateTime(1970, 1, 1, 0, 0, 0, 0),
         _data=empty_data,
         _limit_up=0.0,
@@ -93,5 +93,5 @@ struct BarDictPriceBoard(PriceBoard, Movable):
 def create_bar_dict_price_board() -> BarDictPriceBoard:
     return BarDictPriceBoard(
         _bar_cache=Dict[String, BarObject](),
-        _phase=EXECUTION_PHASE_BEFORE_TRADING
+        _phase=EXECUTION_PHASE.BEFORE_TRADING
     )

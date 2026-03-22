@@ -2,14 +2,14 @@
 RQAlpha Mojo - Simulation Testing Utilities
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, SIDE_BUY, EXCHANGE_XSHE, POSITION_EFFECT_OPEN
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE
 from rqmojo.model.order import Order, create_order_with_id, OrderStyle, MarketOrder
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.datetime_func import DateTime
 
 
-def create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE_BUY) -> Order:
+def create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE.BUY) -> Order:
     var style = MarketOrder()
     return create_order_with_id(
         order_id=1,
@@ -17,7 +17,7 @@ def create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100
         side=side,
         quantity=quantity,
         style=style,
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.OPEN
     )
 
 
@@ -41,5 +41,5 @@ def create_test_instrument(order_book_id: String = "000001.XSHE") -> Instrument:
         order_book_id=order_book_id,
         symbol=symbol,
         listed_date=DateTime(1990, 1, 1, 0, 0, 0, 0),
-        exchange=EXCHANGE_XSHE
+        exchange=EXCHANGE.XSHE
     )

@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_stock.py
 """
 
 from std.collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION, INSTRUMENT_TYPE_CS, ORDER_TYPE_LIMIT, SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE, POSITION_DIRECTION
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
 from rqmojo.environment import Environment
@@ -45,11 +45,11 @@ def _get_account_position(env: Environment, order_book_id: String) -> AccountPos
 def _round_order_quantity(ins: Instrument, quantity: Int, round_method: String = "floor") -> Int:
     var ins_type = ins.type()
     var board_type = ins.board_type()
-    if ins_type == INSTRUMENT_TYPE_CS and board_type == "KSH":
+    if ins_type == INSTRUMENT_TYPE.CS and board_type == "KSH":
         if abs(quantity) < KSH_MIN_AMOUNT():
             return 0
         return quantity
-    elif ins_type == INSTRUMENT_TYPE_CS and board_type == "BJS":
+    elif ins_type == INSTRUMENT_TYPE.CS and board_type == "BJS":
         if abs(quantity) < BJSE_MIN_AMOUNT():
             return 0
         return quantity
@@ -241,8 +241,8 @@ def stock_order_target_value(
     
     if cash_amount == 0:
         return _submit_order(
-            env, id_or_ins, result.position_closable, SIDE_SELL, 
-            POSITION_EFFECT_CLOSE, close_style, result.position_quantity, False
+            env, id_or_ins, result.position_closable, SIDE.SELL, 
+            POSITION_EFFECT.CLOSE, close_style, result.position_quantity, False
         )
     
     var delta = cash_amount - result.position_market_value
@@ -261,8 +261,8 @@ def stock_order_target_percent(
     
     if percent == 0:
         return _submit_order(
-            env, id_or_ins, result.position_closable, SIDE_SELL,
-            POSITION_EFFECT_CLOSE, close_style, result.position_quantity, False
+            env, id_or_ins, result.position_closable, SIDE.SELL,
+            POSITION_EFFECT.CLOSE, close_style, result.position_quantity, False
         )
     
     var delta = result.total_value * percent - result.position_market_value

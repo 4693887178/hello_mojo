@@ -5,9 +5,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py
 
 from std.collections import Dict, List, Optional
 from rqmojo.const import (
-    SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE,
-    SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
-    ORDER_TYPE_LIMIT
+    SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE
 )
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
@@ -100,9 +98,9 @@ def order_target_portfolio(
         var close_price = item.last_price
         var open_price = item.last_price
         
-        if item.close_style.style_type == ORDER_TYPE_LIMIT:
+        if item.close_style.style_type == ORDER_TYPE.LIMIT:
             close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE_LIMIT:
+        if item.open_style.style_type == ORDER_TYPE.LIMIT:
             open_price = item.open_style.limit_price
         
         if close_price <= 0 or open_price <= 0:
@@ -118,9 +116,9 @@ def order_target_portfolio(
                 env.next_order_id(),
                 item.order_book_id,
                 delta_quantity,
-                SIDE_BUY,
+                SIDE.BUY,
                 item.open_style,
-                POSITION_EFFECT_OPEN
+                POSITION_EFFECT.OPEN
             )
             var result = env.submit_order(order)
             if result != None:
@@ -130,9 +128,9 @@ def order_target_portfolio(
                 env.next_order_id(),
                 item.order_book_id,
                 -delta_quantity,
-                SIDE_SELL,
+                SIDE.SELL,
                 item.close_style,
-                POSITION_EFFECT_CLOSE
+                POSITION_EFFECT.CLOSE
             )
             var result = env.submit_order(order)
             if result != None:

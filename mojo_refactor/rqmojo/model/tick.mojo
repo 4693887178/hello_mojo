@@ -3,7 +3,7 @@ RQAlpha Mojo - Tick Object Model
 Ported from rqalpha/model/tick.py
 """
 
-from rqmojo.const import INSTRUMENT_TYPE, MARKET_CN
+from rqmojo.const import INSTRUMENT_TYPE, MARKET
 from rqmojo.model.instrument import Instrument, create_instrument_from_dict
 from rqmojo.utils.datetime_func import DateTime
 from rqmojo.utils.i18n import gettext

@@ -3,7 +3,7 @@ RQAlpha Mojo - Data Proxy
 Ported from rqalpha/data/data_proxy.py
 """
 
-from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET, EXCHANGE_XSHG, EXCHANGE_XSHE, EXCHANGE_SHFE, EXCHANGE_CFFEX, INSTRUMENT_TYPE_CS, INSTRUMENT_TYPE_ETF, INSTRUMENT_TYPE_LOF, INSTRUMENT_TYPE_FUTURE, EXCHANGE_XSHG, EXCHANGE_XSHE, EXCHANGE_SHFE, EXCHANGE_CFFEX, INSTRUMENT_TYPE_CS, INSTRUMENT_TYPE_ETF, INSTRUMENT_TYPE_LOF, INSTRUMENT_TYPE_FUTURE
+from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
@@ -157,17 +157,17 @@ struct DataProxy(Movable):
     var _trading_dates_mixin: TradingDatesMixin
     
     def get_instrument(self, order_book_id: String) -> Instrument:
-        return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHG)
+        return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
     
     def get_last_price(self, order_book_id: String) -> Float64:
         return 10.0
     
     def get_all_instruments(self, type: String = "") -> List[Instrument]:
         var result = List[Instrument]()
-        result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
-        result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
-        result.append(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE_XSHG))
-        result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE_XSHG))
+        result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE))
+        result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE.XSHE))
+        result.append(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE.XSHG))
+        result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE.XSHG))
         return result^
     
     def get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
@@ -369,7 +369,7 @@ struct DataProxy(Movable):
                 if hour == 14:
                     for minute in range(0, 1):
                         result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
-        elif instrument.type == INSTRUMENT_TYPE_FUTURE:
+        elif instrument.type == INSTRUMENT_TYPE.FUTURE:
             for hour in range(9, 12):
                 for minute in range(0, 60):
                     result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
@@ -380,7 +380,7 @@ struct DataProxy(Movable):
         return result^
     
     def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
-        if instrument.type != INSTRUMENT_TYPE_CS and instrument.type != INSTRUMENT_TYPE_ETF:
+        if instrument.type != INSTRUMENT_TYPE.CS and instrument.type != INSTRUMENT_TYPE.ETF:
             return Optional[DividendInfo](None)
         
         var dividend = create_dividend_info(
@@ -394,7 +394,7 @@ struct DataProxy(Movable):
         return Optional[DividendInfo](dividend)
     
     def get_split(self, instrument: Instrument) -> Optional[SplitInfo]:
-        if instrument.type != INSTRUMENT_TYPE_CS:
+        if instrument.type != INSTRUMENT_TYPE.CS:
             return Optional[SplitInfo](None)
         
         var split = create_split_info(ex_date=20230515, split_factor=1.5)
@@ -436,7 +436,7 @@ struct DataProxy(Movable):
         return result^
     
     def get_settle_price(self, instrument: Instrument, trading_dt: DateTime) -> Float64:
-        if instrument.type != INSTRUMENT_TYPE_FUTURE:
+        if instrument.type != INSTRUMENT_TYPE.FUTURE:
             return Float64(0.0)
         
         return 3500.0
@@ -463,15 +463,15 @@ struct DataProxy(Movable):
     
     def _get_instrument_by_id(self, order_book_id: String) -> Instrument:
         if order_book_id == "RB1912":
-            return create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE_SHFE, "RB", "21:1-23:0,9:1-10:15,10:31-11:30,13:31-15:0")
+            return create_future_instrument("RB1912", "螺纹钢1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10.0, EXCHANGE.SHFE, "RB", "21:1-23:0,9:1-10:15,10:31-11:30,13:31-15:0")
         elif order_book_id == "AG1912":
-            return create_future_instrument("AG1912", "白银1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 15.0, EXCHANGE_SHFE, "AG", "21:1-23:59,0:0-2:30,9:1-11:30,13:31-15:15")
+            return create_future_instrument("AG1912", "白银1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 15.0, EXCHANGE.SHFE, "AG", "21:1-23:59,0:0-2:30,9:1-11:30,13:31-15:15")
         elif order_book_id == "TF1912":
-            return create_future_instrument("TF1912", "五年期国债1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10000.0, EXCHANGE_CFFEX, "TF", "9:15-11:30,13:0-15:15")
+            return create_future_instrument("TF1912", "五年期国债1912", DateTime(2019, 1, 1, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), DateTime(2019, 12, 15, 0, 0, 0, 0), 10000.0, EXCHANGE.CFFEX, "TF", "9:15-11:30,13:0-15:15")
         elif order_book_id == "000001.XSHE":
-            return create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE)
+            return create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
         else:
-            return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE_XSHG)
+            return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
     
     def get_trading_period(self, order_book_ids: List[String], default_trading_period: List[TimeRange] = List[TimeRange]()) raises -> List[TimeRange]:
         var trading_period = List[TimeRange]()
@@ -515,7 +515,7 @@ struct DataProxy(Movable):
         return result^
     
     def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
-        if instrument.type != INSTRUMENT_TYPE_CS and instrument.type != INSTRUMENT_TYPE_ETF:
+        if instrument.type != INSTRUMENT_TYPE.CS and instrument.type != INSTRUMENT_TYPE.ETF:
             return Optional[DividendInfo](None)
         
         var dividend = create_dividend_info(

@@ -3,7 +3,7 @@ RQAlpha Mojo - Mocking Utilities
 Ported from rqalpha/utils/testing/mocking.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, SIDE_BUY, POSITION_EFFECT_OPEN, ORDER_STATUS_PENDING_NEW
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, create_order_with_id
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.instrument import Instrument, create_stock_instrument
@@ -50,8 +50,8 @@ def create_mock_order(order_book_id: String = "000001.XSHE", quantity: Int = 100
     return create_order_with_id(
         order_id=1,
         order_book_id=order_book_id,
-        side=SIDE_BUY,
+        side=SIDE.BUY,
         quantity=quantity,
         style=MarketOrder(),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.OPEN
     )

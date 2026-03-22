@@ -37,7 +37,7 @@ struct SignalBroker(Writable, Movable):
     def get_open_orders(self) -> List[Order]:
         var result = List[Order]()
         for entry in self._orders.items():
-            if entry.value.status == ORDER_STATUS_ACTIVE:
+            if entry.value.status == ORDER_STATUS.ACTIVE:
                 result.append(entry.value)
         return result^
     

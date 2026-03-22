@@ -3,7 +3,7 @@ RQAlpha Mojo - Risk Management
 Ported from rqalpha/mod/rqalpha_mod_sys_risk/
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, POSITION_EFFECT_OPEN, POSITION_EFFECT_OPEN
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS
 from rqmojo.model.order import Order
 from rqmojo.model.instrument import Instrument
 from rqmojo.portfolio.account import Account
@@ -75,7 +75,7 @@ struct CashValidator(Movable):
         if not self._enabled:
             return valid_result()
         
-        if order.position_effect != POSITION_EFFECT_OPEN:
+        if order.position_effect != POSITION_EFFECT.OPEN:
             return valid_result()
         
         var required_cash: Float64 = 0.0

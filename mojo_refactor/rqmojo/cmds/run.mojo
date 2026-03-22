@@ -86,7 +86,7 @@ def run_strategy(
         start_date=start_date,
         end_date=end_date,
         frequency=frequency,
-        run_type=RUN_TYPE_BACKTEST,
+        run_type=RUN_TYPE.BACKTEST,
         base_port=0,
         accounts=Dict[String, Float64](),
         init_cash=init_cash,
@@ -201,19 +201,19 @@ def create_run_params() -> List[CliParam]:
 
 def parse_run_type(run_type_str: String) -> RUN_TYPE:
     if run_type_str == "b" or run_type_str == "backtest":
-        return RUN_TYPE_BACKTEST
+        return RUN_TYPE.BACKTEST
     elif run_type_str == "p" or run_type_str == "paper":
-        return RUN_TYPE_PAPER_TRADING
+        return RUN_TYPE.PAPER_TRADING
     elif run_type_str == "r" or run_type_str == "live":
-        return RUN_TYPE_LIVE_TRADING
-    return RUN_TYPE_BACKTEST
+        return RUN_TYPE.LIVE_TRADING
+    return RUN_TYPE.BACKTEST
 
 
 def create_run_config_from_dict(params: Dict[String, String]) -> RunConfig:
     var start_date = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var end_date = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var frequency = "1d"
-    var run_type = RUN_TYPE_BACKTEST
+    var run_type = RUN_TYPE.BACKTEST
     var init_cash = 100000.0
     
     try:

@@ -3,7 +3,7 @@ RQAlpha Mojo - Order Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/validator.py
 """
 
-from rqmojo.const import ORDER_TYPE, MATCHING_TYPE, ORDER_TYPE_LIMIT
+from rqmojo.const import ORDER_TYPE, MATCHING_TYPE
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidatorInterface
 
@@ -24,7 +24,7 @@ struct OrderStyleValidator(FrontendValidatorInterface, Movable, Copyable):
         return True
     
     def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
-        if order.style.style_type == ORDER_TYPE_LIMIT:
+        if order.style.style_type == ORDER_TYPE.LIMIT:
             if order.style.limit_price <= 0:
                 return Optional[String]("Limit order price must be positive")
         if self.frequency == "tick":

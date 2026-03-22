@@ -8,10 +8,7 @@ from std.testing import assert_equal, assert_true, assert_false
 from std.collections import Dict, List, Set
 from rqmojo.const import (
     SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, POSITION_DIRECTION,
-    SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
-    ORDER_STATUS_FILLED, ORDER_STATUS_CANCELLED, POSITION_DIRECTION_LONG,
-    POSITION_DIRECTION_SHORT, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET,
-    ORDER_STATUS_PENDING_NEW, EXCHANGE_XSHG, EXCHANGE_XSHE
+    EXCHANGE
 )
 from rqmojo.model.order import Order, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument, create_stock_instrument
@@ -32,15 +29,15 @@ def test_order_creation() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
     assert_equal(order.quantity, 100)
-    assert_equal(order.side, SIDE_BUY)
+    assert_equal(order.side, SIDE.BUY)
     
     print("Test test_order_creation: PASSED")
 
@@ -52,16 +49,16 @@ def test_limit_order() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
     assert_equal(order.quantity, 100)
-    assert_equal(order.side, SIDE_BUY)
-    assert_equal(order.position_effect, POSITION_EFFECT_OPEN)
+    assert_equal(order.side, SIDE.BUY)
+    assert_equal(order.position_effect, POSITION_EFFECT.OPEN)
     assert_equal(order.style.limit_price, 10.5)
     
     print("Test test_limit_order: PASSED")
@@ -74,16 +71,16 @@ def test_market_order() raises:
     var order = create_order_with_id(
         2,
         "600000.XSHG",
-        SIDE_SELL,
+        SIDE.SELL,
         200,
         style,
-        POSITION_EFFECT_CLOSE
+        POSITION_EFFECT.CLOSE
     )
     
     assert_equal(order.order_book_id, "600000.XSHG")
     assert_equal(order.quantity, 200)
-    assert_equal(order.side, SIDE_SELL)
-    assert_equal(order.position_effect, POSITION_EFFECT_CLOSE)
+    assert_equal(order.side, SIDE.SELL)
+    assert_equal(order.position_effect, POSITION_EFFECT.CLOSE)
     
     print("Test test_market_order: PASSED")
 
@@ -244,13 +241,13 @@ def test_order_status() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
-    assert_equal(order.status, ORDER_STATUS_PENDING_NEW)
+    assert_equal(order.status, ORDER_STATUS.PENDING_NEW)
     
     print("Test test_order_status: PASSED")
 
@@ -258,8 +255,8 @@ def test_order_status() raises:
 def test_position_direction() raises:
     print("=== Testing Position Direction ===")
     
-    assert_equal(POSITION_DIRECTION_LONG.name(), "LONG")
-    assert_equal(POSITION_DIRECTION_SHORT.name(), "SHORT")
+    assert_equal(POSITION_DIRECTION.LONG.name(), "LONG")
+    assert_equal(POSITION_DIRECTION.SHORT.name(), "SHORT")
     
     print("Test test_position_direction: PASSED")
 
@@ -267,8 +264,8 @@ def test_position_direction() raises:
 def test_side_enum() raises:
     print("=== Testing Side Enum ===")
     
-    assert_equal(SIDE_BUY.name(), "BUY")
-    assert_equal(SIDE_SELL.name(), "SELL")
+    assert_equal(SIDE.BUY.name(), "BUY")
+    assert_equal(SIDE.SELL.name(), "SELL")
     
     print("Test test_side_enum: PASSED")
 
@@ -276,8 +273,8 @@ def test_side_enum() raises:
 def test_position_effect_enum() raises:
     print("=== Testing Position Effect Enum ===")
     
-    assert_equal(POSITION_EFFECT_OPEN.name(), "OPEN")
-    assert_equal(POSITION_EFFECT_CLOSE.name(), "CLOSE")
+    assert_equal(POSITION_EFFECT.OPEN.name(), "OPEN")
+    assert_equal(POSITION_EFFECT.CLOSE.name(), "CLOSE")
     
     print("Test test_position_effect_enum: PASSED")
 

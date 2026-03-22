@@ -3,7 +3,7 @@ RQAlpha Mojo - Position Management
 Ported from rqalpha/portfolio/position.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION, INSTRUMENT_TYPE, POSITION_DIRECTION_SHORT, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE, POSITION_EFFECT_CLOSE_TODAY, POSITION_DIRECTION_LONG
+from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION, INSTRUMENT_TYPE
 from rqmojo.model.instrument import Instrument
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
@@ -30,7 +30,7 @@ struct Position(Movable, ImplicitlyCopyable):
 
     def __init__(out self):
         self.order_book_id = ""
-        self.direction = POSITION_DIRECTION_LONG
+        self.direction = POSITION_DIRECTION.LONG
         self.quantity = 0
         self.old_quantity = 0
         self.today_quantity = 0
@@ -86,7 +86,7 @@ struct Position(Movable, ImplicitlyCopyable):
         if self.quantity == 0:
             return 0.0
         var direction_factor: Float64 = 1.0
-        if self.direction == POSITION_DIRECTION_SHORT:
+        if self.direction == POSITION_DIRECTION.SHORT:
             direction_factor = -1.0
         return direction_factor * (self.last_price - self.avg_price) * Float64(self.quantity) * self._contract_multiplier
 
@@ -123,7 +123,7 @@ struct Position(Movable, ImplicitlyCopyable):
         var delta_cash: Float64 = 0.0
         var trade_amount = trade.price * Float64(trade.quantity) * self._contract_multiplier
         
-        if trade.position_effect == POSITION_EFFECT_OPEN:
+        if trade.position_effect == POSITION_EFFECT.OPEN:
             var old_total = self.avg_price * Float64(self.quantity)
             self.quantity += trade.quantity
             self.today_quantity += trade.quantity
@@ -250,7 +250,7 @@ def create_position(
 
 
 def create_stock_position(order_book_id: String, quantity: Int = 0, avg_price: Float64 = 0.0) -> Position:
-    return create_position(order_book_id, POSITION_DIRECTION_LONG, quantity, avg_price, 1.0, 1.0)
+    return create_position(order_book_id, POSITION_DIRECTION.LONG, quantity, avg_price, 1.0, 1.0)
 
 
 def create_future_position(

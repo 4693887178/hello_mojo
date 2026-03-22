@@ -5,7 +5,7 @@ Ported from rqalpha/main.py
 
 from std.collections import Dict, List
 from std.python import Python, PythonObject
-from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, EXIT_CODE, PERSIST_MODE, RUN_TYPE_BACKTEST
+from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, EXIT_CODE, PERSIST_MODE
 from rqmojo.environment import Environment, create_environment_from_config
 from rqmojo.core.events import EVENT, Event, EventBus, create_event_bus
 from rqmojo.core.executor import Executor, create_executor
@@ -37,7 +37,7 @@ from rqmojo.utils.config import RQAlphaConfig, BaseConfig, ExtraConfig, ModConfi
 from rqmojo.utils import RqAttrDict, RqValue
 
 
-comptime RUN_TYPE_BACKTEST_VAL: RUN_TYPE = RUN_TYPE_BACKTEST
+comptime RUN_TYPE_BACKTEST_VAL: RUN_TYPE = RUN_TYPE.BACKTEST
 
 
 @fieldwise_init
@@ -63,7 +63,7 @@ def create_config(
         start_date=start_date,
         end_date=end_date,
         frequency=frequency,
-        run_type=RUN_TYPE_BACKTEST,
+        run_type=RUN_TYPE.BACKTEST,
         data_bundle_path=data_bundle_path,
         strategy_file=strategy_file,
         persist_mode=persist_mode,

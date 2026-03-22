@@ -8,10 +8,7 @@ from std.testing import assert_equal, assert_true, assert_false
 from std.collections import Dict, List, Set
 from rqmojo.const import (
     SIDE, POSITION_EFFECT, ORDER_TYPE, ORDER_STATUS, POSITION_DIRECTION,
-    SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
-    ORDER_STATUS_FILLED, ORDER_STATUS_CANCELLED, POSITION_DIRECTION_LONG,
-    POSITION_DIRECTION_SHORT, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET,
-    EXCHANGE_XSHG, EXCHANGE_XSHE
+    EXCHANGE
 )
 from rqmojo.model.order import Order, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument, create_stock_instrument
@@ -33,14 +30,14 @@ def test_order_shares() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         1910,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
-    assert_equal(order.side, SIDE_BUY)
+    assert_equal(order.side, SIDE.BUY)
     assert_equal(order.quantity, 1910)
     
     print("Test test_order_shares: PASSED")
@@ -58,14 +55,14 @@ def test_order_lots() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
-    assert_equal(order.side, SIDE_BUY)
+    assert_equal(order.side, SIDE.BUY)
     assert_equal(order.quantity, 100)
     
     print("Test test_order_lots: PASSED")
@@ -83,14 +80,14 @@ def test_order_value() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
-    assert_equal(order.side, SIDE_BUY)
+    assert_equal(order.side, SIDE.BUY)
     
     print("Test test_order_value: PASSED")
 
@@ -107,14 +104,14 @@ def test_order_percent() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
-    assert_equal(order.side, SIDE_BUY)
+    assert_equal(order.side, SIDE.BUY)
     
     print("Test test_order_percent: PASSED")
 
@@ -131,10 +128,10 @@ def test_order_target_value() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
@@ -154,10 +151,10 @@ def test_order_target_percent() raises:
     var order = create_order_with_id(
         1,
         "000001.XSHE",
-        SIDE_BUY,
+        SIDE.BUY,
         100,
         style,
-        POSITION_EFFECT_OPEN
+        POSITION_EFFECT.OPEN
     )
     
     assert_equal(order.order_book_id, "000001.XSHE")
@@ -175,7 +172,7 @@ def test_stock_order() raises:
     
     var style = MarketOrder()
     var orders = List[Order]()
-    orders.append(create_order_with_id(1, "000001.XSHE", SIDE_BUY, 100, style, POSITION_EFFECT_OPEN))
+    orders.append(create_order_with_id(1, "000001.XSHE", SIDE.BUY, 100, style, POSITION_EFFECT.OPEN))
     
     assert_equal(len(orders), 1)
     
@@ -192,7 +189,7 @@ def test_stock_order_to() raises:
     
     var style = MarketOrder()
     var orders = List[Order]()
-    orders.append(create_order_with_id(1, "000001.XSHE", SIDE_BUY, 100, style, POSITION_EFFECT_OPEN))
+    orders.append(create_order_with_id(1, "000001.XSHE", SIDE.BUY, 100, style, POSITION_EFFECT.OPEN))
     
     assert_equal(len(orders), 1)
     
@@ -202,7 +199,7 @@ def test_stock_order_to() raises:
 def test_round_order_quantity() raises:
     print("=== Testing _round_order_quantity ===")
     
-    var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE)
+    var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
     
     var qty1 = 150
     var rounded1 = (qty1 // 100) * 100
@@ -240,7 +237,7 @@ def test_limit_order_style() raises:
     
     var style = LimitOrder(10.5)
     assert_equal(style.limit_price, 10.5)
-    assert_equal(style.style_type, ORDER_TYPE_LIMIT)
+    assert_equal(style.style_type, ORDER_TYPE.LIMIT)
     
     print("Test test_limit_order_style: PASSED")
 
@@ -249,7 +246,7 @@ def test_market_order_style() raises:
     print("=== Testing Market Order Style ===")
     
     var style = MarketOrder()
-    assert_equal(style.style_type, ORDER_TYPE_MARKET)
+    assert_equal(style.style_type, ORDER_TYPE.MARKET)
     
     print("Test test_market_order_style: PASSED")
 
@@ -257,7 +254,7 @@ def test_market_order_style() raises:
 def test_instrument_creation() raises:
     print("=== Testing Instrument Creation ===")
     
-    var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE)
+    var ins = create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE.XSHE)
     assert_equal(ins.order_book_id(), "000001.XSHE")
     assert_equal(ins.symbol(), "平安银行")
     

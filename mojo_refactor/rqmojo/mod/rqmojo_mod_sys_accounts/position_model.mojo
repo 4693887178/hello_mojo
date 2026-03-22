@@ -65,7 +65,7 @@ struct PositionModel(Movable):
         self.frozen_quantity -= quantity
 
 
-def create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG) -> PositionModel:
+def create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> PositionModel:
     return PositionModel(
         order_book_id=order_book_id,
         direction=direction,

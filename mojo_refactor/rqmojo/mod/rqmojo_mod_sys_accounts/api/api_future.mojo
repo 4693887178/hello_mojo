@@ -6,10 +6,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_future.py
 from std.collections import Dict, List, Optional
 from rqmojo.const import (
     SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE,
-    POSITION_DIRECTION, HEDGE_TYPE, RUN_TYPE,
-    SIDE_BUY, SIDE_SELL, POSITION_EFFECT_OPEN, POSITION_EFFECT_CLOSE,
-    INSTRUMENT_TYPE_FUTURE, DEFAULT_ACCOUNT_TYPE_FUTURE,
-    POSITION_DIRECTION_LONG, ORDER_TYPE_LIMIT
+    POSITION_DIRECTION, HEDGE_TYPE, RUN_TYPE
 )
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
 from rqmojo.model.instrument import Instrument
@@ -74,7 +71,7 @@ def buy_open(
     quantity: Int,
     style: OrderStyle = MarketOrder()
 ) -> Optional[Order]:
-    return _submit_order(env, order_book_id, quantity, SIDE_BUY, POSITION_EFFECT_OPEN, style)
+    return _submit_order(env, order_book_id, quantity, SIDE.BUY, POSITION_EFFECT.OPEN, style)
 
 
 def sell_close(
@@ -84,8 +81,8 @@ def sell_close(
     style: OrderStyle = MarketOrder(),
     close_today: Bool = False
 ) -> Optional[Order]:
-    var position_effect = POSITION_EFFECT_CLOSE
-    return _submit_order(env, order_book_id, quantity, SIDE_SELL, position_effect, style)
+    var position_effect = POSITION_EFFECT.CLOSE
+    return _submit_order(env, order_book_id, quantity, SIDE.SELL, position_effect, style)
 
 
 def sell_open(
@@ -94,7 +91,7 @@ def sell_open(
     quantity: Int,
     style: OrderStyle = MarketOrder()
 ) -> Optional[Order]:
-    return _submit_order(env, order_book_id, quantity, SIDE_SELL, POSITION_EFFECT_OPEN, style)
+    return _submit_order(env, order_book_id, quantity, SIDE.SELL, POSITION_EFFECT.OPEN, style)
 
 
 def buy_close(
@@ -104,8 +101,8 @@ def buy_close(
     style: OrderStyle = MarketOrder(),
     close_today: Bool = False
 ) -> Optional[Order]:
-    var position_effect = POSITION_EFFECT_CLOSE
-    return _submit_order(env, order_book_id, quantity, SIDE_BUY, position_effect, style)
+    var position_effect = POSITION_EFFECT.CLOSE
+    return _submit_order(env, order_book_id, quantity, SIDE.BUY, position_effect, style)
 
 
 def future_order(
@@ -267,9 +264,9 @@ def order_target_portfolio_future(
         var close_price = item.last_price
         var open_price = item.last_price
         
-        if item.close_style.style_type == ORDER_TYPE_LIMIT:
+        if item.close_style.style_type == ORDER_TYPE.LIMIT:
             close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE_LIMIT:
+        if item.open_style.style_type == ORDER_TYPE.LIMIT:
             open_price = item.open_style.limit_price
         
         if close_price <= 0 or open_price <= 0:
@@ -284,10 +281,10 @@ def order_target_portfolio_future(
             var order = create_order_with_id(
                 env.next_order_id(),
                 item.order_book_id,
-                SIDE_BUY,
+                SIDE.BUY,
                 delta_quantity,
                 item.open_style,
-                POSITION_EFFECT_OPEN
+                POSITION_EFFECT.OPEN
             )
             var result = env.submit_order(order)
             if result != None:
@@ -296,10 +293,10 @@ def order_target_portfolio_future(
             var order = create_order_with_id(
                 env.next_order_id(),
                 item.order_book_id,
-                SIDE_SELL,
+                SIDE.SELL,
                 -delta_quantity,
                 item.close_style,
-                POSITION_EFFECT_CLOSE
+                POSITION_EFFECT.CLOSE
             )
             var result = env.submit_order(order)
             if result != None:
