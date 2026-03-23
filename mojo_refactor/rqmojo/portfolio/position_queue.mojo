@@ -5,13 +5,13 @@ Position queue for tracking opening positions with dates
 """
 
 from std.collections import List
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init
 struct PositionQueueItem(Copyable, Movable, ImplicitlyCopyable):
     """A single item in the position queue representing one opening trade"""
-    var date: Date
+    var date: DateTimeDate
     var quantity: Int
 
     def __str__(self) -> String:
@@ -40,7 +40,7 @@ struct PositionQueue(Copyable, Movable, ImplicitlyCopyable):
     def is_empty(self) -> Bool:
         return len(self._items) == 0
 
-    def push(mut self, date: Date, quantity: Int) -> None:
+    def push(mut self, date: DateTimeDate, quantity: Int) -> None:
         """Add a new position opening to the queue"""
         if quantity == 0:
             return

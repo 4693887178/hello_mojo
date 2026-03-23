@@ -6,7 +6,8 @@ Uses Python h5py/numpy/pandas for HDF5 operations
 
 from std.collections import List, Dict
 from python import Python, PythonObject
-from rqmojo.utils.datetime_func import convert_date_to_date_int, Date, DateTime
+from rqmojo.utils.datetime_func import convert_date_to_date_int
+from rqmojo.utils.typing import DateTimeDate, DateTime
 from rqmojo.utils.typing import DateLike
 
 

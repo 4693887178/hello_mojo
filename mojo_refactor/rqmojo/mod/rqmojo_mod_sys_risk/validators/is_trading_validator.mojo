@@ -9,7 +9,7 @@ from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidator
 from rqmojo.model.instrument import Instrument
 from rqmojo.portfolio.account import Account
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.utils.i18n import gettext as _
 from rqmojo.utils.exception import InstrumentNotFound
 

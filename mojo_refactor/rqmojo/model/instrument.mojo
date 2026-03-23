@@ -4,7 +4,8 @@ Ported from rqalpha/model/instrument.py
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET, POSITION_DIRECTION
-from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
+from rqmojo.utils.typing import DateTime
+from rqmojo.utils.datetime_func import TimeRange
 
 
 def is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:

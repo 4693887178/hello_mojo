@@ -6,7 +6,8 @@ Ported from rqalpha/data/bundle.py
 from std.collections import Dict, List
 from rqmojo.const import INSTRUMENT_TYPE
 from rqmojo.model.instrument import Instrument
-from rqmojo.utils.datetime_func import DateTime, Date, convert_date_to_int, convert_int_to_datetime
+from rqmojo.utils.typing import DateTime, DateTimeDate
+from rqmojo.utils.datetime_func import convert_date_to_int, convert_int_to_datetime
 
 
 comptime START_DATE = 20050104

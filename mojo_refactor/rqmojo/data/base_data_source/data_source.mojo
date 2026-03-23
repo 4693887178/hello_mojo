@@ -8,7 +8,8 @@ from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET, TRADING_CALENDAR_TYP
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
-from rqmojo.utils.datetime_func import DateTime, Date, convert_int_to_datetime
+from rqmojo.utils.typing import DateTime, DateTimeDate
+from rqmojo.utils.datetime_func import convert_int_to_datetime
 
 
 @fieldwise_init
@@ -116,7 +117,7 @@ struct BaseDataSource(Movable):
             total_turnover=10200000.0
         )
 
-    def get_trading_dates(self, start_date: Date, end_date: Date) -> List[DateTime]:
+    def get_trading_dates(self, start_date: DateTimeDate, end_date: DateTimeDate) -> List[DateTime]:
         var result = List[DateTime]()
         var start_int = start_date.year * 10000 + start_date.month * 100 + start_date.day
         var end_int = end_date.year * 10000 + end_date.month * 100 + end_date.day
@@ -161,14 +162,14 @@ struct BaseDataSource(Movable):
     def get_ex_cum_factor(self, order_book_id: String) -> Float64:
         return 1.0
 
-    def get_yield_curve(self, start_date: Date, end_date: Date) -> List[Float64]:
+    def get_yield_curve(self, start_date: DateTimeDate, end_date: DateTimeDate) -> List[Float64]:
         var result = List[Float64]()
         return result^
 
     def get_futures_trading_parameters(self, order_book_id: String, dt: DateTime) -> FuturesTradingParameters:
         return FuturesTradingParameters(long_margin_ratio=0.1, short_margin_ratio=0.1)
 
-    def get_exchange_rate(self, trading_date: Date, local: MARKET, settlement: MARKET) -> ExchangeRate:
+    def get_exchange_rate(self, trading_date: DateTimeDate, local: MARKET, settlement: MARKET) -> ExchangeRate:
         return ExchangeRate(bid_reference=1.0, ask_reference=1.0, bid_settlement_sh=1.0, ask_settlement_sh=1.0, bid_settlement_sz=1.0, ask_settlement_sz=1.0)
 
 

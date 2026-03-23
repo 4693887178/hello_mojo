@@ -5,7 +5,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/plot.py
 
 from rqmojo.mod.rqmojo_mod_sys_analyser.plot.consts import ChartType, Color
 from rqmojo.mod.rqmojo_mod_sys_analyser.plot.utils import format_date, calculate_max_drawdown, calculate_sharpe_ratio
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

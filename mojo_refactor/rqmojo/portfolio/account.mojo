@@ -7,7 +7,7 @@ from std.collections import List
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION
 from rqmojo.model.trade import Trade
 from rqmojo.portfolio.position import Position, create_position, create_future_position
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 struct Account(ImplicitlyCopyable):

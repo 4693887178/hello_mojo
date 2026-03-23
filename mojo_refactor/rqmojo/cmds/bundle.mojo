@@ -3,7 +3,7 @@ RQAlpha Mojo - Bundle Command
 Ported from rqalpha/cmds/bundle.py
 """
 
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init

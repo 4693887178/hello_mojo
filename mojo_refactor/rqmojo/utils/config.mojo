@@ -5,7 +5,7 @@ Ported from rqalpha/utils/config.py
 
 from std.collections import Dict, List
 from rqmojo.const import RUN_TYPE, PERSIST_MODE, COMMISSION_TYPE
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init

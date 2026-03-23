@@ -9,7 +9,7 @@ from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade_with_id
 from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.core.events import EVENT, EventBus, Event
 
 

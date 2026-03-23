@@ -5,7 +5,7 @@ Ported from rqalpha/core/execution_context.py
 
 from std.collections import List, Dict
 from rqmojo.const import EXECUTION_PHASE
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init

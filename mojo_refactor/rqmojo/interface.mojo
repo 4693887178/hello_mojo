@@ -12,7 +12,7 @@ from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
 from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

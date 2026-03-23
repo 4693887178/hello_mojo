@@ -8,7 +8,7 @@ from rqmojo.const import ORDER_STATUS, SIDE, POSITION_EFFECT, ORDER_STATUS_CANCE
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
 from rqmojo.core.events import EVENT, Event, EventBus
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

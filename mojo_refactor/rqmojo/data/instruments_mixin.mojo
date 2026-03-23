@@ -5,7 +5,8 @@ Ported from rqalpha/data/instruments_mixin.py
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
-from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
+from rqmojo.utils.typing import DateTime, DateTimeDate
+from rqmojo.utils.datetime_func import TimeRange
 
 
 @fieldwise_init

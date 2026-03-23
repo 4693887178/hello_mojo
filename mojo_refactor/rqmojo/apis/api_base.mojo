@@ -11,7 +11,7 @@ from rqmojo.model.tick import TickObject
 from rqmojo.core.strategy_context import StrategyContext
 from rqmojo.portfolio.position import Position
 from rqmojo.data.data_proxy import DataProxy, Snapshot
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.core.events import EVENT
 
 

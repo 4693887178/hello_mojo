@@ -11,7 +11,7 @@ from rqmojo.model.bar import BarObject
 from rqmojo.environment import Environment
 from rqmojo.portfolio.position import Position
 from rqmojo.portfolio.account import Account
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.utils.exception import RQInvalidArgument
 
 

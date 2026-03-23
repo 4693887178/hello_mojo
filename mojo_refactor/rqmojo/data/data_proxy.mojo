@@ -7,7 +7,8 @@ from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
-from rqmojo.utils.datetime_func import DateTime, Date, TimeRange
+from rqmojo.utils.typing import DateTime, DateTimeDate
+from rqmojo.utils.datetime_func import TimeRange
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018, create_trading_dates_mixin_with_november_2024, create_trading_dates_mixin_with_multiple_months
 
 
@@ -195,7 +196,7 @@ struct DataProxy(Movable):
     def is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
         return False
     
-    def count_trading_dates(self, start_date: Date, end_date: Date) -> Int:
+    def count_trading_dates(self, start_date: DateTimeDate, end_date: DateTimeDate) -> Int:
         return self._trading_dates_mixin.count_trading_dates(
             start_date.year, start_date.month, start_date.day,
             end_date.year, end_date.month, end_date.day
@@ -207,24 +208,24 @@ struct DataProxy(Movable):
     def is_trading_date(self, dt: DateTime) -> Bool:
         return self._trading_dates_mixin.is_trading_date(dt.year, dt.month, dt.day)
     
-    def is_trading_date_from_date(self, d: Date) -> Bool:
+    def is_trading_date_from_date(self, d: DateTimeDate) -> Bool:
         return self._trading_dates_mixin.is_trading_date(d.year, d.month, d.day)
     
     def get_previous_trading_date(self, dt: DateTime) -> DateTime:
         var result = self._trading_dates_mixin.get_previous_trading_date(dt.year, dt.month, dt.day)
         return DateTime(result.year, result.month, result.day, 0, 0, 0, 0)
     
-    def get_previous_trading_date_from_date(self, d: Date) -> Date:
+    def get_previous_trading_date_from_date(self, d: DateTimeDate) -> DateTimeDate:
         var result = self._trading_dates_mixin.get_previous_trading_date(d.year, d.month, d.day)
-        return Date(result.year, result.month, result.day)
+        return DateTimeDate(result.year, result.month, result.day)
     
     def get_next_trading_date(self, dt: DateTime) -> DateTime:
         var result = self._trading_dates_mixin.get_next_trading_date(dt.year, dt.month, dt.day)
         return DateTime(result.year, result.month, result.day, 0, 0, 0, 0)
     
-    def get_next_trading_date_from_date(self, d: Date) -> Date:
+    def get_next_trading_date_from_date(self, d: DateTimeDate) -> DateTimeDate:
         var result = self._trading_dates_mixin.get_next_trading_date(d.year, d.month, d.day)
-        return Date(result.year, result.month, result.day)
+        return DateTimeDate(result.year, result.month, result.day)
     
     def history_bars(
         self,
@@ -400,7 +401,7 @@ struct DataProxy(Movable):
         var split = create_split_info(ex_date=20230515, split_factor=1.5)
         return Optional[SplitInfo](split)
     
-    def get_yield_curve(self, start_date: Date, end_date: Date, tenor: String = "") -> List[YieldCurvePoint]:
+    def get_yield_curve(self, start_date: DateTimeDate, end_date: DateTimeDate, tenor: String = "") -> List[YieldCurvePoint]:
         var result = List[YieldCurvePoint]()
         
         var tenors = List[String]()
@@ -427,11 +428,11 @@ struct DataProxy(Movable):
                     )
                     result.append(point)
             
-            current_date = Date(current_date.year, current_date.month, current_date.day + 1)
+            current_date = DateTimeDate(current_date.year, current_date.month, current_date.day + 1)
             if current_date.day > 28:
-                current_date = Date(current_date.year, current_date.month + 1, 1)
+                current_date = DateTimeDate(current_date.year, current_date.month + 1, 1)
             if current_date.month > 12:
-                current_date = Date(current_date.year + 1, 1, 1)
+                current_date = DateTimeDate(current_date.year + 1, 1, 1)
         
         return result^
     

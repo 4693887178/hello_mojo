@@ -7,7 +7,7 @@ from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, create_order_with_id
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.instrument import Instrument, create_stock_instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 struct MockDataProxy(Movable, Copyable):

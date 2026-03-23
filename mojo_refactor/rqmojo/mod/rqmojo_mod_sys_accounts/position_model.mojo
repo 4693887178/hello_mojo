@@ -5,7 +5,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/position_model.py
 
 from rqmojo.const import POSITION_DIRECTION, SIDE, POSITION_DIRECTION_LONG, POSITION_DIRECTION_LONG
 from rqmojo.model.instrument import Instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

@@ -7,7 +7,7 @@ from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS
 from rqmojo.model.order import Order
 from rqmojo.model.instrument import Instrument
 from rqmojo.portfolio.account import Account
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

@@ -6,7 +6,8 @@ Ported from rqalpha/model/bar.py
 from std.collections import Dict, List, Set
 from rqmojo.const import INSTRUMENT_TYPE, RUN_TYPE, EXECUTION_PHASE, EXCHANGE
 from rqmojo.model.instrument import Instrument, create_stock_instrument
-from rqmojo.utils.datetime_func import DateTime, convert_int_to_datetime
+from rqmojo.utils.typing import DateTime
+from rqmojo.utils.datetime_func import convert_int_to_datetime
 from python import Python, PythonObject
 
 

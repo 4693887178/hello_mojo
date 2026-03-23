@@ -5,7 +5,7 @@ Ported from rqalpha/model/tick.py
 
 from rqmojo.const import INSTRUMENT_TYPE, MARKET
 from rqmojo.model.instrument import Instrument, create_instrument_from_dict
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.utils.i18n import gettext
 from rqmojo.utils.repr import dict_repr_from_dict
 from std.collections import Dict, List

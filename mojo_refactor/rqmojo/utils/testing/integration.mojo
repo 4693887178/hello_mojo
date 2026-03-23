@@ -5,7 +5,7 @@ Ported from rqalpha/utils/testing/integration.py
 
 from std.collections import Dict, List
 from std.python import Python, PythonObject
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 comptime __all__: List[String] = [

@@ -7,7 +7,7 @@ from rqmojo.const import MATCHING_TYPE, SIDE, ORDER_STATUS
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade
 from rqmojo.model.bar import BarObject
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

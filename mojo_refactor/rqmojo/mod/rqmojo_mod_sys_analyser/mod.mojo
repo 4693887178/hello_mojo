@@ -9,7 +9,7 @@ This module provides portfolio analysis functionality including:
 """
 
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
 from std.collections import Dict, List
 

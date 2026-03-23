@@ -8,7 +8,7 @@ from std.python import Python, PythonObject
 from rqmojo._version import get_version, __version__
 from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, EXIT_CODE
 from rqmojo.utils.config import RQAlphaConfig, BaseConfig, parse_config
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.utils.functools import clear_all_cached_functions
 from rqmojo.utils.logger import user_log, system_log, init_logger
 from rqmojo.utils.exception import CustomError

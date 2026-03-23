@@ -6,7 +6,7 @@ from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE
 from rqmojo.model.order import Order, create_order_with_id, OrderStyle, MarketOrder
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.instrument import Instrument, create_stock_instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 def create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE.BUY) -> Order:

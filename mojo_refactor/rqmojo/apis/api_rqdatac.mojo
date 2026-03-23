@@ -7,7 +7,7 @@ from std.collections import Dict, List
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_TYPE
 from rqmojo.model.order import Order
 from rqmojo.core.strategy_context import StrategyContext
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 def get_price(ctx: StrategyContext, order_book_id: String, start_date: DateTime, end_date: DateTime, frequency: String = "1d") -> List[Float64]:

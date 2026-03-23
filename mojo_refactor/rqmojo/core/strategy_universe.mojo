@@ -7,7 +7,7 @@ from std.collections import Dict, Set
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.environment import Environment
 from rqmojo.model.instrument import Instrument
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 def _get_current_time() -> DateTime:
@@ -130,7 +130,7 @@ struct StrategyUniverse(
         
         self.update(new_set)
 
-    def clear_de_listed(mut self, trading_dt: Date, data_proxy: object):
+    def clear_de_listed(mut self, trading_dt: DateTimeDate, data_proxy: object):
         var de_listed = List[String]()
         
         for order_book_id in self.universe_set:

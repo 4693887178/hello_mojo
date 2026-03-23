@@ -14,7 +14,7 @@ from rqmojo.data.data_proxy import DataProxy, create_data_proxy
 from rqmojo.data.bar_dict_price_board import BarDictPriceBoard
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin
 from rqmojo.portfolio.portfolio_manager import Portfolio
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

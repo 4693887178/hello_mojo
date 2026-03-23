@@ -4,6 +4,7 @@ Ported from rqalpha/utils/datetime_func.py
 """
 
 from python import Python, PythonObject
+from rqmojo.utils.typing import DateTimeDate, DateTime
 
 
 def _py_int_to_int(py_obj: PythonObject) raises -> Int:
@@ -20,87 +21,11 @@ struct TimeRange(Copyable, Movable, ImplicitlyCopyable):
     var end_minute: Int
 
 
-@fieldwise_init
-struct Date(Copyable, Movable, ImplicitlyCopyable):
-    var year: Int
-    var month: Int
-    var day: Int
-    
-    def __str__(self) -> String:
-        return String(self.year) + "-" + String(self.month) + "-" + String(self.day)
-    
-    @staticmethod
-    def from_string(s: String) raises -> Date:
-        var parts = s.split("-")
-        if len(parts) >= 3:
-            return Date(Int(parts[0]), Int(parts[1]), Int(parts[2]))
-        return Date(1970, 1, 1)
-
-
-@fieldwise_init
-struct DateTime(Copyable, Movable, ImplicitlyCopyable):
-    var year: Int
-    var month: Int
-    var day: Int
-    var hour: Int
-    var minute: Int
-    var second: Int
-    var microsecond: Int
-    
-    def __str__(self) -> String:
-        return String(self.year) + "-" + String(self.month) + "-" + String(self.day) + " " + String(self.hour) + ":" + String(self.minute) + ":" + String(self.second)
-    
-    def date(self) -> Date:
-        return Date(self.year, self.month, self.day)
-    
-    def replace(mut self, hour: Int = -1, minute: Int = -1, second: Int = -1, microsecond: Int = -1) -> DateTime:
-        if hour >= 0:
-            self.hour = hour
-        if minute >= 0:
-            self.minute = minute
-        if second >= 0:
-            self.second = second
-        if microsecond >= 0:
-            self.microsecond = microsecond
-        return self
-    
-    def to_string(self) -> String:
-        return self.__str__()
-    
-    @staticmethod
-    def now() raises -> DateTime:
-        var datetime_module = Python.import_module("datetime")
-        var py_now = datetime_module.datetime.now()
-        return DateTime(
-            _py_int_to_int(py_now.year),
-            _py_int_to_int(py_now.month),
-            _py_int_to_int(py_now.day),
-            _py_int_to_int(py_now.hour),
-            _py_int_to_int(py_now.minute),
-            _py_int_to_int(py_now.second),
-            _py_int_to_int(py_now.microsecond)
-        )
-    
-    @staticmethod
-    def parse(s: String) raises -> DateTime:
-        var datetime_module = Python.import_module("datetime")
-        var py_dt = datetime_module.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
-        return DateTime(
-            _py_int_to_int(py_dt.year),
-            _py_int_to_int(py_dt.month),
-            _py_int_to_int(py_dt.day),
-            _py_int_to_int(py_dt.hour),
-            _py_int_to_int(py_dt.minute),
-            _py_int_to_int(py_dt.second),
-            0
-        )
-
-
-def convert_date_to_date_int(dt: Date) -> Int:
+def convert_date_to_date_int(dt: DateTimeDate) -> Int:
     return dt.year * 10000 + dt.month * 100 + dt.day
 
 
-def convert_date_to_int(dt: Date) -> Int:
+def convert_date_to_int(dt: DateTimeDate) -> Int:
     return dt.year * 10000000000000 + dt.month * 100000000000 + dt.day * 1000000000
 
 
@@ -159,36 +84,36 @@ def convert_date_time_ms_int_to_datetime(date_int: Int, time_int: Int) -> DateTi
     return dt.replace(hour=hours, minute=minutes, second=seconds, microsecond=millisecond * 1000)
 
 
-def to_date_from_string(date_str: String) raises -> Date:
+def to_date_from_string(date_str: String) raises -> DateTimeDate:
     var parser = Python.import_module("dateutil.parser")
     var py_dt = parser.parse(date_str)
-    return Date(
+    return DateTimeDate(
         _py_int_to_int(py_dt.year),
         _py_int_to_int(py_dt.month),
         _py_int_to_int(py_dt.day)
     )
 
 
-def to_date_from_datetime(dt: DateTime) -> Date:
+def to_date_from_datetime(dt: DateTime) -> DateTimeDate:
     return dt.date()
 
 
-def to_date_from_date(d: Date) -> Date:
+def to_date_from_date(d: DateTimeDate) -> DateTimeDate:
     return d
 
 
-def to_date_from_py_datetime(py_dt: PythonObject) raises -> Date:
+def to_date_from_py_datetime(py_dt: PythonObject) raises -> DateTimeDate:
     var datetime_module = Python.import_module("datetime")
     var builtins = Python.import_module("builtins")
     
     if builtins.isinstance(py_dt, datetime_module.datetime):
-        return Date(
+        return DateTimeDate(
             _py_int_to_int(py_dt.year),
             _py_int_to_int(py_dt.month),
             _py_int_to_int(py_dt.day)
         )
     elif builtins.isinstance(py_dt, datetime_module.date):
-        return Date(
+        return DateTimeDate(
             _py_int_to_int(py_dt.year),
             _py_int_to_int(py_dt.month),
             _py_int_to_int(py_dt.day)

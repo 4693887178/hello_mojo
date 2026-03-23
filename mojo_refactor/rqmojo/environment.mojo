@@ -11,7 +11,7 @@ from rqmojo.const import (
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
 from rqmojo.model.instrument import Instrument, create_stock_instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy, DividendInfo
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position

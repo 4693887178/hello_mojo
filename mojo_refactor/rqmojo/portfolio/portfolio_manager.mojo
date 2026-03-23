@@ -8,7 +8,7 @@ from rqmojo.const import DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, POSITION_DIRECTI
 from rqmojo.model.trade import Trade
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position, PositionProxy, create_position_proxy
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

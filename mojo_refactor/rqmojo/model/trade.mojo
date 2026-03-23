@@ -5,7 +5,7 @@ Ported from rqalpha/model/trade.py
 
 from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION
 from rqmojo.model.order import Order
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

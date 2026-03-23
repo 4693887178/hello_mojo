@@ -7,7 +7,7 @@ from rqmojo.const import SIDE, POSITION_EFFECT, POSITION_DIRECTION, INSTRUMENT_T
 from rqmojo.model.instrument import Instrument
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.portfolio.position_queue import PositionQueue, PositionQueueItem, create_position_queue
 
 
@@ -155,7 +155,7 @@ struct Position(Movable, ImplicitlyCopyable):
         self._update_market_value()
         return delta_cash
 
-    def apply_trade_with_date(mut self, trade: Trade, trade_date: Date) -> Float64:
+    def apply_trade_with_date(mut self, trade: Trade, trade_date: DateTimeDate) -> Float64:
         var delta_cash: Float64 = 0.0
         var trade_amount = trade.price * Float64(trade.quantity) * self._contract_multiplier
         

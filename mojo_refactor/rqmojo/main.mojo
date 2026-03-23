@@ -27,7 +27,7 @@ from rqmojo.model.trade import Trade
 from rqmojo.interface import Persistable
 from rqmojo.mod import ModHandler, create_mod_handler
 from rqmojo.portfolio import Portfolio, create_portfolio, create_stock_portfolio
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime
 from rqmojo.utils.exception import CustomError, is_user_exc
 from rqmojo.utils.i18n import gettext
 from rqmojo.utils.logger import user_log, system_log, user_system_log, init_logger

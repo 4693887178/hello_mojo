@@ -6,7 +6,7 @@ Ported from rqalpha/data/bar_dict_price_board.py
 from rqmojo.interface import PriceBoard
 from rqmojo.model.bar import BarObject, BarData
 from rqmojo.model.instrument import Instrument, create_stock_instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.const import EXECUTION_PHASE, EXCHANGE
 from std.collections import Dict
 

@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_simulation/simulation_event_source.py
 """
 
 from rqmojo.const import EXECUTION_PHASE, RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.model.tick import TickObject
 from rqmojo.model.instrument import Instrument
 

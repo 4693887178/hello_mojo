@@ -11,7 +11,7 @@ from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
 from rqmojo.model.order import Order, buy, sell, MarketOrder, LimitOrder
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.portfolio_manager import Portfolio
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.utils.config import RQAlphaConfig, BaseConfig, ExtraConfig, ModConfig, default_extra_config, default_mod_config
@@ -19,8 +19,8 @@ from rqmojo.utils.config import RQAlphaConfig, BaseConfig, ExtraConfig, ModConfi
 
 @fieldwise_init
 struct RunInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
-    var _start_date: Date
-    var _end_date: Date
+    var _start_date: DateTimeDate
+    var _end_date: DateTimeDate
     var _frequency: String
     var _stock_starting_cash: Float64
     var _future_starting_cash: Float64
@@ -34,10 +34,10 @@ struct RunInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
     def __str__(self) -> String:
         return "RunInfo(" + self._start_date.__str__() + " to " + self._end_date.__str__() + ")"
     
-    def start_date(self) -> Date:
+    def start_date(self) -> DateTimeDate:
         return self._start_date
     
-    def end_date(self) -> Date:
+    def end_date(self) -> DateTimeDate:
         return self._end_date
     
     def frequency(self) -> String:
@@ -69,8 +69,8 @@ struct RunInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
 
 
 def create_run_info(
-    start_date: Date,
-    end_date: Date,
+    start_date: DateTimeDate,
+    end_date: DateTimeDate,
     frequency: String,
     stock_starting_cash: Float64 = 0.0,
     future_starting_cash: Float64 = 0.0,

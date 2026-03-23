@@ -7,7 +7,7 @@ from std.collections import Dict, List, Set
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE, EXECUTION_PHASE
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.environment import Environment
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 from rqmojo.model.bar import BarObject
 
 

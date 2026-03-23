@@ -5,7 +5,7 @@ Ported from rqalpha/model/order.py
 
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, ORDER_TYPE
 from rqmojo.model.instrument import Instrument
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

@@ -5,7 +5,7 @@ Ported from rqalpha/data/auto_update_bundle_mixin.py
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init
@@ -22,20 +22,20 @@ struct OpenAuctionData(Stringable, Copyable, Movable, ImplicitlyCopyable):
 struct AutomaticUpdateBundle(Movable):
     var _path: String
     var _filename: String
-    var _end_date: Date
+    var _end_date: DateTimeDate
     var _data: List[OpenAuctionData]
     
     def add_data(mut self, data: OpenAuctionData) -> None:
         self._data.append(data)
     
-    def get_data(self, order_book_id: String, dt: Date) -> OpenAuctionData:
+    def get_data(self, order_book_id: String, dt: DateTimeDate) -> OpenAuctionData:
         for i in range(len(self._data)):
             var d = self._data[i]
             if d.order_book_id == order_book_id:
                 return d
         return OpenAuctionData("", DateTime(1970, 1, 1, 0, 0, 0, 0), 0.0)
     
-    def has_data(self, order_book_id: String, dt: Date) -> Bool:
+    def has_data(self, order_book_id: String, dt: DateTimeDate) -> Bool:
         for i in range(len(self._data)):
             var d = self._data[i]
             if d.order_book_id == order_book_id:
@@ -46,7 +46,7 @@ struct AutomaticUpdateBundle(Movable):
         return len(self._data) > 0
 
 
-def create_auto_update_bundle(path: String, filename: String, end_date: Date) -> AutomaticUpdateBundle:
+def create_auto_update_bundle(path: String, filename: String, end_date: DateTimeDate) -> AutomaticUpdateBundle:
     return AutomaticUpdateBundle(
         _path=path,
         _filename=filename,
@@ -56,7 +56,7 @@ def create_auto_update_bundle(path: String, filename: String, end_date: Date) ->
 
 
 def create_auto_update_bundle_with_test_data() -> AutomaticUpdateBundle:
-    var end_date = Date(2024, 2, 28)
+    var end_date = DateTimeDate(2024, 2, 28)
     var bundle = create_auto_update_bundle("/tmp/test_bundle", "open_auction_volume.h5", end_date)
     
     bundle.add_data(OpenAuctionData("000001.XSHE", DateTime(2023, 12, 28, 9, 25, 0, 0), 1500000.0))

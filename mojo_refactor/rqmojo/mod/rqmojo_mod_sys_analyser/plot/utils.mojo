@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/utils.py
 """
 
 from std.math import sqrt
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 def _pad_zero(value: Int, width: Int) -> String:

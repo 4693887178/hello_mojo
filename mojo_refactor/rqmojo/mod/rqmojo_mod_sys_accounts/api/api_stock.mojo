@@ -11,7 +11,7 @@ from rqmojo.environment import Environment
 from rqmojo.portfolio.account import Account
 from rqmojo.portfolio.position import Position
 from rqmojo.data.data_proxy import DataProxy
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init

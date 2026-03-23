@@ -6,7 +6,7 @@ Ported from rqalpha/core/executor.py
 from std.collections import Dict, List
 from rqmojo.const import EXECUTION_PHASE
 from rqmojo.core.events import EVENT, Event, EventBus
-from rqmojo.utils.datetime_func import DateTime, Date
+from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init
