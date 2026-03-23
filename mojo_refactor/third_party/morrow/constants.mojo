@@ -1,21 +1,20 @@
-from utils import StaticTuple
+from std.utils import StaticTuple
 
 
-# todo: hardcode for tmp
-alias _MAX_TIMESTAMP: Int = 32503737600
-alias MAX_TIMESTAMP = _MAX_TIMESTAMP
-alias MAX_TIMESTAMP_MS = MAX_TIMESTAMP * 1000
-alias MAX_TIMESTAMP_US = MAX_TIMESTAMP * 1_000_000
+comptime _MAX_TIMESTAMP: Int = 32503737600
+comptime MAX_TIMESTAMP = _MAX_TIMESTAMP
+comptime MAX_TIMESTAMP_MS = MAX_TIMESTAMP * 1000
+comptime MAX_TIMESTAMP_US = MAX_TIMESTAMP * 1_000_000
 
-alias _DAYS_IN_MONTH = VariadicList[Int](
+comptime _DAYS_IN_MONTH = StaticTuple[Int, 13](
     -1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 )
-alias _DAYS_BEFORE_MONTH = VariadicList[Int](
+comptime _DAYS_BEFORE_MONTH = StaticTuple[Int, 13](
     -1, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
-)  # -1 is a placeholder for indexing purposes.
+)
 
 
-alias MONTH_NAMES = StaticTuple[StringLiteral, 13](
+comptime MONTH_NAMES = StaticTuple[StringLiteral, 13](
     "",
     "January",
     "February",
@@ -31,7 +30,7 @@ alias MONTH_NAMES = StaticTuple[StringLiteral, 13](
     "December",
 )
 
-alias MONTH_ABBREVIATIONS = StaticTuple[StringLiteral, 13](
+comptime MONTH_ABBREVIATIONS = StaticTuple[StringLiteral, 13](
     "",
     "Jan",
     "Feb",
@@ -47,7 +46,7 @@ alias MONTH_ABBREVIATIONS = StaticTuple[StringLiteral, 13](
     "Dec",
 )
 
-alias DAY_NAMES = StaticTuple[StringLiteral, 8](
+comptime DAY_NAMES = StaticTuple[StringLiteral, 8](
     "",
     "Monday",
     "Tuesday",
@@ -57,6 +56,6 @@ alias DAY_NAMES = StaticTuple[StringLiteral, 8](
     "Saturday",
     "Sunday",
 )
-alias DAY_ABBREVIATIONS = StaticTuple[StringLiteral, 8](
+comptime DAY_ABBREVIATIONS = StaticTuple[StringLiteral, 8](
     "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
 )

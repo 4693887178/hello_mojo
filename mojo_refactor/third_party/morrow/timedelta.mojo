@@ -1,17 +1,16 @@
-alias SECONDS_OF_DAY = 24 * 3600
+from .util import _pad_left
 
 
-struct TimeDelta(Stringable, Formattable):
-    """
-    Represents a duration of time.
-    """
+comptime SECONDS_OF_DAY = 24 * 3600
 
+
+struct TimeDelta(Copyable, Movable, Writable, Equatable, ImplicitlyCopyable):
     var days: Int
     var seconds: Int
     var microseconds: Int
 
-    fn __init__(
-        inout self,
+    def __init__(
+        out self,
         days: Int = 0,
         seconds: Int = 0,
         microseconds: Int = 0,
@@ -20,9 +19,6 @@ struct TimeDelta(Stringable, Formattable):
         hours: Int = 0,
         weeks: Int = 0,
     ):
-        """
-        Initialize a TimeDelta object.
-        """
         self.days = 0
         self.seconds = 0
         self.microseconds = 0
@@ -31,7 +27,6 @@ struct TimeDelta(Stringable, Formattable):
         var seconds_ = seconds
         var microseconds_ = microseconds
 
-        # Normalize everything to days, seconds, microseconds.
         days_ += weeks * 7
         seconds_ += minutes * 60 + hours * 3600
         microseconds_ += milliseconds * 1000
@@ -56,18 +51,12 @@ struct TimeDelta(Stringable, Formattable):
         self.seconds = self.seconds % SECONDS_OF_DAY
         self.days += days_
 
-    fn __copyinit__(inout self, other: Self):
-        """
-        Copy constructor for TimeDelta.
-        """
-        self.days = other.days
-        self.seconds = other.seconds
-        self.microseconds = other.microseconds
+    def __copyinit__(out self, copy: Self):
+        self.days = copy.days
+        self.seconds = copy.seconds
+        self.microseconds = copy.microseconds
 
-    fn __str__(self) -> String:
-        return String.format_sequence(self)
-
-    fn format_to(self: Self, inout writer: Formatter):
+    def write_to(self, mut writer: Some[Writer]):
         var mm = self.seconds // 60
         var ss = self.seconds % 60
         var hh = mm // 60
@@ -78,123 +67,74 @@ struct TimeDelta(Stringable, Formattable):
             else:
                 writer.write(self.days, " day, ")
 
-        writer.write(hh, ":", str(mm).rjust(2, "0"), ":", str(ss).rjust(2, "0"))
+        writer.write(hh, ":", _pad_left(String(mm), 2, "0"), ":", _pad_left(String(ss), 2, "0"))
         if self.microseconds:
-            writer.write(str(self.microseconds).rjust(6, "0"))
+            writer.write(_pad_left(String(self.microseconds), 6, "0"))
 
-    fn total_seconds(self) -> Float64:
-        """
-        Calculate the total number of seconds in the TimeDelta.
-        """
-        return (
+    def total_seconds(self) -> Float64:
+        return Float64(
             (self.days * 86400 + self.seconds) * 10**6 + self.microseconds
-        ) / 10**6
+        ) / Float64(10**6)
 
     @always_inline
-    fn __add__(self, other: Self) -> Self:
-        """
-        Add two TimeDelta objects.
-        """
+    def __add__(self, other: Self) -> Self:
         return Self(
             self.days + other.days,
             self.seconds + other.seconds,
             self.microseconds + other.microseconds,
         )
 
-    fn __radd__(self, other: Self) -> Self:
-        """
-        Reverse add operation for TimeDelta.
-        """
+    def __radd__(self, other: Self) -> Self:
         return self.__add__(other)
 
-    fn __sub__(self, other: Self) -> Self:
-        """
-        Subtract one TimeDelta from another.
-        """
+    def __sub__(self, other: Self) -> Self:
         return Self(
             self.days - other.days,
             self.seconds - other.seconds,
             self.microseconds - other.microseconds,
         )
 
-    fn __rsub__(self, other: Self) -> Self:
-        """
-        Reverse subtract operation for TimeDelta.
-        """
+    def __rsub__(self, other: Self) -> Self:
         return Self(
             other.days - self.days,
             other.seconds - self.seconds,
             other.microseconds - self.microseconds,
         )
 
-    fn __neg__(self) -> Self:
-        """
-        Negate the TimeDelta.
-        """
+    def __neg__(self) -> Self:
         return Self(-self.days, -self.seconds, -self.microseconds)
 
-    fn __pos__(self) -> Self:
-        """
-        Return a positive TimeDelta (self).
-        """
-        return self
+    def __pos__(self) -> Self:
+        return Self(self.days, self.seconds, self.microseconds)
 
     def __abs__(self) -> Self:
-        """
-        Return the absolute value of the TimeDelta.
-        """
         if self.days < 0:
             return -self
         else:
-            return self
+            return Self(self.days, self.seconds, self.microseconds)
 
     @always_inline
-    fn __mul__(self, other: Int) -> Self:
-        """
-        Multiply the TimeDelta by an integer.
-        """
+    def __mul__(self, other: Int) -> Self:
         return Self(
             self.days * other,
             self.seconds * other,
             self.microseconds * other,
         )
 
-    fn __rmul__(self, other: Int) -> Self:
-        """
-        Reverse multiply operation for TimeDelta.
-        """
+    def __rmul__(self, other: Int) -> Self:
         return self.__mul__(other)
 
-    fn _to_microseconds(self) -> Int:
-        """
-        Convert the TimeDelta to microseconds.
-        """
+    def _to_microseconds(self) -> Int:
         return (
             self.days * SECONDS_OF_DAY + self.seconds
         ) * 1000000 + self.microseconds
 
-    fn __mod__(self, other: Self) -> Self:
-        """
-        Calculate the remainder of dividing this TimeDelta by another.
-        """
+    def __mod__(self, other: Self) -> Self:
         var r = self._to_microseconds() % other._to_microseconds()
         return Self(0, 0, r)
 
-    fn __eq__(self, other: Self) -> Bool:
-        """
-        Check if two TimeDelta objects are equal.
-        """
-        return (
-            self.days == other.days
-            and self.seconds == other.seconds
-            and self.microseconds == other.microseconds
-        )
-
     @always_inline
-    fn __le__(self, other: Self) -> Bool:
-        """
-        Check if this TimeDelta is less than or equal to another.
-        """
+    def __le__(self, other: Self) -> Bool:
         if self.days < other.days:
             return True
         elif self.days == other.days:
@@ -208,10 +148,7 @@ struct TimeDelta(Stringable, Formattable):
         return False
 
     @always_inline
-    fn __lt__(self, other: Self) -> Bool:
-        """
-        Check if this TimeDelta is less than another.
-        """
+    def __lt__(self, other: Self) -> Bool:
         if self.days < other.days:
             return True
         elif self.days == other.days:
@@ -224,25 +161,16 @@ struct TimeDelta(Stringable, Formattable):
                 return True
         return False
 
-    fn __ge__(self, other: Self) -> Bool:
-        """
-        Check if this TimeDelta is greater than or equal to another.
-        """
+    def __ge__(self, other: Self) -> Bool:
         return not self.__lt__(other)
 
-    fn __gt__(self, other: Self) -> Bool:
-        """
-        Check if this TimeDelta is greater than another.
-        """
+    def __gt__(self, other: Self) -> Bool:
         return not self.__le__(other)
 
-    fn __bool__(self) -> Bool:
-        """
-        Check if the TimeDelta is non-zero.
-        """
+    def __bool__(self) -> Bool:
         return self.days != 0 or self.seconds != 0 or self.microseconds != 0
 
 
-alias Min = TimeDelta(-99999999)
-alias Max = TimeDelta(days=99999999)
-alias Resolution = TimeDelta(microseconds=1)
+comptime Min = TimeDelta(-99999999)
+comptime Max = TimeDelta(days=99999999)
+comptime Resolution = TimeDelta(microseconds=1)

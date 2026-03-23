@@ -1,103 +1,76 @@
-from memory import UnsafePointer
-from sys.ffi import external_call
+from std.memory.unsafe_pointer import UnsafePointer
+from std.ffi import external_call, c_int, c_long
+from std.memory.pointer import Pointer
 
-# C type aliases
-alias c_void = UInt8
-alias c_char = UInt8
-alias c_schar = Int8
-alias c_uchar = UInt8
-alias c_short = Int16
-alias c_ushort = UInt16
-alias c_int = Int32
-alias c_uint = UInt32
-alias c_long = Int64
-alias c_ulong = UInt64
-alias c_float = Float32
-alias c_double = Float64
+comptime c_void = UInt8
+comptime c_char = UInt8
+comptime c_schar = Int8
+comptime c_uchar = UInt8
+comptime c_short = Int16
+comptime c_ushort = UInt16
+comptime c_uint = UInt32
+comptime c_ulong = UInt64
+comptime c_float = Float32
+comptime c_double = Float64
 
 
-@value
-@register_passable("trivial")
-struct CTimeval:
-    """Represents the C struct timeval."""
-
-    var tv_sec: Int  # Seconds
-    var tv_usec: Int  # Microseconds
-
-    fn __init__(inout self, tv_sec: Int = 0, tv_usec: Int = 0):
-        self.tv_sec = tv_sec
-        self.tv_usec = tv_usec
+@fieldwise_init
+struct CTimeval(TrivialRegisterPassable):
+    var tv_sec: Int
+    var tv_usec: Int
 
 
-@value
-@register_passable("trivial")
-struct CTm:
-    """Represents the C struct tm for date and time information."""
-
-    var tm_sec: c_int  # Seconds
-    var tm_min: c_int  # Minutes
-    var tm_hour: c_int  # Hour
-    var tm_mday: c_int  # Day of the month
-    var tm_mon: c_int  # Month
-    var tm_year: c_int  # Year minus 1900
-    var tm_wday: c_int  # Day of the week
-    var tm_yday: c_int  # Day of the year
-    var tm_isdst: c_int  # Daylight savings flag
-    var tm_gmtoff: c_long  # localtime zone offset seconds
-
-    fn __init__(inout self):
-        self.tm_sec = 0
-        self.tm_min = 0
-        self.tm_hour = 0
-        self.tm_mday = 0
-        self.tm_mon = 0
-        self.tm_year = 0
-        self.tm_wday = 0
-        self.tm_yday = 0
-        self.tm_isdst = 0
-        self.tm_gmtoff = 0
+@fieldwise_init
+struct CTm(TrivialRegisterPassable):
+    var tm_sec: c_int
+    var tm_min: c_int
+    var tm_hour: c_int
+    var tm_mday: c_int
+    var tm_mon: c_int
+    var tm_year: c_int
+    var tm_wday: c_int
+    var tm_yday: c_int
+    var tm_isdst: c_int
+    var tm_gmtoff: c_long
 
 
 @always_inline
-fn c_gettimeofday() -> CTimeval:
-    """Wrapper for the C function gettimeofday."""
-    var tv = CTimeval()
-    external_call["gettimeofday", NoneType](Reference(tv), 0)
+def c_gettimeofday() -> CTimeval:
+    var tv = CTimeval(0, 0)
+    external_call["gettimeofday", NoneType](Pointer(to=tv), 0)
     return tv
 
 
 @always_inline
-fn c_localtime(owned tv_sec: Int) -> CTm:
-    """Wrapper for the C function localtime."""
-    var tm = CTm()
-    _ = external_call["localtime_r", Reference[CTm]](
-        Reference(tv_sec), Reference(tm)
+def c_localtime(tv_sec: Int) -> CTm:
+    var tm = CTm(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    var mut_tv_sec = tv_sec
+    _ = external_call["localtime_r", Pointer[CTm, MutAnyOrigin]](
+        Pointer(to=mut_tv_sec), Pointer(to=tm)
     )
     return tm
 
 
 @always_inline
-fn c_strptime(time_str: String, time_format: String) -> CTm:
-    """Wrapper for the C function strptime."""
-    var tm = CTm()
-    _ = external_call["strptime", Reference[String]](
-        time_str.unsafe_ptr(), time_format.unsafe_ptr(), Reference(tm)
+def c_strptime(time_str: String, time_format: String) -> CTm:
+    var tm = CTm(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    _ = external_call["strptime", Pointer[CTm, MutAnyOrigin]](
+        time_str.unsafe_ptr(), time_format.unsafe_ptr(), Pointer(to=tm)
     )
     return tm
 
 
 @always_inline
-fn c_gmtime(owned tv_sec: Int) -> CTm:
-    """Wrapper for the C function gmtime."""
-    var tm = CTm()
-    _ = external_call["gmtime_r", Reference[CTm]](
-        Reference(tv_sec), Reference(tm)
+def c_gmtime(tv_sec: Int) -> CTm:
+    var tm = CTm(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    var mut_tv_sec = tv_sec
+    _ = external_call["gmtime_r", Pointer[CTm, MutAnyOrigin]](
+        Pointer(to=mut_tv_sec), Pointer(to=tm)
     )
     return tm
 
 
-fn to_char_ptr(s: String) -> UnsafePointer[c_char]:
-    """Only ASCII-based strings."""
+def to_char_ptr(s: String) -> UnsafePointer[c_char]:
     var ptr = UnsafePointer[c_char]().alloc(len(s))
     for i in range(len(s)):
         ptr.store(i, ord(s[i]))
