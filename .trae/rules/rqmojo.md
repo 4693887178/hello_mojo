@@ -15,7 +15,15 @@ MOJO是用UV的方式安装的0.26.2.0版本。
 在/home/zhou/hello\_mojo/trae\_cn\_78/.venv/bin路径下, 使用时需要带上路径。
 mojo文档地址：<https://docs.modular.com/mojo/lib>
 
-<br />
+python rqalpha 位置：/home/zhou/hello\_mojo/trae\_cn\_78/.venv/lib/python3.14/site-packages/rqalpha
+
+mojo重构文件位置：/home/zhou/hello\_mojo/trae\_cn\_78/mojo\_refactor/rqmojo
+
+python测试文件存放位置：/home/zhou/hello\_mojo/trae\_cn\_78/mojo\_refactor/tests/python
+
+mojo测试文件存放位置：/home/zhou/hello\_mojo/trae\_cn\_78/mojo\_refactor/tests/mojo
+
+md格式的测试结果存放位置：/home/zhou/hello\_mojo/trae\_cn\_78/mojo\_refactor/tests/results对应实现目录下。
 
 Mojo Python互操作配置：
 由于Mojo编译的程序不自动链接Python库，运行包含Python互操作的Mojo程序时需要预加载Python动态库并设置Python模块路径：
