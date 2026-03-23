@@ -10,7 +10,7 @@ Mojo 0.26+ compatible - Optimized with Variant Registry and Reflection
 4. 实现 Writable trait，支持 print() 输出
 """
 
-from std.reflection import get_base_type_name, struct_field_index_by_name
+from std.reflection import get_base_type_name, struct_field_names, struct_field_index_by_name
 from std.utils import Variant
 
 
@@ -33,8 +33,7 @@ struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime SCHEDULED = EXECUTION_PHASE("SCHEDULED", "[scheduler函数内]")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -47,8 +46,7 @@ struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime LIVE_TRADING = RUN_TYPE("LIVE_TRADING", "LIVE_TRADING")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -61,8 +59,7 @@ struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime BOND = DEFAULT_ACCOUNT_TYPE("BOND", "BOND")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -79,8 +76,7 @@ struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime NEXT_TICK_BEST_COUNTERPARTY = MATCHING_TYPE("NEXT_TICK_BEST_COUNTERPARTY", "NEXT_TICK_BEST_COUNTERPARTY")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -93,8 +89,7 @@ struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime ALGO = ORDER_TYPE("ALGO", "ALGO")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -106,8 +101,7 @@ struct ALGO(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime VWAP = ALGO("VWAP", "VWAP")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -123,8 +117,7 @@ struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime CANCELLED = ORDER_STATUS("CANCELLED", "CANCELLED")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -139,8 +132,7 @@ struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime CONVERT_STOCK = SIDE("CONVERT_STOCK", "CONVERT_STOCK")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -155,8 +147,7 @@ struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime MATCH = POSITION_EFFECT("MATCH", "MATCH")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -168,8 +159,7 @@ struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime SHORT = POSITION_DIRECTION("SHORT", "SHORT")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -182,8 +172,7 @@ struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime NOTSET = EXC_TYPE("NOTSET", "NOTSET")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -207,8 +196,7 @@ struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime FutureArbitrage = INSTRUMENT_TYPE("FutureArbitrage", "FutureArbitrage")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -221,8 +209,7 @@ struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime ON_NORMAL_EXIT = PERSIST_MODE("ON_NORMAL_EXIT", "ON_NORMAL_EXIT")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -234,8 +221,7 @@ struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime BY_VOLUME = COMMISSION_TYPE("BY_VOLUME", "BY_VOLUME")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -248,8 +234,7 @@ struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime EXIT_INTERNAL_ERROR = EXIT_CODE("EXIT_INTERNAL_ERROR", "EXIT_INTERNAL_ERROR")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -262,8 +247,7 @@ struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime ARBITRAGE = HEDGE_TYPE("ARBITRAGE", "arbitrage")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 struct DAYS_CNT:
@@ -287,8 +271,7 @@ struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime BJSE = EXCHANGE("BJSE", "BJSE")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -303,8 +286,7 @@ struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime EXCHANGE = TRADING_CALENDAR_TYPE("CN_STOCK", "CN_STOCK")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 @fieldwise_init
@@ -316,8 +298,7 @@ struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable):
     comptime HK = MARKET("HK", "HK")
 
     def write_to(self, mut writer: Some[Writer]):
-        comptime type_name = get_base_type_name[Self]()
-        writer.write(type_name, ".", self.name)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
 
 # ============================================================
@@ -400,28 +381,24 @@ struct EnumRegistry:
             "MARKET": EnumListVariant([MARKET.CN, MARKET.HK]),
         }
     
-    def get[T: Movable & Copyable](self, name: String) raises -> Optional[T]:
+    fn _find_match[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
         comptime type_name = get_base_type_name[T]()
         comptime name_idx = struct_field_index_by_name[T, "name"]()
-        
-        var val = self.registry[type_name]
-        for v in val[List[T]]:
-            ref field_ref = __struct_field_ref(name_idx, v)
-            var field_val = rebind[String](field_ref)
-            if field_val == name:
-                return v.copy()
-        
-        return None
-    
-    def get_by_value[T: Movable & Copyable](self, value: String) raises -> Optional[T]:
-        comptime type_name = get_base_type_name[T]()
         comptime value_idx = struct_field_index_by_name[T, "value"]()
         
         var val = self.registry[type_name]
         for v in val[List[T]]:
-            ref field_ref = __struct_field_ref(value_idx, v)
-            var field_val = rebind[String](field_ref)
-            if field_val == value:
+            ref name_ref = __struct_field_ref(name_idx, v)
+            ref value_ref = __struct_field_ref(value_idx, v)
+            var name_val = rebind[String](name_ref)
+            var value_val = rebind[String](value_ref)
+            if name_val == target or value_val == target:
                 return v.copy()
         
         return None
+    
+    def get[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
+        return self._find_match[T](target)
+    
+    def contains[T: Movable & Copyable](self, target: String) raises -> Bool:
+        return self._find_match[T](target) != None

@@ -46,7 +46,7 @@ struct RunResult(Movable, Writable):
     var message: String
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("RunResult(code=", self.exit_code.name(), ")")
+        writer.write("RunResult(code=", self.exit_code.name, ")")
 
 
 def create_config(
