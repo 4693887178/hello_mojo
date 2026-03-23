@@ -23,18 +23,18 @@
 
 ## 第一组：依赖数量 0（共10个文件）
 
-| 序号 | 文件路径                       | 状态    | 依赖模块 |
-| -- | -------------------------- | ----- | ---- |
-| 1  | `_version.py`              | ✅ 已完成 | 无    |
-| 2  | `cmds/entry.py`            | ✅ 已完成 | 无    |
-| 3  | `user_module.py`           | ✅ 已完成 | 无    |
-| 4  | `utils/click_helper.py`    | ✅ 已完成 | 无    |
-| 5  | `utils/concurrent.py`      | ✅ 已完成 | 无    |
-| 6  | `utils/log_capture.py`     | ✅ 已完成 | 无    |
-| 7  | `utils/package_helper.py`  | ✅ 已完成 | 无    |
-| 8  | `utils/persisit_helper.py` | ✅ 已完成 | 无    |
-| 9  | `utils/repr.py`            | ✅ 已完成 | 无    |
-| 10 | `utils/typing.py`          | ✅ 已完成 | 无    |
+| 序号 | 文件路径                       | 状态    | 依赖模块 | 人工复盘时间 |
+| -- | -------------------------- | ----- | ---- | ------------ |
+| 1  | `_version.py`              | ✅ 已完成 | 无    |              |
+| 2  | `cmds/entry.py`            | ✅ 已完成 | 无    |              |
+| 3  | `user_module.py`           | ✅ 已完成 | 无    |              |
+| 4  | `utils/click_helper.py`    | ✅ 已完成 | 无    |              |
+| 5  | `utils/concurrent.py`      | ✅ 已完成 | 无    |              |
+| 6  | `utils/log_capture.py`     | ✅ 已完成 | 无    | 2026-03-23 13:16 |
+| 7  | `utils/package_helper.py`  | ✅ 已完成 | 无    |              |
+| 8  | `utils/persisit_helper.py` | ✅ 已完成 | 无    |              |
+| 9  | `utils/repr.py`            | ✅ 已完成 | 无    |              |
+| 10 | `utils/typing.py`          | ✅ 已完成 | 无    |              |
 
 ***
 
