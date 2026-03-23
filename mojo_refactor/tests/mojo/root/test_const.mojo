@@ -501,11 +501,11 @@ def test_enum_registry_get() raises:
 
 
 def test_enum_registry_get_by_value() raises:
-    print("Testing EnumRegistry.get_by_value()...")
+    print("Testing EnumRegistry.get() by value...")
     
     var registry = EnumRegistry()
     
-    var phase_opt = registry.get_by_value[EXECUTION_PHASE]("[全局]")
+    var phase_opt = registry.get[EXECUTION_PHASE]("[全局]")
     if phase_opt:
         var phase = phase_opt.value()
         assert_equal(phase.name, "GLOBAL")
@@ -513,7 +513,7 @@ def test_enum_registry_get_by_value() raises:
     else:
         raise Error("Failed to get EXECUTION_PHASE by value")
     
-    var run_type_opt = registry.get_by_value[RUN_TYPE]("BACKTEST")
+    var run_type_opt = registry.get[RUN_TYPE]("BACKTEST")
     if run_type_opt:
         var run_type = run_type_opt.value()
         assert_equal(run_type.name, "BACKTEST")
@@ -521,7 +521,7 @@ def test_enum_registry_get_by_value() raises:
     else:
         raise Error("Failed to get RUN_TYPE by value")
     
-    var hedge_type_opt = registry.get_by_value[HEDGE_TYPE]("hedge")
+    var hedge_type_opt = registry.get[HEDGE_TYPE]("hedge")
     if hedge_type_opt:
         var hedge_type = hedge_type_opt.value()
         assert_equal(hedge_type.name, "HEDGE")
@@ -529,7 +529,7 @@ def test_enum_registry_get_by_value() raises:
     else:
         raise Error("Failed to get HEDGE_TYPE by value")
     
-    var instrument_opt = registry.get_by_value[INSTRUMENT_TYPE]("Future")
+    var instrument_opt = registry.get[INSTRUMENT_TYPE]("Future")
     if instrument_opt:
         var instrument = instrument_opt.value()
         assert_equal(instrument.name, "FUTURE")
@@ -537,7 +537,7 @@ def test_enum_registry_get_by_value() raises:
     else:
         raise Error("Failed to get INSTRUMENT_TYPE by value")
     
-    print("  EnumRegistry.get_by_value() tests passed!")
+    print("  EnumRegistry.get() by value tests passed!")
 
 
 def test_writable() raises:
@@ -562,7 +562,7 @@ def test_enum_registry_not_found() raises:
     var not_found1 = registry.get[EXECUTION_PHASE]("NOT_EXIST")
     assert_true(not_found1 == None)
     
-    var not_found2 = registry.get_by_value[RUN_TYPE]("NOT_EXIST")
+    var not_found2 = registry.get[RUN_TYPE]("NOT_EXIST")
     assert_true(not_found2 == None)
     
     print("  EnumRegistry not found tests passed!")
