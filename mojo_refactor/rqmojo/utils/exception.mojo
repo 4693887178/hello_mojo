@@ -1,39 +1,79 @@
 """
 RQAlpha Mojo - Exception Handling
 Ported from rqalpha/utils/exception.py
+Mojo 0.26+ compatible
 """
 
-from std.collections import List
+from std.collections import List, Dict
 from rqmojo.const import EXC_TYPE
 
 
+comptime EXC_EXT_NAME: String = "ricequant_exc"
+
+
 @fieldwise_init
-struct CustomError(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct StackFrame(Equatable, ImplicitlyCopyable, Hashable, Writable):
+    var filename: String
+    var lineno: Int
+    var func_name: String
+    var code: String
+
+    def write_to(self, mut writer: Some[Writer]):
+        t"File {self.filename}, line {self.lineno} in {self.func_name}".write_to(writer)
+
+
+@fieldwise_init
+struct CustomError(Equatable, Writable):
     var msg: String
     var exc_type_name: String
     var error_type: EXC_TYPE
-    var stacks: String
+    var stacks: List[StackFrame]
+    var max_exc_var_len: Int
 
-    def __str__(self) -> String:
+    def write_to(self, mut writer: Some[Writer]):
         if len(self.stacks) == 0:
-            return self.msg
-        return self.stacks + "\n" + self.exc_type_name + ": " + self.msg
+            self.msg.write_to(writer)
+            return
+
+        "Traceback (most recent call last):\n".write_to(writer)
+        
+        for frame in self.stacks:
+            t"  File {frame.filename}, line {frame.lineno} in {frame.func_name}\n".write_to(writer)
+            t"    {frame.code}\n".write_to(writer)
+            "\n".write_to(writer)
+        
+        t"{self.exc_type_name}: {self.msg}".write_to(writer)
 
     @staticmethod
     def create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET) -> Self:
-        return Self(msg, exc_type_name, error_type, "")
+        return Self(msg, exc_type_name, error_type, List[StackFrame](), 160)
+
+    def add_stack_info(mut self, filename: String, lineno: Int, func_name: String, code: String):
+        self.stacks.append(StackFrame(filename, lineno, func_name, code))
+
+    def stacks_length(self) -> Int:
+        return len(self.stacks)
 
 
 @fieldwise_init
-struct RQUserError(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct CustomException(Equatable, Writable):
+    var error: CustomError
+
+    def write_to(self, mut writer: Some[Writer]):
+        self.error.write_to(writer)
+
+    @staticmethod
+    def create(error: CustomError) -> Self:
+        return Self(error)
+
+
+@fieldwise_init
+struct RQUserError(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
     var error_type: EXC_TYPE
 
-    def __str__(self) -> String:
-        return self.message
-
-    def to_error(self) -> Error:
-        return Error(self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        self.message.write_to(writer)
 
     @staticmethod
     def create(message: String) -> Self:
@@ -41,14 +81,11 @@ struct RQUserError(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct RQInvalidArgument(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct RQInvalidArgument(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "RQInvalidArgument: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("RQInvalidArgument: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"RQInvalidArgument: {self.message}".write_to(writer)
 
     @staticmethod
     def create(message: String) -> Self:
@@ -56,14 +93,11 @@ struct RQInvalidArgument(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct RQTypeError(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct RQTypeError(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "RQTypeError: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("RQTypeError: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"RQTypeError: {self.message}".write_to(writer)
 
     @staticmethod
     def create(message: String) -> Self:
@@ -71,14 +105,11 @@ struct RQTypeError(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct RQApiNotSupportedError(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct RQApiNotSupportedError(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "RQApiNotSupportedError: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("RQApiNotSupportedError: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"RQApiNotSupportedError: {self.message}".write_to(writer)
 
     @staticmethod
     def create(message: String) -> Self:
@@ -86,14 +117,11 @@ struct RQApiNotSupportedError(Stringable, Copyable, Movable, ImplicitlyCopyable)
 
 
 @fieldwise_init
-struct RQDatacVersionTooLow(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct RQDatacVersionTooLow(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "RQDatacVersionTooLow: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("RQDatacVersionTooLow: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"RQDatacVersionTooLow: {self.message}".write_to(writer)
 
     @staticmethod
     def create(message: String) -> Self:
@@ -101,14 +129,11 @@ struct RQDatacVersionTooLow(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct InstrumentNotFound(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct InstrumentNotFound(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "InstrumentNotFound: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("InstrumentNotFound: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"InstrumentNotFound: {self.message}".write_to(writer)
 
     @staticmethod
     def create(order_book_id: String) -> Self:
@@ -116,14 +141,11 @@ struct InstrumentNotFound(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct EnvironmentNotInitialized(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct EnvironmentNotInitialized(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var message: String
 
-    def __str__(self) -> String:
-        return "EnvironmentNotInitialized: " + self.message
-
-    def to_error(self) -> Error:
-        return Error("EnvironmentNotInitialized: " + self.message)
+    def write_to(self, mut writer: Some[Writer]):
+        t"EnvironmentNotInitialized: {self.message}".write_to(writer)
 
     @staticmethod
     def create() -> Self:
@@ -131,14 +153,15 @@ struct EnvironmentNotInitialized(Stringable, Copyable, Movable, ImplicitlyCopyab
 
 
 @fieldwise_init
-struct BaseExceptionGroup(Stringable, Movable):
+struct BaseExceptionGroup(Equatable, Writable):
     var message: String
     var exceptions: List[Error]
 
-    def __str__(self) -> String:
+    def write_to(self, mut writer: Some[Writer]):
         if len(self.exceptions) == 1:
-            return self.message + " (1 sub-exception)"
-        return self.message + " (" + String(len(self.exceptions)) + " sub-exceptions)"
+            t"{self.message} (1 sub-exception)".write_to(writer)
+        else:
+            t"{self.message} ({len(self.exceptions)} sub-exceptions)".write_to(writer)
 
     @staticmethod
     def create(message: String, exceptions: List[Error]) raises -> Self:
@@ -150,14 +173,15 @@ struct BaseExceptionGroup(Stringable, Movable):
 
 
 @fieldwise_init
-struct ExceptionGroup(Stringable, Movable):
+struct ExceptionGroup(Equatable, Writable):
     var message: String
     var exceptions: List[Error]
 
-    def __str__(self) -> String:
+    def write_to(self, mut writer: Some[Writer]):
         if len(self.exceptions) == 1:
-            return self.message + " (1 sub-exception)"
-        return self.message + " (" + String(len(self.exceptions)) + " sub-exceptions)"
+            t"{self.message} (1 sub-exception)".write_to(writer)
+        else:
+            t"{self.message} ({len(self.exceptions)} sub-exceptions)".write_to(writer)
 
     @staticmethod
     def create(message: String, exceptions: List[Error]) raises -> Self:
@@ -174,9 +198,10 @@ def format_exception_group(exc_group: ExceptionGroup, indent: String = "") -> St
     
     for i in range(len(exc_group.exceptions)):
         var is_last = (i == len(exc_group.exceptions) - 1)
-        var prefix = "|-- " if not is_last else "`-- "
+        var prefix = "├─ " if not is_last else "└─ "
         
-        lines.append(indent + prefix + "Error: " + String(exc_group.exceptions[i]))
+        var err = exc_group.exceptions[i]
+        lines.append(indent + prefix + "Error: " + String(err))
     
     var result = ""
     for i in range(len(lines)):
@@ -187,15 +212,19 @@ def format_exception_group(exc_group: ExceptionGroup, indent: String = "") -> St
     return result
 
 
-def patch_user_exc(exc_type: EXC_TYPE) -> EXC_TYPE:
-    if exc_type == EXC_TYPE.NOTSET:
+def patch_user_exc(exc_type: EXC_TYPE, force: Bool = False) -> EXC_TYPE:
+    if exc_type == EXC_TYPE.NOTSET or force:
         return EXC_TYPE.USER_EXC
     return exc_type
 
 
-def patch_system_exc(exc_type: EXC_TYPE) -> EXC_TYPE:
-    if exc_type == EXC_TYPE.NOTSET:
+def patch_system_exc(exc_type: EXC_TYPE, force: Bool = False) -> EXC_TYPE:
+    if exc_type == EXC_TYPE.NOTSET or force:
         return EXC_TYPE.SYSTEM_EXC
+    return exc_type
+
+
+def get_exc_from_type(exc_type: EXC_TYPE) -> EXC_TYPE:
     return exc_type
 
 
@@ -207,17 +236,20 @@ def is_system_exc(exc_type: EXC_TYPE) -> Bool:
     return exc_type == EXC_TYPE.SYSTEM_EXC
 
 
-def raise_invalid_argument(message: String) raises:
-    raise Error("RQInvalidArgument: " + message)
+@fieldwise_init
+struct ModifyExceptionFromType(Equatable, ImplicitlyCopyable, Hashable, Writable):
+    var exc_from_type: EXC_TYPE
+    var force: Bool
 
+    def write_to(self, mut writer: Some[Writer]):
+        "ModifyExceptionFromType".write_to(writer)
 
-def raise_instrument_not_found(order_book_id: String) raises:
-    raise Error("InstrumentNotFound: Instrument " + order_book_id + " not found")
+    @staticmethod
+    def create(exc_from_type: EXC_TYPE, force: Bool = False) -> Self:
+        return Self(exc_from_type, force)
 
+    def __enter__(mut self) -> &Self:
+        return &self
 
-def raise_environment_not_initialized() raises:
-    raise Error("EnvironmentNotInitialized: Environment has not been initialized")
-
-
-def raise_api_not_supported(message: String) raises:
-    raise Error("RQApiNotSupportedError: " + message)
+    def __exit__(mut self, exc_type: EXC_TYPE):
+        pass
