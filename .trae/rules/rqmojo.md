@@ -1,6 +1,17 @@
 先读这篇文章，理解文章所讲的内容，这个项目以后都按这个介绍的规范来实现。
 <https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents>
 
+## 开发前准备
+
+**重要：在编写或修改任何 Mojo 代码之前，必须先调用以下两个 skill：**
+
+1. **`mojo-syntax`** - 获取最新的 Mojo 语法规范（如果可用）
+2. **`mojo-python-interop`** - 获取 Mojo-Python 互操作指南
+
+这两个 skill 提供了关键的语法修正和互操作模式，确保代码符合当前 Mojo 版本（0.26.2.0）的要求。
+
+---
+
 将PYTHON框架rqalpha， 用mojo语言重构，
 要求
 1.尽量保证功能，文件名称，类名，函数，方法名一致\
