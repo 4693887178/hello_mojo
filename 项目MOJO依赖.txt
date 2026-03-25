@@ -1,5 +1,5 @@
-datetime https://github.com/mojoto/morrow.mojo
-argparse https://github.com/forfudan/argmojo
-json https://github.com/bgreni/EmberJson
-numpy https://github.com/Mojo-Numerics-and-Algorithms-group/NuMojo
+datetime https://github.com/mojoto/morrow.mojo.git
+argparse https://github.com/forfudan/argmojo.git
+json https://github.com/bgreni/EmberJson.git
+numpy https://github.com/Mojo-Numerics-and-Algorithms-group/NuMojo.git
 yaml https://github.com/DataBooth/mojo-yaml.git

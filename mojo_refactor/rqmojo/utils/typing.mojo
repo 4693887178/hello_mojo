@@ -6,7 +6,7 @@ Ported from rqalpha/utils/typing.py
 from std.collections import List
 from utils import Variant
 from rqmojo.const import POSITION_DIRECTION
-from third_party.morrow.morrow import Morrow
+from morrow import Morrow
 
 
 comptime DateTime = Morrow

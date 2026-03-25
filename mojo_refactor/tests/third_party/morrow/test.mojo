@@ -19,21 +19,21 @@ def assert_datetime_equal(dt: Morrow, py_dt: PythonObject) raises:
         and dt.hour == _py_int_to_int(py_dt.hour)
         and dt.minute == _py_int_to_int(py_dt.minute)
         and dt.second == _py_int_to_int(py_dt.second),
-        "dt: " + String(dt) + " is not equal to py_dt: " + String(py_dt),
+        "datetime not equal",
     )
 
 
 def test_now() raises:
     print("Running test_now()")
     var result = Morrow.now()
-    print("Morrow.now() = ", result)
+    print("Morrow.now() = " + result.__str__())
     print("test_now() passed (time comparison skipped due to timing differences)")
 
 
 def test_utcnow() raises:
     print("Running test_utcnow()")
     var result = Morrow.utcnow()
-    print("Morrow.utcnow() = ", result)
+    print("Morrow.utcnow() = " + result.__str__())
     print("test_utcnow() passed (time comparison skipped due to timing differences)")
 
 
@@ -41,7 +41,7 @@ def test_fromtimestamp() raises:
     print("Running test_fromtimestamp()")
     var t = c_gettimeofday()
     var result = Morrow.fromtimestamp(Float64(t.tv_sec))
-    print("Morrow.fromtimestamp() = ", result)
+    print("Morrow.fromtimestamp() = " + result.__str__())
     print("test_fromtimestamp() passed")
 
 
@@ -49,7 +49,7 @@ def test_utcfromtimestamp() raises:
     print("Running test_utcfromtimestamp()")
     var t = c_gettimeofday()
     var result = Morrow.utcfromtimestamp(Float64(t.tv_sec))
-    print("Morrow.utcfromtimestamp() = ", result)
+    print("Morrow.utcfromtimestamp() = " + result.__str__())
     print("test_utcfromtimestamp() passed")
 
 
@@ -109,23 +109,23 @@ def test_sub() raises:
         2023, 10, 1, 10, 0, 0
     )
     assert_equal(result.microseconds, 1)
-    print("result = ", result)
+    print("result = " + result.__str__())
 
     var result2 = Morrow(2023, 10, 1, 10, 0, 1) - Morrow(2023, 10, 1, 10, 0, 0)
     assert_equal(result2.seconds, 1)
-    print("result2 = ", result2)
+    print("result2 = " + result2.__str__())
 
     var result3 = Morrow(2023, 10, 1, 10, 1, 0) - Morrow(2023, 10, 1, 10, 0, 0)
     assert_equal(result3.seconds, 60)
-    print("result3 = ", result3)
+    print("result3 = " + result3.__str__())
 
     var result4 = Morrow(2023, 10, 2, 10, 0, 0) - Morrow(2023, 10, 1, 10, 0, 0)
     assert_equal(result4.days, 1)
-    print("result4 = ", result4)
+    print("result4 = " + result4.__str__())
 
     var result5 = Morrow(2023, 10, 3, 10, 1, 1) - Morrow(2023, 10, 1, 10, 0, 0)
     assert_equal(result5.days, 2)
-    print("result5 = ", result5)
+    print("result5 = " + result5.__str__())
 
 
 def test_timedelta() raises:
@@ -161,14 +161,14 @@ def test_timedelta() raises:
         milliseconds=10000000000,
     )
     assert_equal(td.days, 919)
-    print("TimeDelta large = ", td)
+    print("TimeDelta large = " + td.__str__())
 
 
 def test_from_to_py() raises:
     print("Running test_from_to_py()")
     var m = Morrow(2024, 3, 23, 10, 30, 45, 123456)
     var dt = m.to_py()
-    print("Morrow.to_py() = ", dt)
+    print("Morrow.to_py() = " + dt.__str__())
     var m2 = Morrow.from_py(dt)
     assert_equal(m2.year, 2024)
     assert_equal(m2.month, 3)
