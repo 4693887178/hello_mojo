@@ -3,46 +3,51 @@ Test for mod/rqmojo_mod_sys_simulation/signal_broker.mojo
 Group 09 - File 6
 """
 
-from std.collections import Dict, List
-from rqmojo.mod.rqmojo_mod_sys_simulation.signal_broker import (
-    SignalBroker, create_signal_broker
-)
-from rqmojo.interface import AbstractBroker
+from rqmojo.mod.rqmojo_mod_sys_simulation.signal_broker import SignalBroker, create_signal_broker
 
 
-def test_signal_broker_struct() -> Bool:
-    print("Test: SignalBroker struct exists")
+fn test_signal_broker_init() -> Bool:
+    print("Test: SignalBroker init")
+    var broker = create_signal_broker()
     print("  PASSED")
     return True
 
 
-def test_signal_broker_methods() -> Bool:
-    print("Test: SignalBroker methods exist")
-    
-    if not hasattr(SignalBroker, "submit_order"):
-        raise "Should have submit_order method"
-    
-    if not hasattr(SignalBroker, "cancel_order"):
-        raise "Should have cancel_order method"
-    
-    if not hasattr(SignalBroker, "get_open_orders"):
-        raise "Should have get_open_orders method"
+fn test_signal_broker_get_order_count() -> Bool:
+    print("Test: SignalBroker get_order_count")
+    var broker = create_signal_broker()
+    var count = broker.get_order_count()
+    if count != 0:
+        return False
     print("  PASSED")
     return True
 
 
-def main() -> None:
+fn test_signal_broker_get_open_orders() -> Bool:
+    print("Test: SignalBroker get_open_orders")
+    var broker = create_signal_broker()
+    var orders = broker.get_open_orders()
+    print("  PASSED")
+    return True
+
+
+def main() raises:
     print("=== Group 09 File 6: Signal Broker Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_signal_broker_struct():
+    if test_signal_broker_init():
         passed += 1
     else:
         failed += 1
     
-    if test_signal_broker_methods():
+    if test_signal_broker_get_order_count():
+        passed += 1
+    else:
+        failed += 1
+    
+    if test_signal_broker_get_open_orders():
         passed += 1
     else:
         failed += 1

@@ -3,48 +3,52 @@ Test for core/strategy.mojo
 Group 09 - File 9
 """
 
-from std.collections import Dict, List
-from rqmojo.core.strategy import Strategy, create_strategy
+from rqmojo.core.strategy import BaseStrategy, create_base_strategy
+from rqmojo.core.events import create_event_bus
 
 
-def test_strategy_struct() -> Bool:
-    print("Test: Strategy struct exists")
-    var strategy = create_strategy()
+fn test_strategy_init() -> Bool:
+    print("Test: BaseStrategy init")
+    var event_bus = create_event_bus()
+    var strategy = create_base_strategy(event_bus=event_bus^)
     print("  PASSED")
     return True
 
 
-def test_strategy_methods() -> Bool:
-    print("Test: Strategy methods exist")
-    var strategy = create_strategy()
-    
-    if not hasattr(strategy, "init"):
-        raise "Should have init method"
-    
-    if not hasattr(strategy, "handle_bar"):
-        raise "Should have handle_bar method"
-    
-    if not hasattr(strategy, "before_trading"):
-        raise "Should have before_trading method"
-    
-    if not hasattr(strategy, "after_trading"):
-        raise "Should have after_trading method"
+fn test_strategy_with_name() -> Bool:
+    print("Test: BaseStrategy with name")
+    var event_bus = create_event_bus()
+    var strategy = create_base_strategy(event_bus=event_bus^, name="MyStrategy")
     print("  PASSED")
     return True
 
 
-def main() -> None:
+fn test_strategy_str() -> Bool:
+    print("Test: BaseStrategy str")
+    var event_bus = create_event_bus()
+    var strategy = create_base_strategy(event_bus=event_bus^)
+    var s = String(strategy)
+    print("  PASSED")
+    return True
+
+
+def main() raises:
     print("=== Group 09 File 9: Strategy Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_strategy_struct():
+    if test_strategy_init():
         passed += 1
     else:
         failed += 1
     
-    if test_strategy_methods():
+    if test_strategy_with_name():
+        passed += 1
+    else:
+        failed += 1
+    
+    if test_strategy_str():
         passed += 1
     else:
         failed += 1

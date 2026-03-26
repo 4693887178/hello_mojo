@@ -1,84 +1,54 @@
 """
-Test for core/bar_dict.mojo
+Test for data/bar_dict_price_board.mojo
 Group 09 - File 4
 """
 
-from rqmojo.core.bar_dict import BarDict, create_bar_dict
-from rqmojo.model.bar import BarObject, create_bar_object
-from rqmojo.utils.typing import DateTime
+from rqmojo.data.bar_dict_price_board import BarDictPriceBoard, create_bar_dict_price_board
 
 
-fn test_bar_dict_init() -> Bool:
-    print("Test: BarDict init")
-    var bar_dict = create_bar_dict()
+fn test_bar_dict_price_board_init() -> Bool:
+    print("Test: BarDictPriceBoard init")
+    var board = create_bar_dict_price_board()
     print("  PASSED")
     return True
 
 
-fn test_bar_dict_get_or_create() -> Bool:
-    print("Test: BarDict get_or_create")
-    var bar_dict = create_bar_dict()
-    var bar = bar_dict.get_or_create("000001.XSHE")
+fn test_bar_dict_price_board_get_last_price() -> Bool:
+    print("Test: BarDictPriceBoard get_last_price")
+    var board = create_bar_dict_price_board()
+    var price = board.get_last_price("000001.XSHE")
     print("  PASSED")
     return True
 
 
-fn test_bar_dict_set() -> Bool:
-    print("Test: BarDict set")
-    var bar_dict = create_bar_dict()
-    var bar = create_bar_object(
-        order_book_id="000001.XSHE",
-        dt=DateTime(2024, 1, 1, 0, 0, 0, 0),
-        open=10.0,
-        high=11.0,
-        low=9.0,
-        close=10.5,
-        volume=1000000.0,
-        total_turnover=10500000.0,
-        limit_up=11.5,
-        limit_down=9.5,
-        suspended=False,
-        trading=True
-    )
-    bar_dict.set("000001.XSHE", owned bar)
-    print("  PASSED")
-    return True
-
-
-fn test_bar_dict_get() -> Bool:
-    print("Test: BarDict get")
-    var bar_dict = create_bar_dict()
-    var bar = bar_dict.get("000001.XSHE")
+fn test_bar_dict_price_board_clear_cache() -> Bool:
+    print("Test: BarDictPriceBoard clear_cache")
+    var board = create_bar_dict_price_board()
+    board.clear_cache()
     print("  PASSED")
     return True
 
 
 def main() raises:
-    print("=== Group 09 File 4: Bar Dict Tests ===")
+    print("=== Group 09 File 4: Bar Dict Price Board Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
     try:
-        if test_bar_dict_init():
+        if test_bar_dict_price_board_init():
             passed += 1
     except:
         failed += 1
     
     try:
-        if test_bar_dict_get_or_create():
+        if test_bar_dict_price_board_get_last_price():
             passed += 1
     except:
         failed += 1
     
     try:
-        if test_bar_dict_set():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_bar_dict_get():
+        if test_bar_dict_price_board_clear_cache():
             passed += 1
     except:
         failed += 1

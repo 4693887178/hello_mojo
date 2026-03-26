@@ -4,28 +4,28 @@ Group 09 - File 9
 """
 
 from rqmojo.portfolio.account import Account, create_account
-from rqmojo.const import ACCOUNT_TYPE
+from rqmojo.const import DEFAULT_ACCOUNT_TYPE
 
 
 fn test_account_init() -> Bool:
     print("Test: Account init")
-    var account = create_account(ACCOUNT_TYPE.STOCK, 100000.0)
+    var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
     print("  PASSED")
     return True
 
 
 fn test_account_total_value() -> Bool:
     print("Test: Account total_value")
-    var account = create_account(ACCOUNT_TYPE.STOCK, 100000.0)
-    var value = account.total_value()
+    var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
+    var value = account.total_value
     print("  PASSED")
     return True
 
 
-fn test_account_positions() -> Bool:
-    print("Test: Account positions")
-    var account = create_account(ACCOUNT_TYPE.STOCK, 100000.0)
-    var positions = account.positions()
+fn test_account_get_positions() -> Bool:
+    print("Test: Account get_positions")
+    var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
+    var positions = account.get_positions()
     print("  PASSED")
     return True
 
@@ -49,7 +49,7 @@ def main() raises:
         failed += 1
     
     try:
-        if test_account_positions():
+        if test_account_get_positions():
             passed += 1
     except:
         failed += 1

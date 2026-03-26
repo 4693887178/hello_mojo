@@ -3,60 +3,51 @@ Test for mod/rqmojo_mod_sys_risk/validators/self_trade_validator.mojo
 Group 09 - File 3
 """
 
-from std.collections import Dict, List
-from rqmojo.mod.rqmojo_mod_sys_risk.validators.self_trade_validator import (
-    SelfTradeValidator, create_self_trade_validator
-)
-from rqmojo.interface import AbstractFrontendValidator
+from rqmojo.mod.rqmojo_mod_sys_risk.validators.self_trade_validator import SelfTradeValidator, create_self_trade_validator
 
 
-def test_self_trade_validator_struct() -> Bool:
-    print("Test: SelfTradeValidator struct exists")
-    var validator = create_self_trade_validator()
+fn test_self_trade_validator_init() -> Bool:
+    print("Test: SelfTradeValidator init")
+    var validator = create_self_trade_validator(True)
     print("  PASSED")
     return True
 
 
-def test_self_trade_validator_methods() -> Bool:
-    print("Test: SelfTradeValidator methods exist")
-    var validator = create_self_trade_validator()
-    
-    if not hasattr(validator, "validate_submission"):
-        raise "Should have validate_submission method"
-    
-    if not hasattr(validator, "validate_cancellation"):
-        raise "Should have validate_cancellation method"
+fn test_self_trade_validator_enabled() -> Bool:
+    print("Test: SelfTradeValidator enabled")
+    var validator = create_self_trade_validator(True)
+    if not validator.enabled:
+        return False
     print("  PASSED")
     return True
 
 
-def test_validate_cancellation_returns_none() -> Bool:
-    print("Test: validate_cancellation returns None")
-    var validator = create_self_trade_validator()
-    var result = validator.validate_cancellation(None, None)
-    if result != None:
-        raise "validate_cancellation should return None"
+fn test_self_trade_validator_disabled() -> Bool:
+    print("Test: SelfTradeValidator disabled")
+    var validator = create_self_trade_validator(False)
+    if validator.enabled:
+        return False
     print("  PASSED")
     return True
 
 
-def main() -> None:
+def main() raises:
     print("=== Group 09 File 3: Self Trade Validator Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_self_trade_validator_struct():
+    if test_self_trade_validator_init():
         passed += 1
     else:
         failed += 1
     
-    if test_self_trade_validator_methods():
+    if test_self_trade_validator_enabled():
         passed += 1
     else:
         failed += 1
     
-    if test_validate_cancellation_returns_none():
+    if test_self_trade_validator_disabled():
         passed += 1
     else:
         failed += 1

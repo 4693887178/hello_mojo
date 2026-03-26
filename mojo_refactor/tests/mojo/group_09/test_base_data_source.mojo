@@ -1,5 +1,5 @@
 """
-Test for data/base_data_source.mojo
+Test for data/base_data_source/data_source.mojo
 Group 09 - File 6
 """
 
@@ -17,15 +17,15 @@ fn test_base_data_source_init() -> Bool:
 fn test_base_data_source_get_bar() -> Bool:
     print("Test: BaseDataSource get_bar")
     var source = create_base_data_source()
-    var bar = source.get_bar("000001.XSHE", DateTime(2024, 1, 2, 0, 0, 0, 0), "1d")
+    var bar = source.get_bar("000001.XSHE", DateTime(2024, 1, 2, 0, 0, 0, 0))
     print("  PASSED")
     return True
 
 
-fn test_base_data_source_get_trading_dates() -> Bool:
-    print("Test: BaseDataSource get_trading_dates")
+fn test_base_data_source_get_instrument() -> Bool:
+    print("Test: BaseDataSource get_instrument")
     var source = create_base_data_source()
-    var dates = source.get_trading_dates("000001.XSHE")
+    var instrument = source.get_instrument("000001.XSHE")
     print("  PASSED")
     return True
 
@@ -49,7 +49,7 @@ def main() raises:
         failed += 1
     
     try:
-        if test_base_data_source_get_trading_dates():
+        if test_base_data_source_get_instrument():
             passed += 1
     except:
         failed += 1

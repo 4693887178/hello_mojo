@@ -78,9 +78,8 @@ struct BaseDataSource(Movable):
         return result^
 
     def get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
-        var ins = self.get_instrument(order_book_id)
         return create_bar_object(
-            instrument=ins,
+            order_book_id=order_book_id,
             dt=dt,
             open=10.0,
             high=10.5,
@@ -92,11 +91,10 @@ struct BaseDataSource(Movable):
 
     def history_bars(self, order_book_id: String, bar_count: Int, dt: DateTime) -> List[BarObject]:
         var result = List[BarObject]()
-        var ins = self.get_instrument(order_book_id)
         for i in range(bar_count):
             var bar_dt = DateTime(dt.year, dt.month, dt.day - i, 0, 0, 0, 0)
             result.append(create_bar_object(
-                instrument=ins,
+                order_book_id=order_book_id,
                 dt=bar_dt,
                 open=10.0 + i * 0.1,
                 high=10.5 + i * 0.1,

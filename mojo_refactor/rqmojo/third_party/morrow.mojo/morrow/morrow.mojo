@@ -15,7 +15,7 @@ comptime _DI100Y = 36524  #    "    "   "   " 100   "
 comptime _DI4Y = 1461  #    "    "   "   "   4   "
 
 
-struct Morrow(Writable, Movable):
+struct Morrow(Writable, Movable, Copyable, ImplicitlyCopyable):
     var year: Int
     var month: Int
     var day: Int

@@ -4,22 +4,18 @@ Group 09 - File 5
 """
 
 from rqmojo.core.executor import Executor, create_executor
-from rqmojo.core.events import EventBus
-from rqmojo.const import MATCHING_TYPE
 
 
 fn test_executor_init() -> Bool:
     print("Test: Executor init")
-    var event_bus = EventBus()
-    var executor = create_executor(event_bus, MATCHING_TYPE.CURRENT_BAR_CLOSE)
+    var executor = create_executor()
     print("  PASSED")
     return True
 
 
 fn test_executor_get_state() -> Bool:
     print("Test: Executor get_state")
-    var event_bus = EventBus()
-    var executor = create_executor(event_bus, MATCHING_TYPE.CURRENT_BAR_CLOSE)
+    var executor = create_executor()
     var state = executor.get_state()
     print("  PASSED")
     return True
@@ -27,8 +23,7 @@ fn test_executor_get_state() -> Bool:
 
 fn test_executor_set_state() -> Bool:
     print("Test: Executor set_state")
-    var event_bus = EventBus()
-    var executor = create_executor(event_bus, MATCHING_TYPE.CURRENT_BAR_CLOSE)
+    var executor = create_executor()
     executor.set_state("")
     print("  PASSED")
     return True

@@ -4,13 +4,16 @@ Ported from rqalpha/mod/rqalpha_mod_sys_simulation/
 """
 
 from std.collections import Dict, List
-from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, MATCHING_TYPE, MATCHING_TYPE_CURRENT_BAR_CLOSE
+from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, MATCHING_TYPE
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade, create_trade_with_id
 from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
 from rqmojo.utils.typing import DateTime
 from rqmojo.core.events import EVENT, EventBus, Event
+
+
+comptime MATCHING_TYPE_CURRENT_BAR_CLOSE: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE
 
 
 @fieldwise_init
