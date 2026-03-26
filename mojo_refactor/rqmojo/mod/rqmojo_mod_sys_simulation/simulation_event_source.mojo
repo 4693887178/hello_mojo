@@ -55,10 +55,10 @@ struct SimulationEventSource(Movable):
             self._events.append(Event("TICK", tick.datetime, tick.datetime, ob_id))
 
 
-def create_simulation_event_source(start_date: DateTime, end_date: DateTime, frequency: String) -> SimulationEventSource:
+def create_simulation_event_source(var start_date: DateTime, var end_date: DateTime, frequency: String) -> SimulationEventSource:
     return SimulationEventSource(
-        _start_date=start_date,
-        _end_date=end_date,
+        _start_date=start_date^,
+        _end_date=end_date^,
         _frequency=frequency,
         _events=List[Event]()
     )

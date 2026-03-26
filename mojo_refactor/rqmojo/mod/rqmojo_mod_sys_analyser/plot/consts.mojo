@@ -3,14 +3,16 @@ RQAlpha Mojo - Plot Constants
 Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/consts.py
 """
 
+from std.io import Writer
+
 
 @fieldwise_init
-struct ChartType(Stringable, Copyable, Movable, Equatable):
+struct ChartType(Writable, Copyable, Movable, Equatable):
     var name: String
     var value: String
     
-    def __str__(self) -> String:
-        return self.value
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write(self.value)
     
     @staticmethod
     def LINE() -> ChartType:
@@ -26,14 +28,14 @@ struct ChartType(Stringable, Copyable, Movable, Equatable):
 
 
 @fieldwise_init
-struct Color(Stringable, Copyable, Movable, Equatable):
+struct Color(Writable, Copyable, Movable, Equatable):
     var r: Int
     var g: Int
     var b: Int
     var a: Float64
     
-    def __str__(self) -> String:
-        return "rgba(" + String(self.r) + "," + String(self.g) + "," + String(self.b) + "," + String(self.a) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("rgba(", String(self.r), ",", String(self.g), ",", String(self.b), ",", String(self.a), ")")
     
     @staticmethod
     def RED() -> Color:
@@ -53,6 +55,6 @@ struct Color(Stringable, Copyable, Movable, Equatable):
 
 
 struct PlotConst:
-    alias DEFAULT_WIDTH: Int = 800
-    alias DEFAULT_HEIGHT: Int = 400
-    alias DEFAULT_DPI: Int = 100
+    comptime DEFAULT_WIDTH: Int = 800
+    comptime DEFAULT_HEIGHT: Int = 400
+    comptime DEFAULT_DPI: Int = 100

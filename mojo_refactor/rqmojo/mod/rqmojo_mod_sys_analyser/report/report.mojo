@@ -8,7 +8,7 @@ from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init
-struct StrategyResult(Movable, Copyable, ImplicitlyCopyable):
+struct StrategyResult(Movable):
     var start_date: DateTime
     var end_date: DateTime
     var total_returns: Float64
@@ -44,7 +44,7 @@ struct Report(Movable):
     def generate_summary(self) -> String:
         var summary = "=== Strategy Report ===\n"
         summary += "Strategy: " + self.strategy_name + "\n"
-        summary += "Period: " + self.result.start_date.__str__() + " to " + self.result.end_date.__str__() + "\n"
+        summary += "Period: " + String.write(self.result.start_date) + " to " + String.write(self.result.end_date) + "\n"
         summary += "Total Returns: " + String(self.result.total_returns * 100) + "%\n"
         summary += "Annual Returns: " + String(self.result.annual_returns * 100) + "%\n"
         summary += "Max Drawdown: " + String(self.result.max_drawdown * 100) + "%\n"
@@ -55,7 +55,7 @@ struct Report(Movable):
         return summary
 
 
-def create_report(strategy_name: String, nav_list: List[Float64], start_date: DateTime, end_date: DateTime, total_trades: Int = 0, win_count: Int = 0, loss_count: Int = 0) -> Report:
+def create_report(strategy_name: String, var start_date: DateTime, var end_date: DateTime, nav_list: List[Float64], total_trades: Int, win_count: Int, loss_count: Int) -> Report:
     var max_dd = calculate_max_drawdown(nav_list)
     
     var returns = List[Float64]()
@@ -69,7 +69,9 @@ def create_report(strategy_name: String, nav_list: List[Float64], start_date: Da
     if len(nav_list) > 0 and nav_list[0] > 0:
         total_return = (nav_list[-1] - nav_list[0]) / nav_list[0]
     
-    var days = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
+    var sd = start_date^
+    var ed = end_date^
+    var days = (ed.year - sd.year) * 365 + (ed.month - sd.month) * 30 + (ed.day - sd.day)
     var annual_return = 0.0
     if days > 0:
         annual_return = total_return * 365.0 / Float64(days)
@@ -79,8 +81,8 @@ def create_report(strategy_name: String, nav_list: List[Float64], start_date: Da
         win_rate = Float64(win_count) / Float64(total_trades)
     
     var result = StrategyResult(
-        start_date=start_date,
-        end_date=end_date,
+        start_date=sd^,
+        end_date=ed^,
         total_returns=total_return,
         annual_returns=annual_return,
         max_drawdown=max_dd,

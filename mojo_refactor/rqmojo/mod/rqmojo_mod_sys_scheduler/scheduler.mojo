@@ -13,7 +13,7 @@ from rqmojo.model.bar import BarObject
 
 def _parse_datetime(s: String) -> DateTime:
     try:
-        return DateTime.parse(s)
+        return DateTime.strptime(s, "%Y-%m-%d")
     except:
         return DateTime(2024, 1, 1, 0, 0, 0, 0)
 
@@ -106,8 +106,6 @@ struct Scheduler(Writable, Movable):
     var _registry: List[ScheduleEntry]
     var _frequency: String
     var _today: Optional[DateTime]
-    var _this_week: List[DateTime]
-    var _this_month: List[DateTime]
     var _last_minute: Int
     var _current_minute: Int
     var _stage: String
@@ -126,8 +124,6 @@ struct Scheduler(Writable, Movable):
         self._registry = List[ScheduleEntry]()
         self._frequency = frequency
         self._today = Optional[DateTime](None)
-        self._this_week = List[DateTime]()
-        self._this_month = List[DateTime]()
         self._last_minute = 0
         self._current_minute = 0
         self._stage = ""
@@ -221,15 +217,15 @@ struct Scheduler(Writable, Movable):
     def clear(mut self) -> None:
         self._registry.clear()
 
-    def next_day(mut self, trading_dt: DateTime) -> None:
+    def next_day(mut self, var trading_dt: DateTime) -> None:
         if self._registry.__len__() == 0:
             return
 
-        self._today = Optional[DateTime](trading_dt)
+        self._today = Optional[DateTime](trading_dt^)
         self._last_minute = self._start_minute
         self._current_minute = 0
 
-    def next_bar(mut self, current_time: DateTime) -> List[String]:
+    def next_bar(mut self, var current_time: DateTime) -> List[String]:
         self._current_minute = current_time.hour * 60 + current_time.minute
         
         var result = List[String]()
@@ -283,8 +279,6 @@ def create_scheduler(frequency: String = "1d") -> Scheduler:
         _registry=List[ScheduleEntry](),
         _frequency=frequency,
         _today=Optional[DateTime](None),
-        _this_week=List[DateTime](),
-        _this_month=List[DateTime](),
         _last_minute=0,
         _current_minute=0,
         _stage="",

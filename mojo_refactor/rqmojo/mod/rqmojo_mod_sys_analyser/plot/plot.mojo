@@ -4,12 +4,11 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/plot.py
 """
 
 from rqmojo.mod.rqmojo_mod_sys_analyser.plot.consts import ChartType, Color
-from rqmojo.mod.rqmojo_mod_sys_analyser.plot.utils import format_date, calculate_max_drawdown, calculate_sharpe_ratio
 from rqmojo.utils.typing import DateTime
 
 
 @fieldwise_init
-struct PlotData(Movable):
+struct PlotData(Copyable, Movable):
     var x: List[String]
     var y: List[Float64]
     var name: String
@@ -26,25 +25,25 @@ struct PlotFigure(Movable):
     var height: Int
     var data_series: List[PlotData]
     
-    def add_line(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.BLUE()) -> None:
+    def add_line(mut self, var x: List[String], var y: List[Float64], name: String, var color: Color = Color.BLUE()) -> None:
         var data = PlotData(
-            x=x,
-            y=y,
+            x=x^,
+            y=y^,
             name=name,
             chart_type=ChartType.LINE(),
-            color=color
+            color=color^
         )
-        self.data_series.append(data)
+        self.data_series.append(data^)
     
-    def add_bar(mut self, x: List[String], y: List[Float64], name: String, color: Color = Color.RED()) -> None:
+    def add_bar(mut self, var x: List[String], var y: List[Float64], name: String, var color: Color = Color.RED()) -> None:
         var data = PlotData(
-            x=x,
-            y=y,
+            x=x^,
+            y=y^,
             name=name,
             chart_type=ChartType.BAR(),
-            color=color
+            color=color^
         )
-        self.data_series.append(data)
+        self.data_series.append(data^)
     
     def to_json(self) -> String:
         var json = "{\"title\":\"" + self.title + "\","
@@ -55,12 +54,13 @@ struct PlotFigure(Movable):
         json += "\"data\":["
         
         for i in range(len(self.data_series)):
-            var data = self.data_series[i]
             if i > 0:
                 json += ","
+            var data = self.data_series[i].copy()
             json += "{\"name\":\"" + data.name + "\","
             json += "\"type\":\"" + data.chart_type.value + "\","
-            json += "\"color\":\"" + data.color.__str__() + "\","
+            var color_str = String.write(data.color)
+            json += "\"color\":\"" + color_str + "\","
             json += "\"x\":["
             for j in range(len(data.x)):
                 if j > 0:

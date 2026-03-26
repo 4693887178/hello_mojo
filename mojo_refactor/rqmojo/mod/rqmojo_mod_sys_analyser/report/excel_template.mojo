@@ -5,10 +5,10 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/report/excel_template.py
 
 
 struct ExcelTemplate:
-    alias SHEET_SUMMARY: String = "Summary"
-    alias SHEET_TRADES: String = "Trades"
-    alias SHEET_DAILY: String = "Daily"
-    alias SHEET_POSITIONS: String = "Positions"
+    comptime SHEET_SUMMARY: String = "Summary"
+    comptime SHEET_TRADES: String = "Trades"
+    comptime SHEET_DAILY: String = "Daily"
+    comptime SHEET_POSITIONS: String = "Positions"
 
 
 def generate_csv_content(headers: List[String], rows: List[List[String]]) -> String:
@@ -30,7 +30,7 @@ def generate_csv_content(headers: List[String], rows: List[List[String]]) -> Str
     return content
 
 
-def generate_summary_csv(result: Dict[String, String]) -> String:
+def generate_summary_csv(result: Dict[String, String]) raises -> String:
     var headers = List[String]()
     headers.append("Metric")
     headers.append("Value")
@@ -40,6 +40,6 @@ def generate_summary_csv(result: Dict[String, String]) -> String:
         var row = List[String]()
         row.append(key)
         row.append(result[key])
-        rows.append(row)
+        rows.append(row^)
     
     return generate_csv_content(headers, rows)

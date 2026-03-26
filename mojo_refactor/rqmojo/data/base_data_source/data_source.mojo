@@ -109,6 +109,8 @@ struct BaseDataSource(Movable):
 
     def get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
         var ins = self.get_instrument(order_book_id)
+        # TODO: Implement actual tick data retrieval from data bundle
+        # Currently returns mock tick data for testing purposes
         return create_tick_object(
             instrument=ins,
             dt=dt,
@@ -117,14 +119,14 @@ struct BaseDataSource(Movable):
             total_turnover=10200000.0
         )
 
-    def get_trading_dates(self, start_date: DateTimeDate, end_date: DateTimeDate) -> List[DateTime]:
-        var result = List[DateTime]()
+    def count_trading_dates(self, start_date: DateTimeDate, end_date: DateTimeDate) -> Int:
         var start_int = start_date.year * 10000 + start_date.month * 100 + start_date.day
         var end_int = end_date.year * 10000 + end_date.month * 100 + end_date.day
+        var count = 0
         for dt_int in self._trading_dates:
             if dt_int >= start_int and dt_int <= end_int:
-                result.append(convert_int_to_datetime(dt_int))
-        return result^
+                count += 1
+        return count
 
     def is_trading_date(self, year: Int, month: Int, day: Int) -> Bool:
         var dt_int = year * 10000 + month * 100 + day

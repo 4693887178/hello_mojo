@@ -24,11 +24,11 @@ struct TransactionCostMod(ModInterface, Stringable, Movable):
         var future_decider = create_future_decider(commission_multiplier=self.futures_commission_multiplier)
         var bond_decider = create_bond_decider()
         
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS.__str__(), stock_decider, "CN")
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.ETF.__str__(), stock_decider, "CN")
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.LOF.__str__(), stock_decider, "CN")
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.FUTURE.__str__(), future_decider, "CN")
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.BOND.__str__(), bond_decider, "CN")
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS, stock_decider)
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.ETF, stock_decider)
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.LOF, stock_decider)
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.FUTURE, future_decider)
+        env.set_transaction_cost_decider(INSTRUMENT_TYPE.BOND, bond_decider)
     
     def tear_down(mut self, code: EXIT_CODE, exception: Optional[object]) -> None:
         pass
