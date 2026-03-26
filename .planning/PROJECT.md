@@ -60,17 +60,20 @@ mojo_refactor/
 **Status**: ⏳ Pending
 **Description**: 完成依赖数量 15+ 的入口层模块重构
 
-### Current Milestone: Group 06 测试整理与修复
+### Current Milestone: Milestone 3 - 完成剩余模块重构
 
-**Goal**: 整理 Group 06 测试文件，分析并修复 MOJO 和 PYTHON 代码差异
+**Goal**: 完成剩余 23 个文件的重构工作（Group 08, 09, 13）
+
+**Target Groups**:
+- Group 08: 依赖数量 4 模块 (10 files) - cmds/run.py, core/strategy_context.py, data/base_data_source/storage_interface.py 等
+- Group 09: 依赖数量 4-5 模块 (10 files) - mod/rqalpha_mod_sys_analyser/report/report.py, model/instrument.py 等
+- Group 13: 依赖数量 15+ 模块 (3 files) - main.py, __init__.py, utils/testing/integration.py
 
 **Tasks**:
-- [x] 分析测试目录结构
-- [x] 创建详细测试结果文件 (01-10)
-- [x] 更新 SUMMARY.md
-- [x] 分析代码差异原因
-- [x] 修复主要差异
-- [ ] 验证修复结果
+- [ ] 创建 Python 测试文件 (23个)
+- [ ] 创建 Mojo 测试文件 (23个)
+- [ ] 实现重构代码
+- [ ] 验证测试通过
 
 ### Key Decisions
 1. 使用工厂函数模式 (`create_*()`) 替代直接构造函数

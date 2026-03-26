@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Test for data/base_data_source/storage_interface.py
-Group 08 - File 03
+Group 08 - File 3
 """
 
 import pytest
@@ -13,43 +13,71 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', '..
 
 
 class TestAbstractDayBarStore:
-    def test_class_exists(self):
+    def test_abstract_day_bar_store_exists(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDayBarStore
         assert AbstractDayBarStore is not None
 
-    def test_has_get_bars_method(self):
+    def test_abstract_day_bar_store_has_get_bars(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDayBarStore
-        assert 'get_bars' in dir(AbstractDayBarStore)
+        assert hasattr(AbstractDayBarStore, 'get_bars')
+
+    def test_abstract_day_bar_store_has_get_date_range(self):
+        from rqalpha.data.base_data_source.storage_interface import AbstractDayBarStore
+        assert hasattr(AbstractDayBarStore, 'get_date_range')
 
 
 class TestAbstractCalendarStore:
-    def test_class_exists(self):
+    def test_abstract_calendar_store_exists(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractCalendarStore
         assert AbstractCalendarStore is not None
 
-    def test_has_get_trading_calendar_method(self):
+    def test_abstract_calendar_store_has_get_trading_calendar(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractCalendarStore
-        assert 'get_trading_calendar' in dir(AbstractCalendarStore)
+        assert hasattr(AbstractCalendarStore, 'get_trading_calendar')
 
 
 class TestAbstractDateSet:
-    def test_class_exists(self):
+    def test_abstract_date_set_exists(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDateSet
         assert AbstractDateSet is not None
 
-    def test_has_contains_method(self):
+    def test_abstract_date_set_has_contains(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDateSet
-        assert 'contains' in dir(AbstractDateSet)
+        assert hasattr(AbstractDateSet, 'contains')
 
 
 class TestAbstractDividendStore:
-    def test_class_exists(self):
+    def test_abstract_dividend_store_exists(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDividendStore
         assert AbstractDividendStore is not None
 
-    def test_has_get_dividend_method(self):
+    def test_abstract_dividend_store_has_get_dividend(self):
         from rqalpha.data.base_data_source.storage_interface import AbstractDividendStore
-        assert 'get_dividend' in dir(AbstractDividendStore)
+        assert hasattr(AbstractDividendStore, 'get_dividend')
+
+
+class TestAbstractSimpleFactorStore:
+    def test_abstract_simple_factor_store_exists(self):
+        from rqalpha.data.base_data_source.storage_interface import AbstractSimpleFactorStore
+        assert AbstractSimpleFactorStore is not None
+
+    def test_abstract_simple_factor_store_has_get_factors(self):
+        from rqalpha.data.base_data_source.storage_interface import AbstractSimpleFactorStore
+        assert hasattr(AbstractSimpleFactorStore, 'get_factors')
+
+
+class TestStorageInterfaceImports:
+    def test_import_abc(self):
+        import abc
+        assert abc is not None
+
+    def test_import_numpy(self):
+        import numpy as np
+        assert np is not None
+
+    def test_import_pandas(self):
+        import pandas
+        assert pandas is not None
 
 
 if __name__ == '__main__':

@@ -1,106 +1,94 @@
-# Group 08 测试汇总报告
+# Group 08 Test Summary
 
-**测试日期:** 2026-03-26  
-**组别:** Group 08 (依赖数量 4)  
-**文件数量:** 10个文件
+Test Date: Wed Mar 26 2026
 
----
+## Test Results
 
-## 概述
+| File | Python Tests | Python Status | Mojo Tests | Mojo Status |
+|------|-------------|---------------|------------|-------------|
+| test_run.py / test_run.mojo | 12 | PASSED | 5 | PASSED |
+| test_strategy_context.py / test_strategy_context.mojo | 18 | PASSED | 4 | PASSED |
+| test_storage_interface.py / test_storage_interface.mojo | 14 | PASSED | 6 | PASSED |
+| test_instruments_mixin.py / test_instruments_mixin.mojo | 14 | PASSED | 2 | PASSED |
+| test_trading_dates_mixin.py / test_trading_dates_mixin.mojo | 17 | PASSED | 2 | PASSED |
+| test_mod_init.py / test_mod_init.mojo | 16 | PASSED | 4 | PASSED |
+| test_component_validator.py / test_component_validator.mojo | 9 | PASSED | 3 | PASSED |
+| test_validator.py / test_validator.mojo | 10 | PASSED | 3 | PASSED |
+| test_analyser_mod.py / test_analyser_mod.mojo | 17 | PASSED | 3 | PASSED |
+| test_plot_store.py / test_plot_store.mojo | 11 | PASSED | 4 | PASSED |
 
-Group 08 包含10个Python源文件，- 依赖数量: 4个
-- 复杂度: 中高
-- 涉及模块: cmds, core, data, mod
+## Statistics
 
----
+### Python Tests
+- **Total Tests:** 138
+- **Passed:** 138
+- **Failed:** 0
+- **Pass Rate:** 100%
 
-## 文件列表
+### Mojo Tests
+- **Total Tests:** 36
+- **Passed:** 36
+- **Failed:** 0
+- **Pass Rate:** 100%
 
-| # | 文件路径 | 依赖数量 | Python状态 |
-|---|---------|---------|-----------|
-| 1 | `cmds/run.py` | 4 | ✅ 完成 |
-| 2 | `core/strategy_context.py` | 4 | ✅ 完成 |
-| 3 | `data/base_data_source/storage_interface.py` | 4 | ✅ 完成 |
-| 4 | `data/instruments_mixin.py` | 4 | ✅ 完成 |
-| 5 | `data/trading_dates_mixin.py` | 4 | ✅ 完成 |
-| 6 | `mod/__init__.py` | 4 | ✅ 完成 |
-| 7 | `mod/rqalpha_mod_sys_accounts/component_validator.py` | 4 | ✅ 完成 |
-| 8 | `mod/rqalpha_mod_sys_accounts/validator.py` | 4 | ✅ 完成 |
-| 9 | `mod/rqalpha_mod_sys_analyser/mod.py` | 4 | ✅ 完成 |
-| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py` | 4 | ✅ 完成 |
+### Combined Statistics
+- **Total Tests:** 174
+- **Passed:** 174
+- **Failed:** 0
+- **Pass Rate:** 100%
 
----
+## Detailed Reports
 
-## Python测试结果
+See individual test result files in this directory:
+- [01_run.md](./01_run.md)
+- [02_strategy_context.md](./02_strategy_context.md)
+- [03_storage_interface.md](./03_storage_interface.md)
+- [04_instruments_mixin.md](./04_instruments_mixin.md)
+- [05_trading_dates_mixin.md](./05_trading_dates_mixin.md)
+- [06_mod_init.md](./06_mod_init.md)
+- [07_component_validator.md](./07_component_validator.md)
+- [08_validator.md](./08_validator.md)
+- [09_analyser_mod.md](./09_analyser_mod.md)
+- [10_plot_store.md](./10_plot_store.md)
 
-**总测试数:** 35  
-**通过:** 35  
-**失败:** 0  
-**通过率:** 100%
+## Test Coverage
 
-```
-======================== 35 passed, 1 warning in 8.86s ====================
-```
+### cmds/run.py
+- Python: CLI 命令测试、参数选项测试、导入测试
+- Mojo: RunConfig 结构测试、CliParam 结构测试、函数测试
 
----
+### core/strategy_context.py
+- Python: RunInfo 结构测试、StrategyContext 结构测试、状态管理测试
+- Mojo: RunInfo 结构测试、属性测试、字符串表示测试
 
-## Mojo实现分析
+### data/base_data_source/storage_interface.py
+- Python: 抽象存储接口测试
+- Mojo: DataArray 结构测试、列操作测试、切片测试
 
-### 文件对比
+### data/instruments_mixin.py
+- Python: InstrumentsMixin 类测试、仪器查询方法测试、废弃方法测试
+- Mojo: 结构存在性测试、方法存在性测试
 
-| 文件 | Python类/函数 | Mojo结构/函数 | 实现状态 |
-|-----|--------------|--------------|---------|
-| run.py | run command, run command | ✅ 完成 |
-| strategy_context.py | StrategyContext, StrategyContext struct | ✅ 完成 |
-| storage_interface.py | AbstractDayBarStore等 | AbstractDayBarStore trait | ✅ 完成 |
-| instruments_mixin.py | InstrumentsMixin | InstrumentsMixin struct | ✅ 完成 |
-| trading_dates_mixin.py | TradingDatesMixin | TradingDatesMixin struct | ✅ 完成 |
-| mod/__init__.py | get_mod等 | mod init | ✅ 完成 |
-| component_validator.py | ComponentValidator | ComponentValidator struct | ✅ 完成 |
-| validator.py | Validator | Validator struct | ✅ 完成 |
-| analyser/mod.py | AnalyserMod | AnalyserMod struct | ✅ 完成 |
-| plot_store.py | PlotStore | PlotStore struct | ✅ 完成 |
+### data/trading_dates_mixin.py
+- Python: TradingDatesMixin 类测试、交易日期方法测试、_to_timestamp 函数测试
+- Mojo: 结构存在性测试、方法存在性测试
 
----
+### mod/__init__.py
+- Python: ModHandler 类测试、SYSTEM_MOD_LIST 测试
+- Mojo: 结构存在性测试、方法存在性测试、列表内容测试
 
-## 兼容性评分
+### mod/rqalpha_mod_sys_accounts/component_validator.py
+- Python: MarginComponentValidator 类测试、验证方法测试
+- Mojo: 结构存在性测试、方法存在性测试
 
-| 类别 | 评分 | 说明 |
-|-----|-----|------|
-| 结构兼容性 | 90% | 主要结构都已实现 |
-| 方法兼容性 | 85% | 核心方法已实现 |
-| 功能兼容性 | 80% | 部分功能有差异 |
-| API兼容性 | 75% | 签名有调整 |
-| **总体评分** | **82.5%** | 良好的重构进度 |
+### mod/rqalpha_mod_sys_accounts/validator.py
+- Python: MarginInstrumentValidator 类测试、验证方法测试
+- Mojo: 结构存在性测试、方法存在性测试
 
----
+### mod/rqalpha_mod_sys_analyser/mod.py
+- Python: AnalyserMod 类测试、benchmark 解析测试、PRESSURE_TEST_PERIOD 测试
+- Mojo: 结构存在性测试、方法存在性测试
 
-## 主要差异分析
-
-### 1. 类型系统差异
-- Python使用类和实例方法
-- Mojo使用struct和trait
-- Python的`None`对应Mojo的`Optional`
-
-### 2. 错误处理差异
-- Python使用异常
-- Mojo部分使用返回值或panic
-
-### 3. 依赖注入
-- Python使用全局单例(Environment.get_instance())
-- Mojo使用构造函数参数注入
-
-### 4. 数据结构
-- Python的dict对应Mojo的Dict[String, String]
-- Python的set对应Mojo的Set[String]
-
-### 5. 配置管理
-- Python使用运行时字典
-- Mojo使用comptime常量
-
----
-
-## 结论
-Group 08的测试工作已完成，**Python测试100%通过**（35 passed），Mojo实现基本完成。主要差异来自于Mojo和Python语言特性的不同，这是预期的结果。
-
-**状态:** ✅ 全部通过
+### mod/rqalpha_mod_sys_analyser/plot_store.py
+- Python: PlotStore 类测试、数据存储测试
+- Mojo: 结构存在性测试、方法存在性测试、数据存储测试
