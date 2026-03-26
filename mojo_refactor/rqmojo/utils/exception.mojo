@@ -23,12 +23,28 @@ struct StackFrame(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
 
 @fieldwise_init
-struct CustomError(Equatable, Writable):
+struct CustomError(Equatable, Writable, Movable):
     var msg: String
     var exc_type_name: String
     var error_type: EXC_TYPE
     var stacks: List[StackFrame]
     var max_exc_var_len: Int
+
+    def __init__(out self, msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET):
+        self.msg = msg
+        self.exc_type_name = exc_type_name
+        self.error_type = error_type
+        self.stacks = List[StackFrame]()
+        self.max_exc_var_len = 160
+
+    def __init__(out self, *, copy: Self):
+        self.msg = copy.msg
+        self.exc_type_name = copy.exc_type_name
+        self.error_type = copy.error_type
+        self.stacks = List[StackFrame]()
+        for frame in copy.stacks:
+            self.stacks.append(frame)
+        self.max_exc_var_len = copy.max_exc_var_len
 
     def write_to(self, mut writer: Some[Writer]):
         if len(self.stacks) == 0:
@@ -46,7 +62,8 @@ struct CustomError(Equatable, Writable):
 
     @staticmethod
     def create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET) -> Self:
-        return Self(msg, exc_type_name, error_type, List[StackFrame](), 160)
+        var result = Self(msg, exc_type_name, error_type)
+        return result^
 
     def add_stack_info(mut self, filename: String, lineno: Int, func_name: String, code: String):
         self.stacks.append(StackFrame(filename, lineno, func_name, code))
@@ -55,16 +72,18 @@ struct CustomError(Equatable, Writable):
         return len(self.stacks)
 
 
-@fieldwise_init
-struct CustomException(Equatable, Writable):
+struct CustomException(Equatable, Writable, Movable):
     var error: CustomError
+
+    def __init__(out self, msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET):
+        self.error = CustomError.create(msg, exc_type_name, error_type)
 
     def write_to(self, mut writer: Some[Writer]):
         self.error.write_to(writer)
 
     @staticmethod
-    def create(error: CustomError) -> Self:
-        return Self(error)
+    def create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET) -> Self:
+        return Self(msg, exc_type_name, error_type)
 
 
 @fieldwise_init

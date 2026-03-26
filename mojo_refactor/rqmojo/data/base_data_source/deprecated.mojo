@@ -38,7 +38,7 @@ struct InstrumentStore(Movable):
     var _instruments: Dict[String, Instrument]
     var _sym_id_map: Dict[String, String]
 
-    def __init__(mut self, instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE):
+    def __init__(out self, instruments: List[Instrument], instrument_type: INSTRUMENT_TYPE):
         self._instrument_type = instrument_type
         self._instruments = Dict[String, Instrument]()
         self._sym_id_map = Dict[String, String]()

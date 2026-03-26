@@ -8,6 +8,7 @@ from rqmojo.const import EXIT_CODE
 from rqmojo.core.events import EVENT
 from rqmojo.utils.i18n import gettext
 from std.collections import List
+from std.python import PythonObject
 
 
 comptime __all__: List[String] = [
@@ -18,7 +19,7 @@ comptime __all__: List[String] = [
 
 
 @fieldwise_init
-struct ProgressBar(Writable, Movable):
+struct ProgressBar(Writable, Movable, ImplicitlyCopyable):
     var _length: Int
     var _current: Int
     var _show_eta: Bool
@@ -77,7 +78,7 @@ struct ProgressMod(ModInterface, Writable, Movable):
             _initialized=False
         )
 
-    def start_up(mut self, env: object, mod_config: object) -> None:
+    def start_up(mut self, env_name: String, mod_config_name: String) -> None:
         self._show = True
         self._initialized = True
 
@@ -86,12 +87,14 @@ struct ProgressMod(ModInterface, Writable, Movable):
         self._progress_bar = Optional[ProgressBar](ProgressBar(length=trading_length, show_eta=False))
 
     def _tick(mut self) -> None:
-        if var bar = self._progress_bar.value():
+        if self._progress_bar:
+            var bar = self._progress_bar.value()
             bar.update(1)
 
-    def tear_down(self, code: EXIT_CODE, exception: Optional[object]) -> None:
+    def tear_down(self, code: EXIT_CODE, exception: Optional[String]) -> None:
         if self._show:
-            if var bar = self._progress_bar.value():
+            if self._progress_bar:
+                var bar = self._progress_bar.value()
                 bar.render_finish()
 
 

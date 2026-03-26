@@ -46,7 +46,7 @@ struct FilePersistProvider(Movable, PersistProvider):
     var _should_run_init_flag: Bool
 
     def __str__(self) -> String:
-        return "FilePersistProvider(mode=" + self._mode.value() + ")"
+        return "FilePersistProvider(mode=" + self._mode.value + ")"
 
     def store(mut self, key: String, value: String) -> None:
         self._storage[key] = value
@@ -135,7 +135,7 @@ struct PersistHelper(Movable):
         self._listeners_registered = False
 
     def __str__(self) -> String:
-        return "PersistHelper(mode=" + self._persist_mode.value() + ", objects=" + String(len(self._objects)) + ")"
+        return "PersistHelper(mode=" + self._persist_mode.value + ", objects=" + String(len(self._objects)) + ")"
 
     def _has_object(self, key: String) -> Bool:
         try:
@@ -153,22 +153,22 @@ struct PersistHelper(Movable):
     def on_event(mut self, event_type: String, event: Event) -> Bool:
         if self._persist_mode != PERSIST_MODE.REAL_TIME:
             return False
-        if event_type == EVENT.POST_BEFORE_TRADING().value():
+        if event_type == EVENT.POST_BEFORE_TRADING().value:
             self.persist()
             return False
-        if event_type == EVENT.POST_AFTER_TRADING().value():
+        if event_type == EVENT.POST_AFTER_TRADING().value:
             self.persist()
             return False
-        if event_type == EVENT.POST_BAR().value():
+        if event_type == EVENT.POST_BAR().value:
             self.persist()
             return False
-        if event_type == EVENT.DO_PERSIST().value():
+        if event_type == EVENT.DO_PERSIST().value:
             self.persist()
             return False
-        if event_type == EVENT.POST_SETTLEMENT().value():
+        if event_type == EVENT.POST_SETTLEMENT().value:
             self.persist()
             return False
-        if event_type == EVENT.DO_RESTORE().value():
+        if event_type == EVENT.DO_RESTORE().value:
             _ = self.restore(event)
             return False
         return False

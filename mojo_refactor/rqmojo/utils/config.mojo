@@ -9,7 +9,7 @@ from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init
-struct BaseConfig(Movable, ImplicitlyCopyable):
+struct BaseConfig(Movable):
     var start_date: DateTime
     var end_date: DateTime
     var frequency: String
@@ -34,7 +34,7 @@ struct ModConfig(Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct RQAlphaConfig(Movable, ImplicitlyCopyable):
+struct RQAlphaConfig(Movable):
     var base: BaseConfig
     var extra: ExtraConfig
     var mod: ModConfig
@@ -93,10 +93,10 @@ def default_mod_config() -> ModConfig:
 
 def default_config() -> RQAlphaConfig:
     return RQAlphaConfig(
-        base=default_base_config(),
-        extra=default_extra_config(),
-        mod=default_mod_config()
-    )
+        base=default_base_config()^,
+        extra=default_extra_config()^,
+        mod=default_mod_config()^
+    )^
 
 
 def create_config(
@@ -105,10 +105,12 @@ def create_config(
     frequency: String = "1d",
     run_type: RUN_TYPE = RUN_TYPE.BACKTEST
 ) -> RQAlphaConfig:
+    var start_dt = DateTime(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second, start_date.microsecond)
+    var end_dt = DateTime(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second, end_date.microsecond)
     return RQAlphaConfig(
         base=BaseConfig(
-            start_date=start_date,
-            end_date=end_date,
+            start_date=start_dt^,
+            end_date=end_dt^,
             frequency=frequency,
             run_type=run_type,
             data_bundle_path="~/.rqalpha/bundle",
@@ -116,10 +118,10 @@ def create_config(
             persist_mode=PERSIST_MODE.ON_CRASH,
             initial_cash=100000.0,
             rqdatac_uri=""
-        ),
-        extra=default_extra_config(),
-        mod=default_mod_config()
-    )
+        )^,
+        extra=default_extra_config()^,
+        mod=default_mod_config()^
+    )^
 
 
 def create_config_from_args(
@@ -135,7 +137,7 @@ def create_config_from_args(
     var start_dt = DateTime(start_year, start_month, start_day, 0, 0, 0, 0)
     var end_dt = DateTime(end_year, end_month, end_day, 0, 0, 0, 0)
     var rt = parse_run_type(run_type_str)
-    return create_config(start_dt, end_dt, frequency, rt)
+    return create_config(start_dt^, end_dt^, frequency, rt)
 
 
 def parse_config(
@@ -190,4 +192,4 @@ def parse_config(
         elif key == "mod.enabled":
             mod_cfg.enabled = (value == "true" or value == "True")
     
-    return RQAlphaConfig(base=base_cfg, extra=extra_cfg, mod=mod_cfg)
+    return RQAlphaConfig(base=base_cfg^, extra=extra_cfg^, mod=mod_cfg^)

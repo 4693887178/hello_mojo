@@ -7,6 +7,23 @@ from std.collections import List
 from rqmojo.const import EXIT_CODE
 
 
+def show_help() -> None:
+    print("Usage: rqmojo [COMMAND] [OPTIONS]")
+    print("")
+    print("Commands:")
+    print("  run      Run backtest")
+    print("  bundle   Manage data bundle")
+    print("  mod      Manage modules")
+    print("")
+    print("Options:")
+    print("  -h, --help           Show this help message")
+    print("  -f, --strategy-file  Strategy file path")
+    print("  -s, --start-date     Start date (YYYY-MM-DD)")
+    print("  -e, --end-date       End date (YYYY-MM-DD)")
+    print("  -fq, --frequency     Frequency (1d, 1m, tick)")
+    print("  -c, --init-cash      Initial cash amount")
+
+
 def _parse_float(s: String) -> Float64:
     var result: Float64 = 0.0
     var sign: Float64 = 1.0
@@ -65,6 +82,8 @@ struct CliParser(Movable):
                 self._command = "bundle"
             elif arg == "mod":
                 self._command = "mod"
+            elif arg == "help" or arg == "-h" or arg == "--help":
+                self._command = "help"
             elif arg == "-f" or arg == "--strategy-file":
                 if i + 1 < len(args):
                     i += 1
@@ -126,7 +145,10 @@ struct CliRunner(Movable):
         
         var command = self._parser.get_command()
         
-        if command == "run":
+        if command == "help" or command == "-h" or command == "--help":
+            show_help()
+            return 0
+        elif command == "run":
             print("=== RQAlpha Mojo Backtest ===")
             print("Strategy: ", self._parser.get_strategy_file())
             print("Start Date: ", self._parser.get_start_date_str())
@@ -140,9 +162,13 @@ struct CliRunner(Movable):
         elif command == "mod":
             print("Mod command...")
             return 0
+        elif command == "":
+            show_help()
+            return 0
         else:
             print("Unknown command: ", command)
             print("Available commands: run, bundle, mod")
+            print("Use -h or --help for more information")
             return 1
 
 

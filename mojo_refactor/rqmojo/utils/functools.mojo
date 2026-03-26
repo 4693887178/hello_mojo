@@ -24,8 +24,8 @@ struct CachedFunc(Movable, Copyable):
     def __init__(max_size: Int = 128) -> Self:
         return Self(Dict[String, String](), max_size)
 
-    def get(mut self, key: String) -> Optional[String]:
-        if self.cache.contains(key):
+    def get(mut self, key: String) raises -> Optional[String]:
+        if key in self.cache:
             return Optional[String](self.cache[key])
         return Optional[String](None)
 
@@ -33,7 +33,7 @@ struct CachedFunc(Movable, Copyable):
         self.cache[key] = value
 
     def contains(self, key: String) -> Bool:
-        return self.cache.contains(key)
+        return key in self.cache
 
     def clear(mut self):
         self.cache.clear()

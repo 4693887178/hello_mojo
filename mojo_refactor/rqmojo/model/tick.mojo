@@ -18,7 +18,7 @@ comptime __all__: List[String] = [
 
 
 @fieldwise_init
-struct TickObject(Writable, Movable, Copyable, ImplicitlyCopyable):
+struct TickObject(Writable, Movable):
     var _order_book_id: String
     var _instrument: Instrument
     var datetime: DateTime
@@ -31,12 +31,24 @@ struct TickObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     var prev_close: Float64
     var limit_up: Float64
     var limit_down: Float64
+    var open_interest: Float64
+    var prev_settlement: Float64
+    var asks: List[Float64]
+    var ask_vols: List[Float64]
+    var bid_vols: List[Float64]
 
     def __str__(self) -> String:
         var props = Dict[String, String]()
         props["order_book_id"] = self._order_book_id
-        props["datetime"] = self.datetime.__str__()
+        var dt_str = String()
+        try:
+            dt_str = self.datetime.isoformat()
+        except:
+            dt_str = "unknown"
+        props["datetime"] = dt_str
         props["last"] = String(self.last)
+        props["open_interest"] = String(self.open_interest)
+        props["prev_settlement"] = String(self.prev_settlement)
         return dict_repr_from_dict("TickObject", props)
 
     def write_to(self, mut writer: Some[Writer]):
@@ -51,9 +63,12 @@ struct TickObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     def close(self) -> Float64:
         return self.last
 
+    def isnan(self) -> Bool:
+        return self.last != self.last or self.volume != self.volume
+
 
 def create_tick_object(
-    var instrument: Instrument,
+    instrument: Instrument,
     dt: DateTime,
     last: Float64,
     volume: Float64,
@@ -63,12 +78,17 @@ def create_tick_object(
     low: Float64 = 1.0,
     prev_close: Float64 = 0.0,
     limit_up: Float64 = 0.0,
-    limit_down: Float64 = 0.0
+    limit_down: Float64 = 0.0,
+    open_interest: Float64 = 0.0,
+    prev_settlement: Float64 = 0.0,
+    asks: List[Float64] = List[Float64](),
+    ask_vols: List[Float64] = List[Float64](),
+    bid_vols: List[Float64] = List[Float64]()
 ) -> TickObject:
     return TickObject(
         _order_book_id=instrument.order_book_id(),
         _instrument=instrument^,
-        datetime=dt,
+        datetime=dt^,
         last=last,
         volume=volume,
         total_turnover=total_turnover,
@@ -77,5 +97,10 @@ def create_tick_object(
         low=low,
         prev_close=prev_close,
         limit_up=limit_up,
-        limit_down=limit_down
+        limit_down=limit_down,
+        open_interest=open_interest,
+        prev_settlement=prev_settlement,
+        asks=asks,
+        ask_vols=ask_vols,
+        bid_vols=bid_vols
     )

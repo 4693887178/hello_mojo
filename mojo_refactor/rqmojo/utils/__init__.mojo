@@ -1,3 +1,7 @@
+"""
+RQMojo utils - RqValue and helper functions
+"""
+
 from std.collections import Dict, List
 
 
@@ -37,14 +41,47 @@ struct RqValue(Copyable, Movable):
         self.dict_val = Dict[String, RqValue]()
         self.list_val = List[RqValue]()
 
-    def __init__(out self, *, copy: Self):
-        self.kind = copy.kind
-        self.int_val = copy.int_val
-        self.float_val = copy.float_val
-        self.bool_val = copy.bool_val
-        self.string_val = copy.string_val
-        self.dict_val = copy.dict_val.copy()
-        self.list_val = copy.list_val.copy()
+
+def make_int_value(val: Int64) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_INT
+    result.int_val = val
+    return result
+
+
+def make_float_value(val: Float64) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_FLOAT
+    result.float_val = val
+    return result
+
+
+def make_bool_value(val: Bool) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_BOOL
+    result.bool_val = val
+    return result
+
+
+def make_string_value(val: String) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_STRING
+    result.string_val = val
+    return result
+
+
+def make_dict_value(d: Dict[String, RqValue]) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_DICT
+    result.dict_val = d.copy()
+    return result
+
+
+def make_list_value(l: List[RqValue]) -> RqValue:
+    var result = RqValue()
+    result.kind = KIND_LIST
+    result.list_val = l.copy()
+    return result
 
 
 struct RqAttrDict(Copyable, Movable):
@@ -53,6 +90,7 @@ struct RqAttrDict(Copyable, Movable):
     def __init__(out self):
         self.data = Dict[String, RqValue]()
 
+
     def __init__(out self, d: Dict[String, RqValue]) raises:
         self.data = Dict[String, RqValue]()
         _init_from_dict(self.data, d)
@@ -60,8 +98,10 @@ struct RqAttrDict(Copyable, Movable):
     def __str__(self) raises -> String:
         return _dict_to_string(self.data)
 
+
     def __repr__(self) raises -> String:
         return _dict_to_string(self.data)
+
 
     def __bool__(self) -> Bool:
         return len(self.data) > 0
@@ -200,5 +240,3 @@ def _merge_dicts(mut target: Dict[String, RqValue], other: Dict[String, RqValue]
                     target[k] = v.copy()
             else:
                 target[k] = v.copy()
-        else:
-            target[k] = v.copy()

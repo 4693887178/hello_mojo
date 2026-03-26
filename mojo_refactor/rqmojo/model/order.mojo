@@ -45,7 +45,7 @@ def LimitOrder(price: Float64) -> OrderStyle:
 
 
 @fieldwise_init
-struct Order(Writable, Copyable, Movable, ImplicitlyCopyable):
+struct Order(Writable, Movable):
     var order_id: Int
     var order_book_id: String
     var side: SIDE
@@ -61,7 +61,7 @@ struct Order(Writable, Copyable, Movable, ImplicitlyCopyable):
     var price: Float64
     
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("Order(", String(self.order_id), ", ", self.order_book_id, ", ", self.side.value(), ", qty=", String(self.quantity), ")")
+        writer.write("Order(", String(self.order_id), ", ", self.order_book_id, ", ", self.side.value, ", qty=", String(self.quantity), ")")
     
     def order_type(self) -> ORDER_TYPE:
         return self.style.style_type

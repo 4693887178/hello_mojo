@@ -61,7 +61,7 @@ def create_nan_bar_data() -> BarData:
 
 
 @fieldwise_init
-struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
+struct PartialBarObject(Writable, Movable):
     var _order_book_id: String
     var _instrument: Instrument
     var _dt: DateTime
@@ -70,7 +70,9 @@ struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     var _limit_down: Float64
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("PartialBarObject(", self._order_book_id, ", dt=", self._dt.__str__(), ")")
+        writer.write("PartialBarObject(", self._order_book_id, ", dt=")
+        self._dt.write_to(writer)
+        writer.write(")")
 
     def order_book_id(self) -> String:
         return self._order_book_id
@@ -136,7 +138,7 @@ struct PartialBarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct BarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
+struct BarObject(Writable, Movable):
     var _order_book_id: String
     var _instrument: Instrument
     var _dt: DateTime
@@ -147,7 +149,9 @@ struct BarObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     var _trading: Bool
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("BarObject(", self._order_book_id, ", ", self._dt.__str__(), ", close=", String(self.close()), ")")
+        writer.write("BarObject(", self._order_book_id, ", ")
+        self._dt.write_to(writer)
+        writer.write(", close=", String(self.close()), ")")
 
     def order_book_id(self) -> String:
         return self._order_book_id

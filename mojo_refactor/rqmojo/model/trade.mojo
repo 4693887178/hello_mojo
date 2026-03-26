@@ -25,7 +25,7 @@ def create_trade_id_generator() -> TradeIdGenerator:
 
 
 @fieldwise_init
-struct Trade(Writable, Copyable, Movable, ImplicitlyCopyable):
+struct Trade(Writable, Movable):
     var trade_id: Int
     var exec_id: String
     var order_id: Int
@@ -40,7 +40,7 @@ struct Trade(Writable, Copyable, Movable, ImplicitlyCopyable):
     var tax: Float64
     
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("Trade(", String(self.trade_id), ", ", self.order_book_id, ", ", String(self.side.value()), ", qty=", String(self.quantity), ", price=", String(self.price), ")")
+        writer.write("Trade(", String(self.trade_id), ", ", self.order_book_id, ", ", self.side.value, ", qty=", String(self.quantity), ", price=", String(self.price), ")")
 
 
 def create_trade_with_id(
