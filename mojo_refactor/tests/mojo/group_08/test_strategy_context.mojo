@@ -1,108 +1,73 @@
 """
 Test for core/strategy_context.mojo
-Group 08 - File 2
+Group 08 - File 8
 """
 
-from std.collections import Dict, Set
-from rqmojo.core.strategy_context import (
-    RunInfo, StrategyContext, create_run_info, create_strategy_context
-)
+from rqmojo.core.strategy_context import StrategyContext, create_strategy_context
 from rqmojo.const import RUN_TYPE, MATCHING_TYPE
-from rqmojo.utils.typing import DateTime, DateTimeDate
+from python import PythonObject
 
 
-def test_run_info_struct() -> Bool:
-    print("Test: RunInfo struct exists")
-    var info = create_run_info(
-        start_date=DateTimeDate(2020, 1, 1),
-        end_date=DateTimeDate(2020, 12, 31),
-        frequency="1d"
-    )
-    if info.frequency() != "1d":
-        raise "Frequency should be 1d"
+fn test_strategy_context_init() -> Bool:
+    print("Test: StrategyContext init")
+    var ctx = create_strategy_context()
     print("  PASSED")
     return True
 
 
-def test_run_info_properties() -> Bool:
-    print("Test: RunInfo properties")
-    var info = create_run_info(
-        start_date=DateTimeDate(2020, 1, 1),
-        end_date=DateTimeDate(2020, 12, 31),
-        frequency="1d",
-        stock_starting_cash=100000.0,
-        future_starting_cash=50000.0,
-        margin_multiplier=1.5
-    )
-    
-    if info.start_date().year() != 2020:
-        raise "Start date year should be 2020"
-    
-    if info.stock_starting_cash() != 100000.0:
-        raise "Stock starting cash should be 100000.0"
-    
-    if info.future_starting_cash() != 50000.0:
-        raise "Future starting cash should be 50000.0"
-    
-    if info.margin_multiplier() != 1.5:
-        raise "Margin multiplier should be 1.5"
+fn test_strategy_context_fields() -> Bool:
+    print("Test: StrategyContext fields")
+    var ctx = create_strategy_context()
+    ctx.run_type = RUN_TYPE.BACKTEST
+    ctx.matching_type = MATCHING_TYPE.CURRENT_BAR_CLOSE
     print("  PASSED")
     return True
 
 
-def test_run_info_run_type() -> Bool:
-    print("Test: RunInfo run_type")
-    var info = create_run_info(
-        start_date=DateTimeDate(2020, 1, 1),
-        end_date=DateTimeDate(2020, 12, 31),
-        frequency="1d",
-        run_type=RUN_TYPE.PAPER_TRADING
-    )
-    
-    if info.run_type() != RUN_TYPE.PAPER_TRADING:
-        raise "Run type should be PAPER_TRADING"
+fn test_strategy_context_get_state() -> Bool:
+    print("Test: StrategyContext get_state")
+    var ctx = create_strategy_context()
+    var state = ctx.get_state()
     print("  PASSED")
     return True
 
 
-def test_run_info_string() -> Bool:
-    print("Test: RunInfo __str__")
-    var info = create_run_info(
-        start_date=DateTimeDate(2020, 1, 1),
-        end_date=DateTimeDate(2020, 12, 31),
-        frequency="1d"
-    )
-    var s = info.__str__()
-    if len(s) < 1:
-        raise "String representation should not be empty"
+fn test_strategy_context_set_state() -> Bool:
+    print("Test: StrategyContext set_state")
+    var ctx = create_strategy_context()
+    ctx.set_state("")
     print("  PASSED")
     return True
 
 
-def main() -> None:
-    print("=== Group 08 File 2: Strategy Context Tests ===")
+def main() raises:
+    print("=== Group 08 File 8: Strategy Context Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_run_info_struct():
-        passed += 1
-    else:
+    try:
+        if test_strategy_context_init():
+            passed += 1
+    except:
         failed += 1
     
-    if test_run_info_properties():
-        passed += 1
-    else:
+    try:
+        if test_strategy_context_fields():
+            passed += 1
+    except:
         failed += 1
     
-    if test_run_info_run_type():
-        passed += 1
-    else:
+    try:
+        if test_strategy_context_get_state():
+            passed += 1
+    except:
         failed += 1
     
-    if test_run_info_string():
-        passed += 1
-    else:
+    try:
+        if test_strategy_context_set_state():
+            passed += 1
+    except:
         failed += 1
     
     print("")

@@ -1,48 +1,72 @@
 """
 Test for data/trading_dates_mixin.mojo
-Group 08 - File 5
+Group 08 - File 10
 """
 
-from std.collections import Dict, List
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin
-from rqmojo.const import TRADING_CALENDAR_TYPE
 from rqmojo.utils.typing import DateTime
+from std.collections import List
 
 
-def test_trading_dates_mixin_struct() -> Bool:
-    print("Test: TradingDatesMixin struct exists")
+fn test_trading_dates_mixin_init() -> Bool:
+    print("Test: TradingDatesMixin init")
     var mixin = create_trading_dates_mixin()
     print("  PASSED")
     return True
 
 
-def test_trading_dates_mixin_methods() -> Bool:
-    print("Test: TradingDatesMixin methods exist")
+fn test_trading_dates_mixin_get_trading_dates() -> Bool:
+    print("Test: TradingDatesMixin get_trading_dates")
     var mixin = create_trading_dates_mixin()
-    
-    if not hasattr(mixin, "get_trading_dates"):
-        raise "Should have get_trading_dates method"
-    
-    if not hasattr(mixin, "is_trading_date"):
-        raise "Should have is_trading_date method"
+    var dates = mixin.get_trading_dates("000001.XSHE")
     print("  PASSED")
     return True
 
 
-def main() -> None:
-    print("=== Group 08 File 5: Trading Dates Mixin Tests ===")
+fn test_trading_dates_mixin_is_trading_date() -> Bool:
+    print("Test: TradingDatesMixin is_trading_date")
+    var mixin = create_trading_dates_mixin()
+    var result = mixin.is_trading_date(DateTime(2024, 1, 2, 0, 0, 0, 0))
+    print("  PASSED")
+    return True
+
+
+fn test_trading_dates_mixin_get_previous_trading_date() -> Bool:
+    print("Test: TradingDatesMixin get_previous_trading_date")
+    var mixin = create_trading_dates_mixin()
+    var prev_date = mixin.get_previous_trading_date(DateTime(2024, 1, 2, 0, 0, 0, 0))
+    print("  PASSED")
+    return True
+
+
+def main() raises:
+    print("=== Group 08 File 10: Trading Dates Mixin Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_trading_dates_mixin_struct():
-        passed += 1
-    else:
+    try:
+        if test_trading_dates_mixin_init():
+            passed += 1
+    except:
         failed += 1
     
-    if test_trading_dates_mixin_methods():
-        passed += 1
-    else:
+    try:
+        if test_trading_dates_mixin_get_trading_dates():
+            passed += 1
+    except:
+        failed += 1
+    
+    try:
+        if test_trading_dates_mixin_is_trading_date():
+            passed += 1
+    except:
+        failed += 1
+    
+    try:
+        if test_trading_dates_mixin_get_previous_trading_date():
+            passed += 1
+    except:
         failed += 1
     
     print("")

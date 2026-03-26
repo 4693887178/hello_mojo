@@ -4,65 +4,59 @@ Group 08 - File 9
 """
 
 from std.collections import Dict, List
-from rqmojo.mod.rqmojo_mod_sys_analyser.mod import (
-    AnalyserMod, create_analyser_mod, PRESSURE_TEST_PERIOD
-)
-from rqmojo.interface import AbstractMod
+from rqmojo.mod.rqmojo_mod_sys_analyser.mod import AnalyserMod, create_analyser_mod
+from rqmojo.interface import Mod
+from python import PythonObject
+from rqmojo.const import EXIT_CODE
 
 
-def test_analyser_mod_struct() -> Bool:
+fn test_analyser_mod_struct() -> Bool:
     print("Test: AnalyserMod struct exists")
     var mod = create_analyser_mod()
     print("  PASSED")
     return True
 
 
-def test_analyser_mod_methods() -> Bool:
+fn test_analyser_mod_methods() -> Bool:
     print("Test: AnalyserMod methods exist")
     var mod = create_analyser_mod()
-    
-    if not hasattr(mod, "start_up"):
-        raise "Should have start_up method"
-    
-    if not hasattr(mod, "tear_down"):
-        raise "Should have tear_down method"
-    
-    if not hasattr(mod, "get_state"):
-        raise "Should have get_state method"
-    
-    if not hasattr(mod, "set_state"):
-        raise "Should have set_state method"
+    mod.start_up(PythonObject(None), PythonObject(None))
+    mod.tear_down(EXIT_CODE.EXIT_SUCCESS, PythonObject(None))
     print("  PASSED")
     return True
 
 
-def test_pressure_test_period() -> Bool:
-    print("Test: PRESSURE_TEST_PERIOD exists")
-    if len(PRESSURE_TEST_PERIOD) < 1:
-        raise "PRESSURE_TEST_PERIOD should not be empty"
+fn test_analyser_mod_name() -> Bool:
+    print("Test: AnalyserMod name")
+    var mod = create_analyser_mod()
+    if mod.name != "analyser":
+        return False
     print("  PASSED")
     return True
 
 
-def main() -> None:
+def main() raises:
     print("=== Group 08 File 9: Analyser Mod Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_analyser_mod_struct():
-        passed += 1
-    else:
+    try:
+        if test_analyser_mod_struct():
+            passed += 1
+    except:
         failed += 1
     
-    if test_analyser_mod_methods():
-        passed += 1
-    else:
+    try:
+        if test_analyser_mod_methods():
+            passed += 1
+    except:
         failed += 1
     
-    if test_pressure_test_period():
-        passed += 1
-    else:
+    try:
+        if test_analyser_mod_name():
+            passed += 1
+    except:
         failed += 1
     
     print("")

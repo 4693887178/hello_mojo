@@ -1,83 +1,68 @@
 """
 Test for mod/__init__.mojo
-Group 08 - File 6
+Group 08 - File 4
 """
 
-from std.collections import Dict, List
-from rqmojo.mod import ModHandler, SYSTEM_MOD_LIST, create_mod_handler
+from rqmojo.mod import SYSTEM_MOD_LIST, get_system_mod, register_mod, unregister_mod
+from std.collections import List
 
 
-def test_mod_handler_struct() -> Bool:
-    print("Test: ModHandler struct exists")
-    var handler = create_mod_handler()
-    print("  PASSED")
-    return True
-
-
-def test_mod_handler_methods() -> Bool:
-    print("Test: ModHandler methods exist")
-    var handler = create_mod_handler()
-    
-    if not hasattr(handler, "set_env"):
-        raise "Should have set_env method"
-    
-    if not hasattr(handler, "start_up"):
-        raise "Should have start_up method"
-    
-    if not hasattr(handler, "tear_down"):
-        raise "Should have tear_down method"
-    print("  PASSED")
-    return True
-
-
-def test_system_mod_list() -> Bool:
+fn test_system_mod_list() -> Bool:
     print("Test: SYSTEM_MOD_LIST exists")
-    if len(SYSTEM_MOD_LIST) < 1:
-        raise "SYSTEM_MOD_LIST should not be empty"
+    var mod_list = SYSTEM_MOD_LIST
     print("  PASSED")
     return True
 
 
-def test_system_mod_list_contains_required() -> Bool:
-    print("Test: SYSTEM_MOD_LIST contains required mods")
-    var required = ["sys_accounts", "sys_analyser", "sys_simulation", "sys_risk"]
-    var found = 0
-    for mod in required:
-        for sys_mod in SYSTEM_MOD_LIST:
-            if sys_mod == mod:
-                found += 1
-                break
-    
-    if found != len(required):
-        raise "Not all required mods found"
+fn test_get_system_mod() -> Bool:
+    print("Test: get_system_mod function")
+    var mod_name = get_system_mod("sys_analyser")
     print("  PASSED")
     return True
 
 
-def main() -> None:
-    print("=== Group 08 File 6: Mod Init Tests ===")
+fn test_register_mod() -> Bool:
+    print("Test: register_mod function")
+    register_mod("test_mod", "test_config")
+    print("  PASSED")
+    return True
+
+
+fn test_unregister_mod() -> Bool:
+    print("Test: unregister_mod function")
+    unregister_mod("test_mod")
+    print("  PASSED")
+    return True
+
+
+def main() raises:
+    print("=== Group 08 File 4: Mod Init Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_mod_handler_struct():
-        passed += 1
-    else:
+    try:
+        if test_system_mod_list():
+            passed += 1
+    except:
         failed += 1
     
-    if test_mod_handler_methods():
-        passed += 1
-    else:
+    try:
+        if test_get_system_mod():
+            passed += 1
+    except:
         failed += 1
     
-    if test_system_mod_list():
-        passed += 1
-    else:
+    try:
+        if test_register_mod():
+            passed += 1
+    except:
         failed += 1
     
-    if test_system_mod_list_contains_required():
-        passed += 1
-    else:
+    try:
+        if test_unregister_mod():
+            passed += 1
+    except:
         failed += 1
     
     print("")

@@ -1,47 +1,59 @@
 """
 Test for data/instruments_mixin.mojo
-Group 08 - File 4
+Group 08 - File 3
 """
 
-from std.collections import Dict, List
-from rqmojo.data.instruments_mixin import InstrumentsMixin, create_instruments_mixin
-from rqmojo.const import INSTRUMENT_TYPE
+from rqmojo.data.instruments_mixin import InstrumentsMixin
+from rqmojo.model.instrument import Instrument, create_stock_instrument
+from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE
+from rqmojo.utils.typing import DateTime
 
 
-def test_instruments_mixin_struct() -> Bool:
-    print("Test: InstrumentsMixin struct exists")
-    var mixin = create_instruments_mixin()
+fn test_instruments_mixin_init() -> Bool:
+    print("Test: InstrumentsMixin init")
+    var mixin = InstrumentsMixin()
     print("  PASSED")
     return True
 
 
-def test_instruments_mixin_methods() -> Bool:
-    print("Test: InstrumentsMixin methods exist")
-    var mixin = create_instruments_mixin()
-    
-    if not hasattr(mixin, "get_instrument"):
-        raise "Should have get_instrument method"
-    
-    if not hasattr(mixin, "get_all_instruments"):
-        raise "Should have get_all_instruments method"
+fn test_instruments_mixin_get_instrument() -> Bool:
+    print("Test: InstrumentsMixin get_instrument")
+    var mixin = InstrumentsMixin()
+    var ins = mixin.get_instrument("000001.XSHE")
     print("  PASSED")
     return True
 
 
-def main() -> None:
-    print("=== Group 08 File 4: Instruments Mixin Tests ===")
+fn test_instruments_mixin_all_instruments() -> Bool:
+    print("Test: InstrumentsMixin all_instruments")
+    var mixin = InstrumentsMixin()
+    var all = mixin.all_instruments()
+    print("  PASSED")
+    return True
+
+
+def main() raises:
+    print("=== Group 08 File 3: Instruments Mixin Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_instruments_mixin_struct():
-        passed += 1
-    else:
+    try:
+        if test_instruments_mixin_init():
+            passed += 1
+    except:
         failed += 1
     
-    if test_instruments_mixin_methods():
-        passed += 1
-    else:
+    try:
+        if test_instruments_mixin_get_instrument():
+            passed += 1
+    except:
+        failed += 1
+    
+    try:
+        if test_instruments_mixin_all_instruments():
+            passed += 1
+    except:
         failed += 1
     
     print("")
