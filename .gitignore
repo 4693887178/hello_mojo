@@ -11,3 +11,6 @@ wheels/
 
 # Worktrees
 .worktrees/
+
+# Sensitive files (contains tokens)
+github_pr.py

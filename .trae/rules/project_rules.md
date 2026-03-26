@@ -59,3 +59,23 @@ verify-work
 
 * [GSD Agent](./gsd-agents.md)
 * [提问技巧、Git、TDD、配置等可参考](./gsd-references.md)
+
+---
+
+## `/gsd:ship` 命令 SSL 证书问题解决方案
+
+由于系统 SSL 证书配置问题，`gh` CLI 无法使用。使用 Python 脚本替代：
+
+### 一行命令创建 PR
+
+```bash
+GITHUB_TOKEN=ghp_xxx /home/zhou/hello_mojo/trae_cn_78/.venv/bin/python /home/zhou/hello_mojo/trae_cn_78/github_pr.py create "标题" "描述" "分支名"
+```
+
+### 一行命令列出 PR
+
+```bash
+GITHUB_TOKEN=ghp_xxx /home/zhou/hello_mojo/trae_cn_78/.venv/bin/python /home/zhou/hello_mojo/trae_cn_78/github_pr.py list
+```
+
+**注意：** 将 `ghp_xxx` 替换为你的实际 GitHub Token。
