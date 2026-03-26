@@ -1,8 +1,8 @@
-# Test Result: test_plot_store.py
+# Test Result: test_plot_store.py / test_plot_store.mojo
 
 Test Date: Wed Mar 26 2026
 
-## Test Output
+## Python Test Output
 
 ```
 ============================= test session starts ==============================
@@ -25,19 +25,27 @@ mojo_refactor/tests/python/group_08/test_plot_store.py::TestPlotStoreImports::te
 ============================== 11 passed in 1.72s ==============================
 ```
 
+## Mojo Test Output
+
+```
+=== Group 08 File 10: Plot Store Tests ===
+
+Test: PlotStore struct exists
+  PASSED
+Test: PlotStore methods exist
+  PASSED
+Test: add_plot stores data
+  PASSED
+Test: get_plots returns dict
+  PASSED
+
+=== Test Summary ===
+Passed:  4
+Failed:  0
+Total:   4
+```
+
 ## Test Summary
 
-| Test | Status |
-|------|--------|
-| test_plot_store_class_exists | PASSED |
-| test_plot_store_has_add_plot | PASSED |
-| test_plot_store_has_get_plots | PASSED |
-| test_plot_store_has_plot | PASSED |
-| test_add_plot_stores_data | PASSED |
-| test_get_plots_returns_dict | PASSED |
-| test_multiple_series | PASSED |
-| test_import_environment | PASSED |
-| test_import_execution_context | PASSED |
-| test_import_const | PASSED |
-
-**Total: 11 passed, 0 failed**
+**Python: 11 passed, 0 failed**
+**Mojo: 4 passed, 0 failed**

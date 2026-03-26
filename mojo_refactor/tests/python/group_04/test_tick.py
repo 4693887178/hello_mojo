@@ -41,8 +41,8 @@ class TestTickObject(unittest.TestCase):
             'display_name': '平安银行',
             'exchange': 'XSHE',
             'type': 'CS',
-            'listed_date': datetime.date(1991, 4, 3),
-            'de_listed_date': datetime.date(2999, 12, 31),
+            'listed_date': '1991-04-03',
+            'de_listed_date': '2999-12-31',
         }
         return self.Instrument(ins_dict)
 
@@ -215,8 +215,8 @@ class TestTickObjectEdgeCases(unittest.TestCase):
             'display_name': '平安银行',
             'exchange': 'XSHE',
             'type': 'CS',
-            'listed_date': datetime.date(1991, 4, 3),
-            'de_listed_date': datetime.date(2999, 12, 31),
+            'listed_date': '1991-04-03',
+            'de_listed_date': '2999-12-31',
         }
         return self.Instrument(ins_dict)
 
