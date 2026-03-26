@@ -4,7 +4,7 @@ Group 07 - File 08
 """
 
 from rqmojo.mod.rqmojo_mod_sys_simulation.validator import OrderStyleValidator, create_order_style_validator
-from rqmojo.model.order import Order, create_order_with_id
+from rqmojo.model.order import Order, OrderStyle, MarketOrder, create_order_with_id
 from rqmojo.const import ORDER_TYPE, SIDE, POSITION_EFFECT
 
 
@@ -14,6 +14,7 @@ fn create_test_order() raises -> Order:
         order_book_id="000001.XSHE",
         side=SIDE.BUY,
         quantity=100,
+        style=MarketOrder(),
         position_effect=POSITION_EFFECT.OPEN
     )
 

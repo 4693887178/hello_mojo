@@ -15,83 +15,61 @@ def nan_f64() -> Float64:
     return 0.0 / 0.0
 
 
-def create_empty_bar() -> BarObject:
-    var empty_data = BarData(
-        open=0.0,
-        close=0.0,
-        high=0.0,
-        low=0.0,
-        volume=0.0,
-        total_turnover=0.0,
-        limit_up=0.0,
-        limit_down=0.0,
-        settlement=0.0,
-        prev_settlement=0.0,
-        open_interest=0.0,
-        discount_rate=0.0,
-        acc_net_value=0.0,
-        unit_net_value=0.0,
-        basis_spread=0.0,
-        datetime_int=0,
-        prev_close=0.0,
-        last=0.0
-    )
-    return BarObject(
-        _order_book_id="",
-        _instrument=create_stock_instrument("", "", DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHE),
-        _dt=DateTime(1970, 1, 1, 0, 0, 0, 0),
-        _data=empty_data,
-        _limit_up=0.0,
-        _limit_down=0.0,
-        _suspended=False,
-        _trading=False
-    )
-
-
 @fieldwise_init
-struct BarDictPriceBoard(PriceBoard, Movable):
-    var _bar_cache: Dict[String, BarObject]
+struct BarDictPriceBoard(PriceBoard, Writable, Movable):
+    var _last_prices: Dict[String, Float64]
+    var _limit_ups: Dict[String, Float64]
+    var _limit_downs: Dict[String, Float64]
     var _phase: EXECUTION_PHASE
 
-    def _get_bar(mut self, order_book_id: String) -> BarObject:
-        try:
-            return self._bar_cache[order_book_id]
-        except:
-            return create_empty_bar()
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("BarDictPriceBoard()")
 
     def get_last_price(mut self, order_book_id: String) -> Float64:
-        var bar = self._get_bar(order_book_id)
-        return bar.last()
-
+        try:
+            return self._last_prices[order_book_id]
+        except:
+            return nan_f64()
+    
     def get_limit_up(mut self, order_book_id: String) -> Float64:
-        var bar = self._get_bar(order_book_id)
-        return bar.limit_up()
-
+        try:
+            return self._limit_ups[order_book_id]
+        except:
+            return nan_f64()
+    
     def get_limit_down(mut self, order_book_id: String) -> Float64:
-        var bar = self._get_bar(order_book_id)
-        return bar.limit_down()
-
+        try:
+            return self._limit_downs[order_book_id]
+        except:
+            return nan_f64()
+    
     def get_a1(mut self, order_book_id: String) -> Float64:
         return nan_f64()
-
+    
     def get_b1(mut self, order_book_id: String) -> Float64:
         return nan_f64()
-
-    def set_bar(mut self, order_book_id: String, bar: BarObject):
-        self._bar_cache[order_book_id] = bar
-
+    
+    def set_bar(mut self, order_book_id: String, owned bar: BarObject):
+        self._last_prices[order_book_id] = bar.last()
+        self._limit_ups[order_book_id] = bar.limit_up()
+        self._limit_downs[order_book_id] = bar.limit_down()
+    
     def clear_cache(mut self):
-        self._bar_cache.clear()
-
+        self._last_prices.clear()
+        self._limit_ups.clear()
+        self._limit_downs.clear()
+    
     def set_phase(mut self, phase: EXECUTION_PHASE):
         self._phase = phase
-
+    
     def get_phase(self) -> EXECUTION_PHASE:
         return self._phase
 
 
 def create_bar_dict_price_board() -> BarDictPriceBoard:
     return BarDictPriceBoard(
-        _bar_cache=Dict[String, BarObject](),
+        _last_prices=Dict[String, Float64](),
+        _limit_ups=Dict[String, Float64](),
+        _limit_downs=Dict[String, Float64](),
         _phase=EXECUTION_PHASE.BEFORE_TRADING
     )

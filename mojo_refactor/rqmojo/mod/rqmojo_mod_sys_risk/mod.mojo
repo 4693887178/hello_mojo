@@ -49,7 +49,7 @@ struct CashValidator(Movable):
 struct SelfTradeValidator(Movable):
     var _enabled: Bool
     
-    def validate(self, order: Order, existing_orders: List[Order]) -> Bool:
+    def validate_order(self, order: Order) -> Bool:
         return True
     
     def is_enabled(self) -> Bool:

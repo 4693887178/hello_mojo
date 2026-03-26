@@ -11,6 +11,7 @@ from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import (
     Scheduler, TimeRule, create_scheduler,
     market_open_minutes, market_close_minutes, physical_time_minutes
 )
+from python import PythonObject
 
 
 @fieldwise_init
@@ -27,12 +28,12 @@ struct SchedulerMod(Mod, Writable, Movable):
         self._scheduler = Optional[Scheduler](None)
         self._enabled = False
 
-    def start_up(mut self, env: object, mod_config: object):
+    def start_up(mut self, env: PythonObject, mod_config: PythonObject):
         self._enabled = True
         var scheduler = create_scheduler("1d")
         self._scheduler = Optional[Scheduler](scheduler)
 
-    def tear_down(self, code: EXIT_CODE, exception: Optional[object]):
+    def tear_down(self, code: EXIT_CODE, exception: Optional[PythonObject]):
         pass
 
     def get_scheduler(self) -> Optional[Scheduler]:

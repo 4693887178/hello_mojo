@@ -201,6 +201,9 @@ trait ModInterface:
         ...
 
 
+comptime Mod = ModInterface
+
+
 trait PersistProviderInterface:
     def store(mut self, key: String, value: String):
         ...
