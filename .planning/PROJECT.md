@@ -44,36 +44,47 @@ mojo_refactor/
 - Group 06: 依赖数量 2-3 模块 (10 files)
 
 #### Milestone 2: 核心模块重构 (Group 07-09)
-**Status**: 🔄 In Progress
+**Status**: ✅ Completed
 **Description**: 完成依赖数量 3-5 的核心模块重构
 
-**Target Groups**:
+**Completed Groups**:
 - Group 07: 依赖数量 3-4 模块 (10 files)
 - Group 08: 依赖数量 4 模块 (10 files)
 - Group 09: 依赖数量 4-5 模块 (10 files)
 
 #### Milestone 3: 业务层重构 (Group 10-12)
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 **Description**: 完成依赖数量 5-10 的业务层模块重构
 
+**Completed Groups**:
+- Group 10: 依赖数量 5-6 模块 (10 files)
+- Group 11: 依赖数量 6 模块 (10 files)
+- Group 12: 依赖数量 7-10 模块 (10 files)
+
 #### Milestone 4: 入口层重构 (Group 13)
-**Status**: ⏳ Pending
+**Status**: ✅ Completed
 **Description**: 完成依赖数量 15+ 的入口层模块重构
 
-### Current Milestone: Milestone 3 - 完成剩余模块重构
+**Completed Groups**:
+- Group 13: 依赖数量 15+ 模块 (3 files)
 
-**Goal**: 完成剩余 23 个文件的重构工作（Group 08, 09, 13）
+### Current Milestone: Milestone 5 - 集成验证与优化
 
-**Target Groups**:
-- Group 08: 依赖数量 4 模块 (10 files) - cmds/run.py, core/strategy_context.py, data/base_data_source/storage_interface.py 等
-- Group 09: 依赖数量 4-5 模块 (10 files) - mod/rqalpha_mod_sys_analyser/report/report.py, model/instrument.py 等
-- Group 13: 依赖数量 15+ 模块 (3 files) - main.py, __init__.py, utils/testing/integration.py
+**Goal**: 验证所有重构模块的集成正确性，运行完整测试套件，优化性能
+
+**Target**:
+- 验证所有 123 个文件的重构完整性
+- 运行完整 Python 测试套件
+- 运行完整 Mojo 测试套件
+- 性能基准测试
+- 代码审查与清理
 
 **Tasks**:
-- [ ] 创建 Python 测试文件 (23个)
-- [ ] 创建 Mojo 测试文件 (23个)
-- [ ] 实现重构代码
-- [ ] 验证测试通过
+- [ ] 运行完整 Python 测试套件
+- [ ] 运行完整 Mojo 测试套件
+- [ ] 修复失败的测试
+- [ ] 性能基准测试
+- [ ] 代码审查
 
 ### Key Decisions
 1. 使用工厂函数模式 (`create_*()`) 替代直接构造函数
