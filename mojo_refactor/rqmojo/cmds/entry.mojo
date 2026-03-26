@@ -3,7 +3,7 @@ RQAlpha Mojo - Command Line Interface
 Ported from rqalpha/cmds/entry.py
 """
 
-from std.collections import List
+from std.collections import List, Dict
 from rqmojo.const import EXIT_CODE
 
 
@@ -179,3 +179,21 @@ def create_cli_runner() -> CliRunner:
 def run_cli(args: List[String]) -> Int:
     var runner = create_cli_runner()
     return runner.run(args)
+
+
+def inject_mod_commands() -> None:
+    """
+    Inject mod commands into CLI.
+    In Python, this function dynamically adds mod commands to the CLI.
+    In Mojo, we provide a placeholder implementation.
+    """
+    pass
+
+
+def cli(obj: Dict[String, String] = Dict[String, String]()) -> None:
+    """
+    Main CLI entry point.
+    In Python, this is a Click group.
+    In Mojo, we provide a simplified implementation.
+    """
+    show_help()

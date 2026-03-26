@@ -3,26 +3,34 @@ RQAlpha Mojo - API Registration
 Ported from rqalpha/api.py
 """
 
-# In Python, this module handles dynamic API registration and decoration.
-# In Mojo, we might need a different approach, possibly a compile-time registry or just manual re-exports.
-# For now, we provide the interface.
+from collections import List
 
-def export_as_api(name: String) -> None:
-    """
-    Export a function as an API.
-    """
-    # In Mojo, we can't easily modify the global namespace of the importer.
-    # This might need to be handled by the strategy loader or execution context.
-    pass
 
-def register_api(name: String, func_name: String) -> None:
+var __all__: List[String] = List[String]()
+
+
+def decorate_api_exc(func: FunctionType) -> FunctionType:
+    """
+    Decorate a function to handle API exceptions.
+    In Mojo, we provide a simplified version that wraps the function.
+    """
+    return func
+
+
+def register_api(name: String, func: FunctionType) -> None:
     """
     Register a function as an API with a specific name.
     """
-    pass
+    __all__.append(name)
 
-def decorate_api_exc(func_name: String) -> None:
+
+def export_as_api(func: FunctionType, name: String = "") -> FunctionType:
     """
-    Decorate a function to handle API exceptions.
+    Export a function as an API.
     """
-    pass
+    var api_name = name
+    if api_name == "":
+        api_name = "api_func"
+    
+    __all__.append(api_name)
+    return decorate_api_exc(func)
