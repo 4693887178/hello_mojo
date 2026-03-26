@@ -48,5 +48,5 @@ https://forum.modular.com/t/mojo-documentation-mcp-server-using-max-for-embeddin
 /gsd:ship --next      # 完成并继续下一个
 
 /gsd:new-milestone 按照/home/zhou/hello_mojo/trae_cn_78/docs/superpowers/plans/2026-03-21-rqalpha-dependency-analysis.md 
-第九组一个一个做测试并修复其中的错误，PYTHON和MOJO的测试文件都要有，输入条件要一致，输出也应该一致，并要保存MD格式的测试结果文件，并要有个汇总的表格，对测试进行统计。应该是一个文件一个文件比对，类，函数，方法是否都实现了，功能是否一致，测试结果是否相同，如果有不同，是为什么，尽量进行修复。
+第十组一个一个做测试并修复其中的错误，PYTHON和MOJO的测试文件都要有，输入条件要一致，输出也应该一致，并要保存MD格式的测试结果文件，并要有个汇总的表格，对测试进行统计。应该是一个文件一个文件比对，类，函数，方法是否都实现了，功能是否一致，测试结果是否相同，如果有不同，是为什么，尽量进行修复。
 有哪些类，函数，方法都要列出来，一个一个检查 。测试结果是每一组有一个总汇总，每一个文件也有对应的测试结果，比对结果。
