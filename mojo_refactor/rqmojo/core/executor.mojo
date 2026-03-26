@@ -10,14 +10,14 @@ from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
 @fieldwise_init
-struct ExecutorConfig(Copyable, Movable, ImplicitlyCopyable):
+struct ExecutorConfig(Movable):
     var start_date: DateTime
     var end_date: DateTime
     var frequency: String
 
 
 @fieldwise_init
-struct EventSplitTuple(Copyable, Movable, ImplicitlyCopyable):
+struct EventSplitTuple(Copyable, Movable):
     var pre: EVENT
     var main: EVENT
     var post: EVENT
@@ -40,7 +40,7 @@ struct Executor(Movable):
         return EXECUTION_PHASE.GLOBAL
 
     def set_phase(mut self, phase: EXECUTION_PHASE) -> None:
-        self._current_phase_name = phase.name()
+        self._current_phase_name = phase.name
 
     def get_state(self) -> String:
         var year = self._last_before_trading_date // 10000
@@ -184,12 +184,16 @@ def create_executor() -> Executor:
     )
 
 
-def create_executor_with_config(config: ExecutorConfig) -> Executor:
+def create_executor_with_config(config: ExecutorConfig) raises -> Executor:
     return Executor(
         _current_phase_name="GLOBAL",
         _last_before_trading_date=0,
         _event_bus=create_event_bus(),
-        _config=config,
+        _config=ExecutorConfig(
+            start_date=DateTime(config.start_date.year, config.start_date.month, config.start_date.day, config.start_date.hour, config.start_date.minute, config.start_date.second, config.start_date.microsecond),
+            end_date=DateTime(config.end_date.year, config.end_date.month, config.end_date.day, config.end_date.hour, config.end_date.minute, config.end_date.second, config.end_date.microsecond),
+            frequency=config.frequency
+        ),
         _calendar_dt_year=1970,
         _calendar_dt_month=1,
         _calendar_dt_day=1,

@@ -379,8 +379,7 @@ def create_bar_object(
     return BarObject(
         _order_book_id=order_book_id,
         _instrument=ins,
-        _dt=dt,
-        _data=data,
+        _dt=dt,        _data=data,
         _limit_up=limit_up,
         _limit_down=limit_down,
         _suspended=suspended,

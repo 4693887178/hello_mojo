@@ -36,13 +36,13 @@ struct ContextStack(Movable):
 
 
 @fieldwise_init
-struct ExecutionContext(Movable, Writable, ImplicitlyCopyable):
+struct ExecutionContext(Movable, Writable):
     var phase: EXECUTION_PHASE
     var current_datetime: DateTime
     var stack_depth: Int
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("ExecutionContext(", self.phase.name(), ")")
+        writer.write("ExecutionContext(", self.phase.name, ")")
 
     def set_datetime(mut self, dt: DateTime):
         self.current_datetime = dt
@@ -83,7 +83,7 @@ def create_execution_context(phase: EXECUTION_PHASE) -> ExecutionContext:
 def create_bar_execution_context(dt: DateTime) -> ExecutionContext:
     return ExecutionContext(
         phase=EXECUTION_PHASE.ON_BAR,
-        current_datetime=dt,
+        current_datetime=DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond),
         stack_depth=0
     )
 
@@ -91,6 +91,6 @@ def create_bar_execution_context(dt: DateTime) -> ExecutionContext:
 def create_tick_execution_context(dt: DateTime) -> ExecutionContext:
     return ExecutionContext(
         phase=EXECUTION_PHASE.ON_TICK,
-        current_datetime=dt,
+        current_datetime=DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second, dt.microsecond),
         stack_depth=0
     )

@@ -8,17 +8,28 @@ from std.collections import List
 from rqmojo.utils.typing import DateTime, DateTimeDate
 
 
-@fieldwise_init
-struct PositionQueueItem(Copyable, Movable, ImplicitlyCopyable):
+struct PositionQueueItem(Copyable, Movable, ImplicitlyCopyable, Writable):
     """A single item in the position queue representing one opening trade"""
     var date: DateTimeDate
     var quantity: Int
 
-    def __str__(self) -> String:
-        return "PositionQueueItem(date=" + self.date.__str__() + ", qty=" + String(self.quantity) + ")"
+    def __init__(out self, date: DateTimeDate, quantity: Int):
+        self.date = date
+        self.quantity = quantity
+
+    def __init__(out self, *, copy: Self):
+        self.date = copy.date
+        self.quantity = copy.quantity
+
+    def __init__(out self, *, deinit take: Self):
+        self.date = take.date
+        self.quantity = take.quantity
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PositionQueueItem(date=, qty=", String(self.quantity), ")")
 
 
-struct PositionQueue(Copyable, Movable, ImplicitlyCopyable):
+struct PositionQueue(Copyable, Movable, ImplicitlyCopyable, Writable):
     """FIFO queue for tracking position openings"""
     var _items: List[PositionQueueItem]
 
@@ -31,8 +42,8 @@ struct PositionQueue(Copyable, Movable, ImplicitlyCopyable):
     def __init__(out self, *, deinit take: Self):
         self._items = take._items^
 
-    def __str__(self) -> String:
-        return "PositionQueue(items=" + String(len(self._items)) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PositionQueue(items=", String(len(self._items)), ")")
 
     def len(self) -> Int:
         return len(self._items)

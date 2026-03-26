@@ -5,6 +5,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_accounts/__init__.py
 
 from python import click
 from rqmojo import cli
+from .mod import AccountsMod, create_accounts_mod
 
 
 comptime __config__ = {
@@ -21,9 +22,8 @@ comptime __config__ = {
 }
 
 
-def load_mod() raises -> PythonObject:
-    from .mod import AccountMod
-    return AccountMod()
+def load_mod() -> AccountsMod:
+    return create_accounts_mod()
 
 
 def get_cli_prefix() -> String:

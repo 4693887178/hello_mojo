@@ -403,7 +403,7 @@ def test_market():
     print("  MARKET tests passed!")
 
 
-def test_enum_registry():
+def test_enum_registry() raises:
     print("Testing EnumRegistry...")
     
     var registry = EnumRegistry()
