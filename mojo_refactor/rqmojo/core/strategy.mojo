@@ -75,8 +75,8 @@ struct BaseStrategy(Movable, Writable):
 
     def __init__(
         out self,
-        event_bus: EventBus,
-        current_universe: Set[String],
+        var event_bus: EventBus,
+        var current_universe: Set[String],
         callbacks: StrategyCallbacks,
         strategy_name: String,
     ):
@@ -133,15 +133,15 @@ struct BaseStrategy(Movable, Writable):
     def get_universe(self) -> Set[String]:
         return self.current_universe
 
-    def update_universe(mut self, universe: Set[String]) -> None:
-        self.current_universe = universe
+    def update_universe(mut self, var universe: Set[String]) -> None:
+        self.current_universe = universe^
 
 
 struct StrategyEventWrapper(Copyable, Movable, ImplicitlyCopyable, Writable):
     var strategy: BaseStrategy
     var registered_events: List[EVENT]
 
-    def __init__(out self, strategy: BaseStrategy):
+    def __init__(out self, var strategy: BaseStrategy):
         self.strategy = strategy^
         self.registered_events = List[EVENT]()
 
@@ -174,12 +174,13 @@ struct StrategyEventWrapper(Copyable, Movable, ImplicitlyCopyable, Writable):
 
 
 def create_base_strategy(
-    owned event_bus: EventBus,
+    var event_bus: EventBus,
     name: String = "BaseStrategy"
 ) -> BaseStrategy:
+    var universe = Set[String]()
     return BaseStrategy(
-        event_bus=event_bus,
-        current_universe=Set[String](),
+        event_bus=event_bus^,
+        current_universe=universe^,
         callbacks=create_strategy_callbacks(),
         strategy_name=name
     )
