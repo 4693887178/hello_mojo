@@ -4,7 +4,7 @@ Ported from rqalpha/cmds/bundle.py
 """
 
 from rqmojo.utils.typing import DateTime, DateTimeDate
-from rqmojo.utils.i18n import gettext as _
+from rqmojo.utils.i18n import gettext
 
 
 comptime CDN_URL: String = "http://bundle.assets.ricequant.com/bundles_v4/rqbundle_%04d%02d.tar.bz2"
@@ -99,3 +99,22 @@ def check_bundle_data(data_bundle_path: String) -> Bool:
     print("Checking bundle at: ", data_bundle_path)
     print("Note: Actual check requires HDF5 library. Please use Python version.")
     return True
+
+
+@fieldwise_init
+struct BundleCommand(Movable):
+    var name: String
+
+    def __init__() -> Self:
+        return Self(name="bundle")
+
+    def help(self) -> String:
+        return "Bundle management commands"
+
+    def execute(self) -> Int:
+        print("Bundle command executed")
+        return 0
+
+
+def create_bundle_command() -> BundleCommand:
+    return BundleCommand()

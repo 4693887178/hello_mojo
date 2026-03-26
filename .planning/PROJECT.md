@@ -43,34 +43,49 @@ mojo_refactor/
 - Group 05: 依赖数量 2 模块 (10 files)
 - Group 06: 依赖数量 2-3 模块 (10 files)
 
-#### Milestone 2: 核心模块重构 (Group 07-09)
-**Status**: 🔄 In Progress
-**Description**: 完成依赖数量 3-5 的核心模块重构
+#### Milestone 2: 核心模块重构 (Group 07)
+**Status**: ✅ Completed
+**Description**: 完成依赖数量 3-4 的核心模块重构
 
-**Target Groups**:
+**Completed Groups**:
 - Group 07: 依赖数量 3-4 模块 (10 files)
-- Group 08: 依赖数量 4 模块 (10 files)
-- Group 09: 依赖数量 4-5 模块 (10 files)
 
-#### Milestone 3: 业务层重构 (Group 10-12)
+#### Milestone 3: 业务层重构 (Group 08-09)
+**Status**: 🔄 In Progress
+**Description**: 完成依赖数量 4-5 的业务层模块重构
+
+**Groups**:
+- Group 08: 依赖数量 4 模块 (10 files) - 待验证
+- Group 09: 依赖数量 4-5 模块 (10 files) - ✅ 测试通过
+
+#### Milestone 4: 高级业务层重构 (Group 10-12)
 **Status**: ⏳ Pending
-**Description**: 完成依赖数量 5-10 的业务层模块重构
+**Description**: 完成依赖数量 5-10 的高级业务层模块重构
 
-#### Milestone 4: 入口层重构 (Group 13)
+**Groups**:
+- Group 10: 依赖数量 5-6 模块 (10 files)
+- Group 11: 依赖数量 6 模块 (10 files)
+- Group 12: 依赖数量 7-10 模块 (10 files)
+
+#### Milestone 5: 入口层重构 (Group 13)
 **Status**: ⏳ Pending
 **Description**: 完成依赖数量 15+ 的入口层模块重构
 
-### Current Milestone: Group 06 测试整理与修复
+**Groups**:
+- Group 13: 依赖数量 15+ 模块 (3 files)
 
-**Goal**: 整理 Group 06 测试文件，分析并修复 MOJO 和 PYTHON 代码差异
+### Current Milestone: Milestone 3 - 业务层重构 (Group 08-09)
+
+**Goal**: 完成 Group 08-09 的重构和测试验证
+
+**Target**:
+- Group 08: 10 个文件的 Mojo 测试验证
+- Group 09: ✅ 已完成测试验证
 
 **Tasks**:
-- [x] 分析测试目录结构
-- [x] 创建详细测试结果文件 (01-10)
-- [x] 更新 SUMMARY.md
-- [x] 分析代码差异原因
-- [x] 修复主要差异
-- [ ] 验证修复结果
+- [x] Group 09 Mojo 测试修复 (16 files)
+- [ ] Group 08 Mojo 测试验证
+- [ ] 修复 Group 08 编译问题
 
 ### Key Decisions
 1. 使用工厂函数模式 (`create_*()`) 替代直接构造函数

@@ -8,7 +8,8 @@ from rqmojo.model.bar import BarObject
 
 
 trait Slippage:
-    def get_slippage(self, order: Order, bar: BarObject) -> Float64
+    def get_slippage(self, order: Order, bar: BarObject) -> Float64:
+        ...
 
 
 struct FixedSlippage(Slippage, Movable, Copyable):

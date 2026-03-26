@@ -27,10 +27,7 @@ trait Strategy:
         ...
 
 
-@fieldwise_init
-struct StrategyCallbacks(
-    Copyable, Movable, ImplicitlyCopyable
-):
+struct StrategyCallbacks(Copyable, Movable, ImplicitlyCopyable, Writable):
     var has_init: Bool
     var has_before_trading: Bool
     var has_handle_bar: Bool
@@ -38,29 +35,64 @@ struct StrategyCallbacks(
     var has_after_trading: Bool
     var has_open_auction: Bool
 
+    def __init__(out self):
+        self.has_init = False
+        self.has_before_trading = False
+        self.has_handle_bar = False
+        self.has_handle_tick = False
+        self.has_after_trading = False
+        self.has_open_auction = False
+
+    def __init__(out self, *, copy: Self):
+        self.has_init = copy.has_init
+        self.has_before_trading = copy.has_before_trading
+        self.has_handle_bar = copy.has_handle_bar
+        self.has_handle_tick = copy.has_handle_tick
+        self.has_after_trading = copy.has_after_trading
+        self.has_open_auction = copy.has_open_auction
+
+    def __init__(out self, *, deinit take: Self):
+        self.has_init = take.has_init
+        self.has_before_trading = take.has_before_trading
+        self.has_handle_bar = take.has_handle_bar
+        self.has_handle_tick = take.has_handle_tick
+        self.has_after_trading = take.has_after_trading
+        self.has_open_auction = take.has_open_auction
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("StrategyCallbacks()")
+
 
 def create_strategy_callbacks() -> StrategyCallbacks:
-    return StrategyCallbacks(
-        has_init=False,
-        has_before_trading=False,
-        has_handle_bar=False,
-        has_handle_tick=False,
-        has_after_trading=False,
-        has_open_auction=False
-    )
+    return StrategyCallbacks()
 
 
-@fieldwise_init
-struct BaseStrategy(
-    Movable, Stringable
-):
+struct BaseStrategy(Movable, Writable):
     var current_universe: Set[String]
     var callbacks: StrategyCallbacks
     var event_bus: EventBus
     var strategy_name: String
 
-    def __str__(self) -> String:
-        return "Strategy(" + self.strategy_name + ")"
+    def __init__(
+        out self,
+        var event_bus: EventBus,
+        var current_universe: Set[String],
+        callbacks: StrategyCallbacks,
+        strategy_name: String,
+    ):
+        self.event_bus = event_bus^
+        self.current_universe = current_universe^
+        self.callbacks = callbacks
+        self.strategy_name = strategy_name
+
+    def __init__(out self, *, deinit take: Self):
+        self.event_bus = take.event_bus^
+        self.current_universe = take.current_universe^
+        self.callbacks = take.callbacks
+        self.strategy_name = take.strategy_name
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("Strategy(", self.strategy_name, ")")
 
     def register_init(mut self) -> None:
         self.callbacks.has_init = True
@@ -101,16 +133,28 @@ struct BaseStrategy(
     def get_universe(self) -> Set[String]:
         return self.current_universe
 
-    def update_universe(mut self, universe: Set[String]) -> None:
-        self.current_universe = universe
+    def update_universe(mut self, var universe: Set[String]) -> None:
+        self.current_universe = universe^
 
 
-@fieldwise_init
-struct StrategyEventWrapper(
-    Copyable, Movable, ImplicitlyCopyable
-):
+struct StrategyEventWrapper(Copyable, Movable, ImplicitlyCopyable, Writable):
     var strategy: BaseStrategy
     var registered_events: List[EVENT]
+
+    def __init__(out self, var strategy: BaseStrategy):
+        self.strategy = strategy^
+        self.registered_events = List[EVENT]()
+
+    def __init__(out self, *, copy: Self):
+        self.strategy = copy.strategy
+        self.registered_events = copy.registered_events
+
+    def __init__(out self, *, deinit take: Self):
+        self.strategy = take.strategy^
+        self.registered_events = take.registered_events^
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("StrategyEventWrapper()")
 
     def register_events(mut self, event_bus: EventBus) -> None:
         if self.strategy.callbacks.has_before_trading:
@@ -133,9 +177,10 @@ def create_base_strategy(
     var event_bus: EventBus,
     name: String = "BaseStrategy"
 ) -> BaseStrategy:
+    var universe = Set[String]()
     return BaseStrategy(
         event_bus=event_bus^,
-        current_universe=Set[String](),
+        current_universe=universe^,
         callbacks=create_strategy_callbacks(),
         strategy_name=name
     )
