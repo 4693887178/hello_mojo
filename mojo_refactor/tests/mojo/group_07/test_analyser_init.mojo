@@ -4,63 +4,52 @@ Group 07 - File 03
 """
 
 from python import PythonObject
-from rqmojo.mod.rqmojo_mod_sys_analyser import __config__, load_mod, cli_prefix
+from rqmojo.mod.rqmojo_mod_sys_analyser import AnalyserConfig, create_config, get_cli_prefix
 
 
-def test_config_exists() -> Bool:
-    print("Test: __config__ exists")
-    if __config__ is None:
-        raise "__config__ should not be None"
+fn test_config_exists() raises -> Bool:
+    print("Test: AnalyserConfig exists")
+    var config = create_config()
     print("  PASSED")
     return True
 
 
-def test_config_keys() -> Bool:
-    print("Test: __config__ keys")
-    var expected_keys = ["benchmark", "record", "strategy_name", "output_file", 
-                         "report_save_path", "plot", "plot_save_file", "plot_config"]
-    for key in expected_keys:
-        if key not in __config__:
-            raise "Missing config key: " + key
- print("  PASSED")
-    return True
-
-
-def test_load_mod_function() -> Bool:
-    print("Test: load_mod function")
-    if not callable(load_mod):
-        raise "load_mod should be callable"
+fn test_config_defaults() raises -> Bool:
+    print("Test: AnalyserConfig defaults")
+    var config = create_config()
+    if config.record != True:
+        raise "record should be True by default"
+    if config.plot != False:
+        raise "plot should be False by default"
     print("  PASSED")
     return True
 
 
-def test_cli_prefix() -> Bool:
+fn test_cli_prefix() -> Bool:
     print("Test: cli_prefix constant")
-    if cli_prefix != "mod__sys_analyser__":
-    raise "cli_prefix should be 'mod__sys_analyser__'"
+    var prefix = get_cli_prefix()
+    if prefix != "mod__sys_analyser__":
+        return False
     print("  PASSED")
     return True
 
 
-def main() -> None:
+def main() raises:
     print("=== Group 07 File 03: Analyser Init Tests ===")
     print("")
     var passed = 0
     var failed = 0
     
-    if test_config_exists():
-        passed += 1
-    else:
+    try:
+        if test_config_exists():
+            passed += 1
+    except:
         failed += 1
     
-    if test_config_keys():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_load_mod_function():
-        passed += 1
-    else:
+    try:
+        if test_config_defaults():
+            passed += 1
+    except:
         failed += 1
     
     if test_cli_prefix():
