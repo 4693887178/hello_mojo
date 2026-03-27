@@ -4,7 +4,7 @@ Ported from rqalpha/core/events.py
 """
 
 from std.collections import Dict, List
-from utils import Variant
+from std.utils.variant import Variant
 
 
 comptime EventValue = Variant[String, Int, Float64, Bool]
@@ -48,6 +48,10 @@ comptime EventListener = def(Event) -> Bool
 struct EventBus(Movable):
     var listeners: Dict[String, List[EventListener]]
     var user_listeners: Dict[String, List[EventListener]]
+    
+    def __init__(out self):
+        self.listeners = Dict[String, List[EventListener]]()
+        self.user_listeners = Dict[String, List[EventListener]]()
 
     def add_listener(mut self, event_type: String, listener: EventListener, user: Bool = False) raises -> None:
         if user:

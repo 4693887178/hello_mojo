@@ -12,163 +12,88 @@ from rqmojo.const import PERSIST_MODE
 from rqmojo.core.events import EventBus, EVENT
 
 
-def test_file_persist_provider() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_file_persist_provider() raises:
     """Test FilePersistProvider."""
-    print("Test 1: FilePersistProvider")
     var provider = create_file_persist_provider(PERSIST_MODE.ON_CRASH)
     provider.store("key1", "value1")
     var loaded = provider.load("key1")
-    print("  Stored: key1=value1")
-    print("  Loaded: ", loaded)
-    print("  PASS")
-    return True
+    assert_equal(loaded, "value1", "Should load stored value")
 
 
-def test_memory_persist_provider() -> Bool:
+def test_memory_persist_provider() raises:
     """Test MemoryPersistProvider."""
-    print("Test 2: MemoryPersistProvider")
     var provider = create_memory_persist_provider()
     provider.store("key1", "value1")
     var loaded = provider.load("key1")
-    print("  Stored: key1=value1")
-    print("  Loaded: ", loaded)
-    print("  PASS")
-    return True
+    assert_equal(loaded, "value1", "Should load stored value")
 
 
-def test_persist_helper_register() -> Bool:
+def test_persist_helper_register() raises:
     """Test PersistHelper register."""
-    print("Test 3: PersistHelper register")
     var event_bus = create_event_bus()
     var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
-    try:
-        helper.register("obj1", "state1")
-        var count = helper.get_object_count()
-        print("  Registered obj1")
-        print("  Object count: ", count)
-        print("  PASS")
-        return True
-    except:
-        print("  FAIL: Exception raised")
-        return False
+    helper.register("obj1", "state1")
+    var count = helper.get_object_count()
+    assert_equal(count, 1, "Should have 1 object registered")
 
 
-def test_persist_helper_unregister() -> Bool:
+def test_persist_helper_unregister() raises:
     """Test PersistHelper unregister."""
-    print("Test 4: PersistHelper unregister")
     var event_bus = create_event_bus()
     var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
-    try:
-        helper.register("obj1", "state1")
-        var result = helper.unregister("obj1")
-        var count = helper.get_object_count()
-        print("  Unregistered obj1")
-        print("  Result: ", result)
-        print("  Object count: ", count)
-        print("  PASS")
-        return True
-    except:
-        print("  FAIL: Exception raised")
-        return False
+    helper.register("obj1", "state1")
+    var result = helper.unregister("obj1")
+    assert_true(result, "Unregister should return True")
+    var count = helper.get_object_count()
+    assert_equal(count, 0, "Should have 0 objects after unregister")
 
 
-def test_persist_helper_persist() -> Bool:
+def test_persist_helper_persist() raises:
     """Test PersistHelper persist."""
-    print("Test 5: PersistHelper persist")
     var event_bus = create_event_bus()
     var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
-    try:
-        helper.register("obj1", "state1")
-        helper.persist()
-        print("  Persisted obj1")
-        print("  PASS")
-        return True
-    except:
-        print("  FAIL: Exception raised")
-        return False
+    helper.register("obj1", "state1")
+    helper.persist()
+    assert_true(True, "Persist should succeed")
 
 
-def test_persist_helper_get_state() -> Bool:
+def test_persist_helper_get_state() raises:
     """Test PersistHelper get_object_state."""
-    print("Test 6: PersistHelper get_object_state")
     var event_bus = create_event_bus()
     var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
-    try:
-        helper.register("obj1", "state1")
-        var state = helper.get_object_state("obj1")
-        print("  State: ", state)
-        print("  PASS")
-        return True
-    except:
-        print("  FAIL: Exception raised")
-        return False
+    helper.register("obj1", "state1")
+    var state = helper.get_object_state("obj1")
+    assert_equal(state, "state1", "Should get correct state")
 
 
-def test_persist_helper_update_state() -> Bool:
+def test_persist_helper_update_state() raises:
     """Test PersistHelper update_object_state."""
-    print("Test 7: PersistHelper update_object_state")
     var event_bus = create_event_bus()
     var helper = create_persist_helper(event_bus^, PERSIST_MODE.ON_CRASH)
-    try:
-        helper.register("obj1", "state1")
-        helper.update_object_state("obj1", "state2")
-        var state = helper.get_object_state("obj1")
-        print("  Updated state: ", state)
-        print("  PASS")
-        return True
-    except:
-        print("  FAIL: Exception raised")
-        return False
+    helper.register("obj1", "state1")
+    helper.update_object_state("obj1", "state2")
+    var state = helper.get_object_state("obj1")
+    assert_equal(state, "state2", "Should get updated state")
 
 
-def test_compute_hash() -> Bool:
+def test_compute_hash() raises:
     """Test _compute_hash_from_string."""
-    print("Test 8: _compute_hash_from_string")
     var hash1 = _compute_hash_from_string("test")
     var hash2 = _compute_hash_from_string("test")
     var hash3 = _compute_hash_from_string("different")
-    print("  Hash of 'test': ", hash1)
-    print("  Hash of 'test' again: ", hash2)
-    print("  Hash of 'different': ", hash3)
-    print("  Same hash for same input: ", hash1 == hash2)
-    print("  Different hash for different input: ", hash1 != hash3)
-    print("  PASS")
-    return True
+    assert_equal(hash1, hash2, "Same input should produce same hash")
+    assert_true(hash1 != hash3, "Different input should produce different hash")
 
 
-def test_persist_provider_str() -> Bool:
+def test_persist_provider_str() raises:
     """Test PersistProvider __str__."""
-    print("Test 9: PersistProvider __str__")
     var file_provider = create_file_persist_provider(PERSIST_MODE.ON_CRASH)
     var mem_provider = create_memory_persist_provider()
-    print("  FilePersistProvider: ", file_provider.__str__())
-    print("  MemoryPersistProvider: ", mem_provider.__str__())
-    print("  PASS")
-    return True
+    assert_true(len(file_provider.__str__()) > 0, "FilePersistProvider should have string representation")
+    assert_true(len(mem_provider.__str__()) > 0, "MemoryPersistProvider should have string representation")
 
 
 def main() raises:
-    print("=" * 60)
-    print("Mojo persist_helper.mojo Test")
-    print("=" * 60)
-    
-    var results = List[Bool]()
-    results.append(test_file_persist_provider())
-    results.append(test_memory_persist_provider())
-    results.append(test_persist_helper_register())
-    results.append(test_persist_helper_unregister())
-    results.append(test_persist_helper_persist())
-    results.append(test_persist_helper_get_state())
-    results.append(test_persist_helper_update_state())
-    results.append(test_compute_hash())
-    results.append(test_persist_provider_str())
-    
-    var passed = 0
-    for r in results:
-        if r:
-            passed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, "/", len(results), " passed")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

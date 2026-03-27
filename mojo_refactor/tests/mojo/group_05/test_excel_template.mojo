@@ -6,19 +6,22 @@
 from rqmojo.mod.rqmojo_mod_sys_analyser.report.excel_template import ExcelTemplate, generate_csv_content, generate_summary_csv
 
 
-def test_excel_template_constants() -> Bool:
-    return ExcelTemplate.SHEET_SUMMARY == "Summary" and ExcelTemplate.SHEET_TRADES == "Trades"
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_excel_template_constants() raises:
+    assert_equal(ExcelTemplate.SHEET_SUMMARY, "Summary", "SHEET_SUMMARY should match")
+    assert_equal(ExcelTemplate.SHEET_TRADES, "Trades", "SHEET_TRADES should match")
 
 
-def test_generate_csv_content_empty() -> Bool:
+def test_generate_csv_content_empty() raises:
     var headers = List[String]()
     var rows = List[List[String]]()
     
     var content = generate_csv_content(headers, rows)
-    return content == "\n"
+    assert_equal(content, "\n", "empty content should be newline")
 
 
-def test_generate_csv_content_single_row() -> Bool:
+def test_generate_csv_content_single_row() raises:
     var headers = List[String]()
     headers.append("Name")
     headers.append("Value")
@@ -30,10 +33,11 @@ def test_generate_csv_content_single_row() -> Bool:
     rows.append(row^)
     
     var content = generate_csv_content(headers, rows)
-    return content.find("Name") >= 0 and content.find("Value") >= 0
+    assert_true(content.find("Name") >= 0, "should contain Name")
+    assert_true(content.find("Value") >= 0, "should contain Value")
 
 
-def test_generate_csv_content_multiple_rows() -> Bool:
+def test_generate_csv_content_multiple_rows() raises:
     var headers = List[String]()
     headers.append("Metric")
     headers.append("Value")
@@ -51,77 +55,27 @@ def test_generate_csv_content_multiple_rows() -> Bool:
     rows.append(row2^)
     
     var content = generate_csv_content(headers, rows)
-    return content.find("Returns") >= 0 and content.find("Sharpe") >= 0
+    assert_true(content.find("Returns") >= 0, "should contain Returns")
+    assert_true(content.find("Sharpe") >= 0, "should contain Sharpe")
 
 
-def test_generate_summary_csv() raises -> Bool:
+def test_generate_summary_csv() raises:
     var data = Dict[String, String]()
     data["total_returns"] = "10%"
     data["sharpe"] = "1.5"
     data["max_drawdown"] = "5%"
     
     var content = generate_summary_csv(data)
-    return content.find("Metric") >= 0 and content.find("total_returns") >= 0
+    assert_true(content.find("Metric") >= 0, "should contain Metric")
+    assert_true(content.find("total_returns") >= 0, "should contain total_returns")
 
 
-def test_generate_summary_csv_empty() raises -> Bool:
+def test_generate_summary_csv_empty() raises:
     var data = Dict[String, String]()
     
     var content = generate_summary_csv(data)
-    return content.find("Metric") >= 0
+    assert_true(content.find("Metric") >= 0, "should contain Metric")
 
 
 def main() raises:
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_analyser/report/excel_template.mojo")
-    print("=" * 60)
-    
-    if test_excel_template_constants():
-        print("PASS: test_excel_template_constants")
-        passed += 1
-    else:
-        print("FAIL: test_excel_template_constants")
-        failed += 1
-    
-    if test_generate_csv_content_empty():
-        print("PASS: test_generate_csv_content_empty")
-        passed += 1
-    else:
-        print("FAIL: test_generate_csv_content_empty")
-        failed += 1
-    
-    if test_generate_csv_content_single_row():
-        print("PASS: test_generate_csv_content_single_row")
-        passed += 1
-    else:
-        print("FAIL: test_generate_csv_content_single_row")
-        failed += 1
-    
-    if test_generate_csv_content_multiple_rows():
-        print("PASS: test_generate_csv_content_multiple_rows")
-        passed += 1
-    else:
-        print("FAIL: test_generate_csv_content_multiple_rows")
-        failed += 1
-    
-    if test_generate_summary_csv():
-        print("PASS: test_generate_summary_csv")
-        passed += 1
-    else:
-        print("FAIL: test_generate_summary_csv")
-        failed += 1
-    
-    if test_generate_summary_csv_empty():
-        print("PASS: test_generate_summary_csv_empty")
-        passed += 1
-    else:
-        print("FAIL: test_generate_summary_csv_empty")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

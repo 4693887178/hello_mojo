@@ -9,7 +9,7 @@ from rqmojo.utils.datetime_func import TimeRange
 
 
 def is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
-    return ins_type == INSTRUMENT_TYPE_CS or ins_type == INSTRUMENT_TYPE_ETF or ins_type == INSTRUMENT_TYPE_LOF or ins_type == INSTRUMENT_TYPE_INDX or ins_type == INSTRUMENT_TYPE_BOND
+    return ins_type == INSTRUMENT_TYPE.CS or ins_type == INSTRUMENT_TYPE.ETF or ins_type == INSTRUMENT_TYPE.LOF or ins_type == INSTRUMENT_TYPE.INDX or ins_type == INSTRUMENT_TYPE.BOND
 
 
 def fix_date(ds: String, dflt: DateTime) raises -> DateTime:
@@ -84,7 +84,7 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         return self.underlying_symbol_val
     
     def board_type(self) -> String:
-        if self.type_val == INSTRUMENT_TYPE_CS:
+        if self.type_val == INSTRUMENT_TYPE.CS:
             if self.order_book_id_val.startswith("688"):
                 return "KSH"
             elif self.order_book_id_val.startswith("8") or self.order_book_id_val.startswith("4"):

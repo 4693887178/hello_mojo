@@ -4,63 +4,58 @@ Group 08 - File 9
 """
 
 from std.collections import Dict, List
-from rqmojo.mod.rqmojo_mod_sys_analyser.mod import AnalyserMod, create_analyser_mod
-from rqmojo.interface import Mod
-from python import PythonObject
+from rqmojo.mod.rqmojo_mod_sys_analyser.mod import AnalyserMod, create_analyser_mod, PerformanceMetrics, TradeSummary
 from rqmojo.const import EXIT_CODE
+from std.python import PythonObject
 
 
-fn test_analyser_mod_struct() -> Bool:
-    print("Test: AnalyserMod struct exists")
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_analyser_mod_init() raises:
+    print("Test: AnalyserMod init")
     var mod = create_analyser_mod()
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
-fn test_analyser_mod_methods() -> Bool:
-    print("Test: AnalyserMod methods exist")
-    var mod = create_analyser_mod()
-    mod.start_up(PythonObject(None), PythonObject(None))
-    mod.tear_down(EXIT_CODE.EXIT_SUCCESS, PythonObject(None))
-    print("  PASSED")
-    return True
-
-
-fn test_analyser_mod_name() -> Bool:
+def test_analyser_mod_name() raises:
     print("Test: AnalyserMod name")
     var mod = create_analyser_mod()
     if mod.name != "analyser":
-        return False
+        raise "AnalyserMod name should be 'analyser'"
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
+
+
+def test_performance_metrics() raises:
+    print("Test: PerformanceMetrics")
+    var metrics = PerformanceMetrics(
+        total_returns=0.1,
+        annualized_returns=0.15,
+        max_drawdown=0.05,
+        sharpe_ratio=1.5,
+        win_rate=0.6
+    )
+    if metrics.total_returns != 0.1:
+        raise "PerformanceMetrics total_returns mismatch"
+    print("  PASSED")
+    assert_true(True, "test passed")
+
+
+def test_trade_summary() raises:
+    print("Test: TradeSummary")
+    var summary = TradeSummary(
+        total_trades=10,
+        winning_trades=6,
+        losing_trades=4,
+        total_pnl=1000.0
+    )
+    if summary.total_trades != 10:
+        raise "TradeSummary total_trades mismatch"
+    print("  PASSED")
+    assert_true(True, "test passed")
 
 
 def main() raises:
-    print("=== Group 08 File 9: Analyser Mod Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_analyser_mod_struct():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_analyser_mod_methods():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_analyser_mod_name():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

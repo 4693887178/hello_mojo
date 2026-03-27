@@ -5,65 +5,33 @@ Group 09 - File 4
 
 from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import Scheduler, TimeRule, create_scheduler
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_scheduler_init() -> Bool:
+def test_scheduler_init() raises:
     print("Test: Scheduler init")
-    var scheduler = create_scheduler("1d")
+    var _ = create_scheduler("1d")
     print("  PASSED")
-    return True
 
 
-fn test_scheduler_schedule_daily() -> Bool:
+def test_scheduler_schedule_daily() raises:
     print("Test: Scheduler schedule_daily")
     var scheduler = create_scheduler("1d")
     var time_rule = TimeRule.market_open(0, 0)
     scheduler.schedule_daily("my_func", time_rule)
     print("  PASSED")
-    return True
 
 
-fn test_time_rule_market_open() -> Bool:
+def test_time_rule_market_open() raises:
     print("Test: TimeRule market_open")
-    var rule = TimeRule.market_open(0, 0)
+    var _ = TimeRule.market_open(0, 0)
     print("  PASSED")
-    return True
 
 
-fn test_time_rule_market_close() -> Bool:
+def test_time_rule_market_close() raises:
     print("Test: TimeRule market_close")
-    var rule = TimeRule.market_close(0, 0)
+    var _ = TimeRule.market_close(0, 0)
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 4: Scheduler Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    if test_scheduler_init():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_scheduler_schedule_daily():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_time_rule_market_open():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_time_rule_market_close():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

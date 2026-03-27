@@ -16,100 +16,58 @@ from rqmojo.cmds.mod import (
 )
 
 
-def test_mod_info() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_mod_info() raises:
     print("Test: ModInfo struct")
     var info = ModInfo(name="test", enabled=True, description="Test mod")
     print("  ModInfo created: ", info.name, " - ", info.description)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_mod_command() -> Bool:
+def test_mod_command() raises:
     print("Test: ModCommand struct")
     var cmd = ModCommand(action="list", mod_name="test")
     print("  ModCommand created: ", cmd.action, " - ", cmd.mod_name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_get_builtin_mods() -> Bool:
+def test_get_builtin_mods() raises:
     print("Test: get_builtin_mods function")
     var mods = get_builtin_mods()
     print("  Found ", len(mods), " builtin mods")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_list_mods() -> Bool:
+def test_list_mods() raises:
     print("Test: list_mods function")
     var mods = list_mods()
     print("  Found ", len(mods), " mods")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_enable_mod() -> Bool:
+def test_enable_mod() raises:
     print("Test: enable_mod function")
     var result = enable_mod("simulation")
     print("  enable_mod returned: ", result)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_disable_mod() -> Bool:
+def test_disable_mod() raises:
     print("Test: disable_mod function")
     var result = disable_mod("simulation")
     print("  disable_mod returned: ", result)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_run_mod_command_list() -> Bool:
+def test_run_mod_command_list() raises:
     print("Test: run_mod_command with list action")
     var params = List[String]()
     var result = run_mod_command("list", params)
     print("  run_mod_command list returned: ", result)
-    return True
+    assert_true(True, "test passed")
 
 
-def main() -> None:
-    print("=== Group 06 File 07: Mod Commands Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    if test_mod_info():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_mod_command():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_get_builtin_mods():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_list_mods():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_enable_mod():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_disable_mod():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_run_mod_command_list():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

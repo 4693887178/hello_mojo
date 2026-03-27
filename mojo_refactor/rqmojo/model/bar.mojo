@@ -138,7 +138,7 @@ struct PartialBarObject(Writable, Movable):
 
 
 @fieldwise_init
-struct BarObject(Writable, Movable):
+struct BarObject(Writable, Copyable, Movable, ImplicitlyCopyable):
     var _order_book_id: String
     var _instrument: Instrument
     var _dt: DateTime

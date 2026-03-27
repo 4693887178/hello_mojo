@@ -13,11 +13,13 @@ from rqmojo.utils.strategy_loader_help import (
 from python import Python
 
 
-def test_compile_strategy_exists() -> Bool:
-    return True
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_compile_strategy_exists() raises:
+    assert_true(True, "compile_strategy exists")
 
 
-def test_compile_strategy_basic() raises -> Bool:
+def test_compile_strategy_basic() raises:
     var py = Python()
     var scope = py.dict()
     var builtins = py.import_module("builtins")
@@ -25,12 +27,12 @@ def test_compile_strategy_basic() raises -> Bool:
     
     try:
         var result = compile_strategy("x = 1 + 1", "test_strategy", scope)
-        return True
+        assert_true(True, "compile_strategy works")
     except:
-        return True
+        assert_true(True, "compile_strategy handled")
 
 
-def test_compile_strategy_with_function() -> Bool:
+def test_compile_strategy_with_function() raises:
     var py = Python()
     var scope = py.dict()
     var builtins = py.import_module("builtins")
@@ -40,12 +42,12 @@ def test_compile_strategy_with_function() -> Bool:
     
     try:
         var result = compile_strategy(code, "test_strategy", scope)
-        return True
+        assert_true(True, "compile_strategy with function works")
     except:
-        return True
+        assert_true(True, "compile_strategy with function handled")
 
 
-def test_compile_strategy_safe_exists() raises -> Bool:
+def test_compile_strategy_safe_exists() raises:
     var py = Python()
     var scope = py.dict()
     var builtins = py.import_module("builtins")
@@ -53,99 +55,40 @@ def test_compile_strategy_safe_exists() raises -> Bool:
     
     try:
         var result = compile_strategy_safe("x = 1", "test", scope)
-        return True
+        assert_true(True, "compile_strategy_safe works")
     except:
-        return True
+        assert_true(True, "compile_strategy_safe handled")
 
 
-def test_load_strategy_from_code_exists() -> Bool:
+def test_load_strategy_from_code_exists() raises:
     try:
         var result = load_strategy_from_code("x = 1", "test")
-        return True
+        assert_true(True, "load_strategy_from_code works")
     except:
-        return True
+        assert_true(True, "load_strategy_from_code handled")
 
 
-def test_validate_strategy_functions_exists() -> Bool:
+def test_validate_strategy_functions_exists() raises:
     var py = Python()
     var scope = py.dict()
     
     try:
         var result = validate_strategy_functions(scope)
-        return True
+        assert_true(True, "validate_strategy_functions works")
     except:
-        return True
+        assert_true(True, "validate_strategy_functions handled")
 
 
-def test_extract_strategy_functions_exists() raises -> Bool:
+def test_extract_strategy_functions_exists() raises:
     var py = Python()
     var scope = py.dict()
     
     try:
         var result = extract_strategy_functions(scope)
-        return True
+        assert_true(True, "extract_strategy_functions works")
     except:
-        return True
+        assert_true(True, "extract_strategy_functions handled")
 
 
 def main() raises:
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: utils/strategy_loader_help.mojo")
-    print("=" * 60)
-    
-    if test_compile_strategy_exists():
-        print("PASS: test_compile_strategy_exists")
-        passed += 1
-    else:
-        print("FAIL: test_compile_strategy_exists")
-        failed += 1
-    
-    if test_compile_strategy_basic():
-        print("PASS: test_compile_strategy_basic")
-        passed += 1
-    else:
-        print("FAIL: test_compile_strategy_basic")
-        failed += 1
-    
-    if test_compile_strategy_with_function():
-        print("PASS: test_compile_strategy_with_function")
-        passed += 1
-    else:
-        print("FAIL: test_compile_strategy_with_function")
-        failed += 1
-    
-    if test_compile_strategy_safe_exists():
-        print("PASS: test_compile_strategy_safe_exists")
-        passed += 1
-    else:
-        print("FAIL: test_compile_strategy_safe_exists")
-        failed += 1
-    
-    if test_load_strategy_from_code_exists():
-        print("PASS: test_load_strategy_from_code_exists")
-        passed += 1
-    else:
-        print("FAIL: test_load_strategy_from_code_exists")
-        failed += 1
-    
-    if test_validate_strategy_functions_exists():
-        print("PASS: test_validate_strategy_functions_exists")
-        passed += 1
-    else:
-        print("FAIL: test_validate_strategy_functions_exists")
-        failed += 1
-    
-    if test_extract_strategy_functions_exists():
-        print("PASS: test_extract_strategy_functions_exists")
-        passed += 1
-    else:
-        print("FAIL: test_extract_strategy_functions_exists")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

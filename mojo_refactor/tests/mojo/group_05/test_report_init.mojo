@@ -8,7 +8,9 @@ from rqmojo.mod.rqmojo_mod_sys_analyser.report import ExcelTemplate, generate_cs
 from rqmojo.utils.typing import DateTime
 
 
-def test_strategy_result_creation() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_strategy_result_creation() raises:
     var sd = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var ed = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var result = StrategyResult(
@@ -22,10 +24,10 @@ def test_strategy_result_creation() -> Bool:
         win_rate=0.6,
         profit_loss_ratio=2.0
     )
-    return result.total_returns == 0.1
+    assert_equal(result.total_returns, 0.1, "total_returns should match")
 
 
-def test_strategy_result_to_dict() -> Bool:
+def test_strategy_result_to_dict() raises:
     var sd = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var ed = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var result = StrategyResult(
@@ -40,10 +42,10 @@ def test_strategy_result_to_dict() -> Bool:
         profit_loss_ratio=2.0
     )
     var d = result.to_dict()
-    return "total_returns" in d
+    assert_true("total_returns" in d, "should contain total_returns")
 
 
-def test_report_creation() -> Bool:
+def test_report_creation() raises:
     var sd = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var ed = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var result = StrategyResult(
@@ -64,10 +66,10 @@ def test_report_creation() -> Bool:
         nav_list=List[Float64](),
         trade_list=List[Dict[String, String]]()
     )
-    return report.strategy_name == "test_strategy"
+    assert_equal(report.strategy_name, "test_strategy", "strategy_name should match")
 
 
-def test_report_generate_summary() -> Bool:
+def test_report_generate_summary() raises:
     var sd = DateTime(2020, 1, 1, 0, 0, 0, 0)
     var ed = DateTime(2020, 12, 31, 0, 0, 0, 0)
     var result = StrategyResult(
@@ -89,10 +91,10 @@ def test_report_generate_summary() -> Bool:
         trade_list=List[Dict[String, String]]()
     )
     var summary = report.generate_summary()
-    return summary.find("test_strategy") >= 0
+    assert_true(summary.find("test_strategy") >= 0, "should contain strategy name")
 
 
-def test_create_report() -> Bool:
+def test_create_report() raises:
     var nav_list = List[Float64]()
     nav_list.append(1.0)
     nav_list.append(1.05)
@@ -111,14 +113,15 @@ def test_create_report() -> Bool:
         win_count=6,
         loss_count=4
     )
-    return report.strategy_name == "test"
+    assert_equal(report.strategy_name, "test", "strategy_name should match")
 
 
-def test_excel_template_constants() -> Bool:
-    return ExcelTemplate.SHEET_SUMMARY == "Summary" and ExcelTemplate.SHEET_TRADES == "Trades"
+def test_excel_template_constants() raises:
+    assert_equal(ExcelTemplate.SHEET_SUMMARY, "Summary", "SHEET_SUMMARY should match")
+    assert_equal(ExcelTemplate.SHEET_TRADES, "Trades", "SHEET_TRADES should match")
 
 
-def test_generate_csv_content() -> Bool:
+def test_generate_csv_content() raises:
     var headers = List[String]()
     headers.append("Name")
     headers.append("Value")
@@ -130,83 +133,17 @@ def test_generate_csv_content() -> Bool:
     rows.append(row^)
     
     var content = generate_csv_content(headers, rows)
-    return content.find("Name") >= 0
+    assert_true(content.find("Name") >= 0, "should contain Name")
 
 
-def test_generate_summary_csv() raises -> Bool:
+def test_generate_summary_csv() raises:
     var data = Dict[String, String]()
     data["total_returns"] = "10%"
     data["sharpe"] = "1.5"
     
     var content = generate_summary_csv(data)
-    return content.find("Metric") >= 0
+    assert_true(content.find("Metric") >= 0, "should contain Metric")
 
 
 def main() raises:
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_analyser/report/__init__.mojo")
-    print("=" * 60)
-    
-    if test_strategy_result_creation():
-        print("PASS: test_strategy_result_creation")
-        passed += 1
-    else:
-        print("FAIL: test_strategy_result_creation")
-        failed += 1
-    
-    if test_strategy_result_to_dict():
-        print("PASS: test_strategy_result_to_dict")
-        passed += 1
-    else:
-        print("FAIL: test_strategy_result_to_dict")
-        failed += 1
-    
-    if test_report_creation():
-        print("PASS: test_report_creation")
-        passed += 1
-    else:
-        print("FAIL: test_report_creation")
-        failed += 1
-    
-    if test_report_generate_summary():
-        print("PASS: test_report_generate_summary")
-        passed += 1
-    else:
-        print("FAIL: test_report_generate_summary")
-        failed += 1
-    
-    if test_create_report():
-        print("PASS: test_create_report")
-        passed += 1
-    else:
-        print("FAIL: test_create_report")
-        failed += 1
-    
-    if test_excel_template_constants():
-        print("PASS: test_excel_template_constants")
-        passed += 1
-    else:
-        print("FAIL: test_excel_template_constants")
-        failed += 1
-    
-    if test_generate_csv_content():
-        print("PASS: test_generate_csv_content")
-        passed += 1
-    else:
-        print("FAIL: test_generate_csv_content")
-        failed += 1
-    
-    if test_generate_summary_csv():
-        print("PASS: test_generate_summary_csv")
-        passed += 1
-    else:
-        print("FAIL: test_generate_summary_csv")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

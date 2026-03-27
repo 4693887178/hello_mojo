@@ -6,57 +6,27 @@ Group 09 - File 1
 from rqmojo.cmds.bundle import BundleCommand, create_bundle_command
 from std.collections import Dict
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_bundle_command_init() -> Bool:
+def test_bundle_command_init() raises:
     print("Test: BundleCommand init")
-    var cmd = create_bundle_command()
+    var _ = create_bundle_command()
     print("  PASSED")
-    return True
 
 
-fn test_bundle_command_name() -> Bool:
+def test_bundle_command_name() raises:
     print("Test: BundleCommand name")
     var cmd = create_bundle_command()
-    if cmd.name != "bundle":
-        return False
+    assert_equal(cmd.name, "bundle", "Command name should be 'bundle'")
     print("  PASSED")
-    return True
 
 
-fn test_bundle_command_help() -> Bool:
+def test_bundle_command_help() raises:
     print("Test: BundleCommand help")
     var cmd = create_bundle_command()
-    var help_text = cmd.help()
+    var _ = cmd.help()
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 1: Bundle Command Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_bundle_command_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_bundle_command_name():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_bundle_command_help():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

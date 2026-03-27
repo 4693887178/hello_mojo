@@ -12,17 +12,20 @@ from rqmojo.data.base_data_source.deprecated import (
 from rqmojo.const import INSTRUMENT_TYPE
 
 
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
 def test_deprecated_get_price() raises:
     """Test that deprecated_get_price returns 0.0."""
     var price = deprecated_get_price("000001.XSHE", "2024-01-01")
-    assert price == 0.0, "deprecated_get_price should return 0.0"
+    assert_equal(price, 0.0, "deprecated_get_price should return 0.0")
     print("  deprecated_get_price test passed!")
 
 
 def test_deprecated_get_volume() raises:
     """Test that deprecated_get_volume returns 0."""
     var volume = deprecated_get_volume("000001.XSHE", "2024-01-01")
-    assert volume == 0, "deprecated_get_volume should return 0"
+    assert_equal(volume, 0, "deprecated_get_volume should return 0")
     print("  deprecated_get_volume test passed!")
 
 
@@ -34,7 +37,7 @@ def test_deprecated_warning_creation() raises:
         since_version="1.0.0",
         removed_in_version="2.0.0"
     )
-    assert warning.function_name == "old_function", "function_name should match"
+    assert_equal(warning.function_name, "old_function", "function_name should match")
     print("  DeprecatedWarning creation test passed!")
 
 
@@ -51,15 +54,4 @@ def test_warn_deprecated() raises:
 
 
 def main() raises:
-    print("============================================================")
-    print("Testing data/base_data_source/deprecated.mojo")
-    print("============================================================")
-    
-    test_deprecated_get_price()
-    test_deprecated_get_volume()
-    test_deprecated_warning_creation()
-    test_warn_deprecated()
-    
-    print("============================================================")
-    print("All data/base_data_source/deprecated.mojo tests passed!")
-    print("============================================================")
+    TestSuite.discover_tests[__functions_in_module()]().run()

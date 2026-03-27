@@ -6,136 +6,66 @@
 from rqmojo.utils.testing import RQAlphaTestCase
 
 
-def test_RQAlphaTestCase_exists() -> Bool:
-    var tc = RQAlphaTestCase()
-    return True
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_RQAlphaTestCase_exists() raises:
+    var _ = RQAlphaTestCase()
+    assert_true(True, "RQAlphaTestCase exists")
 
 
-def test_init_fixture_exists() -> Bool:
+def test_init_fixture_exists() raises:
     var tc = RQAlphaTestCase()
     tc.init_fixture()
-    return True
+    assert_true(True, "init_fixture works")
 
 
-def test_assert_equal() -> Bool:
+def test_assert_equal() raises:
     var tc = RQAlphaTestCase()
-    return tc.assert_equal(42, 42, "test equal")
+    var result = tc.assert_equal(42, 42, "test equal")
+    assert_true(result, "assert_equal should pass")
 
 
-def test_assert_equal_float() -> Bool:
+def test_assert_equal_float() raises:
     var tc = RQAlphaTestCase()
-    return tc.assert_equal_float(3.14, 3.14, "test float equal")
+    var result = tc.assert_equal_float(3.14, 3.14, "test float equal")
+    assert_true(result, "assert_equal_float should pass")
 
 
-def test_assert_equal_string() -> Bool:
+def test_assert_equal_string() raises:
     var tc = RQAlphaTestCase()
-    return tc.assert_equal_string("hello", "hello", "test string equal")
+    var result = tc.assert_equal_string("hello", "hello", "test string equal")
+    assert_true(result, "assert_equal_string should pass")
 
 
-def test_assert_true() -> Bool:
+def test_assert_true() raises:
     var tc = RQAlphaTestCase()
-    return tc.assert_true(True, "test true")
+    var result = tc.assert_true(True, "test true")
+    assert_true(result, "assert_true should pass")
 
 
-def test_assert_false() -> Bool:
+def test_assert_false() raises:
     var tc = RQAlphaTestCase()
-    return tc.assert_false(False, "test false")
+    var result = tc.assert_false(False, "test false")
+    assert_true(result, "assert_false should pass")
 
 
-def test_assert_equal_fail() -> Bool:
+def test_assert_equal_fail() raises:
     var tc = RQAlphaTestCase()
-    return not tc.assert_equal(1, 2, "expected fail")
+    var result = tc.assert_equal(1, 2, "expected fail")
+    assert_false(result, "assert_equal should fail for different values")
 
 
-def test_assert_true_fail() -> Bool:
+def test_assert_true_fail() raises:
     var tc = RQAlphaTestCase()
-    return not tc.assert_true(False, "expected fail")
+    var result = tc.assert_true(False, "expected fail")
+    assert_false(result, "assert_true should fail for False")
 
 
-def test_assert_false_fail() -> Bool:
+def test_assert_false_fail() raises:
     var tc = RQAlphaTestCase()
-    return not tc.assert_false(True, "expected fail")
+    var result = tc.assert_false(True, "expected fail")
+    assert_false(result, "assert_false should fail for True")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: utils/testing/__init__.mojo")
-    print("=" * 60)
-    
-    if test_RQAlphaTestCase_exists():
-        print("PASS: test_RQAlphaTestCase_exists")
-        passed += 1
-    else:
-        print("FAIL: test_RQAlphaTestCase_exists")
-        failed += 1
-    
-    if test_init_fixture_exists():
-        print("PASS: test_init_fixture_exists")
-        passed += 1
-    else:
-        print("FAIL: test_init_fixture_exists")
-        failed += 1
-    
-    if test_assert_equal():
-        print("PASS: test_assert_equal")
-        passed += 1
-    else:
-        print("FAIL: test_assert_equal")
-        failed += 1
-    
-    if test_assert_equal_float():
-        print("PASS: test_assert_equal_float")
-        passed += 1
-    else:
-        print("FAIL: test_assert_equal_float")
-        failed += 1
-    
-    if test_assert_equal_string():
-        print("PASS: test_assert_equal_string")
-        passed += 1
-    else:
-        print("FAIL: test_assert_equal_string")
-        failed += 1
-    
-    if test_assert_true():
-        print("PASS: test_assert_true")
-        passed += 1
-    else:
-        print("FAIL: test_assert_true")
-        failed += 1
-    
-    if test_assert_false():
-        print("PASS: test_assert_false")
-        passed += 1
-    else:
-        print("FAIL: test_assert_false")
-        failed += 1
-    
-    if test_assert_equal_fail():
-        print("PASS: test_assert_equal_fail")
-        passed += 1
-    else:
-        print("FAIL: test_assert_equal_fail")
-        failed += 1
-    
-    if test_assert_true_fail():
-        print("PASS: test_assert_true_fail")
-        passed += 1
-    else:
-        print("FAIL: test_assert_true_fail")
-        failed += 1
-    
-    if test_assert_false_fail():
-        print("PASS: test_assert_false_fail")
-        passed += 1
-    else:
-        print("FAIL: test_assert_false_fail")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

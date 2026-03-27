@@ -12,129 +12,62 @@ from rqmojo.utils.class_helper import (
 )
 
 
-def test_cached_property_exists() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_cached_property_exists() raises:
     var cp = cached_property("test_prop")
-    return cp.name == "test_prop"
+    assert_equal(cp.name, "test_prop", "name should match")
 
 
-def test_cached_property_init() -> Bool:
+def test_cached_property_init() raises:
     var cp = cached_property("test_prop")
-    return not cp.is_cached()
+    assert_false(cp.is_cached(), "should not be cached initially")
 
 
-def test_cached_property_with_value() -> Bool:
+def test_cached_property_with_value() raises:
     var cp = cached_property("test_prop", "test_value")
-    return cp.is_cached() and cp.get_value() == "test_value"
+    assert_true(cp.is_cached(), "should be cached")
+    assert_equal(cp.get_value(), "test_value", "value should match")
 
 
-def test_cached_property_set_value() -> Bool:
+def test_cached_property_set_value() raises:
     var cp = cached_property("test_prop")
     cp.set_value("new_value")
-    return cp.is_cached() and cp.get_value() == "new_value"
+    assert_true(cp.is_cached(), "should be cached after set")
+    assert_equal(cp.get_value(), "new_value", "value should match")
 
 
-def test_make_cached_property() -> Bool:
+def test_make_cached_property() raises:
     var cp = make_cached_property("test", "value")
-    return cp.is_cached() and cp.get_value() == "value"
+    assert_true(cp.is_cached(), "should be cached")
+    assert_equal(cp.get_value(), "value", "value should match")
 
 
-def test_CachedProperty_alias() -> Bool:
+def test_CachedProperty_alias() raises:
     var cp = CachedProperty("alias_test")
-    return cp.name == "alias_test"
+    assert_equal(cp.name, "alias_test", "name should match")
 
 
-def test_property_repr_basic() -> Bool:
+def test_property_repr_basic() raises:
     from std.collections import Dict
     var props = Dict[String, String]()
     props["name"] = "test"
     props["value"] = "42"
     var result = property_repr("TestObj", props)
-    return result.find("TestObj") >= 0 and result.find("name") >= 0
+    assert_true(result.find("TestObj") >= 0, "should contain TestObj")
+    assert_true(result.find("name") >= 0, "should contain name")
 
 
-def test_property_repr_empty() -> Bool:
+def test_property_repr_empty() raises:
     from std.collections import Dict
     var props = Dict[String, String]()
     var result = property_repr("EmptyObj", props)
-    return result.find("EmptyObj") >= 0
+    assert_true(result.find("EmptyObj") >= 0, "should contain EmptyObj")
 
 
-def test_deprecated_property_exists() -> Bool:
-    return True
+def test_deprecated_property_exists() raises:
+    assert_true(True, "deprecated_property exists")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: utils/class_helper.mojo")
-    print("=" * 60)
-    
-    if test_cached_property_exists():
-        print("PASS: test_cached_property_exists")
-        passed += 1
-    else:
-        print("FAIL: test_cached_property_exists")
-        failed += 1
-    
-    if test_cached_property_init():
-        print("PASS: test_cached_property_init")
-        passed += 1
-    else:
-        print("FAIL: test_cached_property_init")
-        failed += 1
-    
-    if test_cached_property_with_value():
-        print("PASS: test_cached_property_with_value")
-        passed += 1
-    else:
-        print("FAIL: test_cached_property_with_value")
-        failed += 1
-    
-    if test_cached_property_set_value():
-        print("PASS: test_cached_property_set_value")
-        passed += 1
-    else:
-        print("FAIL: test_cached_property_set_value")
-        failed += 1
-    
-    if test_make_cached_property():
-        print("PASS: test_make_cached_property")
-        passed += 1
-    else:
-        print("FAIL: test_make_cached_property")
-        failed += 1
-    
-    if test_CachedProperty_alias():
-        print("PASS: test_CachedProperty_alias")
-        passed += 1
-    else:
-        print("FAIL: test_CachedProperty_alias")
-        failed += 1
-    
-    if test_property_repr_basic():
-        print("PASS: test_property_repr_basic")
-        passed += 1
-    else:
-        print("FAIL: test_property_repr_basic")
-        failed += 1
-    
-    if test_property_repr_empty():
-        print("PASS: test_property_repr_empty")
-        passed += 1
-    else:
-        print("FAIL: test_property_repr_empty")
-        failed += 1
-    
-    if test_deprecated_property_exists():
-        print("PASS: test_deprecated_property_exists")
-        passed += 1
-    else:
-        print("FAIL: test_deprecated_property_exists")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

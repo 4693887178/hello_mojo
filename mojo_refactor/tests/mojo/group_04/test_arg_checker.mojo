@@ -12,203 +12,111 @@ from rqmojo.utils.arg_checker import (
 )
 
 
-def test_check_string_valid() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_check_string_valid() raises:
     try:
-        return check_string("hello", "test_arg")
+        var result = check_string("hello", "test_arg")
+        assert_true(result, "check_string should pass")
     except:
-        return False
+        assert_true(False, "check_string should not raise")
 
 
-def test_check_string_empty() -> Bool:
+def test_check_string_empty() raises:
     try:
         check_string("", "test_arg")
-        return False
+        assert_true(False, "should raise for empty string")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def test_check_int_valid() -> Bool:
+def test_check_int_valid() raises:
     try:
-        return check_int(42, "test_arg")
+        var result = check_int(42, "test_arg")
+        assert_true(result, "check_int should pass")
     except:
-        return False
+        assert_true(False, "check_int should not raise")
 
 
-def test_check_int_with_range() -> Bool:
+def test_check_int_with_range() raises:
     try:
-        return check_int(50, "test_arg", 0, 100)
+        var result = check_int(50, "test_arg", 0, 100)
+        assert_true(result, "check_int with range should pass")
     except:
-        return False
+        assert_true(False, "check_int with range should not raise")
 
 
-def test_check_int_below_min() -> Bool:
+def test_check_int_below_min() raises:
     try:
         check_int(-1, "test_arg", 0, 100)
-        return False
+        assert_true(False, "should raise for below min")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def test_check_int_above_max() -> Bool:
+def test_check_int_above_max() raises:
     try:
         check_int(101, "test_arg", 0, 100)
-        return False
+        assert_true(False, "should raise for above max")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def test_check_float_valid() -> Bool:
+def test_check_float_valid() raises:
     try:
-        return check_float(3.14, "test_arg")
+        var result = check_float(3.14, "test_arg")
+        assert_true(result, "check_float should pass")
     except:
-        return False
+        assert_true(False, "check_float should not raise")
 
 
-def test_check_float_with_range() -> Bool:
+def test_check_float_with_range() raises:
     try:
-        return check_float(0.5, "test_arg", 0.0, 1.0)
+        var result = check_float(0.5, "test_arg", 0.0, 1.0)
+        assert_true(result, "check_float with range should pass")
     except:
-        return False
+        assert_true(False, "check_float with range should not raise")
 
 
-def test_check_percentage_valid() -> Bool:
+def test_check_percentage_valid() raises:
     try:
-        return check_percentage(0.5, "test_arg")
+        var result = check_percentage(0.5, "test_arg")
+        assert_true(result, "check_percentage should pass")
     except:
-        return False
+        assert_true(False, "check_percentage should not raise")
 
 
-def test_check_percentage_invalid() -> Bool:
+def test_check_percentage_invalid() raises:
     try:
         check_percentage(1.5, "test_arg")
-        return False
+        assert_true(False, "should raise for invalid percentage")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def test_check_order_book_id_valid() -> Bool:
+def test_check_order_book_id_valid() raises:
     try:
-        return check_order_book_id("000001.XSHE", "test_arg")
+        var result = check_order_book_id("000001.XSHE", "test_arg")
+        assert_true(result, "check_order_book_id should pass")
     except:
-        return False
+        assert_true(False, "check_order_book_id should not raise")
 
 
-def test_check_order_book_id_invalid() -> Bool:
+def test_check_order_book_id_invalid() raises:
     try:
         check_order_book_id("invalid", "test_arg")
-        return False
+        assert_true(False, "should raise for invalid order_book_id")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def test_check_order_book_id_empty() -> Bool:
+def test_check_order_book_id_empty() raises:
     try:
         check_order_book_id("", "test_arg")
-        return False
+        assert_true(False, "should raise for empty order_book_id")
     except:
-        return True
+        assert_true(True, "raised as expected")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: utils/arg_checker.mojo")
-    print("=" * 60)
-    
-    if test_check_string_valid():
-        print("PASS: test_check_string_valid")
-        passed += 1
-    else:
-        print("FAIL: test_check_string_valid")
-        failed += 1
-    
-    if test_check_string_empty():
-        print("PASS: test_check_string_empty")
-        passed += 1
-    else:
-        print("FAIL: test_check_string_empty")
-        failed += 1
-    
-    if test_check_int_valid():
-        print("PASS: test_check_int_valid")
-        passed += 1
-    else:
-        print("FAIL: test_check_int_valid")
-        failed += 1
-    
-    if test_check_int_with_range():
-        print("PASS: test_check_int_with_range")
-        passed += 1
-    else:
-        print("FAIL: test_check_int_with_range")
-        failed += 1
-    
-    if test_check_int_below_min():
-        print("PASS: test_check_int_below_min")
-        passed += 1
-    else:
-        print("FAIL: test_check_int_below_min")
-        failed += 1
-    
-    if test_check_int_above_max():
-        print("PASS: test_check_int_above_max")
-        passed += 1
-    else:
-        print("FAIL: test_check_int_above_max")
-        failed += 1
-    
-    if test_check_float_valid():
-        print("PASS: test_check_float_valid")
-        passed += 1
-    else:
-        print("FAIL: test_check_float_valid")
-        failed += 1
-    
-    if test_check_float_with_range():
-        print("PASS: test_check_float_with_range")
-        passed += 1
-    else:
-        print("FAIL: test_check_float_with_range")
-        failed += 1
-    
-    if test_check_percentage_valid():
-        print("PASS: test_check_percentage_valid")
-        passed += 1
-    else:
-        print("FAIL: test_check_percentage_valid")
-        failed += 1
-    
-    if test_check_percentage_invalid():
-        print("PASS: test_check_percentage_invalid")
-        passed += 1
-    else:
-        print("FAIL: test_check_percentage_invalid")
-        failed += 1
-    
-    if test_check_order_book_id_valid():
-        print("PASS: test_check_order_book_id_valid")
-        passed += 1
-    else:
-        print("FAIL: test_check_order_book_id_valid")
-        failed += 1
-    
-    if test_check_order_book_id_invalid():
-        print("PASS: test_check_order_book_id_invalid")
-        passed += 1
-    else:
-        print("FAIL: test_check_order_book_id_invalid")
-        failed += 1
-    
-    if test_check_order_book_id_empty():
-        print("PASS: test_check_order_book_id_empty")
-        passed += 1
-    else:
-        print("FAIL: test_check_order_book_id_empty")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

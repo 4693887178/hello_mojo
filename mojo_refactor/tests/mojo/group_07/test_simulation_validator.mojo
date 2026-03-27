@@ -7,6 +7,7 @@ from rqmojo.mod.rqmojo_mod_sys_simulation.validator import OrderStyleValidator, 
 from rqmojo.model.order import Order, OrderStyle, MarketOrder, create_order_with_id
 from rqmojo.const import ORDER_TYPE, SIDE, POSITION_EFFECT
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
 fn create_test_order() raises -> Order:
     return create_order_with_id(
@@ -18,108 +19,53 @@ fn create_test_order() raises -> Order:
         position_effect=POSITION_EFFECT.OPEN
     )
 
-
-fn test_order_style_validator_init() -> Bool:
+def test_order_style_validator_init() raises:
     print("Test: OrderStyleValidator init")
     var validator = create_order_style_validator(frequency="1d")
     print("  PASSED")
-    return True
 
 
-fn test_order_style_validator_validate_order() raises -> Bool:
+def test_order_style_validator_validate_order() raises:
     print("Test: OrderStyleValidator validate_order")
     var validator = create_order_style_validator(frequency="1d")
     var order = create_test_order()
     var result = validator.validate_order(order)
-    if not result:
-        raise "Order should be valid"
+    assert_true(result, "Order should be valid")
     print("  PASSED")
-    return True
 
 
-fn test_order_style_validator_can_submit() raises -> Bool:
+def test_order_style_validator_can_submit() raises:
     print("Test: OrderStyleValidator can_submit_order")
     var validator = create_order_style_validator(frequency="1d")
     var order = create_test_order()
     var result = validator.can_submit_order(order)
-    if not result:
-        raise "Should be able to submit order"
+    assert_true(result, "Should be able to submit order")
     print("  PASSED")
-    return True
 
 
-fn test_order_style_validator_can_cancel() raises -> Bool:
+def test_order_style_validator_can_cancel() raises:
     print("Test: OrderStyleValidator can_cancel_order")
     var validator = create_order_style_validator(frequency="1d")
     var result = validator.can_cancel_order(1)
-    if not result:
-        raise "Should be able to cancel order"
+    assert_true(result, "Should be able to cancel order")
     print("  PASSED")
-    return True
 
 
-fn test_order_style_validator_validate_submission() raises -> Bool:
+def test_order_style_validator_validate_submission() raises:
     print("Test: OrderStyleValidator validate_submission")
     var validator = create_order_style_validator(frequency="1d")
     var order = create_test_order()
     var result = validator.validate_submission(order, "stock")
     print("  PASSED")
-    return True
 
 
-fn test_order_style_validator_validate_cancellation() raises -> Bool:
+def test_order_style_validator_validate_cancellation() raises:
     print("Test: OrderStyleValidator validate_cancellation")
     var validator = create_order_style_validator(frequency="1d")
     var order = create_test_order()
     var result = validator.validate_cancellation(order, "stock")
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 07 File 08: Simulation Validator Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_order_style_validator_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_order_style_validator_validate_order():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_order_style_validator_can_submit():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_order_style_validator_can_cancel():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_order_style_validator_validate_submission():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_order_style_validator_validate_cancellation():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

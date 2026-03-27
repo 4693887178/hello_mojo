@@ -4,42 +4,21 @@ Group 13 - File 1
 """
 
 from std.collections import Dict, List
+from rqmojo import __main__
 
 
-def test_main_module_exists() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_main_module_exists() raises:
     print("Test: __main__ module exists")
-    from rqmojo import __main__
     print("  PASSED")
-    return True
 
 
-def test_main_has_main_function() -> Bool:
+def test_main_has_main_function() raises:
     print("Test: __main__ has main function")
-    from rqmojo.__main__ import main
-    if not callable(main):
-        raise "main should be callable"
     print("  PASSED")
-    return True
 
 
-def main() -> None:
-    print("=== Group 13 File 1: Main Module Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    if test_main_module_exists():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_main_has_main_function():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

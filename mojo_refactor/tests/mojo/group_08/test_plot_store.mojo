@@ -1,80 +1,47 @@
 """
-Test for mod/rqmojo_mod_sys_analyser/plot/store.mojo
+Test for mod/rqmojo_mod_sys_analyser/plot_store.mojo
 Group 08 - File 5
 """
 
-from rqmojo.mod.rqmojo_mod_sys_analyser.plot.store import PlotStore, create_plot_store
+from rqmojo.mod.rqmojo_mod_sys_analyser.plot_store import PlotStore, create_plot_store
 from rqmojo.utils.typing import DateTime
 from std.collections import List
 
 
-fn test_plot_store_init() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_plot_store_init() raises:
     print("Test: PlotStore init")
     var store = create_plot_store()
+    assert_equal(store.get_figure_count(), 0, "Initial figure count should be 0")
     print("  PASSED")
-    return True
 
 
-fn test_plot_store_add_series() -> Bool:
-    print("Test: PlotStore add_series")
+def test_plot_store_add_figure() raises:
+    print("Test: PlotStore add_figure")
     var store = create_plot_store()
-    store.add_series("test_series")
+    store.add_figure("test_figure")
+    assert_equal(store.get_figure_count(), 1, "Figure count should be 1 after add_figure")
     print("  PASSED")
-    return True
 
 
-fn test_plot_store_add_point() -> Bool:
-    print("Test: PlotStore add_point")
+def test_plot_store_create_figure() raises:
+    print("Test: PlotStore create_figure")
     var store = create_plot_store()
-    store.add_series("test_series")
-    store.add_point("test_series", DateTime(2024, 1, 1, 0, 0, 0, 0), 100.0)
+    var figure = store.create_figure("test_figure")
+    assert_equal(figure.title, "test_figure", "Figure title should match")
     print("  PASSED")
-    return True
 
 
-fn test_plot_store_get_series_names() -> Bool:
-    print("Test: PlotStore get_series_names")
+def test_plot_store_clear() raises:
+    print("Test: PlotStore clear")
     var store = create_plot_store()
-    store.add_series("test_series")
-    var names = store.get_series_names()
-    if len(names) != 1:
-        return False
+    store.add_figure("test_figure")
+    store.clear()
+    assert_equal(store.get_figure_count(), 0, "Figure count should be 0 after clear")
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 08 File 5: Plot Store Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_plot_store_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_plot_store_add_series():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_plot_store_add_point():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_plot_store_get_series_names():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

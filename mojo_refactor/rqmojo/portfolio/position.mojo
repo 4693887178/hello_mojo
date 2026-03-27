@@ -224,7 +224,7 @@ struct Position(Movable, ImplicitlyCopyable):
 
 def create_position(
     order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG,
+    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG,
     quantity: Int = 0,
     avg_price: Float64 = 0.0,
     contract_multiplier: Float64 = 1.0,

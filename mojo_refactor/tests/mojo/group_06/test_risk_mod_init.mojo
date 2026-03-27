@@ -6,51 +6,34 @@ Group 06 - File 01
 from rqmojo.mod.rqmojo_mod_sys_risk.mod import RiskMod, create_risk_mod
 
 
-def test_create_risk_mod() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_create_risk_mod() raises:
     print("Test: create_risk_mod function")
     try:
         var mod = create_risk_mod()
         print("  RiskMod created: ", mod.name)
-        return True
+        assert_true(True, "test passed")
     except:
         print("  create_risk_mod failed")
-        return False
+        assert_true(False, "test failed")
 
 
-def test_risk_mod_name() -> Bool:
+def test_risk_mod_name() raises:
     print("Test: RiskMod name property")
     try:
         var mod = create_risk_mod()
         if mod.name == "risk":
             print("  RiskMod name is correct: ", mod.name)
-            return True
+            assert_true(True, "test passed")
         else:
             print("  Expected 'risk', got: ", mod.name)
-            return False
+            assert_true(False, "test failed")
     except:
         print("  RiskMod name test failed")
-        return False
+        assert_true(False, "test failed")
 
 
-def main() -> None:
-    print("=== Group 06 File 01: Risk Mod Init Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    if test_create_risk_mod():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_risk_mod_name():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

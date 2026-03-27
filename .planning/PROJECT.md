@@ -31,9 +31,9 @@ mojo_refactor/
 
 ### Milestones
 
-#### Milestone 1: 基础模块重构 (Group 01-06)
+#### Milestone 1: 基础模块重构 (Group 01-07)
 **Status**: ✅ Completed
-**Description**: 完成依赖数量 0-3 的基础模块重构
+**Description**: 完成依赖数量 0-4 的基础模块重构
 
 **Completed Groups**:
 - Group 01: 无依赖基础模块 (10 files)
@@ -42,32 +42,26 @@ mojo_refactor/
 - Group 04: 依赖数量 2 模块 (10 files)
 - Group 05: 依赖数量 2 模块 (10 files)
 - Group 06: 依赖数量 2-3 模块 (10 files)
+- Group 07: 依赖数量 3-4 模块 (10 files)
 
-#### Milestone 2: 核心模块重构 (Group 07)
+#### Milestone 2: 高级业务层重构 (Group 10-12)
 **Status**: ✅ Completed
-**Description**: 完成依赖数量 3-4 的核心模块重构
+**Description**: 完成依赖数量 5-10 的高级业务层模块重构
 
 **Completed Groups**:
-- Group 07: 依赖数量 3-4 模块 (10 files)
+- Group 10: 依赖数量 5-6 模块 (10 files)
+- Group 11: 依赖数量 6 模块 (10 files)
+- Group 12: 依赖数量 7-10 模块 (10 files)
 
 #### Milestone 3: 业务层重构 (Group 08-09)
 **Status**: 🔄 In Progress
 **Description**: 完成依赖数量 4-5 的业务层模块重构
 
 **Groups**:
-- Group 08: 依赖数量 4 模块 (10 files) - 待验证
-- Group 09: 依赖数量 4-5 模块 (10 files) - ✅ 测试通过
+- Group 08: 依赖数量 4 模块 (10 files) - 待重构
+- Group 09: 依赖数量 4-5 模块 (10 files) - 待重构
 
-#### Milestone 4: 高级业务层重构 (Group 10-12)
-**Status**: ⏳ Pending
-**Description**: 完成依赖数量 5-10 的高级业务层模块重构
-
-**Groups**:
-- Group 10: 依赖数量 5-6 模块 (10 files)
-- Group 11: 依赖数量 6 模块 (10 files)
-- Group 12: 依赖数量 7-10 模块 (10 files)
-
-#### Milestone 5: 入口层重构 (Group 13)
+#### Milestone 4: 入口层重构 (Group 13)
 **Status**: ⏳ Pending
 **Description**: 完成依赖数量 15+ 的入口层模块重构
 
@@ -76,16 +70,27 @@ mojo_refactor/
 
 ### Current Milestone: Milestone 3 - 业务层重构 (Group 08-09)
 
-**Goal**: 完成 Group 08-09 的重构和测试验证
+**Goal**: 完成 Group 08-09 的 Mojo 重构和测试验证
 
 **Target**:
-- Group 08: 10 个文件的 Mojo 测试验证
-- Group 09: ✅ 已完成测试验证
+- Group 08: 10 个文件的 Mojo 重构
+- Group 09: 10 个文件的 Mojo 重构
 
 **Tasks**:
-- [x] Group 09 Mojo 测试修复 (16 files)
+- [ ] Group 08 Mojo 代码重构
 - [ ] Group 08 Mojo 测试验证
-- [ ] 修复 Group 08 编译问题
+- [ ] Group 09 Mojo 代码重构
+- [ ] Group 09 Mojo 测试验证
+
+### Progress Summary
+
+| Milestone | Status | Files |
+|-----------|--------|-------|
+| Milestone 1 (Group 01-07) | ✅ Completed | 70 |
+| Milestone 2 (Group 10-12) | ✅ Completed | 30 |
+| Milestone 3 (Group 08-09) | 🔄 In Progress | 20 |
+| Milestone 4 (Group 13) | ⏳ Pending | 3 |
+| **Total** | **81% Refactored** | **123** |
 
 ### Key Decisions
 1. 使用工厂函数模式 (`create_*()`) 替代直接构造函数

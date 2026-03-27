@@ -8,24 +8,25 @@ This module provides portfolio analysis functionality including:
 - Trade summary generation
 """
 
-from rqmojo.const import DEFAULT_ACCOUNT_TYPE
+from rqmojo.const import DEFAULT_ACCOUNT_TYPE, EXIT_CODE
+from rqmojo.interface import ModInterface
 from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
-from std.collections import Dict, List
+from std.collections import Dict, List, Optional
 
 
 @fieldwise_init
-struct BenchmarkPortfolio(Copyable, Movable, ImplicitlyCopyable):
+struct BenchmarkPortfolio(Copyable, Movable, ImplicitlyCopyable, Writable):
     var date: DateTime
     var unit_net_value: Float64
     var total_value: Float64
     
-    def __str__(self) -> String:
-        return "BenchmarkPortfolio(date=" + self.date.__str__() + ", nav=" + String(self.unit_net_value) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("BenchmarkPortfolio(date=", String(self.date), ", nav=", String(self.unit_net_value), ")")
 
 
 @fieldwise_init
-struct AnalyserMod(Movable):
+struct AnalyserMod(ModInterface, Movable, Writable):
     var name: String
     var enabled: Bool
     var _benchmark_config: String
@@ -36,13 +37,13 @@ struct AnalyserMod(Movable):
     var _end_date: DateTime
     var _initial_cash: Float64
     
-    def __str__(self) -> String:
-        return "AnalyserMod(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("AnalyserMod(", self.name, ")")
     
-    def start(self) -> None:
+    def start_up(mut self, env_name: String, mod_config_name: String):
         pass
     
-    def stop(self) -> None:
+    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
         pass
     
     def set_benchmark(mut self, benchmark_config: String) -> None:
@@ -143,26 +144,26 @@ struct AnalyserMod(Movable):
 
 
 @fieldwise_init
-struct PerformanceMetrics(Movable, Copyable, ImplicitlyCopyable):
+struct PerformanceMetrics(Movable, Copyable, ImplicitlyCopyable, Writable):
     var total_returns: Float64
     var annualized_returns: Float64
     var max_drawdown: Float64
     var sharpe_ratio: Float64
     var win_rate: Float64
     
-    def __str__(self) -> String:
-        return "PerformanceMetrics(returns=" + String(self.total_returns) + ", sharpe=" + String(self.sharpe_ratio) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PerformanceMetrics(returns=", String(self.total_returns), ", sharpe=", String(self.sharpe_ratio), ")")
 
 
 @fieldwise_init
-struct TradeSummary(Movable, Copyable, ImplicitlyCopyable):
+struct TradeSummary(Movable, Copyable, ImplicitlyCopyable, Writable):
     var total_trades: Int
     var winning_trades: Int
     var losing_trades: Int
     var total_pnl: Float64
     
-    def __str__(self) -> String:
-        return "TradeSummary(trades=" + String(self.total_trades) + ", pnl=" + String(self.total_pnl) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TradeSummary(trades=", String(self.total_trades), ", pnl=", String(self.total_pnl), ")")
 
 
 def create_analyser_mod() -> AnalyserMod:

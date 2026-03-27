@@ -115,26 +115,24 @@ def order_target_portfolio(
             var order = create_order_with_id(
                 env.next_order_id(),
                 item.order_book_id,
-                delta_quantity,
                 SIDE.BUY,
+                delta_quantity,
                 item.open_style,
                 POSITION_EFFECT.OPEN
             )
             var result = env.submit_order(order)
-            if result != None:
-                orders.append(result.value())
+            orders.append(result)
         else:
             var order = create_order_with_id(
                 env.next_order_id(),
                 item.order_book_id,
-                -delta_quantity,
                 SIDE.SELL,
+                -delta_quantity,
                 item.close_style,
                 POSITION_EFFECT.CLOSE
             )
             var result = env.submit_order(order)
-            if result != None:
-                orders.append(result.value())
+            orders.append(result)
     
     return orders^
 

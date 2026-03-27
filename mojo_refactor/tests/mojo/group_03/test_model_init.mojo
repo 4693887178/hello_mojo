@@ -6,6 +6,9 @@ Tests for model/__init__.mojo
 from rqmojo.model import Order, Trade, Instrument, BarObject, TickObject
 
 
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
 def test_model_module_imports() raises:
     """Test that model module can be imported."""
     print("  model module imports test passed!")
@@ -37,17 +40,4 @@ def test_tick_import() raises:
 
 
 def main() raises:
-    print("============================================================")
-    print("Testing model/__init__.mojo")
-    print("============================================================")
-    
-    test_model_module_imports()
-    test_order_import()
-    test_trade_import()
-    test_instrument_import()
-    test_bar_import()
-    test_tick_import()
-    
-    print("============================================================")
-    print("All model/__init__.mojo tests passed!")
-    print("============================================================")
+    TestSuite.discover_tests[__functions_in_module()]().run()

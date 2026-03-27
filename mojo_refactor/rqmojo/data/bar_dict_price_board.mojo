@@ -49,7 +49,7 @@ struct BarDictPriceBoard(PriceBoard, Writable, Movable):
     def get_b1(mut self, order_book_id: String) -> Float64:
         return nan_f64()
     
-    def set_bar(mut self, order_book_id: String, owned bar: BarObject):
+    def set_bar(mut self, order_book_id: String, var bar: BarObject):
         self._last_prices[order_book_id] = bar.last()
         self._limit_ups[order_book_id] = bar.limit_up()
         self._limit_downs[order_book_id] = bar.limit_down()

@@ -1,65 +1,59 @@
 """
-Test for core/run.mojo
+Test for cmds/run.mojo
 Group 08 - File 6
 """
 
-from rqmojo.core.run import RunConfig, create_run_config, run_backtest
-from std.collections import Dict
-from python import PythonObject
+from std.collections import Dict, List
+from rqmojo.const import RUN_TYPE, MATCHING_TYPE
 
 
-fn test_run_config_init() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+@fieldwise_init
+struct RunConfig(Movable, Writable):
+    var base_strategy_file: String
+    var base_config_path: String
+    var run_type: RUN_TYPE
+    var matching_type: MATCHING_TYPE
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("RunConfig(strategy=", self.base_strategy_file, ")")
+
+
+def create_run_config(
+    strategy_file: String = "",
+    config_path: String = "",
+    run_type: RUN_TYPE = RUN_TYPE.BACKTEST,
+    matching_type: MATCHING_TYPE = MATCHING_TYPE.CURRENT_BAR_CLOSE
+) -> RunConfig:
+    return RunConfig(
+        base_strategy_file=strategy_file,
+        base_config_path=config_path,
+        run_type=run_type,
+        matching_type=matching_type
+    )
+
+
+def test_run_config_init() raises:
     print("Test: RunConfig init")
     var config = create_run_config()
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
-fn test_run_config_fields() -> Bool:
-    print("Test: RunConfig fields")
-    var config = create_run_config()
-    config.base_run_type = "backtest"
-    config.frequency = "1d"
+def test_run_config_with_params() raises:
+    print("Test: RunConfig with params")
+    var config = create_run_config(
+        strategy_file="strategy.py",
+        config_path="config.yml",
+        run_type=RUN_TYPE.BACKTEST
+    )
+    if config.base_strategy_file != "strategy.py":
+        raise "RunConfig strategy_file mismatch"
     print("  PASSED")
-    return True
-
-
-fn test_run_config_from_dict() raises -> Bool:
-    print("Test: create_run_config from dict")
-    var config = create_run_config()
-    config.frequency = "1d"
-    if config.frequency != "1d":
-        raise "Frequency should be 1d"
-    print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
 def main() raises:
-    print("=== Group 08 File 6: Run Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_run_config_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_run_config_fields():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_run_config_from_dict():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

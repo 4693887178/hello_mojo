@@ -175,7 +175,7 @@ def future_order_to(
 def get_future_position(
     env: Environment,
     order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION_LONG
+    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG
 ) -> Position:
     return env.portfolio.get_position(order_book_id)
 

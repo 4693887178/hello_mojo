@@ -5,53 +5,27 @@ Group 09 - File 10
 
 from rqmojo.portfolio.portfolio_manager import Portfolio, create_stock_portfolio
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_portfolio_init() -> Bool:
+def test_portfolio_init() raises:
     print("Test: Portfolio init")
-    var portfolio = create_stock_portfolio(100000.0)
+    var _ = create_stock_portfolio(100000.0)
     print("  PASSED")
-    return True
 
 
-fn test_portfolio_total_value() -> Bool:
+def test_portfolio_total_value() raises:
     print("Test: Portfolio total_value")
     var portfolio = create_stock_portfolio(100000.0)
-    var value = portfolio.total_value
+    var _ = portfolio.total_value
     print("  PASSED")
-    return True
 
 
-fn test_portfolio_get_account() -> Bool:
+def test_portfolio_get_account() raises:
     print("Test: Portfolio get_account")
     var portfolio = create_stock_portfolio(100000.0)
-    var account = portfolio.get_account()
+    var _ = portfolio.get_account()
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 10: Portfolio Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    if test_portfolio_init():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_portfolio_total_value():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_portfolio_get_account():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

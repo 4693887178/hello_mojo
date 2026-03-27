@@ -31,7 +31,7 @@ def BJSE_MIN_AMOUNT() -> Int:
     return 100
 
 
-def _get_account_position(env: Environment, order_book_id: String) -> AccountPositionResult raises:
+def _get_account_position(env: Environment, order_book_id: String) raises -> AccountPositionResult:
     var position = env.portfolio.get_stock_position(order_book_id)
     return AccountPositionResult(
         total_cash=env._portfolio_cash,
@@ -67,7 +67,7 @@ def _round_order_quantity(ins: Instrument, quantity: Int, round_method: String =
 
 
 def _get_order_style_price(env: Environment, order_book_id: String, style: OrderStyle) -> Float64:
-    if style.style_type == ORDER_TYPE_LIMIT:
+    if style.style_type == ORDER_TYPE.LIMIT:
         return style.limit_price
     return env.get_last_price_from_proxy(order_book_id)
 
@@ -86,8 +86,8 @@ def _submit_order(
     current_quantity: Int,
     auto_switch_order_value: Bool = True,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order] raises:
-    if style.style_type == ORDER_TYPE_LIMIT:
+) raises -> Optional[Order]:
+    if style.style_type == ORDER_TYPE.LIMIT:
         if style.limit_price != style.limit_price:
             return None
     
@@ -97,17 +97,18 @@ def _submit_order(
     
     var ins = env.get_instrument(order_book_id)
     
-    if (side == SIDE_BUY and current_quantity != -amount) or (side == SIDE_SELL and current_quantity != abs(amount)):
-        amount = _round_order_quantity(ins, amount)
+    var final_amount = amount
+    if (side == SIDE.BUY and current_quantity != -amount) or (side == SIDE.SELL and current_quantity != abs(amount)):
+        final_amount = _round_order_quantity(ins, amount)
     
-    if amount == 0:
+    if final_amount == 0:
         return None
     
     var order = create_order_with_id(
         0,
         ins.order_book_id(),
-        abs(amount),
         side,
+        abs(final_amount),
         style,
         position_effect
     )
@@ -123,16 +124,16 @@ def _order_shares(
     quantity: Int,
     auto_switch_order_value: Bool = True,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var side: SIDE
     var position_effect: POSITION_EFFECT
     
     if amount > 0:
-        side = SIDE_BUY
-        position_effect = POSITION_EFFECT_OPEN
+        side = SIDE.BUY
+        position_effect = POSITION_EFFECT.OPEN
     else:
-        side = SIDE_SELL
-        position_effect = POSITION_EFFECT_CLOSE
+        side = SIDE.SELL
+        position_effect = POSITION_EFFECT.CLOSE
     
     return _submit_order(
         env, order_book_id, amount, side, position_effect, style, quantity, 
@@ -147,13 +148,13 @@ def _order_value(
     cash_amount: Float64,
     style: OrderStyle,
     zero_amount_as_exception: Bool = True
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var actual_cash = cash_amount
     if cash_amount > 0:
         actual_cash = min(cash_amount, account_result.total_cash)
     
     var price: Float64
-    if style.style_type == ORDER_TYPE_LIMIT:
+    if style.style_type == ORDER_TYPE.LIMIT:
         price = style.limit_price
     else:
         price = env.get_last_price_from_proxy(order_book_id)
@@ -189,7 +190,7 @@ def stock_order_shares(
     id_or_ins: String,
     amount: Int,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var result = _get_account_position(env, id_or_ins)
     return _order_shares(
         env, id_or_ins, amount, style, result.position_quantity, True
@@ -201,7 +202,7 @@ def stock_order_lots(
     id_or_ins: String,
     lots: Int,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var ins = env.get_instrument(id_or_ins)
     var round_lot = ins.round_lot()
     if round_lot <= 0:
@@ -214,7 +215,7 @@ def stock_order_value(
     id_or_ins: String,
     cash_amount: Float64,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var result = _get_account_position(env, id_or_ins)
     return _order_value(env, result, id_or_ins, cash_amount, style)
 
@@ -224,7 +225,7 @@ def stock_order_percent(
     id_or_ins: String,
     percent: Float64,
     style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var result = _get_account_position(env, id_or_ins)
     var cash_amount = result.total_value * percent
     return _order_value(env, result, id_or_ins, cash_amount, style)
@@ -236,7 +237,7 @@ def stock_order_target_value(
     cash_amount: Float64,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var result = _get_account_position(env, id_or_ins)
     
     if cash_amount == 0:
@@ -256,7 +257,7 @@ def stock_order_target_percent(
     percent: Float64,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> Optional[Order] raises:
+) raises -> Optional[Order]:
     var result = _get_account_position(env, id_or_ins)
     
     if percent == 0:
@@ -275,11 +276,11 @@ def stock_order(
     id_or_ins: String,
     quantity: Int,
     style: OrderStyle = MarketOrder()
-) -> List[Order] raises:
+) raises -> List[Order]:
     var result = stock_order_shares(env, id_or_ins, quantity, style)
     var orders = List[Order]()
     if result is not None:
-        orders.append(result[])
+        orders.append(result.value())
     return orders^
 
 
@@ -289,7 +290,7 @@ def stock_order_to(
     quantity: Int,
     open_style: OrderStyle = MarketOrder(),
     close_style: OrderStyle = MarketOrder()
-) -> List[Order] raises:
+) raises -> List[Order]:
     var result = _get_account_position(env, id_or_ins)
     var delta = quantity - result.position_quantity
     var style = open_style if delta > 0 else close_style
@@ -297,5 +298,5 @@ def stock_order_to(
     var order = stock_order_shares(env, id_or_ins, delta, style)
     var orders = List[Order]()
     if order is not None:
-        orders.append(order[])
+        orders.append(order.value())
     return orders^

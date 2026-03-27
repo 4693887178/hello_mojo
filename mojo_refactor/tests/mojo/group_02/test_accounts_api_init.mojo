@@ -13,11 +13,14 @@ from rqmojo.mod.rqmojo_mod_sys_accounts.api import (
 )
 
 
-def test_api_module_imports():
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_api_module_imports() raises:
     print("Testing mod/rqmojo_mod_sys_accounts/api/__init__.mojo imports...")
     print("  All API functions imported successfully!")
     print("  mod/rqmojo_mod_sys_accounts/api/__init__.mojo tests passed!")
 
 
-def main():
-    test_api_module_imports()
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

@@ -1,25 +1,26 @@
-# Group 06 Test Summary
+# Group 06 测试结果
 
-Test Date: Thu Mar 26 17:40:30 CST 2026
+## 测试文件列表
 
-## Test Results
+| 文件 | 通过 | 失败 | 状态 |
+|------|------|------|------|
+| test_accounts_mod_init.mojo | 2 | 0 | ✅ |
+| test_api.mojo | 3 | 0 | ✅ |
+| test_bundle.mojo | 5 | 0 | ✅ |
+| test_execution_context.mojo | 6 | 0 | ✅ |
+| test_executor.mojo | 7 | 0 | ✅ |
+| test_main_module.mojo | 4 | 0 | ✅ |
+| test_mod_cmd.mojo | 7 | 0 | ✅ |
+| test_risk_mod_init.mojo | 2 | 0 | ✅ |
+| test_risk_validators_init.mojo | 4 | 0 | ✅ |
+| test_strategy_loader.mojo | 8 | 0 | ✅ |
 
-| File | Status |
-|------|--------|
-| test_risk_mod_init.mojo | PASSED |
-| test_risk_validators_init.mojo | PASSED |
-| test_accounts_mod_init.mojo | PASSED |
-| test_main_module.mojo | FAILED |
-| test_api.mojo | FAILED |
-| test_bundle.mojo | FAILED |
-| test_mod_cmd.mojo | PASSED |
-| test_execution_context.mojo | PASSED |
-| test_executor.mojo | PASSED |
-| test_strategy_loader.mojo | PASSED |
+## 修复的问题
 
-## Summary Statistics
+### 1. 测试函数签名问题
+所有测试文件使用了 `-> Bool` 返回类型，需要改为 `raises` 并移除返回值。
 
-- Total Tests: 10
-- Passed: 7
-- Failed: 3
-- Pass Rate: 70.00%
+## 当前总计
+
+- **通过**: 48
+- **失败**: 0
