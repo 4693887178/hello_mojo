@@ -7,14 +7,15 @@ from rqmojo.mod.rqmojo_mod_sys_analyser.report.report import Report, create_repo
 from std.collections import List
 from rqmojo.utils.typing import DateTime
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_report_init() -> Bool:
+def test_report_init() raises:
     print("Test: Report init")
     var nav_list = List[Float64]()
     nav_list.append(100000.0)
     nav_list.append(101000.0)
     nav_list.append(102000.0)
-    var report = create_report(
+    var _ = create_report(
         strategy_name="TestStrategy",
         start_date=DateTime(2024, 1, 1, 0, 0, 0, 0),
         end_date=DateTime(2024, 12, 31, 0, 0, 0, 0),
@@ -24,10 +25,9 @@ fn test_report_init() -> Bool:
         loss_count=4
     )
     print("  PASSED")
-    return True
 
 
-fn test_report_generate_summary() -> Bool:
+def test_report_generate_summary() raises:
     print("Test: Report generate_summary")
     var nav_list = List[Float64]()
     nav_list.append(100000.0)
@@ -42,31 +42,9 @@ fn test_report_generate_summary() -> Bool:
         win_count=6,
         loss_count=4
     )
-    var summary = report.generate_summary()
+    var _ = report.generate_summary()
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 3: Report Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_report_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_report_generate_summary():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

@@ -1,127 +1,98 @@
 # REQUIREMENTS.md
 
-## Milestone: 集成验证与优化
+## Milestone 3: 业务层重构 (Group 08-09)
 
-**Version**: 1.0
-**Created**: 2026-03-26
-**Status**: Active
+### Overview
+完成 RQAlpha 框架中依赖数量 4-5 的业务层模块的 Mojo 重构。
 
----
+### Goals
+1. 完成 Group 08 (10 files) 的 Mojo 重构
+2. 完成 Group 09 (10 files) 的 Mojo 重构
+3. 确保所有重构模块通过 Mojo 测试验证
+4. 保持与 Python 版本的功能一致性
 
-## 1. Overview
+### Scope
 
-### 1.1 Purpose
-验证所有 123 个重构模块的集成正确性，运行完整测试套件，确保 RQMojo 框架功能完整。
+#### Group 08: 依赖数量 4 模块 (10 files)
 
-### 1.2 Scope
-- 运行完整 Python 测试套件 (123 个测试文件)
-- 运行完整 Mojo 测试套件 (123 个测试文件)
-- 修复失败的测试
-- 性能基准测试
-- 代码审查与清理
+| 序号 | 文件路径 | 依赖模块 |
+|-----|---------|---------|
+| 1 | `cmds/run.py` | `rqalpha.utils.i18n`, `rqalpha.utils.click_helper`, `rqalpha.utils.config`, `rqalpha.cmds.entry` |
+| 2 | `core/strategy_context.py` | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger` |
+| 3 | `data/base_data_source/storage_interface.py` | `rqalpha.model.instrument`, `rqalpha.utils.typing`, `rqalpha.const`, `.deprecated` |
+| 4 | `data/instruments_mixin.py` | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
+| 5 | `data/trading_dates_mixin.py` | `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.interface` |
+| 6 | `mod/__init__.py` | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.utils` |
+| 7 | `mod/rqalpha_mod_sys_accounts/component_validator.py` | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
+| 8 | `mod/rqalpha_mod_sys_accounts/validator.py` | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
+| 9 | `mod/rqalpha_mod_sys_analyser/mod.py` | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`, `rqalpha.utils.i18n` |
+| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py` | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger` |
 
-### 1.3 Success Criteria
-- Python 测试 100% 通过
-- Mojo 测试 100% 通过
-- 性能不低于 Python 版本
-- 代码符合 Mojo 规范
+#### Group 09: 依赖数量 4-5 模块 (10 files)
 
----
+| 序号 | 文件路径 | 依赖模块 |
+|-----|---------|---------|
+| 1 | `mod/rqalpha_mod_sys_analyser/report/report.py` | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils.datetime_func`, `rqalpha.utils.logger` |
+| 2 | `mod/rqalpha_mod_sys_risk/validators/price_validator.py` | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
+| 3 | `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.py` | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
+| 4 | `mod/rqalpha_mod_sys_scheduler/scheduler.py` | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger` |
+| 5 | `mod/rqalpha_mod_sys_simulation/mod.py` | `rqalpha.core.events`, `rqalpha.utils.logger`, `rqalpha.interface`, `rqalpha.const` |
+| 6 | `mod/rqalpha_mod_sys_simulation/signal_broker.py` | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.core.events` |
+| 7 | `mod/rqalpha_mod_sys_simulation/testing.py` | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model` |
+| 8 | `model/instrument.py` | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr` |
+| 9 | `core/strategy.py` | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.const` |
+| 10 | `data/bundle.py` | `rqalpha.apis.api_rqdatac`, `rqalpha.utils.concurrent`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools` |
 
-## 2. Functional Requirements
+### Requirements
 
-### 2.1 测试验证
+#### Functional Requirements
+1. **FR-01**: 所有重构模块必须保持与 Python 版本相同的公共 API
+2. **FR-02**: 所有重构模块必须通过对应的 Mojo 单元测试
+3. **FR-03**: 所有重构模块必须正确处理依赖关系
+4. **FR-04**: 所有重构模块必须支持 Mojo 0.26.2.0 语法
 
-#### FR-01: Python 测试套件
-- **Description**: 运行所有 Python 测试文件
-- **Acceptance Criteria**:
-  - 所有测试文件可执行
-  - 测试覆盖率 >= 80%
-  - 无测试失败
+#### Non-Functional Requirements
+1. **NFR-01**: 代码可读性：保持与 Python 版本一致的命名规范
+2. **NFR-02**: 性能：Mojo 版本应至少与 Python 版本性能相当
+3. **NFR-03**: 可维护性：使用工厂函数模式替代复杂构造函数
 
-#### FR-02: Mojo 测试套件
-- **Description**: 运行所有 Mojo 测试文件
-- **Acceptance Criteria**:
-  - 所有测试文件可编译
-  - 所有测试通过
-  - 无编译警告
+#### Technical Requirements
+1. **TR-01**: 使用 `struct` 替代 `dict` 进行配置
+2. **TR-02**: 使用 `TrivialRegisterPassable` 或 `RegisterPassable` trait 优化性能
+3. **TR-03**: 正确处理所有权转移（使用 `^` 运算符）
+4. **TR-04**: 添加必要的 `Copyable` 和 `ImplicitlyCopyable` traits
 
-#### FR-03: 集成测试
-- **Description**: 运行集成测试验证模块间交互
-- **Acceptance Criteria**:
-  - 模块间接口正确
-  - 数据流正确
-  - 事件系统正确
+### Acceptance Criteria
+1. ✅ 所有 20 个文件完成 Mojo 重构
+2. ✅ 所有 Mojo 测试通过
+3. ✅ 代码通过 Mojo 编译器检查
+4. ✅ 功能与 Python 版本一致
 
-### 2.2 性能验证
+### Dependencies
 
-#### FR-04: 性能基准测试
-- **Description**: 对比 Python 和 Mojo 版本性能
-- **Acceptance Criteria**:
-  - Mojo 版本性能 >= Python 版本
-  - 内存使用合理
-  - 编译时间可接受
+#### Prerequisites
+- Milestone 1 (Group 01-07) 已完成
+- Milestone 2 (Group 10-12) 已完成
+- 所有依赖模块已重构并通过测试
 
-### 2.3 代码质量
+#### External Dependencies
+- Mojo 0.26.2.0
+- Python 3.14 (用于互操作测试)
+- 第三方 Mojo 包 (argmojo, EmberJson, NuMojo, mojo-yaml, morrow)
 
-#### FR-05: 代码审查
-- **Description**: 审查所有重构代码
-- **Acceptance Criteria**:
-  - 代码风格一致
-  - 无安全漏洞
-  - 文档完整
+### Risks and Mitigations
 
----
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Python 互操作问题 | High | 使用预加载 Python 动态库方式 |
+| 所有权转移错误 | Medium | 仔细处理 `^` 运算符和引用 |
+| Trait 缺失 | Medium | 添加必要的 trait 声明 |
+| 编译时间过长 | Low | 分组编译，增量测试 |
 
-## 3. Non-Functional Requirements
+### Timeline
+- **Phase 1**: Group 08 重构 (2-3 hours)
+- **Phase 2**: Group 08 测试验证 (1-2 hours)
+- **Phase 3**: Group 09 重构 (2-3 hours)
+- **Phase 4**: Group 09 测试验证 (1-2 hours)
 
-### 3.1 Performance
-- NFR-01: Mojo 版本性能不低于 Python 版本
-- NFR-02: 编译时间在合理范围内 (< 5 分钟)
-
-### 3.2 Compatibility
-- NFR-03: 保持与 Python 版本的 API 兼容性
-- NFR-04: 支持跨平台（Linux）
-
-### 3.3 Maintainability
-- NFR-05: 代码风格符合 Mojo 规范
-- NFR-06: 提供完整的测试覆盖
-- NFR-07: 文档完整准确
-
----
-
-## 4. Constraints
-
-### 4.1 Technical Constraints
-- C-01: 使用 Mojo 0.26.2.0 版本
-- C-02: 使用 Python 3.14 版本
-- C-03: 需要预加载 Python 动态库
-
-### 4.2 Process Constraints
-- C-04: 所有测试必须通过
-- C-05: 性能基准必须达标
-- C-06: 代码审查必须通过
-
----
-
-## 5. Dependencies
-
-### 5.1 Internal Dependencies
-- 所有 Group 01-13 重构完成
-- 所有测试文件创建完成
-
-### 5.2 External Dependencies
-- Mojo 标准库
-- 第三方 Mojo 包（argmojo, EmberJson, NuMojo, mojo-yaml, morrow）
-- Python 互操作
-
----
-
-## 6. Risks
-
-| Risk ID | Description | Probability | Impact | Mitigation |
-|---------|-------------|-------------|--------|------------|
-| R-01 | 测试失败率高 | Medium | High | 逐个修复，优先级排序 |
-| R-02 | 性能不达标 | Low | Medium | 性能优化，算法改进 |
-| R-03 | Mojo 编译问题 | Medium | Medium | 使用预加载方案 |
-| R-04 | 集成问题 | Medium | High | 模块化测试，逐步集成 |
+**Total Estimated Time**: 6-10 hours

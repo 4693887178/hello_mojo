@@ -24,10 +24,10 @@ def before_trading(context: object) -> None:
 
 
 def handle_bar(context: object, bar_dict: object) -> None:
-    var long_pos_a = get_position(context.s1, POSITION_DIRECTION_LONG)
-    var short_pos_a = get_position(context.s1, POSITION_DIRECTION_SHORT)
-    var long_pos_b = get_position(context.s2, POSITION_DIRECTION_LONG)
-    var short_pos_b = get_position(context.s2, POSITION_DIRECTION_SHORT)
+    var long_pos_a = get_position(context.s1, POSITION_DIRECTION.LONG)
+    var short_pos_a = get_position(context.s1, POSITION_DIRECTION.SHORT)
+    var long_pos_b = get_position(context.s2, POSITION_DIRECTION.LONG)
+    var short_pos_b = get_position(context.s2, POSITION_DIRECTION.SHORT)
     
     context.counter += 1
     

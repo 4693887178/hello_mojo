@@ -3,70 +3,74 @@ Test for mod/__init__.mojo
 Group 08 - File 4
 """
 
-from rqmojo.mod import SYSTEM_MOD_LIST, get_system_mod, register_mod, unregister_mod
-from std.collections import List
+from std.collections import Dict, List
+from rqmojo.mod import ModInfo, ModHandler, create_mod_handler, get_system_mod_list, get_system_mod, register_mod, unregister_mod
 
 
-fn test_system_mod_list() -> Bool:
-    print("Test: SYSTEM_MOD_LIST exists")
-    var mod_list = SYSTEM_MOD_LIST
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_mod_info() raises:
+    print("Test: ModInfo")
+    var info = ModInfo(name="test", version="1.0.0", enabled=True)
+    if info.name != "test":
+        raise "ModInfo name mismatch"
     print("  PASSED")
-    return True
 
 
-fn test_get_system_mod() -> Bool:
-    print("Test: get_system_mod function")
-    var mod_name = get_system_mod("sys_analyser")
+def test_mod_handler() raises:
+    print("Test: ModHandler")
+    var handler = create_mod_handler()
+    if handler.get_mod_count() != 7:
+        raise "ModHandler initial count should be 7 (default mods)"
+    handler.add_mod("test_mod")
+    if handler.get_mod_count() != 8:
+        raise "ModHandler count should be 8 after add_mod"
     print("  PASSED")
-    return True
 
 
-fn test_register_mod() -> Bool:
-    print("Test: register_mod function")
-    register_mod("test_mod", "test_config")
+def test_system_mod_list() raises:
+    print("Test: System Mod List")
+    var mod_list = get_system_mod_list()
+    if len(mod_list) == 0:
+        raise "System mod list should not be empty"
     print("  PASSED")
-    return True
 
 
-fn test_unregister_mod() -> Bool:
-    print("Test: unregister_mod function")
-    unregister_mod("test_mod")
+def test_get_system_mod() raises:
+    print("Test: Get System Mod")
+    var mod = get_system_mod("transaction_cost")
+    if mod is None:
+        raise "Should find transaction_cost mod"
     print("  PASSED")
-    return True
+
+
+def test_mod_handler_register_mod() raises:
+    print("Test: ModHandler register_mod")
+    var handler = create_mod_handler()
+    var initial_count = handler.get_mod_count()
+    var new_mod = ModInfo(name="custom_mod", version="1.0.0", enabled=True)
+    handler.register_mod(new_mod)
+    if handler.get_mod_count() != initial_count + 1:
+        raise "ModHandler count should increase after register_mod"
+    var found = handler.get_mod("custom_mod")
+    if found is None:
+        raise "Should find custom_mod after register"
+    print("  PASSED")
+
+
+def test_mod_handler_unregister_mod() raises:
+    print("Test: ModHandler unregister_mod")
+    var handler = create_mod_handler()
+    handler.add_mod("test_to_remove")
+    var result = handler.unregister_mod("test_to_remove")
+    if not result:
+        raise "Should successfully unregister test_to_remove"
+    var found = handler.get_mod("test_to_remove")
+    if found is not None:
+        raise "Should not find test_to_remove after unregister"
+    print("  PASSED")
 
 
 def main() raises:
-    print("=== Group 08 File 4: Mod Init Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_system_mod_list():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_get_system_mod():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_register_mod():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_unregister_mod():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

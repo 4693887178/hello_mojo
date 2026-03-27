@@ -3,34 +3,31 @@ RQAlpha Mojo - Transaction Cost Mod
 Ported from rqalpha/mod/rqalpha_mod_sys_transaction_cost/mod.py
 """
 
-from rqmojo.const import INSTRUMENT_TYPE, EXIT_CODE
+from rqmojo.const import INSTRUMENT_TYPE, EXIT_CODE, MARKET
 from rqmojo.interface import ModInterface
-from rqmojo.environment import Environment
-from rqmojo.mod.rqmojo_mod_sys_transaction_cost.deciders import StockTransactionCostDecider, FutureTransactionCostDecider, BondTransactionCostDecider, create_stock_decider, create_future_decider, create_bond_decider
+from rqmojo.environment import Environment, TransactionCostDecider
+from std.collections import Dict, Optional
+from std.python import PythonObject
+from std.io import Writer
 
 
 @fieldwise_init
-struct TransactionCostMod(ModInterface, Stringable, Movable):
+struct TransactionCostMod(ModInterface, Writable, Movable):
     var name: String
     var enabled: Bool
     var stock_commission_multiplier: Float64
     var futures_commission_multiplier: Float64
     
-    def __str__(self) -> String:
-        return "TransactionCostMod(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TransactionCostMod(", self.name, ")")
     
-    def start_up(mut self, env: Environment, config: Dict[String, String]) -> None:
-        var stock_decider = create_stock_decider(commission_multiplier=self.stock_commission_multiplier)
-        var future_decider = create_future_decider(commission_multiplier=self.futures_commission_multiplier)
-        var bond_decider = create_bond_decider()
-        
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.CS, stock_decider)
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.ETF, stock_decider)
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.LOF, stock_decider)
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.FUTURE, future_decider)
-        env.set_transaction_cost_decider(INSTRUMENT_TYPE.BOND, bond_decider)
+    def start_up(mut self, env_name: String, mod_config_name: String):
+        pass
     
-    def tear_down(mut self, code: EXIT_CODE, exception: Optional[object]) -> None:
+    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
+        pass
+    
+    def init_from_config(mut self, config: Dict[String, String]):
         pass
 
 

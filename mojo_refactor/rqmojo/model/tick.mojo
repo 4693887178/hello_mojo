@@ -68,8 +68,8 @@ struct TickObject(Writable, Movable):
 
 
 def create_tick_object(
-    instrument: Instrument,
-    dt: DateTime,
+    var instrument: Instrument,
+    var dt: DateTime,
     last: Float64,
     volume: Float64,
     total_turnover: Float64,
@@ -81,9 +81,9 @@ def create_tick_object(
     limit_down: Float64 = 0.0,
     open_interest: Float64 = 0.0,
     prev_settlement: Float64 = 0.0,
-    asks: List[Float64] = List[Float64](),
-    ask_vols: List[Float64] = List[Float64](),
-    bid_vols: List[Float64] = List[Float64]()
+    var asks: List[Float64] = List[Float64](),
+    var ask_vols: List[Float64] = List[Float64](),
+    var bid_vols: List[Float64] = List[Float64]()
 ) -> TickObject:
     return TickObject(
         _order_book_id=instrument.order_book_id(),
@@ -100,7 +100,7 @@ def create_tick_object(
         limit_down=limit_down,
         open_interest=open_interest,
         prev_settlement=prev_settlement,
-        asks=asks,
-        ask_vols=ask_vols,
-        bid_vols=bid_vols
+        asks=asks^,
+        ask_vols=ask_vols^,
+        bid_vols=bid_vols^
     )

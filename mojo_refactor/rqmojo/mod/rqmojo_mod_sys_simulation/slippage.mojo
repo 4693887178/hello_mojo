@@ -29,7 +29,7 @@ struct PercentSlippage(Slippage, Movable, Copyable):
         self.percent = percent
     
     def get_slippage(self, order: Order, bar: BarObject) -> Float64:
-        return bar.close * self.percent
+        return bar.close() * self.percent
 
 
 struct VolumeShareSlippage(Slippage, Movable, Copyable):
@@ -41,14 +41,14 @@ struct VolumeShareSlippage(Slippage, Movable, Copyable):
         self.price_impact = price_impact
     
     def get_slippage(self, order: Order, bar: BarObject) -> Float64:
-        if bar.volume <= 0:
+        if bar.volume() <= 0:
             return 0.0
         
-        var volume_share = Float64(order.quantity) / Float64(bar.volume)
+        var volume_share = Float64(order.quantity) / Float64(bar.volume())
         if volume_share > self.volume_share_limit:
             volume_share = self.volume_share_limit
         
-        return bar.close * volume_share * self.price_impact
+        return bar.close() * volume_share * self.price_impact
 
 
 def create_fixed_slippage(slippage: Float64 = 0.0) -> FixedSlippage:

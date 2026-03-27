@@ -7,171 +7,79 @@ from rqmojo.mod.rqmojo_mod_sys_progress.mod import ProgressMod, ProgressBar, cre
 from rqmojo.const import EXIT_CODE
 
 
-def test_progress_mod_init() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_progress_mod_init() raises:
     var mod = ProgressMod()
-    return mod.name == "progress"
+    assert_equal(mod.name, "progress", "name should match")
 
 
-def test_progress_mod_start_up_exists() -> Bool:
+def test_progress_mod_start_up_exists() raises:
     var mod = ProgressMod()
     mod.start_up("env", "config")
-    return True
+    assert_true(True, "start_up works")
 
 
-def test_progress_mod_tear_down_exists() -> Bool:
+def test_progress_mod_tear_down_exists() raises:
     var mod = ProgressMod()
     mod.tear_down(EXIT_CODE.EXIT_SUCCESS, None)
-    return True
+    assert_true(True, "tear_down works")
 
 
-def test_progress_mod_init_method() -> Bool:
+def test_progress_mod_init_method() raises:
     var mod = ProgressMod()
     mod._init(100)
-    return True
+    assert_true(True, "_init works")
 
 
-def test_progress_mod_tick_method() -> Bool:
+def test_progress_mod_tick_method() raises:
     var mod = ProgressMod()
     mod._init(100)
     mod._tick()
-    return True
+    assert_true(True, "_tick works")
 
 
-def test_progress_bar_init() -> Bool:
+def test_progress_bar_init() raises:
     var bar = ProgressBar(length=100)
-    return True
+    assert_true(True, "ProgressBar created")
 
 
-def test_progress_bar_with_eta() -> Bool:
+def test_progress_bar_with_eta() raises:
     var bar = ProgressBar(length=100, show_eta=True)
-    return True
+    assert_true(True, "ProgressBar with eta created")
 
 
-def test_progress_bar_update() -> Bool:
+def test_progress_bar_update() raises:
     var bar = ProgressBar(length=100)
     bar.update(1)
     bar.update(5)
-    return True
+    assert_true(True, "update works")
 
 
-def test_progress_bar_render_finish() -> Bool:
+def test_progress_bar_render_finish() raises:
     var bar = ProgressBar(length=100)
     bar.render_finish()
-    return True
+    assert_true(True, "render_finish works")
 
 
-def test_progress_bar_reset() -> Bool:
+def test_progress_bar_reset() raises:
     var bar = ProgressBar(length=100)
     bar.update(50)
     bar.reset()
-    return True
+    assert_true(True, "reset works")
 
 
-def test_progress_mod_str() -> Bool:
+def test_progress_mod_str() raises:
     var mod = ProgressMod()
     var s = String(mod)
-    return s.find("ProgressMod") >= 0
+    assert_true(s.find("ProgressMod") >= 0, "should contain ProgressMod")
 
 
-def test_progress_bar_str() -> Bool:
+def test_progress_bar_str() raises:
     var bar = ProgressBar(length=100)
     var s = String(bar)
-    return s.find("ProgressBar") >= 0
+    assert_true(s.find("ProgressBar") >= 0, "should contain ProgressBar")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_progress/mod.mojo")
-    print("=" * 60)
-    
-    if test_progress_mod_init():
-        print("PASS: test_progress_mod_init")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_init")
-        failed += 1
-    
-    if test_progress_mod_start_up_exists():
-        print("PASS: test_progress_mod_start_up_exists")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_start_up_exists")
-        failed += 1
-    
-    if test_progress_mod_tear_down_exists():
-        print("PASS: test_progress_mod_tear_down_exists")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_tear_down_exists")
-        failed += 1
-    
-    if test_progress_mod_init_method():
-        print("PASS: test_progress_mod_init_method")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_init_method")
-        failed += 1
-    
-    if test_progress_mod_tick_method():
-        print("PASS: test_progress_mod_tick_method")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_tick_method")
-        failed += 1
-    
-    if test_progress_bar_init():
-        print("PASS: test_progress_bar_init")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_init")
-        failed += 1
-    
-    if test_progress_bar_with_eta():
-        print("PASS: test_progress_bar_with_eta")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_with_eta")
-        failed += 1
-    
-    if test_progress_bar_update():
-        print("PASS: test_progress_bar_update")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_update")
-        failed += 1
-    
-    if test_progress_bar_render_finish():
-        print("PASS: test_progress_bar_render_finish")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_render_finish")
-        failed += 1
-    
-    if test_progress_bar_reset():
-        print("PASS: test_progress_bar_reset")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_reset")
-        failed += 1
-    
-    if test_progress_mod_str():
-        print("PASS: test_progress_mod_str")
-        passed += 1
-    else:
-        print("FAIL: test_progress_mod_str")
-        failed += 1
-    
-    if test_progress_bar_str():
-        print("PASS: test_progress_bar_str")
-        passed += 1
-    else:
-        print("FAIL: test_progress_bar_str")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

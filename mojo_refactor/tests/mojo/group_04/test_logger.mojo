@@ -6,152 +6,74 @@
 from rqmojo.utils.logger import user_log, system_log, user_system_log, init_logger, user_print, release_print, RQAlphaLogger, LoggerContext, create_logger_context
 
 
-def test_user_log_exists() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_user_log_exists() raises:
     var log = user_log()
-    return log.name == "user_log"
+    assert_equal(log.name, "user_log", "name should match")
 
 
-def test_system_log_exists() -> Bool:
+def test_system_log_exists() raises:
     var log = system_log()
-    return log.name == "system_log"
+    assert_equal(log.name, "system_log", "name should match")
 
 
-def test_user_system_log_exists() -> Bool:
+def test_user_system_log_exists() raises:
     var log = user_system_log()
-    return log.name == "user_system_log"
+    assert_equal(log.name, "user_system_log", "name should match")
 
 
-def test_init_logger_exists() -> Bool:
+def test_init_logger_exists() raises:
     try:
         init_logger()
-        return True
+        assert_true(True, "init_logger works")
     except:
-        return True
+        assert_true(True, "init_logger handled")
 
 
-def test_user_print_exists() -> Bool:
+def test_user_print_exists() raises:
     try:
         user_print("Test message")
-        return True
+        assert_true(True, "user_print works")
     except:
-        return True
+        assert_true(True, "user_print handled")
 
 
-def test_release_print_exists() -> Bool:
+def test_release_print_exists() raises:
     try:
         release_print()
-        return True
+        assert_true(True, "release_print works")
     except:
-        return True
+        assert_true(True, "release_print handled")
 
 
-def test_logger_context() -> Bool:
+def test_logger_context() raises:
     var ctx = create_logger_context()
-    return ctx.user_log().name == "user_log"
+    assert_equal(ctx.user_log().name, "user_log", "user_log name should match")
 
 
-def test_rqalpha_logger() -> Bool:
+def test_rqalpha_logger() raises:
     var log = RQAlphaLogger("test_logger")
-    return log.name == "test_logger"
+    assert_equal(log.name, "test_logger", "name should match")
 
 
-def test_logger_info() -> Bool:
+def test_logger_info() raises:
     var log = user_log()
     try:
         log.info("Test info message")
-        return True
+        assert_true(True, "info works")
     except:
-        return True
+        assert_true(True, "info handled")
 
 
-def test_logger_debug() -> Bool:
+def test_logger_debug() raises:
     var log = user_log()
     try:
         log.debug("Test debug message")
-        return True
+        assert_true(True, "debug works")
     except:
-        return True
+        assert_true(True, "debug handled")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: utils/logger.mojo")
-    print("=" * 60)
-    
-    if test_user_log_exists():
-        print("PASS: test_user_log_exists")
-        passed += 1
-    else:
-        print("FAIL: test_user_log_exists")
-        failed += 1
-    
-    if test_system_log_exists():
-        print("PASS: test_system_log_exists")
-        passed += 1
-    else:
-        print("FAIL: test_system_log_exists")
-        failed += 1
-    
-    if test_user_system_log_exists():
-        print("PASS: test_user_system_log_exists")
-        passed += 1
-    else:
-        print("FAIL: test_user_system_log_exists")
-        failed += 1
-    
-    if test_init_logger_exists():
-        print("PASS: test_init_logger_exists")
-        passed += 1
-    else:
-        print("FAIL: test_init_logger_exists")
-        failed += 1
-    
-    if test_user_print_exists():
-        print("PASS: test_user_print_exists")
-        passed += 1
-    else:
-        print("FAIL: test_user_print_exists")
-        failed += 1
-    
-    if test_release_print_exists():
-        print("PASS: test_release_print_exists")
-        passed += 1
-    else:
-        print("FAIL: test_release_print_exists")
-        failed += 1
-    
-    if test_logger_context():
-        print("PASS: test_logger_context")
-        passed += 1
-    else:
-        print("FAIL: test_logger_context")
-        failed += 1
-    
-    if test_rqalpha_logger():
-        print("PASS: test_rqalpha_logger")
-        passed += 1
-    else:
-        print("FAIL: test_rqalpha_logger")
-        failed += 1
-    
-    if test_logger_info():
-        print("PASS: test_logger_info")
-        passed += 1
-    else:
-        print("FAIL: test_logger_info")
-        failed += 1
-    
-    if test_logger_debug():
-        print("PASS: test_logger_debug")
-        passed += 1
-    else:
-        print("FAIL: test_logger_debug")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

@@ -8,69 +8,39 @@ from rqmojo.utils.typing import DateTime
 from std.collections import List
 
 
-fn test_trading_dates_mixin_init() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_trading_dates_mixin_init() raises:
     print("Test: TradingDatesMixin init")
     var mixin = create_trading_dates_mixin()
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
-fn test_trading_dates_mixin_get_trading_dates() -> Bool:
-    print("Test: TradingDatesMixin get_trading_dates")
+def test_trading_dates_mixin_count_trading_dates() raises:
+    print("Test: TradingDatesMixin count_trading_dates")
     var mixin = create_trading_dates_mixin()
-    var dates = mixin.get_trading_dates("000001.XSHE")
+    var count = mixin.count_trading_dates(2024, 1, 1, 2024, 1, 31)
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
-fn test_trading_dates_mixin_is_trading_date() -> Bool:
+def test_trading_dates_mixin_is_trading_date() raises:
     print("Test: TradingDatesMixin is_trading_date")
     var mixin = create_trading_dates_mixin()
-    var result = mixin.is_trading_date(DateTime(2024, 1, 2, 0, 0, 0, 0))
+    var result = mixin.is_trading_date(2024, 1, 2)
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
-fn test_trading_dates_mixin_get_previous_trading_date() -> Bool:
+def test_trading_dates_mixin_get_previous_trading_date() raises:
     print("Test: TradingDatesMixin get_previous_trading_date")
     var mixin = create_trading_dates_mixin()
-    var prev_date = mixin.get_previous_trading_date(DateTime(2024, 1, 2, 0, 0, 0, 0))
+    var prev_date = mixin.get_previous_trading_date(2024, 1, 2)
     print("  PASSED")
-    return True
+    assert_true(True, "test passed")
 
 
 def main() raises:
-    print("=== Group 08 File 10: Trading Dates Mixin Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_trading_dates_mixin_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_trading_dates_mixin_get_trading_dates():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_trading_dates_mixin_is_trading_date():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_trading_dates_mixin_get_previous_trading_date():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

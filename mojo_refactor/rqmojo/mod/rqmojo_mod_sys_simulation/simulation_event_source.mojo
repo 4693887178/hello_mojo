@@ -17,7 +17,7 @@ struct Event(Stringable, Copyable, Movable, ImplicitlyCopyable):
     var order_book_id: String
     
     def __str__(self) -> String:
-        return "Event(" + self.event_type + ", " + self.calendar_dt.__str__() + ")"
+        return "Event(" + self.event_type + ")"
 
 
 @fieldwise_init

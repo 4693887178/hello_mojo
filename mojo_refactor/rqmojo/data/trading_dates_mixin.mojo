@@ -22,13 +22,13 @@ def _to_timestamp(d: DateLike) -> DateTimeDate:
 
 
 @fieldwise_init
-struct TradingDateResult(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct TradingDateResult(Writable, Copyable, Movable, ImplicitlyCopyable):
     var year: Int
     var month: Int
     var day: Int
     
-    def __str__(self) -> String:
-        return String(self.year) + "-" + String(self.month) + "-" + String(self.day)
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write(String(self.year), "-", String(self.month), "-", String(self.day))
     
     def to_date(self) -> DateTimeDate:
         return DateTimeDate(self.year, self.month, self.day)
@@ -39,12 +39,12 @@ def create_trading_date_result(year: Int, month: Int, day: Int) -> TradingDateRe
 
 
 @fieldwise_init
-struct TradingDatesMixin(Stringable, Movable):
+struct TradingDatesMixin(Writable, Movable):
     var _trading_dates: List[Int]
     var _initialized: Bool
     
-    def __str__(self) -> String:
-        return "TradingDatesMixin(count=" + String(len(self._trading_dates)) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TradingDatesMixin(count=", String(len(self._trading_dates)), ")")
     
     @staticmethod
     def _date_to_int(year: Int, month: Int, day: Int) -> Int:

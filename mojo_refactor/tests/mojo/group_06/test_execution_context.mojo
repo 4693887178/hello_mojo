@@ -14,16 +14,19 @@ from rqmojo.const import EXECUTION_PHASE
 from rqmojo.utils.typing import DateTime
 
 
-def test_context_stack() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_context_stack() raises:
     print("Test: ContextStack struct")
     var stack = ContextStack(stack=List[EXECUTION_PHASE]())
     stack.push(EXECUTION_PHASE.ON_BAR)
     var top = stack.top()
     print("  Stack top: ", top.name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_context_stack_push_pop() -> Bool:
+def test_context_stack_push_pop() raises:
     print("Test: ContextStack push and pop")
     var stack = ContextStack(stack=List[EXECUTION_PHASE]())
     stack.push(EXECUTION_PHASE.ON_BAR)
@@ -32,82 +35,42 @@ def test_context_stack_push_pop() -> Bool:
     print("  Top after push: ", top.name)
     var popped = stack.pop()
     print("  Popped: ", popped.name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_execution_context() -> Bool:
+def test_execution_context() raises:
     print("Test: ExecutionContext struct")
     var ctx = create_execution_context(EXECUTION_PHASE.ON_BAR)
     print("  ExecutionContext phase: ", ctx.phase.name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_bar_execution_context() -> Bool:
+def test_bar_execution_context() raises:
     print("Test: create_bar_execution_context")
     var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
     var ctx = create_bar_execution_context(dt)
     print("  Bar context phase: ", ctx.phase.name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_tick_execution_context() -> Bool:
+def test_tick_execution_context() raises:
     print("Test: create_tick_execution_context")
     var dt = DateTime(2024, 1, 1, 9, 30, 0, 0)
     var ctx = create_tick_execution_context(dt)
     print("  Tick context phase: ", ctx.phase.name)
-    return True
+    assert_true(True, "test passed")
 
 
-def test_execution_context_is_on_bar() -> Bool:
+def test_execution_context_is_on_bar() raises:
     print("Test: ExecutionContext.is_on_bar")
     var ctx = create_bar_execution_context(DateTime(2024, 1, 1, 9, 30, 0, 0))
     if ctx.is_on_bar():
         print("  is_on_bar returned True")
-        return True
+        assert_true(True, "test passed")
     else:
         print("  is_on_bar returned False, expected True")
-        return False
+        assert_true(False, "test failed")
 
 
-def main() -> None:
-    print("=== Group 06 File 08: Execution Context Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    if test_context_stack():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_context_stack_push_pop():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_execution_context():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_bar_execution_context():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_tick_execution_context():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_execution_context_is_on_bar():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

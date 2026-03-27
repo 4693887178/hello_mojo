@@ -3,7 +3,7 @@ RQAlpha Mojo - Strategy Universe
 Ported from rqalpha/core/strategy_universe.py
 """
 
-from std.collections import Dict, Set
+from std.collections import Dict, Set, List
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.environment import Environment
 from rqmojo.model.instrument import Instrument
@@ -18,9 +18,7 @@ def _get_current_time() -> DateTime:
 
 
 @fieldwise_init
-struct StrategyUniverse(
-    Movable, Writable
-):
+struct StrategyUniverse(Movable, Writable):
     var universe_set: Set[String]
     var event_bus: EventBus
     var last_update_time: DateTime
@@ -33,143 +31,89 @@ struct StrategyUniverse(
     def write_to(self, mut writer: Some[Writer]):
         writer.write("StrategyUniverse(count=", String(len(self.universe_set)), ")")
 
-    def get(self) -> Set[String]:
+    def get(ref self) -> Set[String]:
         var result = Set[String]()
         for item in self.universe_set:
             result.add(item)
-        return result
+        return result^
 
-    def get_list(self) -> List[String]:
+    def get_list(ref self) -> List[String]:
         var result = List[String]()
         for item in self.universe_set:
             result.append(item)
-        return result
+        return result^
 
     def update(mut self, universe: Set[String]):
-        var changed = False
-        var new_set = Set[String]()
-        
+        var old_len = len(self.universe_set)
+        self.universe_set.clear()
         for item in universe:
-            new_set.add(item)
-        
-        if len(new_set) != len(self.universe_set):
-            changed = True
-        else:
-            for item in new_set:
-                if not self.universe_set.contains(item):
-                    changed = True
-                    break
-        
-        if changed:
-            self.universe_set = new_set
+            self.universe_set.add(item)
+        var new_len = len(self.universe_set)
+        if new_len != old_len:
             self.last_update_time = _get_current_time()
 
-    def update_from_list(mut self, universe: List[String]):
-        var new_set = Set[String]()
-        for item in universe:
-            new_set.add(item)
-        self.update(new_set)
-
-    def update_from_instruments(mut self, instruments: List[Instrument]):
-        var new_set = Set[String]()
-        for inst in instruments:
-            new_set.add(inst.order_book_id)
-        self.update(new_set)
-
-    def subscribe(mut self, order_book_id: String):
-        if not self.universe_set.contains(order_book_id):
+    def subscribe(mut self, order_book_id: String) raises:
+        if order_book_id not in self.universe_set:
             self.universe_set.add(order_book_id)
             self.last_update_time = _get_current_time()
 
-    def unsubscribe(mut self, order_book_id: String):
-        if self.universe_set.contains(order_book_id):
+    def unsubscribe(mut self, order_book_id: String) raises:
+        if order_book_id in self.universe_set:
             self.universe_set.remove(order_book_id)
             self.last_update_time = _get_current_time()
 
-    def contains(self, order_book_id: String) -> Bool:
-        return self.universe_set.contains(order_book_id)
-
-    def size(self) -> Int:
-        return len(self.universe_set)
-
-    def is_empty(self) -> Bool:
-        return len(self.universe_set) == 0
+    def contains(ref self, order_book_id: String) -> Bool:
+        return order_book_id in self.universe_set
 
     def clear(mut self):
-        self.universe_set = Set[String]()
+        self.universe_set.clear()
         self.last_update_time = _get_current_time()
 
-    def get_state(self) -> String:
+    def get_state(ref self) -> String:
+        var items = self.get_list()
         var result = "["
-        var first = True
-        for item in self.universe_set:
-            if not first:
+        for i in range(len(items)):
+            if i > 0:
                 result += ", "
-            result += "\"" + item + "\""
-            first = False
+            result += "\"" + items[i] + "\""
         result += "]"
         return result
 
     def set_state(mut self, state: String):
         var new_set = Set[String]()
-        var current = ""
         var in_string = False
+        var current_item = ""
         
         for i in range(len(state)):
-            var ch = state[i]
+            var ch = state[byte=i]
             if ch == "\"" and not in_string:
                 in_string = True
-                current = ""
             elif ch == "\"" and in_string:
                 in_string = False
-                if len(current) > 0:
-                    new_set.add(current)
-                current = ""
+                if len(current_item) > 0:
+                    new_set.add(current_item)
+                    current_item = ""
             elif in_string:
-                current += ch
+                current_item += String(ch)
         
-        self.update(new_set)
-
-    def clear_de_listed(mut self, trading_dt: DateTimeDate, data_proxy: object):
-        var de_listed = List[String]()
-        
-        for order_book_id in self.universe_set:
-            de_listed.append(order_book_id)
-        
-        if len(de_listed) > 0:
-            for item in de_listed:
-                self.universe_set.remove(item)
-            self.last_update_time = _get_current_time()
+        self.universe_set = new_set^
+        self.last_update_time = _get_current_time()
 
 
 @fieldwise_init
-struct UniverseChangeRecord(
-    Copyable, Movable, ImplicitlyCopyable
-):
+struct UniverseChangeRecord(Movable):
     var timestamp: DateTime
     var added: Set[String]
     var removed: Set[String]
 
-    def __init__(out self, added: Set[String], removed: Set[String]):
+    def __init__(out self, var added: Set[String], var removed: Set[String]):
         self.timestamp = _get_current_time()
-        self.added = added
-        self.removed = removed
+        self.added = added^
+        self.removed = removed^
 
     def has_changes(self) -> Bool:
         return len(self.added) > 0 or len(self.removed) > 0
 
 
-def create_strategy_universe(event_bus: EventBus) -> StrategyUniverse:
-    return StrategyUniverse(event_bus=event_bus)
-
-
-def universe_from_list(event_bus: EventBus, items: List[String]) -> StrategyUniverse:
-    var universe = StrategyUniverse(event_bus=event_bus)
-    universe.update_from_list(items)
-    return universe
-
-
-def universe_from_instruments(event_bus: EventBus, instruments: List[Instrument]) -> StrategyUniverse:
-    var universe = StrategyUniverse(event_bus=event_bus)
-    universe.update_from_instruments(instruments)
-    return universe
+def create_strategy_universe(var event_bus: EventBus) -> StrategyUniverse:
+    return StrategyUniverse(event_bus=event_bus^)

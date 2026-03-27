@@ -13,10 +13,13 @@ from rqmojo.utils.exception import (
 from rqmojo.const import EXC_TYPE
 
 
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
 def test_custom_error_creation() raises:
     """Test that CustomError can be created."""
     var ce = CustomError.create("test message")
-    assert ce.msg == "test message", "Message should match"
+    assert_equal(ce.msg, "test message", "Message should match")
     print("  CustomError creation test passed!")
 
 
@@ -24,7 +27,7 @@ def test_custom_error_add_stack() raises:
     """Test that CustomError can add stack info."""
     var ce = CustomError.create("test message")
     ce.add_stack_info("test.py", 10, "test_func", "code line")
-    assert ce.stacks_length() == 1, "Should have 1 stack frame"
+    assert_equal(ce.stacks_length(), 1, "Should have 1 stack frame")
     print("  CustomError add_stack test passed!")
 
 
@@ -72,20 +75,4 @@ def test_patch_functions() raises:
 
 
 def main() raises:
-    print("============================================================")
-    print("Testing utils/exception.mojo")
-    print("============================================================")
-    
-    test_custom_error_creation()
-    test_custom_error_add_stack()
-    test_custom_exception_creation()
-    test_rq_user_error_creation()
-    test_rq_invalid_argument_creation()
-    test_rq_type_error_creation()
-    test_instrument_not_found_creation()
-    test_environment_not_initialized_creation()
-    test_patch_functions()
-    
-    print("============================================================")
-    print("All utils/exception.mojo tests passed!")
-    print("============================================================")
+    TestSuite.discover_tests[__functions_in_module()]().run()

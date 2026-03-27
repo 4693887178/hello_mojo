@@ -6,56 +6,27 @@ Group 09 - File 9
 from rqmojo.portfolio.account import Account, create_account
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_account_init() -> Bool:
+def test_account_init() raises:
     print("Test: Account init")
-    var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
+    var _ = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
     print("  PASSED")
-    return True
 
 
-fn test_account_total_value() -> Bool:
+def test_account_total_value() raises:
     print("Test: Account total_value")
     var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
-    var value = account.total_value
+    var _ = account.total_value
     print("  PASSED")
-    return True
 
 
-fn test_account_get_positions() -> Bool:
+def test_account_get_positions() raises:
     print("Test: Account get_positions")
     var account = create_account(DEFAULT_ACCOUNT_TYPE.STOCK, 100000.0)
-    var positions = account.get_positions()
+    var _ = account.get_positions()
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 9: Account Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_account_init():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_account_total_value():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_account_get_positions():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

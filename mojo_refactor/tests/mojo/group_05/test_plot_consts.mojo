@@ -6,110 +6,63 @@
 from rqmojo.mod.rqmojo_mod_sys_analyser.plot.consts import ChartType, Color, PlotConst
 
 
-def test_chart_type_line() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_chart_type_line() raises:
     var line = ChartType.LINE()
-    return line.name == "LINE" and line.value == "line"
+    assert_equal(line.name, "LINE", "name should be LINE")
+    assert_equal(line.value, "line", "value should be line")
 
 
-def test_chart_type_bar() -> Bool:
+def test_chart_type_bar() raises:
     var bar = ChartType.BAR()
-    return bar.name == "BAR" and bar.value == "bar"
+    assert_equal(bar.name, "BAR", "name should be BAR")
+    assert_equal(bar.value, "bar", "value should be bar")
 
 
-def test_chart_type_scatter() -> Bool:
+def test_chart_type_scatter() raises:
     var scatter = ChartType.SCATTER()
-    return scatter.name == "SCATTER" and scatter.value == "scatter"
+    assert_equal(scatter.name, "SCATTER", "name should be SCATTER")
+    assert_equal(scatter.value, "scatter", "value should be scatter")
 
 
-def test_color_red() -> Bool:
+def test_color_red() raises:
     var red = Color.RED()
-    return red.r == 255 and red.g == 0 and red.b == 0 and red.a == 1.0
+    assert_equal(red.r, 255, "r should be 255")
+    assert_equal(red.g, 0, "g should be 0")
+    assert_equal(red.b, 0, "b should be 0")
+    assert_equal(red.a, 1.0, "a should be 1.0")
 
 
-def test_color_green() -> Bool:
+def test_color_green() raises:
     var green = Color.GREEN()
-    return green.r == 0 and green.g == 255 and green.b == 0 and green.a == 1.0
+    assert_equal(green.r, 0, "r should be 0")
+    assert_equal(green.g, 255, "g should be 255")
+    assert_equal(green.b, 0, "b should be 0")
+    assert_equal(green.a, 1.0, "a should be 1.0")
 
 
-def test_color_blue() -> Bool:
+def test_color_blue() raises:
     var blue = Color.BLUE()
-    return blue.r == 0 and blue.g == 0 and blue.b == 255 and blue.a == 1.0
+    assert_equal(blue.r, 0, "r should be 0")
+    assert_equal(blue.g, 0, "g should be 0")
+    assert_equal(blue.b, 255, "b should be 255")
+    assert_equal(blue.a, 1.0, "a should be 1.0")
 
 
-def test_color_black() -> Bool:
+def test_color_black() raises:
     var black = Color.BLACK()
-    return black.r == 0 and black.g == 0 and black.b == 0 and black.a == 1.0
+    assert_equal(black.r, 0, "r should be 0")
+    assert_equal(black.g, 0, "g should be 0")
+    assert_equal(black.b, 0, "b should be 0")
+    assert_equal(black.a, 1.0, "a should be 1.0")
 
 
-def test_plot_const_defaults() -> Bool:
-    return PlotConst.DEFAULT_WIDTH == 800
+def test_plot_const_defaults() raises:
+    assert_equal(PlotConst.DEFAULT_WIDTH, 800, "DEFAULT_WIDTH should be 800")
+    assert_equal(PlotConst.DEFAULT_HEIGHT, 400, "DEFAULT_HEIGHT should be 400")
+    assert_equal(PlotConst.DEFAULT_DPI, 100, "DEFAULT_DPI should be 100")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_analyser/plot/consts.mojo")
-    print("=" * 60)
-    
-    if test_chart_type_line():
-        print("PASS: test_chart_type_line")
-        passed += 1
-    else:
-        print("FAIL: test_chart_type_line")
-        failed += 1
-    
-    if test_chart_type_bar():
-        print("PASS: test_chart_type_bar")
-        passed += 1
-    else:
-        print("FAIL: test_chart_type_bar")
-        failed += 1
-    
-    if test_chart_type_scatter():
-        print("PASS: test_chart_type_scatter")
-        passed += 1
-    else:
-        print("FAIL: test_chart_type_scatter")
-        failed += 1
-    
-    if test_color_red():
-        print("PASS: test_color_red")
-        passed += 1
-    else:
-        print("FAIL: test_color_red")
-        failed += 1
-    
-    if test_color_green():
-        print("PASS: test_color_green")
-        passed += 1
-    else:
-        print("FAIL: test_color_green")
-        failed += 1
-    
-    if test_color_blue():
-        print("PASS: test_color_blue")
-        passed += 1
-    else:
-        print("FAIL: test_color_blue")
-        failed += 1
-    
-    if test_color_black():
-        print("PASS: test_color_black")
-        passed += 1
-    else:
-        print("FAIL: test_color_black")
-        failed += 1
-    
-    if test_plot_const_defaults():
-        print("PASS: test_plot_const_defaults")
-        passed += 1
-    else:
-        print("FAIL: test_plot_const_defaults")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

@@ -5,50 +5,57 @@ Tests for data adjustment functions
 """
 
 from python import Python
-from rqmojo.data.base_data_source.adjust import _factor_for_date, adjust_bars
+from rqmojo.data.base_data_source.adjust import get_price_fields, get_fields_require_adjustment
 
 
-def test_factor_for_date() raises:
-    print("Testing _factor_for_date...")
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_get_price_fields() raises:
+    print("Testing get_price_fields...")
     
-    var np = Python.import_module("numpy")
+    var fields = get_price_fields()
+    var found_open = False
+    var found_close = False
+    var found_high = False
+    var found_low = False
     
-    var dates = np.array(["2020-01-01", "2020-01-02", "2020-01-03"], dtype="datetime64[D]")
-    var factor = np.array([1.0, 1.1, 1.2])
+    for f in fields:
+        if f == "open":
+            found_open = True
+        elif f == "close":
+            found_close = True
+        elif f == "high":
+            found_high = True
+        elif f == "low":
+            found_low = True
     
-    var result = _factor_for_date(dates, factor)
-    assert result is not None
+    assert_true(found_open)
+    assert_true(found_close)
+    assert_true(found_high)
+    assert_true(found_low)
     
-    print("  _factor_for_date tests passed!")
+    print("  get_price_fields tests passed!")
 
 
-def test_adjust_bars() raises:
-    print("Testing adjust_bars...")
+def test_get_fields_require_adjustment() raises:
+    print("Testing get_fields_require_adjustment...")
     
-    var np = Python.import_module("numpy")
+    var fields = get_fields_require_adjustment()
+    var found_open = False
+    var found_volume = False
     
-    var bars = Python.dict()
-    bars["open"] = np.array([10.0, 11.0, 12.0])
-    bars["close"] = np.array([10.5, 11.5, 12.5])
-    bars["high"] = np.array([11.0, 12.0, 13.0])
-    bars["low"] = np.array([10.0, 11.0, 12.0])
+    for f in fields:
+        if f == "open":
+            found_open = True
+        elif f == "volume":
+            found_volume = True
     
-    var factor = np.array([1.1, 1.1, 1.1])
+    assert_true(found_open)
+    assert_true(found_volume)
     
-    var adjusted = adjust_bars(bars, factor)
-    assert adjusted is not None
-    
-    print("  adjust_bars tests passed!")
+    print("  get_fields_require_adjustment tests passed!")
 
 
 def main() raises:
-    print("=" * 60)
-    print("Testing data/base_data_source/adjust.mojo")
-    print("=" * 60)
-    
-    test_factor_for_date()
-    test_adjust_bars()
-    
-    print("=" * 60)
-    print("All data/base_data_source/adjust.mojo tests passed!")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

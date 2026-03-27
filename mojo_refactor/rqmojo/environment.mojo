@@ -6,7 +6,7 @@ Ported from rqalpha/environment.py
 from std.collections import Dict, List, Set, Optional
 from rqmojo.const import (
     RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE,
-    EXECUTION_PHASE
+    EXECUTION_PHASE, POSITION_DIRECTION
 )
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator

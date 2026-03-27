@@ -70,11 +70,12 @@ def _starts_with(s: String, prefix: String) -> Bool:
 
 
 def _slice_string(s: String, start: Int, end: Int) -> String:
-    var bytes_s = s.as_bytes()
-    var result = String()
-    for i in range(start, min(end, len(bytes_s))):
-        result = result + String(bytes_s[i])
-    return result
+    var actual_end = min(end, len(s))
+    if start >= actual_end:
+        return ""
+    if start == 0 and actual_end == len(s):
+        return s
+    return String(s[byte=start:actual_end])
 
 
 def _repr(cls_name: String, properties: List[String]) -> String:

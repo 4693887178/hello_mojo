@@ -8,8 +8,9 @@ from rqmojo.model.instrument import Instrument, create_stock_instrument, create_
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE
 from rqmojo.utils.typing import DateTime
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
-fn test_instrument_struct() -> Bool:
+def test_instrument_struct() raises:
     print("Test: Instrument struct exists")
     var inst = create_stock_instrument(
         order_book_id="000001.XSHE",
@@ -17,13 +18,11 @@ fn test_instrument_struct() -> Bool:
         listed_date=DateTime(1991, 4, 3, 0, 0, 0, 0),
         exchange=EXCHANGE.XSHE
     )
-    if inst.order_book_id() != "000001.XSHE":
-        return False
+    assert_equal(inst.order_book_id(), "000001.XSHE", "Order book ID should match")
     print("  PASSED")
-    return True
 
 
-fn test_instrument_properties() -> Bool:
+def test_instrument_properties() raises:
     print("Test: Instrument properties")
     var inst = create_stock_instrument(
         order_book_id="000001.XSHE",
@@ -32,16 +31,12 @@ fn test_instrument_properties() -> Bool:
         exchange=EXCHANGE.XSHE
     )
     
-    if inst.symbol() != "平安银行":
-        return False
-    
-    if inst.type() != INSTRUMENT_TYPE.CS:
-        return False
+    assert_equal(inst.symbol(), "平安银行", "Symbol should match")
+    assert_equal(inst.type(), INSTRUMENT_TYPE.CS, "Type should be CS")
     print("  PASSED")
-    return True
 
 
-fn test_instrument_exchange() -> Bool:
+def test_instrument_exchange() raises:
     print("Test: Instrument exchange")
     var inst = create_stock_instrument(
         order_book_id="000001.XSHE",
@@ -50,38 +45,9 @@ fn test_instrument_exchange() -> Bool:
         exchange=EXCHANGE.XSHE
     )
     
-    if inst.exchange() != EXCHANGE.XSHE:
-        return False
+    assert_equal(inst.exchange(), EXCHANGE.XSHE, "Exchange should match")
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 09 File 8: Instrument Tests ===")
-    print("")
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_instrument_struct():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_instrument_properties():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_instrument_exchange():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

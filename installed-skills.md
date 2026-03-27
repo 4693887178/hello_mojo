@@ -1,18 +1,22 @@
 # 已安装 Skills 完整列表
 
-> 更新时间：2026-03-25
+> 更新时间：2026-03-27
 
 ---
 
-## 📋 开发流程与规划
+## 📋 开发流程与规划 (GSD)
 
 | Skill | 功能 | 位置 |
 |-------|------|------|
-| brainstorming | 创意头脑风暴，设计前探索需求 | 全局 |
-| writing-plans | 编写实现计划 | 全局 |
-| executing-plans | 执行实现计划 | 全局 |
-| verification-before-completion | 完成前验证 | 全局 |
-| finishing-a-development-branch | 完成开发分支 | 全局 |
+| gsd:new-project | 初始化新项目 | 全局 |
+| gsd:new-milestone | 开始新的里程碑周期 | 全局 |
+| gsd:discuss-phase | 规划前收集阶段上下文 | 全局 |
+| gsd:plan-phase | 创建阶段计划 | 全局 |
+| gsd:execute-phase | 执行阶段计划 | 全局 |
+| gsd:verify-work | 验证阶段完成情况 | 全局 |
+| gsd:debug | 系统化调试 | 全局 |
+| gsd:ship | 创建PR，运行review，准备合并 | 全局 |
+| gsd:progress | 检查项目进度 | 全局 |
 
 ---
 
@@ -33,7 +37,7 @@
 | Skill | 功能 | 位置 |
 |-------|------|------|
 | code-simplifier | 简化和优化代码 | 项目 |
-| requesting-code-review | 请求代码审查 | 全局 |
+| code-reviewer | 审查代码正确性、可维护性和项目规范 | 全局 |
 | receiving-code-review | 接收代码审查反馈 | 全局 |
 | agent-md-refactor | 重构 agent 指令文件 | 项目 |
 
@@ -72,7 +76,6 @@
 | Skill | 功能 | 位置 |
 |-------|------|------|
 | n8n-mcp-orchestrator | n8n MCP 编排器 | 项目 |
-| openclaw | OpenClaw (龙虾/任意虾) 管理器，安装和配置 | 全局 |
 
 ---
 
@@ -89,7 +92,7 @@
 
 | Skill | 功能 | 位置 |
 |-------|------|------|
-| using-git-worktrees | 使用 Git Worktrees | 全局 |
+| gsd:using-git-worktrees | 使用 Git Worktrees | 全局 |
 
 ---
 
@@ -113,38 +116,30 @@
 
 ---
 
-## 📝 代码审查
-
-| Skill | 功能 | 位置 |
-|-------|------|------|
-| code-reviewer | 审查代码正确性、可维护性和项目规范 | 全局 |
-
----
-
 ## 📊 统计
 
 | 类别 | 数量 |
 |------|------|
-| 开发流程与规划 | 5 |
+| 开发流程与规划 (GSD) | 9 |
 | 测试与调试 | 5 |
 | 代码质量与审查 | 4 |
 | 性能与安全 | 2 |
 | Mojo 语言专用 | 4 |
 | 代码理解与探索 | 1 |
-| 自动化与编排 | 2 |
+| 自动化与编排 | 1 |
 | 并行与子代理 | 2 |
 | Git 工作流 | 1 |
 | 技能管理 | 5 |
 | 自我改进 | 1 |
-| 代码审查 | 1 |
-| **总计** | **33** |
+| **总计** | **35** |
 
 ---
 
 ## 📁 安装位置
 
 - **全局 Skills**: `~/.agents/skills/`
-- **项目 Skills**: `/home/zhou/hello_mojo/trae_cn_78/.agents/skills/`
+- **项目 Skills**: `/home/zhou/hello_mojo/trae_cn_78/.trae/skills/`
+- **GSD Skills**: `~/.gsdc/`
 
 ---
 
@@ -160,3 +155,19 @@ npx skills add <owner/repo@skill> -g -y
 # 搜索 skill
 npx skills find <keyword>
 ```
+
+---
+
+## 🗑️ 已删除的重复技能 (2026-03-27)
+
+以下技能因与 GSD 技能重复已被删除：
+
+| 删除的技能 | 替代技能 |
+|-----------|---------|
+| using-git-worktrees | gsd:using-git-worktrees |
+| openclaw-config | gsd:openclaw-config |
+| verification-before-completion | gsd:verify-work |
+| writing-plans | gsd:plan-phase |
+| executing-plans | gsd:execute-phase |
+| requesting-code-review | gsd:review |
+| brainstorming | gsd:discuss-phase |

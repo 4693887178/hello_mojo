@@ -6,47 +6,25 @@ Group 06 - File 03
 from rqmojo.mod.rqmojo_mod_sys_accounts import load_mod, get_cli_prefix
 
 
-def test_load_mod() raises -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_load_mod() raises:
     print("Test: load_mod function exists")
     var mod = load_mod()
     print("  load_mod returned successfully")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_cli_prefix() -> Bool:
+def test_cli_prefix() raises:
     print("Test: cli_prefix is correct")
     var prefix = get_cli_prefix()
     print("  cli_prefix: ", prefix)
     if prefix == "mod__sys_accounts__":
-        return True
+        assert_true(True, "test passed")
     else:
         print("  Expected: mod__sys_accounts__, got: ", prefix)
-        return False
+        assert_true(False, "test failed")
 
 
-def main() -> None:
-    print("=== Group 06 File 03: Accounts Mod Init Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_load_mod():
-            passed += 1
-        else:
-            failed += 1
-    except:
-        print("  test_load_mod raised exception")
-        failed += 1
-    
-    if test_cli_prefix():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

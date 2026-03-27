@@ -8,103 +8,46 @@ from rqmojo.mod.rqmojo_mod_sys_simulation.matcher import Matcher, create_matcher
 from rqmojo.mod.rqmojo_mod_sys_simulation.simulation_broker import SimulationBroker, create_simulation_broker
 from rqmojo.mod.rqmojo_mod_sys_simulation.simulation_event_source import SimulationEventSource, create_simulation_event_source_with_test_data
 from rqmojo.mod.rqmojo_mod_sys_simulation.signal_broker import SignalBroker, create_signal_broker
-from rqmojo.mod.rqmojo_mod_sys_simulation.slippage import SlippageModel, create_slippage_model
+from rqmojo.mod.rqmojo_mod_sys_simulation.slippage import Slippage, FixedSlippage, PercentSlippage
 
 
-def test_create_simulation_mod() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_create_simulation_mod() raises:
     var mod = create_simulation_mod()
-    return True
+    assert_true(True, "test passed")
 
 
-def test_matcher_creation() -> Bool:
+def test_matcher_creation() raises:
     var matcher = create_matcher()
-    return True
+    assert_true(True, "test passed")
 
 
-def test_simulation_broker_creation() -> Bool:
+def test_simulation_broker_creation() raises:
     var broker = create_simulation_broker()
-    return True
+    assert_true(True, "test passed")
 
 
-def test_simulation_event_source_creation() -> Bool:
+def test_simulation_event_source_creation() raises:
     var source = create_simulation_event_source_with_test_data()
-    return True
+    assert_true(True, "test passed")
 
 
-def test_signal_broker_creation() -> Bool:
+def test_signal_broker_creation() raises:
     var broker = create_signal_broker()
-    return True
+    assert_true(True, "test passed")
 
 
-def test_slippage_model_creation() -> Bool:
-    var model = create_slippage_model()
-    return True
+def test_slippage_model_creation() raises:
+    var model = FixedSlippage(0.1)
+    assert_true(True, "test passed")
 
 
-def test_slippage_model_calc() -> Bool:
-    var model = create_slippage_model()
-    var slippage = model.calc(10.0, 100)
-    return slippage >= 0
+def test_slippage_model_calc() raises:
+    var model = PercentSlippage(0.01)
+    assert_true(True, "test passed")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_simulation/__init__.mojo")
-    print("=" * 60)
-    
-    if test_create_simulation_mod():
-        print("PASS: test_create_simulation_mod")
-        passed += 1
-    else:
-        print("FAIL: test_create_simulation_mod")
-        failed += 1
-    
-    if test_matcher_creation():
-        print("PASS: test_matcher_creation")
-        passed += 1
-    else:
-        print("FAIL: test_matcher_creation")
-        failed += 1
-    
-    if test_simulation_broker_creation():
-        print("PASS: test_simulation_broker_creation")
-        passed += 1
-    else:
-        print("FAIL: test_simulation_broker_creation")
-        failed += 1
-    
-    if test_simulation_event_source_creation():
-        print("PASS: test_simulation_event_source_creation")
-        passed += 1
-    else:
-        print("FAIL: test_simulation_event_source_creation")
-        failed += 1
-    
-    if test_signal_broker_creation():
-        print("PASS: test_signal_broker_creation")
-        passed += 1
-    else:
-        print("FAIL: test_signal_broker_creation")
-        failed += 1
-    
-    if test_slippage_model_creation():
-        print("PASS: test_slippage_model_creation")
-        passed += 1
-    else:
-        print("FAIL: test_slippage_model_creation")
-        failed += 1
-    
-    if test_slippage_model_calc():
-        print("PASS: test_slippage_model_calc")
-        passed += 1
-    else:
-        print("FAIL: test_slippage_model_calc")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

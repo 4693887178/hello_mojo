@@ -23,7 +23,22 @@ def create_test_datetime() -> DateTime:
     return DateTime(2024, 1, 15, 10, 30, 0)
 
 
-def test_tick_object_exists() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_tick_object_exists() raises:
+    var ins = create_test_instrument()
+    var dt = create_test_datetime()
+    var _ = create_tick_object(
+        instrument=ins,
+        dt=dt,
+        last=10.5,
+        volume=1000000.0,
+        total_turnover=10500000.0,
+    )
+    assert_true(True, "TickObject created")
+
+
+def test_tick_order_book_id() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -33,10 +48,10 @@ def test_tick_object_exists() -> Bool:
         volume=1000000.0,
         total_turnover=10500000.0,
     )
-    return True
+    assert_equal(tick.order_book_id(), "000001.XSHE", "order_book_id should match")
 
 
-def test_tick_order_book_id() -> Bool:
+def test_tick_last() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -46,10 +61,10 @@ def test_tick_order_book_id() -> Bool:
         volume=1000000.0,
         total_turnover=10500000.0,
     )
-    return tick.order_book_id() == "000001.XSHE"
+    assert_equal(tick.last, 10.5, "last should be 10.5")
 
 
-def test_tick_last() -> Bool:
+def test_tick_volume() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -59,10 +74,10 @@ def test_tick_last() -> Bool:
         volume=1000000.0,
         total_turnover=10500000.0,
     )
-    return tick.last == 10.5
+    assert_equal(tick.volume, 1000000.0, "volume should be 1000000.0")
 
 
-def test_tick_volume() -> Bool:
+def test_tick_total_turnover() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -72,23 +87,10 @@ def test_tick_volume() -> Bool:
         volume=1000000.0,
         total_turnover=10500000.0,
     )
-    return tick.volume == 1000000.0
+    assert_equal(tick.total_turnover, 10500000.0, "total_turnover should match")
 
 
-def test_tick_total_turnover() -> Bool:
-    var ins = create_test_instrument()
-    var dt = create_test_datetime()
-    var tick = create_tick_object(
-        instrument=ins,
-        dt=dt,
-        last=10.5,
-        volume=1000000.0,
-        total_turnover=10500000.0,
-    )
-    return tick.total_turnover == 10500000.0
-
-
-def test_tick_open() -> Bool:
+def test_tick_open() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -99,10 +101,10 @@ def test_tick_open() -> Bool:
         total_turnover=10500000.0,
         open=10.0,
     )
-    return tick.open == 10.0
+    assert_equal(tick.open, 10.0, "open should be 10.0")
 
 
-def test_tick_high() -> Bool:
+def test_tick_high() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -113,10 +115,10 @@ def test_tick_high() -> Bool:
         total_turnover=10500000.0,
         high=11.0,
     )
-    return tick.high == 11.0
+    assert_equal(tick.high, 11.0, "high should be 11.0")
 
 
-def test_tick_low() -> Bool:
+def test_tick_low() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -127,10 +129,10 @@ def test_tick_low() -> Bool:
         total_turnover=10500000.0,
         low=10.0,
     )
-    return tick.low == 10.0
+    assert_equal(tick.low, 10.0, "low should be 10.0")
 
 
-def test_tick_prev_close() -> Bool:
+def test_tick_prev_close() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -141,10 +143,10 @@ def test_tick_prev_close() -> Bool:
         total_turnover=10500000.0,
         prev_close=10.2,
     )
-    return tick.prev_close == 10.2
+    assert_equal(tick.prev_close, 10.2, "prev_close should be 10.2")
 
 
-def test_tick_limit_up() -> Bool:
+def test_tick_limit_up() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -155,10 +157,10 @@ def test_tick_limit_up() -> Bool:
         total_turnover=10500000.0,
         limit_up=11.22,
     )
-    return tick.limit_up == 11.22
+    assert_equal(tick.limit_up, 11.22, "limit_up should be 11.22")
 
 
-def test_tick_limit_down() -> Bool:
+def test_tick_limit_down() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -169,10 +171,10 @@ def test_tick_limit_down() -> Bool:
         total_turnover=10500000.0,
         limit_down=9.18,
     )
-    return tick.limit_down == 9.18
+    assert_equal(tick.limit_down, 9.18, "limit_down should be 9.18")
 
 
-def test_tick_close() -> Bool:
+def test_tick_close() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -182,10 +184,10 @@ def test_tick_close() -> Bool:
         volume=1000000.0,
         total_turnover=10500000.0,
     )
-    return tick.close() == 10.5
+    assert_equal(tick.close(), 10.5, "close should be 10.5")
 
 
-def test_tick_str() -> Bool:
+def test_tick_str() raises:
     var ins = create_test_instrument()
     var dt = create_test_datetime()
     var tick = create_tick_object(
@@ -196,109 +198,8 @@ def test_tick_str() -> Bool:
         total_turnover=10500000.0,
     )
     var s = String(tick)
-    return s.find("TickObject") >= 0
+    assert_true(s.find("TickObject") >= 0, "String should contain TickObject")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: model/tick.mojo")
-    print("=" * 60)
-    
-    if test_tick_object_exists():
-        print("PASS: test_tick_object_exists")
-        passed += 1
-    else:
-        print("FAIL: test_tick_object_exists")
-        failed += 1
-    
-    if test_tick_order_book_id():
-        print("PASS: test_tick_order_book_id")
-        passed += 1
-    else:
-        print("FAIL: test_tick_order_book_id")
-        failed += 1
-    
-    if test_tick_last():
-        print("PASS: test_tick_last")
-        passed += 1
-    else:
-        print("FAIL: test_tick_last")
-        failed += 1
-    
-    if test_tick_volume():
-        print("PASS: test_tick_volume")
-        passed += 1
-    else:
-        print("FAIL: test_tick_volume")
-        failed += 1
-    
-    if test_tick_total_turnover():
-        print("PASS: test_tick_total_turnover")
-        passed += 1
-    else:
-        print("FAIL: test_tick_total_turnover")
-        failed += 1
-    
-    if test_tick_open():
-        print("PASS: test_tick_open")
-        passed += 1
-    else:
-        print("FAIL: test_tick_open")
-        failed += 1
-    
-    if test_tick_high():
-        print("PASS: test_tick_high")
-        passed += 1
-    else:
-        print("FAIL: test_tick_high")
-        failed += 1
-    
-    if test_tick_low():
-        print("PASS: test_tick_low")
-        passed += 1
-    else:
-        print("FAIL: test_tick_low")
-        failed += 1
-    
-    if test_tick_prev_close():
-        print("PASS: test_tick_prev_close")
-        passed += 1
-    else:
-        print("FAIL: test_tick_prev_close")
-        failed += 1
-    
-    if test_tick_limit_up():
-        print("PASS: test_tick_limit_up")
-        passed += 1
-    else:
-        print("FAIL: test_tick_limit_up")
-        failed += 1
-    
-    if test_tick_limit_down():
-        print("PASS: test_tick_limit_down")
-        passed += 1
-    else:
-        print("FAIL: test_tick_limit_down")
-        failed += 1
-    
-    if test_tick_close():
-        print("PASS: test_tick_close")
-        passed += 1
-    else:
-        print("FAIL: test_tick_close")
-        failed += 1
-    
-    if test_tick_str():
-        print("PASS: test_tick_str")
-        passed += 1
-    else:
-        print("FAIL: test_tick_str")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

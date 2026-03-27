@@ -381,7 +381,7 @@ struct EnumRegistry:
             "MARKET": EnumListVariant([MARKET.CN, MARKET.HK]),
         }
     
-    fn _find_match[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
+    def _find_match[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
         comptime type_name = get_base_type_name[T]()
         comptime name_idx = struct_field_index_by_name[T, "name"]()
         comptime value_idx = struct_field_index_by_name[T, "value"]()

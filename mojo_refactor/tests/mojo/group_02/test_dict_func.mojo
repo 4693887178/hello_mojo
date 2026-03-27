@@ -21,6 +21,8 @@ def make_dict_value(d: Dict[String, RqValue]) -> RqValue:
     return result^
 
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
 def test_simple_update() raises:
     print("Testing deep_update simple update...")
     
@@ -32,9 +34,8 @@ def test_simple_update() raises:
     
     deep_update(from_dict, to_dict)
     
-    assert to_dict["a"].int_val == 1
-    assert to_dict["b"].int_val == 2
-    
+    assert_equal(to_dict["a"].int_val, 1)
+    assert_equal(to_dict["b"].int_val, 2)
     print("  deep_update simple update tests passed!")
 
 
@@ -49,9 +50,8 @@ def test_overwrite_value() raises:
     
     deep_update(from_dict, to_dict)
     
-    assert to_dict["a"].int_val == 0
-    assert to_dict["c"].int_val == 3
-    
+    assert_equal(to_dict["a"].int_val, 0)
+    assert_equal(to_dict["c"].int_val, 3)
     print("  deep_update overwrite value tests passed!")
 
 
@@ -73,9 +73,9 @@ def test_nested_dict_update() raises:
     
     deep_update(from_dict, to_dict)
     
-    assert to_dict["a"].dict_val.__contains__("b")
-    assert to_dict["a"].dict_val.__contains__("c")
-    assert to_dict["a"].dict_val.__contains__("d")
+    assert_true(to_dict["a"].dict_val.__contains__("b"), "Should contain b")
+    assert_true(to_dict["a"].dict_val.__contains__("c"), "Should contain c")
+    assert_true(to_dict["a"].dict_val.__contains__("d"), "Should contain d")
     
     print("  deep_update nested dict update tests passed!")
 
@@ -90,8 +90,7 @@ def test_empty_from_dict() raises:
     
     deep_update(from_dict, to_dict)
     
-    assert to_dict["a"].int_val == 1
-    
+    assert_equal(to_dict["a"].int_val, 1)
     print("  deep_update empty from_dict tests passed!")
 
 
@@ -105,23 +104,11 @@ def test_empty_to_dict() raises:
     
     deep_update(from_dict, to_dict)
     
-    assert to_dict.__contains__("a")
-    assert to_dict["a"].int_val == 1
+    assert_true(to_dict.__contains__("a"), "Should contain a")
+    assert_equal(to_dict["a"].int_val, 1)
     
     print("  deep_update empty to_dict tests passed!")
 
 
 def main() raises:
-    print("=" * 60)
-    print("Testing utils/dict_func.mojo")
-    print("=" * 60)
-    
-    test_simple_update()
-    test_overwrite_value()
-    test_nested_dict_update()
-    test_empty_from_dict()
-    test_empty_to_dict()
-    
-    print("=" * 60)
-    print("All utils/dict_func.mojo tests passed!")
-    print("=" * 60)
+    TestSuite.discover_tests[__functions_in_module()]().run()

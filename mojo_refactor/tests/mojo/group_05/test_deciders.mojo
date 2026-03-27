@@ -11,22 +11,26 @@ from rqmojo.mod.rqmojo_mod_sys_transaction_cost.deciders import (
 )
 
 
-def test_create_stock_decider() -> Bool:
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_create_stock_decider() raises:
     var decider = create_stock_decider()
-    return decider.commission_multiplier == 0.0003 and decider.min_commission == 5.0
+    assert_equal(decider.commission_multiplier, 0.0003, "commission_multiplier should match")
+    assert_equal(decider.min_commission, 5.0, "min_commission should match")
 
 
-def test_create_stock_decider_custom() -> Bool:
+def test_create_stock_decider_custom() raises:
     var decider = create_stock_decider(
         commission_multiplier=0.0005,
         min_commission=10.0,
         stamp_tax_rate=0.002,
         transfer_fee_rate=0.00001
     )
-    return decider.commission_multiplier == 0.0005 and decider.min_commission == 10.0
+    assert_equal(decider.commission_multiplier, 0.0005, "commission_multiplier should match")
+    assert_equal(decider.min_commission, 10.0, "min_commission should match")
 
 
-def test_stock_decider_calc_buy() -> Bool:
+def test_stock_decider_calc_buy() raises:
     var decider = create_stock_decider()
     
     var args = TransactionCostArgs(
@@ -40,10 +44,11 @@ def test_stock_decider_calc_buy() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission == 5.0 and result.tax == 0.0
+    assert_equal(result.commission, 5.0, "commission should be 5.0")
+    assert_equal(result.tax, 0.0, "tax should be 0.0")
 
 
-def test_stock_decider_calc_sell() -> Bool:
+def test_stock_decider_calc_sell() raises:
     var decider = create_stock_decider()
     
     var args = TransactionCostArgs(
@@ -57,10 +62,11 @@ def test_stock_decider_calc_sell() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission == 5.0 and result.tax == 1.0
+    assert_equal(result.commission, 5.0, "commission should be 5.0")
+    assert_equal(result.tax, 1.0, "tax should be 1.0")
 
 
-def test_stock_decider_calc_large_order() -> Bool:
+def test_stock_decider_calc_large_order() raises:
     var decider = create_stock_decider()
     
     var args = TransactionCostArgs(
@@ -74,15 +80,17 @@ def test_stock_decider_calc_large_order() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission > 29.99 and result.commission < 30.01
+    assert_true(result.commission > 29.99, "commission should be > 29.99")
+    assert_true(result.commission < 30.01, "commission should be < 30.01")
 
 
-def test_create_future_decider() -> Bool:
+def test_create_future_decider() raises:
     var decider = create_future_decider()
-    return decider.commission_multiplier == 0.0001 and decider.close_commission_multiplier == 0.0001
+    assert_equal(decider.commission_multiplier, 0.0001, "commission_multiplier should match")
+    assert_equal(decider.close_commission_multiplier, 0.0001, "close_commission_multiplier should match")
 
 
-def test_future_decider_calc_open() -> Bool:
+def test_future_decider_calc_open() raises:
     var decider = create_future_decider()
     
     var args = TransactionCostArgs(
@@ -96,10 +104,11 @@ def test_future_decider_calc_open() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission == 0.4 and result.tax == 0.0
+    assert_equal(result.commission, 0.4, "commission should be 0.4")
+    assert_equal(result.tax, 0.0, "tax should be 0.0")
 
 
-def test_future_decider_calc_close() -> Bool:
+def test_future_decider_calc_close() raises:
     var decider = create_future_decider(
         commission_multiplier=0.0001,
         close_commission_multiplier=0.00005
@@ -116,15 +125,16 @@ def test_future_decider_calc_close() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission == 0.2 and result.tax == 0.0
+    assert_equal(result.commission, 0.2, "commission should be 0.2")
+    assert_equal(result.tax, 0.0, "tax should be 0.0")
 
 
-def test_create_bond_decider() -> Bool:
+def test_create_bond_decider() raises:
     var decider = create_bond_decider()
-    return decider.commission_multiplier == 0.0001
+    assert_equal(decider.commission_multiplier, 0.0001, "commission_multiplier should match")
 
 
-def test_bond_decider_calc() -> Bool:
+def test_bond_decider_calc() raises:
     var decider = create_bond_decider(commission_multiplier=0.0002)
     
     var args = TransactionCostArgs(
@@ -138,88 +148,10 @@ def test_bond_decider_calc() -> Bool:
     )
     
     var result = decider.calc(args)
-    return result.commission == 0.2 and result.tax == 0.0 and result.other_fees == 0.0
+    assert_equal(result.commission, 0.2, "commission should be 0.2")
+    assert_equal(result.tax, 0.0, "tax should be 0.0")
+    assert_equal(result.other_fees, 0.0, "other_fees should be 0.0")
 
 
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_transaction_cost/deciders.mojo")
-    print("=" * 60)
-    
-    if test_create_stock_decider():
-        print("PASS: test_create_stock_decider")
-        passed += 1
-    else:
-        print("FAIL: test_create_stock_decider")
-        failed += 1
-    
-    if test_create_stock_decider_custom():
-        print("PASS: test_create_stock_decider_custom")
-        passed += 1
-    else:
-        print("FAIL: test_create_stock_decider_custom")
-        failed += 1
-    
-    if test_stock_decider_calc_buy():
-        print("PASS: test_stock_decider_calc_buy")
-        passed += 1
-    else:
-        print("FAIL: test_stock_decider_calc_buy")
-        failed += 1
-    
-    if test_stock_decider_calc_sell():
-        print("PASS: test_stock_decider_calc_sell")
-        passed += 1
-    else:
-        print("FAIL: test_stock_decider_calc_sell")
-        failed += 1
-    
-    if test_stock_decider_calc_large_order():
-        print("PASS: test_stock_decider_calc_large_order")
-        passed += 1
-    else:
-        print("FAIL: test_stock_decider_calc_large_order")
-        failed += 1
-    
-    if test_create_future_decider():
-        print("PASS: test_create_future_decider")
-        passed += 1
-    else:
-        print("FAIL: test_create_future_decider")
-        failed += 1
-    
-    if test_future_decider_calc_open():
-        print("PASS: test_future_decider_calc_open")
-        passed += 1
-    else:
-        print("FAIL: test_future_decider_calc_open")
-        failed += 1
-    
-    if test_future_decider_calc_close():
-        print("PASS: test_future_decider_calc_close")
-        passed += 1
-    else:
-        print("FAIL: test_future_decider_calc_close")
-        failed += 1
-    
-    if test_create_bond_decider():
-        print("PASS: test_create_bond_decider")
-        passed += 1
-    else:
-        print("FAIL: test_create_bond_decider")
-        failed += 1
-    
-    if test_bond_decider_calc():
-        print("PASS: test_bond_decider_calc")
-        passed += 1
-    else:
-        print("FAIL: test_bond_decider_calc")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

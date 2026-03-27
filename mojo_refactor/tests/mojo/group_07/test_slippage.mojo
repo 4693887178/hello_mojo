@@ -12,6 +12,7 @@ from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.const import SIDE, POSITION_EFFECT
 from rqmojo.utils.typing import DateTime
 
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
 fn create_test_bar() -> BarObject:
     return create_bar_object(
@@ -40,8 +41,7 @@ fn create_test_order() -> Order:
         position_effect=POSITION_EFFECT.OPEN
     )
 
-
-fn test_fixed_slippage() raises -> Bool:
+def test_fixed_slippage() raises:
     print("Test: FixedSlippage")
     
     var slippage = create_fixed_slippage(0.5)
@@ -50,13 +50,11 @@ fn test_fixed_slippage() raises -> Bool:
     
     var result = slippage.get_slippage(order, bar)
     
-    if result != 0.5:
-        raise "Fixed slippage should be 0.5"
+    assert_equal(result, 0.5, "Fixed slippage should be 0.5")
     print("  PASSED")
-    return True
 
 
-fn test_percent_slippage() raises -> Bool:
+def test_percent_slippage() raises:
     print("Test: PercentSlippage")
     
     var slippage = create_percent_slippage(0.01)
@@ -67,10 +65,9 @@ fn test_percent_slippage() raises -> Bool:
     
     print("  Slippage: ", result)
     print("  PASSED")
-    return True
 
 
-fn test_volume_share_slippage() raises -> Bool:
+def test_volume_share_slippage() raises:
     print("Test: VolumeShareSlippage")
     
     var slippage = create_volume_share_slippage(volume_share_limit=0.25, price_impact=0.1)
@@ -81,36 +78,7 @@ fn test_volume_share_slippage() raises -> Bool:
     
     print("  Slippage: ", result)
     print("  PASSED")
-    return True
 
 
 def main() raises:
-    print("=== Group 07 File 07: Slippage Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    try:
-        if test_fixed_slippage():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_percent_slippage():
-            passed += 1
-    except:
-        failed += 1
-    
-    try:
-        if test_volume_share_slippage():
-            passed += 1
-    except:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+    TestSuite.discover_tests[__functions_in_module()]().run()

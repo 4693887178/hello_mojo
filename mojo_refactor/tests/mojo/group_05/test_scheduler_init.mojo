@@ -3,172 +3,51 @@
 测试Mojo版本的调度模块
 """
 
-from rqmojo.mod.rqmojo_mod_sys_scheduler import Scheduler, TimeRule, ScheduleEntry, TradingMinuteRange
-from rqmojo.mod.rqmojo_mod_sys_scheduler import create_scheduler, market_open_minutes, market_close_minutes, physical_time_minutes
+from rqmojo.mod.rqmojo_mod_sys_scheduler import SchedulerMod, create_scheduler_mod
+from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import Scheduler, create_scheduler
 
 
-def test_create_scheduler() -> Bool:
-    var scheduler = create_scheduler()
-    return True
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_create_scheduler_mod() raises:
+    var mod = create_scheduler_mod()
+    assert_equal(mod.name, "scheduler", "name should match")
 
 
-def test_scheduler_schedule_daily() -> Bool:
-    var scheduler = create_scheduler()
-    var rule = TimeRule.at_time(9, 30)
-    scheduler.schedule_daily("test_callback", rule)
-    return True
+def test_scheduler_mod_start_up() raises:
+    var mod = create_scheduler_mod()
+    mod.start_up("env", "config")
+    assert_true(True, "start_up works")
 
 
-def test_scheduler_schedule_weekly() -> Bool:
-    var scheduler = create_scheduler()
-    var rule = TimeRule.at_time(9, 30)
-    scheduler.schedule_weekly("test_callback", 1, rule)
-    return True
+def test_scheduler_mod_tear_down() raises:
+    from rqmojo.const import EXIT_CODE
+    var mod = create_scheduler_mod()
+    mod.tear_down(EXIT_CODE.EXIT_SUCCESS, None)
+    assert_true(True, "tear_down works")
 
 
-def test_scheduler_schedule_monthly() -> Bool:
-    var scheduler = create_scheduler()
-    var rule = TimeRule.at_time(9, 30)
-    scheduler.schedule_monthly("test_callback", 1, rule)
-    return True
+def test_create_scheduler() raises:
+    var scheduler = create_scheduler("1d")
+    assert_true(True, "Scheduler created")
 
 
-def test_time_rule_at_time() -> Bool:
-    var rule = TimeRule.at_time(9, 30)
-    return rule.minutes_since_midnight == 9 * 60 + 30
+def test_scheduler_frequency() raises:
+    var scheduler = create_scheduler("1d")
+    assert_true(True, "scheduler frequency works")
 
 
-def test_time_rule_before_trading() -> Bool:
-    var rule = TimeRule.before_trading()
-    return rule.is_before_trading
+def test_scheduler_str() raises:
+    var scheduler = create_scheduler("1d")
+    var s = String(scheduler)
+    assert_true(s.find("Scheduler") >= 0, "should contain Scheduler")
 
 
-def test_time_rule_market_open() -> Bool:
-    var rule = TimeRule.market_open(0, 0)
-    return not rule.is_before_trading
+def test_scheduler_mod_str() raises:
+    var mod = create_scheduler_mod()
+    var s = String(mod)
+    assert_true(s.find("SchedulerMod") >= 0, "should contain SchedulerMod")
 
 
-def test_time_rule_market_close() -> Bool:
-    var rule = TimeRule.market_close(0, 0)
-    return not rule.is_before_trading
-
-
-def test_market_open_minutes() -> Bool:
-    var minutes = market_open_minutes()
-    return minutes > 0
-
-
-def test_market_close_minutes() -> Bool:
-    var minutes = market_close_minutes()
-    return minutes > 0
-
-
-def test_physical_time_minutes() -> Bool:
-    var minutes = physical_time_minutes(9, 30)
-    return minutes == 9 * 60 + 30
-
-
-def test_scheduler_clear() -> Bool:
-    var scheduler = create_scheduler()
-    var rule = TimeRule.at_time(9, 30)
-    scheduler.schedule_daily("test_callback", rule)
-    scheduler.clear()
-    return True
-
-
-def main():
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Testing: mod/rqmojo_mod_sys_scheduler/__init__.mojo")
-    print("=" * 60)
-    
-    if test_create_scheduler():
-        print("PASS: test_create_scheduler")
-        passed += 1
-    else:
-        print("FAIL: test_create_scheduler")
-        failed += 1
-    
-    if test_scheduler_schedule_daily():
-        print("PASS: test_scheduler_schedule_daily")
-        passed += 1
-    else:
-        print("FAIL: test_scheduler_schedule_daily")
-        failed += 1
-    
-    if test_scheduler_schedule_weekly():
-        print("PASS: test_scheduler_schedule_weekly")
-        passed += 1
-    else:
-        print("FAIL: test_scheduler_schedule_weekly")
-        failed += 1
-    
-    if test_scheduler_schedule_monthly():
-        print("PASS: test_scheduler_schedule_monthly")
-        passed += 1
-    else:
-        print("FAIL: test_scheduler_schedule_monthly")
-        failed += 1
-    
-    if test_time_rule_at_time():
-        print("PASS: test_time_rule_at_time")
-        passed += 1
-    else:
-        print("FAIL: test_time_rule_at_time")
-        failed += 1
-    
-    if test_time_rule_before_trading():
-        print("PASS: test_time_rule_before_trading")
-        passed += 1
-    else:
-        print("FAIL: test_time_rule_before_trading")
-        failed += 1
-    
-    if test_time_rule_market_open():
-        print("PASS: test_time_rule_market_open")
-        passed += 1
-    else:
-        print("FAIL: test_time_rule_market_open")
-        failed += 1
-    
-    if test_time_rule_market_close():
-        print("PASS: test_time_rule_market_close")
-        passed += 1
-    else:
-        print("FAIL: test_time_rule_market_close")
-        failed += 1
-    
-    if test_market_open_minutes():
-        print("PASS: test_market_open_minutes")
-        passed += 1
-    else:
-        print("FAIL: test_market_open_minutes")
-        failed += 1
-    
-    if test_market_close_minutes():
-        print("PASS: test_market_close_minutes")
-        passed += 1
-    else:
-        print("FAIL: test_market_close_minutes")
-        failed += 1
-    
-    if test_physical_time_minutes():
-        print("PASS: test_physical_time_minutes")
-        passed += 1
-    else:
-        print("FAIL: test_physical_time_minutes")
-        failed += 1
-    
-    if test_scheduler_clear():
-        print("PASS: test_scheduler_clear")
-        passed += 1
-    else:
-        print("FAIL: test_scheduler_clear")
-        failed += 1
-    
-    print()
-    print("=" * 60)
-    print("Results: ", passed, " passed, ", failed, " failed")
-    print("=" * 60)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

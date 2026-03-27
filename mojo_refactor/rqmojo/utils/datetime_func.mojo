@@ -53,7 +53,7 @@ def _convert_int_to_date(dt_int: Int) -> DateTime:
 def convert_int_to_datetime(dt_int: Int) -> DateTime:
     var dt = dt_int
     var ms = 0
-    if dt > 10000000000:
+    if dt > 100000000000000:
         ms = dt % 1000
         dt //= 1000
     var year = dt // 10000000000

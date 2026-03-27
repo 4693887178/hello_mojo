@@ -4,55 +4,28 @@ Group 06 - File 04
 """
 
 
-def test_entry_point_exists() -> Bool:
+
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
+
+def test_entry_point_exists() raises:
     print("Test: entry_point function exists")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_cli_import() -> Bool:
+def test_cli_import() raises:
     print("Test: cli can be imported")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_inject_mod_commands_import() -> Bool:
+def test_inject_mod_commands_import() raises:
     print("Test: inject_mod_commands can be imported")
-    return True
+    assert_true(True, "test passed")
 
 
-def test_module_structure() -> Bool:
+def test_module_structure() raises:
     print("Test: module structure")
-    return True
+    assert_true(True, "test passed")
 
 
-def main() -> None:
-    print("=== Group 06 File 04: __main__ Tests ===")
-    print("")
-    
-    var passed = 0
-    var failed = 0
-    
-    if test_entry_point_exists():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_cli_import():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_inject_mod_commands_import():
-        passed += 1
-    else:
-        failed += 1
-    
-    if test_module_structure():
-        passed += 1
-    else:
-        failed += 1
-    
-    print("")
-    print("=== Test Summary ===")
-    print("Passed: ", passed)
-    print("Failed: ", failed)
-    print("Total:  ", passed + failed)
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

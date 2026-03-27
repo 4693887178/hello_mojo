@@ -25,13 +25,13 @@ def handle_bar(context: object, bar_dict: object) -> None:
     var hist = macd_result[2]
     
     if macd[-1] - signal[-1] > 0 and macd[-2] - signal[-2] < 0:
-        var sell_qty = get_position(context.s1, POSITION_DIRECTION_SHORT).quantity
+        var sell_qty = get_position(context.s1, POSITION_DIRECTION.SHORT).quantity
         if sell_qty > 0:
             buy_close(context.s1, 1)
         buy_open(context.s1, 1)
     
     if macd[-1] - signal[-1] < 0 and macd[-2] - signal[-2] > 0:
-        var buy_qty = get_position(context.s1, POSITION_DIRECTION_LONG).quantity
+        var buy_qty = get_position(context.s1, POSITION_DIRECTION.LONG).quantity
         if buy_qty > 0:
             sell_close(context.s1, 1)
         sell_open(context.s1, 1)
