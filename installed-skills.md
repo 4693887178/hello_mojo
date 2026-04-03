@@ -1,6 +1,22 @@
 # 已安装 Skills 完整列表
 
-> 更新时间：2026-03-27
+> 更新时间：2026-04-03
+
+---
+
+## 🧬 OpenSpace 自进化引擎
+
+| Skill | 功能 | 位置 |
+|-------|------|------|
+| delegate-task | 委派任务给 OpenSpace 执行，支持编码、DevOps、网页研究 | 项目 |
+| skill-discovery | 搜索 OpenSpace 本地和云端技能库 | 项目 |
+
+**MCP 工具**: `execute_task`, `search_skills`, `fix_skill`, `upload_skill`
+
+**核心能力**:
+- 🧬 自进化 - 任务成功时技能自动升级，失败时自动修复
+- 🌐 群体智能 - 一个 Agent 学到的，全网 Agent 共享
+- 💰 节省成本 - 46% 更少 token，4.2 倍收益
 
 ---
 

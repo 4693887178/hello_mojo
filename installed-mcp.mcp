@@ -1,0 +1,53 @@
+{
+  "name": "OpenSpace",
+  "description": "自进化 AI Agent 引擎 - 让 Agent 自动学习、自动修复、自动优化",
+  "version": "0.1.0",
+  "command": "/home/zhou/hello_mojo/trae_cn_78/.venv/bin/openspace-mcp",
+  "args": [],
+  "env": {
+    "OPENSPACE_HOST_SKILL_DIRS": "/home/zhou/hello_mojo/trae_cn_78/.trae/skills",
+    "OPENSPACE_WORKSPACE": "/home/zhou/hello_mojo/trae_cn_78/OpenSpace",
+    "OPENSPACE_API_KEY": "sk-EI3bFdy-T9fOdS8nnFt5R_AUeHUNyBoiTGplXm-q2_0"
+  },
+  "toolTimeout": 600,
+  "tools": [
+    {
+      "name": "execute_task",
+      "description": "委派任务给 OpenSpace 执行，自动搜索技能、执行、进化"
+    },
+    {
+      "name": "search_skills",
+      "description": "搜索本地和云端技能库"
+    },
+    {
+      "name": "fix_skill",
+      "description": "手动修复损坏的技能"
+    },
+    {
+      "name": "upload_skill",
+      "description": "上传技能到云端社区"
+    }
+  ],
+  "skills": [
+    {
+      "name": "delegate-task",
+      "path": "/home/zhou/hello_mojo/trae_cn_78/.trae/skills/delegate-task",
+      "description": "委派任务给 OpenSpace - 全栈自主工作者，支持编码、DevOps、网页研究和桌面自动化"
+    },
+    {
+      "name": "skill-discovery",
+      "path": "/home/zhou/hello_mojo/trae_cn_78/.trae/skills/skill-discovery",
+      "description": "搜索 OpenSpace 本地和云端技能库中的可复用技能"
+    }
+  ],
+  "features": [
+    "🧬 自进化 - 任务成功时技能自动升级，失败时自动修复",
+    "🌐 群体智能 - 一个 Agent 学到的，全网 Agent 共享",
+    "💰 节省成本 - 46% 更少 token，4.2 倍收益"
+  ],
+  "installation": {
+    "source": "https://github.com/HKUDS/OpenSpace",
+    "installed_at": "2026-04-03",
+    "install_path": "/home/zhou/hello_mojo/trae_cn_78/OpenSpace"
+  }
+}
