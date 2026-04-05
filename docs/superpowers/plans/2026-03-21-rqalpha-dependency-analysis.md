@@ -79,7 +79,7 @@
 | 1  | `utils/logger.py`                          | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.utils.exception` | 2026-04-06 05:44 |
 | 2  | `utils/rq_json.py`                         | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.datetime_func`                   | 2026-04-06 06:02 |
 | 3  | `utils/strategy_loader_help.py`            | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.exception`                       |                      |
-| 4  | `utils/testing/__init__.py`                | ✅ 已完成 | 2    | `.mocking`, `.fixtures`                                                 |                      |
+| 4  | `utils/testing/__init__.py`                | ✅ 已完成 | 2    | `.mocking`, `.fixtures`, `.integration`                                    | 2026-04-06 |
 | 5  | `utils/arg_checker.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    |                      |
 | 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    |                      |
 | 7  | `utils/functools.py`                       | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`                                   |                      |

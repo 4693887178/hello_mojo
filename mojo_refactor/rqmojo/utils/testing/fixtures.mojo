@@ -6,7 +6,31 @@ Ported from rqalpha/utils/testing/fixtures.py
 from std.collections import Dict, List
 from rqmojo.utils import RqAttrDict, RqValue
 from rqmojo.environment import Environment
+from rqmojo.core.strategy_universe import StrategyUniverse
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
+
+
+struct MagicMock(Movable):
+    var _call_count: Int
+    var _call_args_list: List[String]
+    var _return_value: RqValue
+
+    def __init__(out self):
+        self._call_count = 0
+        self._call_args_list = List[String]()
+        self._return_value = RqValue(None)
+
+    def __call__(mut self) -> RqValue:
+        self._call_count += 1
+        self._call_args_list.append("()")
+        return self._return_value
+
+    def call_count(self) -> Int:
+        return self._call_count
+
+    def reset_mock(mut self):
+        self._call_count = 0
+        self._call_args_list = List[String]()
 
 
 struct RQAlphaFixture:
@@ -17,13 +41,26 @@ struct RQAlphaFixture:
 struct EnvironmentFixture:
     var env_config: RqAttrDict
     var env: Optional[Environment]
-    
+
     def __init__(out self):
         self.env_config = RqAttrDict()
         self.env = None
-    
+
     def init_fixture(mut self):
         pass
+
+
+struct UniverseFixture:
+    var env_config: RqAttrDict
+    var env: Optional[Environment]
+
+    def __init__(out self):
+        self.env_config = RqAttrDict()
+        self.env = None
+
+    def init_fixture(mut self):
+        RQAlphaFixture().init_fixture()
+        var universe = StrategyUniverse()
 
 
 struct TempDirFixture:
