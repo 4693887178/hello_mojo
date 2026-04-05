@@ -3,13 +3,15 @@ RQAlpha Mojo - Repr Utilities
 Ported from rqalpha/utils/repr.py
 
 Provides property-based repr functionality similar to Python's PropertyReprMeta.
+Optimized for Mojo best practices: unified types, efficient string building,
+Writable conformance, and clean trait-based architecture.
 """
 
 from std.collections import Dict, List
 
 
 @fieldwise_init
-struct ReprPropertyItem(Copyable, Movable):
+struct PropertyItem(Copyable, Movable, Writable):
     var name: String
     var value: String
 
@@ -19,22 +21,17 @@ struct ReprPropertyItem(Copyable, Movable):
     def get_value(self) -> String:
         return self.value
 
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PropertyItem(", self.name, "=", self.value, ")")
 
-@fieldwise_init
-struct CachedProperty(Copyable, Movable):
-    var name: String
-    var value: String
 
-    def get_name(self) -> String:
-        return self.name
-
-    def get_value(self) -> String:
-        return self.value
+comptime ReprPropertyItem = PropertyItem
+comptime CachedProperty = PropertyItem
 
 
 trait Reprable:
-    def __repr_properties__(self) -> List[ReprPropertyItem]: ...
-    def __repr_cached_properties__(self) -> List[CachedProperty]: ...
+    def __repr_properties__(self) -> List[PropertyItem]: ...
+    def __repr_cached_properties__(self) -> List[PropertyItem]: ...
     def __class_name__(self) -> String: ...
     def __abandon_properties__(self) -> List[String]:
         return List[String]()
@@ -46,124 +43,97 @@ trait SlotsReprable:
     def __class_name__(self) -> String: ...
 
 
-struct ReprBuilder:
+struct ReprBuilder(Copyable):
     var cls_name: String
     var properties: List[String]
-    
+
     def __init__(out self, cls_name: String, var properties: List[String]):
         self.cls_name = cls_name
         self.properties = properties^
-    
+
     def build(self) -> String:
-        return _repr(self.cls_name, self.properties)
+        return _build_repr_string(self.cls_name, self.properties)
 
 
-def _starts_with(s: String, prefix: String) -> Bool:
-    if len(s) < len(prefix):
+def _is_private(name: String) -> Bool:
+    if len(name) == 0:
         return False
-    var bytes_s = s.as_bytes()
-    var bytes_prefix = prefix.as_bytes()
-    for i in range(len(bytes_prefix)):
-        if bytes_s[i] != bytes_prefix[i]:
-            return False
-    return True
+    return name[byte=0] == "_"
 
 
-def _slice_string(s: String, start: Int, end: Int) -> String:
-    var actual_end = min(end, len(s))
-    if start >= actual_end:
-        return ""
-    if start == 0 and actual_end == len(s):
-        return s
-    return String(s[byte=start:actual_end])
+def _is_abandoned(name: String, abandon_list: List[String]) -> Bool:
+    for item in abandon_list:
+        if item == name:
+            return True
+    return False
 
 
-def _repr(cls_name: String, properties: List[String]) -> String:
-    var fmt_str = cls_name + "("
-    var first = True
+def _build_repr_string(cls_name: String, properties: List[String]) -> String:
+    var parts = List[String]()
     for p in properties:
-        if not first:
-            fmt_str = fmt_str + ", "
-        fmt_str = fmt_str + p + "={}"
-        first = False
-    fmt_str = fmt_str + ")"
-    return fmt_str
+        if _is_private(p):
+            continue
+        parts.append(p + "={}")
+    return cls_name + "(" + ", ".join(parts) + ")"
+
+
+def _build_kv_string(cls_name: String, d: Dict[String, String]) -> String:
+    var parts = List[String]()
+    for key in d.keys():
+        if _is_private(key):
+            continue
+        var val = d.get(key, "")
+        parts.append(key + "=" + val)
+    return cls_name + "(" + ", ".join(parts) + ")"
+
+
+def _collect_properties[T: Reprable](
+    inst: T, abandon: List[String]
+) -> Dict[String, String]:
+    var result = Dict[String, String]()
+
+    var props = inst.__repr_properties__()
+    for prop in props:
+        var name = prop.get_name()
+        if _is_private(name) or _is_abandoned(name, abandon):
+            continue
+        result[name] = prop.get_value()
+
+    var cached_props = inst.__repr_cached_properties__()
+    for cached in cached_props:
+        var name = cached.get_name()
+        if _is_private(name) or _is_abandoned(name, abandon):
+            continue
+        result[name] = cached.get_value()
+
+    return result^
 
 
 def property_repr[T: Reprable](inst: T) -> String:
     var cls_name = inst.__class_name__()
     var props = properties(inst)
-    return dict_repr_from_dict(cls_name, props)
+    return _build_kv_string(cls_name, props)
 
 
 def slots_repr[T: SlotsReprable](inst: T) -> String:
     var cls_name = inst.__class_name__()
     var slots_dict = slots(inst)
-    return dict_repr_from_dict(cls_name, slots_dict)
+    return _build_kv_string(cls_name, slots_dict)
 
 
 def dict_repr[T: Reprable](inst: T) -> String:
     var cls_name = inst.__class_name__()
     var props = properties(inst)
-    return dict_repr_from_dict(cls_name, props)
+    return _build_kv_string(cls_name, props)
 
 
 def dict_repr_from_dict(cls_name: String, d: Dict[String, String]) -> String:
-    var result = cls_name + "("
-    var first = True
-    for key in d.keys():
-        if _starts_with(key, "_"):
-            continue
-        if not first:
-            result = result + ", "
-        var val = d.get(key, "")
-        result = result + key + "=" + val
-        first = False
-    result = result + ")"
-    return result
+    return _build_kv_string(cls_name, d)
 
 
 def properties[T: Reprable](inst: T) -> Dict[String, String]:
-    var result = Dict[String, String]()
     var abandon = inst.__abandon_properties__()
-    
-    var props = inst.__repr_properties__()
-    for prop in props:
-        var name = prop.get_name()
-        
-        if _starts_with(name, "_"):
-            continue
-        
-        var is_abandoned = False
-        for abandoned in abandon:
-            if abandoned == name:
-                is_abandoned = True
-                break
-        
-        if is_abandoned:
-            continue
-        
-        result[name] = prop.get_value()
-    
-    var cached_props = inst.__repr_cached_properties__()
-    for cached in cached_props:
-        var name = cached.get_name()
-        
-        if _starts_with(name, "_"):
-            continue
-        
-        var is_abandoned = False
-        for abandoned in abandon:
-            if abandoned == name:
-                is_abandoned = True
-                break
-        
-        if is_abandoned:
-            continue
-        
-        result[name] = cached.get_value()
-    
-    return result^
+    return _collect_properties(inst, abandon)
 
 
 def slots[T: SlotsReprable](inst: T) -> Dict[String, String]:
@@ -177,15 +147,17 @@ def slots[T: SlotsReprable](inst: T) -> Dict[String, String]:
 def truncate_string(s: String, max_length: Int = 100) -> String:
     if len(s) <= max_length:
         return s
-    return _slice_string(s, 0, max_length - 3) + "..."
+    return s[byte=0:max_length - 3] + "..."
 
 
 def format_float(value: Float64, precision: Int = 4) -> String:
     var s = String(value)
     if len(s) > precision + 2:
-        return _slice_string(s, 0, precision + 2)
+        return String(s[byte=0:precision + 2])
     return s
 
 
-def make_repr_builder(cls_name: String, var prop_names: List[String]) -> ReprBuilder:
+def make_repr_builder(
+    cls_name: String, var prop_names: List[String]
+) -> ReprBuilder:
     return ReprBuilder(cls_name, prop_names^)
