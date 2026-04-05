@@ -2,6 +2,10 @@
 RQAlpha Mojo - Exception Handling
 Ported from rqalpha/utils/exception.py
 Mojo 0.26+ compatible
+
+Design notes vs Python original:
+  Python: class inheritance + dynamic getattr/setattr for EXC_EXT_NAME
+  Mojo:  struct composition + direct EXC_TYPE parameter passing
 """
 
 from std.collections import List, Dict
@@ -23,12 +27,27 @@ struct StackFrame(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
 
 @fieldwise_init
+struct LocalVar(Equatable, ImplicitlyCopyable, Writable):
+    var name: String
+    var value_str: String
+
+    def write_to(self, mut writer: Some[Writer]):
+        t"{self.name} = {self.value_str}".write_to(writer)
+
+
 struct CustomError(Equatable, Writable, Movable):
     var msg: String
     var exc_type_name: String
     var error_type: EXC_TYPE
     var stacks: List[StackFrame]
     var max_exc_var_len: Int
+
+    def __init__(out self):
+        self.msg = ""
+        self.exc_type_name = "Exception"
+        self.error_type = EXC_TYPE.NOTSET
+        self.stacks = List[StackFrame]()
+        self.max_exc_var_len = 160
 
     def __init__(out self, msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET):
         self.msg = msg
@@ -37,14 +56,31 @@ struct CustomError(Equatable, Writable, Movable):
         self.stacks = List[StackFrame]()
         self.max_exc_var_len = 160
 
-    def __init__(out self, *, copy: Self):
-        self.msg = copy.msg
-        self.exc_type_name = copy.exc_type_name
-        self.error_type = copy.error_type
-        self.stacks = List[StackFrame]()
-        for frame in copy.stacks:
-            self.stacks.append(frame)
-        self.max_exc_var_len = copy.max_exc_var_len
+    def set_exc(mut self, exc_type_name: String, exc_val: String, exc_tb: String):
+        self.exc_type_name = exc_type_name
+        if len(exc_val) > 0 and len(self.msg) == 0:
+            self.msg = exc_val
+
+    def set_msg(mut self, msg: String):
+        self.msg = msg
+
+    def _repr_value(self, value_str: String) -> String:
+        if len(value_str) > self.max_exc_var_len:
+            return value_str[byte=0:self.max_exc_var_len] + " ..."
+        return value_str
+
+    def add_stack_info(
+        mut self,
+        filename: String,
+        lineno: Int,
+        func_name: String,
+        code: String,
+        local_vars: List[LocalVar] = List[LocalVar](),
+    ):
+        self.stacks.append(StackFrame(filename, lineno, func_name, code))
+
+    def stacks_length(self) -> Int:
+        return len(self.stacks)
 
     def write_to(self, mut writer: Some[Writer]):
         if len(self.stacks) == 0:
@@ -52,28 +88,24 @@ struct CustomError(Equatable, Writable, Movable):
             return
 
         "Traceback (most recent call last):\n".write_to(writer)
-        
+
         for frame in self.stacks:
             t"  File {frame.filename}, line {frame.lineno} in {frame.func_name}\n".write_to(writer)
             t"    {frame.code}\n".write_to(writer)
             "\n".write_to(writer)
-        
+
         t"{self.exc_type_name}: {self.msg}".write_to(writer)
 
     @staticmethod
     def create(msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET) -> Self:
-        var result = Self(msg, exc_type_name, error_type)
-        return result^
-
-    def add_stack_info(mut self, filename: String, lineno: Int, func_name: String, code: String):
-        self.stacks.append(StackFrame(filename, lineno, func_name, code))
-
-    def stacks_length(self) -> Int:
-        return len(self.stacks)
+        return Self(msg, exc_type_name, error_type)
 
 
 struct CustomException(Equatable, Writable, Movable):
     var error: CustomError
+
+    def __init__(out self, var error: CustomError):
+        self.error = error^
 
     def __init__(out self, msg: String, exc_type_name: String = "Exception", error_type: EXC_TYPE = EXC_TYPE.NOTSET):
         self.error = CustomError.create(msg, exc_type_name, error_type)
@@ -171,10 +203,17 @@ struct EnvironmentNotInitialized(Equatable, ImplicitlyCopyable, Hashable, Writab
         return Self("Environment has not been initialized")
 
 
-@fieldwise_init
-struct BaseExceptionGroup(Equatable, Writable):
+struct BaseExceptionGroup(Equatable, Writable, Movable):
     var message: String
     var exceptions: List[Error]
+
+    def __init__(out self, var message: String, var exceptions: List[Error]) raises:
+        if len(message) == 0:
+            raise Error("ExceptionGroup message must be a string")
+        if len(exceptions) == 0:
+            raise Error("second argument (exceptions) must be a non-empty sequence")
+        self.message = message^
+        self.exceptions = exceptions^
 
     def write_to(self, mut writer: Some[Writer]):
         if len(self.exceptions) == 1:
@@ -182,53 +221,74 @@ struct BaseExceptionGroup(Equatable, Writable):
         else:
             t"{self.message} ({len(self.exceptions)} sub-exceptions)".write_to(writer)
 
+    def derive(mut self, var new_exceptions: List[Error]) raises -> BaseExceptionGroup:
+        if len(new_exceptions) == 0:
+            return BaseExceptionGroup(self.message, List[Error]())
+        return BaseExceptionGroup(self.message, new_exceptions^)
+
+    def subgroup(
+        mut self, condition: fn(Error) -> Bool
+    ) raises -> Optional[BaseExceptionGroup]:
+        var matched = List[Error]()
+        for i in range(len(self.exceptions)):
+            var err = self.exceptions[i].copy()
+            if condition(err):
+                matched.append(err^)
+        if len(matched) > 0:
+            return self.derive(matched^)
+        return None
+
     @staticmethod
-    def create(message: String, exceptions: List[Error]) raises -> Self:
-        if len(message) == 0:
-            raise Error("ExceptionGroup message must be a string")
-        if len(exceptions) == 0:
-            raise Error("second argument (exceptions) must be a non-empty sequence")
-        return Self(message, exceptions)
+    def create(var message: String, var exceptions: List[Error]) raises -> Self:
+        return Self(message^, exceptions^)
 
 
-@fieldwise_init
-struct ExceptionGroup(Equatable, Writable):
-    var message: String
-    var exceptions: List[Error]
+struct ExceptionGroup(Equatable, Writable, Movable):
+    var _inner: BaseExceptionGroup
+
+    def __init__(out self, var inner: BaseExceptionGroup):
+        self._inner = inner^
+
+    def __init__(out self, var message: String, var exceptions: List[Error]) raises:
+        self._inner = BaseExceptionGroup(message^, exceptions^)
 
     def write_to(self, mut writer: Some[Writer]):
-        if len(self.exceptions) == 1:
-            t"{self.message} (1 sub-exception)".write_to(writer)
-        else:
-            t"{self.message} ({len(self.exceptions)} sub-exceptions)".write_to(writer)
+        self._inner.write_to(writer)
+
+    def derive(mut self, var new_exceptions: List[Error]) raises -> ExceptionGroup:
+        return ExceptionGroup(self._inner.derive(new_exceptions^))
+
+    def subgroup(
+        mut self, condition: fn(Error) -> Bool
+    ) raises -> Optional[ExceptionGroup]:
+        var matched = List[Error]()
+        for i in range(len(self._inner.exceptions)):
+            var err = self._inner.exceptions[i].copy()
+            if condition(err):
+                matched.append(err^)
+        if len(matched) > 0:
+            var derived = self._inner.derive(matched^)
+            return ExceptionGroup(derived^)
+        return None
 
     @staticmethod
-    def create(message: String, exceptions: List[Error]) raises -> Self:
-        if len(message) == 0:
-            raise Error("ExceptionGroup message must be a string")
-        if len(exceptions) == 0:
-            raise Error("second argument (exceptions) must be a non-empty sequence")
-        return Self(message, exceptions)
+    def create(var message: String, var exceptions: List[Error]) raises -> Self:
+        return Self(message^, exceptions^)
 
 
-def format_exception_group(exc_group: ExceptionGroup, indent: String = "") -> String:
+def format_exception_group(
+    exc_group: BaseExceptionGroup, indent: String = "", group_name: String = "ExceptionGroup"
+) -> String:
     var lines = List[String]()
-    lines.append(indent + "ExceptionGroup: " + exc_group.message)
-    
+    lines.append(indent + group_name + ": " + exc_group.message)
+
     for i in range(len(exc_group.exceptions)):
         var is_last = (i == len(exc_group.exceptions) - 1)
         var prefix = "├─ " if not is_last else "└─ "
-        
-        var err = exc_group.exceptions[i]
+        var err = exc_group.exceptions[i].copy()
         lines.append(indent + prefix + "Error: " + String(err))
-    
-    var result = ""
-    for i in range(len(lines)):
-        if i > 0:
-            result = result + "\n"
-        result = result + lines[i]
-    
-    return result
+
+    return "\n".join(lines)
 
 
 def patch_user_exc(exc_type: EXC_TYPE, force: Bool = False) -> EXC_TYPE:
@@ -259,16 +319,22 @@ def is_system_exc(exc_type: EXC_TYPE) -> Bool:
 struct ModifyExceptionFromType(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var exc_from_type: EXC_TYPE
     var force: Bool
+    var _active: Bool
 
     def write_to(self, mut writer: Some[Writer]):
         "ModifyExceptionFromType".write_to(writer)
 
     @staticmethod
     def create(exc_from_type: EXC_TYPE, force: Bool = False) -> Self:
-        return Self(exc_from_type, force)
+        return Self(exc_from_type, force, True)
 
-    def __enter__(mut self) -> &Self:
-        return &self
+    def __enter__(mut self) -> ModifyExceptionFromType:
+        self._active = True
+        return self
 
-    def __exit__(mut self, exc_type: EXC_TYPE):
-        pass
+    def should_patch(mut self, current_type: EXC_TYPE) -> Optional[EXC_TYPE]:
+        if not self._active:
+            return None
+        if self.force or current_type == EXC_TYPE.NOTSET:
+            return self.exc_from_type
+        return None
