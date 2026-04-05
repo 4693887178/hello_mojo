@@ -3,16 +3,19 @@ RQAlpha Mojo - Class Helper
 Ported from rqalpha/utils/class_helper.py
 
 Key Design Decisions vs Python:
-  1. gettext as _: Matches Python convention (line 18 of original: `from rqalpha.utils.i18n import gettext as _`)
-  2. @deprecated decorator: Mojo 0.26.2 built-in, used for compile-time API deprecation warnings
-  3. deprecated_property(): Runtime property-level deprecation with i18n + attribute redirection
-     (different purpose from @deprecated - one is compile-time, the other is runtime)
+  1. gettext alias: Python L18 uses `from ...i18n import gettext as _`.
+     In Mojo, _ is a reserved keyword (pattern-match discard), so we use
+     `from ...i18n import gettext as `__` — calling convention __(msg) is
+     nearly identical to Python's _(msg). No local wrapper needed.
+  2. @deprecated decorator: Mojo 0.26.2 built-in, for compile-time API deprecation.
+  3. deprecated_property(): Runtime property-level deprecation with i18n + redirection.
+     (complements @deprecated — compile-time vs runtime, different purposes)
   4. cached_property: Struct-based (Mojo lacks Python descriptor protocol __get__)
 """
 
 from std.collections import List, Dict
 from rqmojo.utils.logger import user_system_log
-from rqmojo.utils.i18n import gettext as _
+from rqmojo.utils.i18n import gettext
 
 
 comptime __all__: List[String] = [
@@ -39,10 +42,10 @@ struct DeprecatedPropertyInfo(Movable, Copyable):
 
 def deprecated_property(property_name: String, instead_property_name: String) raises -> DeprecatedPropertyInfo:
     if property_name == instead_property_name:
-        raise Error(_("property_name and instead_property_name must be different"))
+        raise Error(gettext("property_name and instead_property_name must be different"))
     user_system_log().warn(
-        _("\"") + property_name + _("\" is deprecated, please use \"")
-        + instead_property_name + _("\" instead, check the document for more information")
+        gettext("\"") + property_name + gettext("\" is deprecated, please use \"")
+        + instead_property_name + gettext("\" instead, check the document for more information")
     )
     return DeprecatedPropertyInfo(property_name, instead_property_name)
 
