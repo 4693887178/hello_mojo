@@ -13,7 +13,7 @@ from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_da
 
 
 @fieldwise_init
-struct DividendInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
+struct DividendInfo(Copyable, Movable, Writable, ImplicitlyCopyable):
     var book_closure_date: Int
     var announcement_date: Int
     var dividend_cash_before_tax: Float64
@@ -21,8 +21,8 @@ struct DividendInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var payable_date: Int
     var round_lot: Int
     
-    def __str__(self) -> String:
-        return "DividendInfo(ex_date=" + String(self.ex_dividend_date) + ", cash=" + String(self.dividend_cash_before_tax) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("DividendInfo(ex_date=", String(self.ex_dividend_date), ", cash=", String(self.dividend_cash_before_tax), ")")
 
 
 @fieldwise_init
@@ -381,7 +381,7 @@ struct DataProxy(Movable):
         return result^
     
     def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
-        if instrument.type != INSTRUMENT_TYPE.CS and instrument.type != INSTRUMENT_TYPE.ETF:
+        if instrument.type() != INSTRUMENT_TYPE.CS and instrument.type() != INSTRUMENT_TYPE.ETF:
             return Optional[DividendInfo](None)
         
         var dividend = create_dividend_info(
@@ -506,28 +506,6 @@ struct DataProxy(Movable):
                 result.append(current)
             current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
         return result^
-    
-    def get_all_instruments(self, type: String = "") -> List[Instrument]:
-        var result = List[Instrument]()
-        result.append(create_stock_instrument("000001.XSHE", "平安银行", DateTime(1991, 4, 3, 0, 0, 0, 0), EXCHANGE_XSHE))
-        result.append(create_stock_instrument("000002.XSHE", "万科A", DateTime(1991, 1, 29, 0, 0, 0, 0), EXCHANGE_XSHE))
-        result.append(create_stock_instrument("600000.XSHG", "浦发银行", DateTime(1999, 11, 10, 0, 0, 0, 0), EXCHANGE_XSHG))
-        result.append(create_stock_instrument("600036.XSHG", "招商银行", DateTime(2002, 4, 9, 0, 0, 0, 0), EXCHANGE_XSHG))
-        return result^
-    
-    def get_dividend(self, instrument: Instrument) -> Optional[DividendInfo]:
-        if instrument.type != INSTRUMENT_TYPE.CS and instrument.type != INSTRUMENT_TYPE.ETF:
-            return Optional[DividendInfo](None)
-        
-        var dividend = create_dividend_info(
-            book_closure_date=20231215,
-            announcement_date=20231210,
-            dividend_cash_before_tax=0.5,
-            ex_dividend_date=20231216,
-            payable_date=20231220,
-            round_lot=10
-        )
-        return Optional[DividendInfo](dividend)
 
 
 def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:

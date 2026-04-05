@@ -1,16 +1,14 @@
-from std.collections import Dict
+from std.collections import Dict, List
 from rqmojo.utils import RqValue, KIND_DICT
 
 
 def deep_update(from_dict: Dict[String, RqValue], mut to_dict: Dict[String, RqValue]) raises:
-    for k in from_dict.keys():
-        var value = from_dict[k].copy()
-        if to_dict.__contains__(k):
-            var to_value = to_dict[k].copy()
-            if to_value.kind == KIND_DICT and value.kind == KIND_DICT:
-                deep_update(value.dict_val, to_value.dict_val)
-                to_dict[k] = to_value.copy()
+    for key in from_dict:
+        var value = from_dict[key].copy()
+        if key in to_dict:
+            if to_dict[key].is_dict() and value.is_dict():
+                deep_update(value.dict_val, to_dict[key].dict_val)
             else:
-                to_dict[k] = value.copy()
+                to_dict[key] = value.copy()
         else:
-            to_dict[k] = value.copy()
+            to_dict[key] = value.copy()

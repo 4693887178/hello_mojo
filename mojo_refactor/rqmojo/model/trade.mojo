@@ -25,7 +25,7 @@ def create_trade_id_generator() -> TradeIdGenerator:
 
 
 @fieldwise_init
-struct Trade(Writable, Movable):
+struct Trade(Writable, Movable, Copyable, ImplicitlyCopyable):
     var trade_id: Int
     var exec_id: String
     var order_id: Int

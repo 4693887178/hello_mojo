@@ -1,5 +1,9 @@
 先读这篇文章，理解文章所讲的内容，这个项目以后都按这个介绍的规范来实现。
+https://www.anthropic.com/engineering/building-effective-agents
 https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+https://www.anthropic.com/engineering/harness-design-long-running-apps
+
+lastmile-ai/mcp-agent（最完整实现）
 
 将PYTHON框架rqalpha， 用mojo语言重构，
 要求
@@ -48,5 +52,77 @@ https://forum.modular.com/t/mojo-documentation-mcp-server-using-max-for-embeddin
 /gsd:ship --next      # 完成并继续下一个
 
 /gsd:new-milestone 按照/home/zhou/hello_mojo/trae_cn_78/docs/superpowers/plans/2026-03-21-rqalpha-dependency-analysis.md 
-第十组一个一个做测试并修复其中的错误，PYTHON和MOJO的测试文件都要有，输入条件要一致，输出也应该一致，并要保存MD格式的测试结果文件，并要有个汇总的表格，对测试进行统计。应该是一个文件一个文件比对，类，函数，方法是否都实现了，功能是否一致，测试结果是否相同，如果有不同，是为什么，尽量进行修复。
+第十组， 一个一个做测试并修复其中的错误，PYTHON和MOJO的测试文件都要有，输入条件要一致，输出也应该一致，并要保存MD格式的测试结果文件，并要有个汇总的表格，对测试进行统计。应该是一个文件一个文件比对，类，函数，方法是否都实现了，功能是否一致，测试结果是否相同，如果有不同，是为什么，尽量进行修复。
 有哪些类，函数，方法都要列出来，一个一个检查 。测试结果是每一组有一个总汇总，每一个文件也有对应的测试结果，比对结果。
+
+
+## Mojo 关键字列表
+### 1. 变量声明
+- var - 显式变量声明
+### 2. 函数定义
+- def - 函数定义（推荐使用）
+- fn - 函数定义（已废弃）
+### 3. 类型系统
+- struct - 结构体定义
+- trait - 特性/接口定义
+### 4. 控制流
+- if , else , elif - 条件语句
+- for , in , while - 循环语句
+- return , break , continue - 流程控制
+- try , except , raise - 异常处理
+### 5. 导入和模块
+- from , import , as - 导入语句
+### 6. 编译时元编程
+- comptime - 编译时常量/分支/循环（替代 alias 和 @parameter ）
+### 7. 类型注解和特性
+- Self - 自身类型引用
+- AnyType - 任意类型
+### 8. 参数约定
+- out - 未初始化输出参数
+- mut - 可变引用（替代 inout ）
+- ref - 引用绑定
+- read - 只读（默认，很少显式写）
+- deinit - 消耗/销毁参数
+### 9. 装饰器
+- @staticmethod - 静态方法
+- @fieldwise_init - 自动生成字段构造函数
+- @implicit - 隐式转换
+- @always_inline , @no_inline - 内联控制
+- @deprecated - 废弃警告
+- @doc_hidden - 隐藏文档
+- @explicit_destroy - 线性类型
+### 10. 特殊方法（Dunder Methods）
+- __init__ - 构造函数
+- __del__ - 析构函数
+- __copyinit__ , __moveinit__ - 拷贝/移动构造函数
+- __str__ , __repr__ - 字符串表示
+- __len__ , __getitem__ , __setitem__ - 容器操作
+- __add__ , __sub__ , __mul__ , __div__ , __mod__ - 算术运算
+- __eq__ , __ne__ , __lt__ , __le__ , __gt__ , __ge__ - 比较运算
+- __and__ , __or__ , __xor__ , __invert__ - 位运算
+- __lshift__ , __rshift__ - 位移运算
+### 11. 常用特性（Traits）
+- Copyable , Movable , ImplicitlyCopyable - 拷贝/移动
+- Equatable , Hashable , Writable - 比较/哈希/输出
+- Sized , Intable , Defaultable - 大小/转换/默认值
+- RegisterPassable , TrivialRegisterPassable - 寄存器传递
+### 12. 内置类型（Prelude 自动导入）
+- Int , String , Bool , Float32 , Float64 - 基本类型
+- List , Dict , Set , Optional - 集合类型
+- SIMD , Pointer , UnsafePointer , Span - 内存类型
+- OwnedPointer , ArcPointer - 所有权指针
+- Error , DType , Writer - 其他类型
+### 13. 起源系统（Origin System）
+- Origin , MutOrigin , ImmutOrigin
+- MutAnyOrigin , ImmutAnyOrigin
+- MutExternalOrigin , ImmutExternalOrigin
+- StaticConstantOrigin
+### 14. 内置函数（Prelude 自动导入）
+- print , len , range , rebind
+### 15. 已废弃/未来特性
+- alias → 已废弃，使用 comptime
+- let → 已废弃，使用 var
+- static , class → 未来特性（尚未支持）
+
+全局不变常量。
+https://docs.modular.com/mojo/std/builtin/globals/global_constant/

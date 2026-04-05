@@ -3,3 +3,5 @@ argparse https://github.com/forfudan/argmojo.git
 json https://github.com/bgreni/EmberJson.git
 numpy https://github.com/Mojo-Numerics-and-Algorithms-group/NuMojo.git
 yaml https://github.com/DataBooth/mojo-yaml.git
+hdf5 https://github.com/shivasankarka/hdf5-mojo.git
+pandas https://github.com/JRedrupp/bison.git

@@ -35,11 +35,22 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     var exchange_val: EXCHANGE
     var listed_date_str: String
     var de_listed_date_str: String
+    var maturity_date_str: String
     var round_lot_val: Int
     var contract_multiplier_val: Float64
     var underlying_symbol_val: String
+    var underlying_order_book_id_val: String
     var market_val: MARKET
     var trading_hours_str: String
+    var market_tplus_val: Int
+    var sector_code_val: String
+    var sector_code_name_val: String
+    var industry_code_val: String
+    var industry_name_val: String
+    var concept_names_val: String
+    var board_type_val: String
+    var status_val: String
+    var special_type_val: String
     
     def write_to(self, mut writer: Some[Writer]):
         writer.write("Instrument(", self.order_book_id(), ", ", self.symbol(), ")")
@@ -83,13 +94,48 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     def underlying_symbol(self) -> String:
         return self.underlying_symbol_val
     
+    def underlying_order_book_id(self) -> String:
+        return self.underlying_order_book_id_val
+    
+    def market_tplus(self) -> Int:
+        return self.market_tplus_val
+    
+    def maturity_date(self) -> DateTime:
+        try:
+            return fix_date(self.maturity_date_str, DateTime(2999, 12, 31, 0, 0, 0, 0))
+        except:
+            return DateTime(2999, 12, 31, 0, 0, 0, 0)
+    
+    def sector_code(self) -> String:
+        return self.sector_code_val
+    
+    def sector_code_name(self) -> String:
+        return self.sector_code_name_val
+    
+    def industry_code(self) -> String:
+        return self.industry_code_val
+    
+    def industry_name(self) -> String:
+        return self.industry_name_val
+    
+    def concept_names(self) -> String:
+        return self.concept_names_val
+    
     def board_type(self) -> String:
+        if len(self.board_type_val) > 0:
+            return self.board_type_val
         if self.type_val == INSTRUMENT_TYPE.CS:
             if self.order_book_id_val.startswith("688"):
                 return "KSH"
             elif self.order_book_id_val.startswith("8") or self.order_book_id_val.startswith("4"):
                 return "BJS"
         return ""
+    
+    def status(self) -> String:
+        return self.status_val
+    
+    def special_type(self) -> String:
+        return self.special_type_val
     
     def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type_val):
@@ -152,11 +198,22 @@ def create_stock_instrument(order_book_id: String, symbol: String, listed_date: 
         exchange_val=exchange,
         listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
         de_listed_date_str="2999-12-31",
+        maturity_date_str="2999-12-31",
         round_lot_val=100,
         contract_multiplier_val=1.0,
         underlying_symbol_val="",
+        underlying_order_book_id_val="",
         market_val=MARKET.CN,
-        trading_hours_str=""
+        trading_hours_str="",
+        market_tplus_val=1,
+        sector_code_val="",
+        sector_code_name_val="",
+        industry_code_val="",
+        industry_name_val="",
+        concept_names_val="",
+        board_type_val="",
+        status_val="Active",
+        special_type_val="Normal"
     )
 
 
@@ -168,9 +225,20 @@ def create_future_instrument(order_book_id: String, symbol: String, listed_date:
         exchange_val=exchange,
         listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
         de_listed_date_str=String(de_listed_date.year) + "-" + String(de_listed_date.month) + "-" + String(de_listed_date.day),
+        maturity_date_str=String(maturity_date.year) + "-" + String(maturity_date.month) + "-" + String(maturity_date.day),
         round_lot_val=1,
         contract_multiplier_val=contract_multiplier,
         underlying_symbol_val=underlying_symbol,
+        underlying_order_book_id_val="",
         market_val=MARKET.CN,
-        trading_hours_str=trading_hours
+        trading_hours_str=trading_hours,
+        market_tplus_val=0,
+        sector_code_val="",
+        sector_code_name_val="",
+        industry_code_val="",
+        industry_name_val="",
+        concept_names_val="",
+        board_type_val="",
+        status_val="Active",
+        special_type_val="Normal"
     )

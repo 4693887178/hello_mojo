@@ -1,22 +1,55 @@
 """
-RQAlpha Mojo - Constants and Enumerations (Optimized Version)
+RQAlpha Mojo - Constants and Enumerations
 Ported from rqalpha/const.py
-Mojo 0.26+ compatible - Optimized with Variant Registry and Reflection
 
-改进点:
-1. 使用 Variant 存储所有枚举列表
-2. 使用反射访问字段，无需 name()/value() 方法
-3. 每个枚举类只需定义字段和常量
-4. 实现 Writable trait，支持 print() 输出
+Design (vs Python original):
+  Python: CustomEnum(str, Enum) + CustomEnumMeta metaclass
+  Mojo:  Independent structs + EnumHelper(reflection-driven)
+
+Python metaclass features replicated here:
+  - __new__      → _reverse_map() builds {name|value: member} via iteration
+  - __getitem__  → __getitem__(s) returns Optional[T] (safe lookup by name or value)
+  - __contains__ → contains(s) checks name OR value membership
+  - list(Enum)   → members() returns all members
+  - repr()       → Writable trait (TypeName.MEMBER_NAME)
 """
 
-from std.reflection import get_base_type_name, struct_field_names, struct_field_index_by_name
-from std.utils import Variant
+from std.reflection import get_base_type_name, struct_field_index_by_name
 
 
-# ============================================================
-# 枚举类定义 - 只需定义字段和常量
-# ============================================================
+struct EnumHelper:
+    @staticmethod
+    def _reflect_name[T: Copyable](instance: T) -> String:
+        comptime idx = struct_field_index_by_name[T, "name"]()
+        ref r = __struct_field_ref(idx, instance)
+        return rebind[String](r)
+
+    @staticmethod
+    def _reflect_value[T: Copyable](instance: T) -> String:
+        comptime idx = struct_field_index_by_name[T, "value"]()
+        ref r = __struct_field_ref(idx, instance)
+        return rebind[String](r)
+
+    @staticmethod
+    def find_member[T: Copyable & ImplicitlyDestructible](
+        members: List[T], target: String
+    ) -> Optional[T]:
+        for m in members:
+            if Self._reflect_name[T](m) == target or Self._reflect_value[T](m) == target:
+                return m.copy()
+        return None
+
+    @staticmethod
+    def build_reverse_map[T: Copyable & ImplicitlyDestructible](
+        members: List[T]
+    ) -> Dict[String, T]:
+        var m = Dict[String, T]()
+        for member in members:
+            m[Self._reflect_name[T](member)] = member.copy()
+            m[Self._reflect_value[T](member)] = member.copy()
+        return m^
+
+
 @fieldwise_init
 struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
@@ -35,6 +68,25 @@ struct EXECUTION_PHASE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[EXECUTION_PHASE]:
+        return EnumHelper.find_member[EXECUTION_PHASE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[EXECUTION_PHASE]:
+        return [Self.GLOBAL, Self.ON_INIT, Self.BEFORE_TRADING, Self.OPEN_AUCTION,
+                Self.ON_BAR, Self.ON_TICK, Self.AFTER_TRADING, Self.FINALIZED,
+                Self.SCHEDULED]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, EXECUTION_PHASE]:
+        return EnumHelper.build_reverse_map[EXECUTION_PHASE](Self.members())
+
 
 @fieldwise_init
 struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -48,6 +100,23 @@ struct RUN_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[RUN_TYPE]:
+        return EnumHelper.find_member[RUN_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[RUN_TYPE]:
+        return [Self.BACKTEST, Self.PAPER_TRADING, Self.LIVE_TRADING]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, RUN_TYPE]:
+        return EnumHelper.build_reverse_map[RUN_TYPE](Self.members())
+
 
 @fieldwise_init
 struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -60,6 +129,23 @@ struct DEFAULT_ACCOUNT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[DEFAULT_ACCOUNT_TYPE]:
+        return EnumHelper.find_member[DEFAULT_ACCOUNT_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[DEFAULT_ACCOUNT_TYPE]:
+        return [Self.STOCK, Self.FUTURE, Self.BOND]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, DEFAULT_ACCOUNT_TYPE]:
+        return EnumHelper.build_reverse_map[DEFAULT_ACCOUNT_TYPE](Self.members())
 
 
 @fieldwise_init
@@ -78,6 +164,25 @@ struct MATCHING_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[MATCHING_TYPE]:
+        return EnumHelper.find_member[MATCHING_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[MATCHING_TYPE]:
+        return [Self.CURRENT_BAR_CLOSE, Self.VWAP, Self.COUNTERPARTY_OFFER,
+                Self.NEXT_BAR_OPEN, Self.NEXT_TICK_LAST, Self.NEXT_TICK_BEST_OWN,
+                Self.NEXT_TICK_BEST_COUNTERPARTY]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, MATCHING_TYPE]:
+        return EnumHelper.build_reverse_map[MATCHING_TYPE](Self.members())
+
 
 @fieldwise_init
 struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -91,6 +196,23 @@ struct ORDER_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[ORDER_TYPE]:
+        return EnumHelper.find_member[ORDER_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[ORDER_TYPE]:
+        return [Self.MARKET, Self.LIMIT, Self.ALGO]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, ORDER_TYPE]:
+        return EnumHelper.build_reverse_map[ORDER_TYPE](Self.members())
+
 
 @fieldwise_init
 struct ALGO(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -102,6 +224,23 @@ struct ALGO(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[ALGO]:
+        return EnumHelper.find_member[ALGO](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[ALGO]:
+        return [Self.TWAP, Self.VWAP]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, ALGO]:
+        return EnumHelper.build_reverse_map[ALGO](Self.members())
 
 
 @fieldwise_init
@@ -119,6 +258,24 @@ struct ORDER_STATUS(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[ORDER_STATUS]:
+        return EnumHelper.find_member[ORDER_STATUS](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[ORDER_STATUS]:
+        return [Self.PENDING_NEW, Self.ACTIVE, Self.FILLED, Self.REJECTED,
+                Self.PENDING_CANCEL, Self.CANCELLED]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, ORDER_STATUS]:
+        return EnumHelper.build_reverse_map[ORDER_STATUS](Self.members())
+
 
 @fieldwise_init
 struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -133,6 +290,24 @@ struct SIDE(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[SIDE]:
+        return EnumHelper.find_member[SIDE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[SIDE]:
+        return [Self.BUY, Self.SELL, Self.FINANCING, Self.MARGIN,
+                Self.CONVERT_STOCK]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, SIDE]:
+        return EnumHelper.build_reverse_map[SIDE](Self.members())
 
 
 @fieldwise_init
@@ -149,6 +324,24 @@ struct POSITION_EFFECT(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[POSITION_EFFECT]:
+        return EnumHelper.find_member[POSITION_EFFECT](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[POSITION_EFFECT]:
+        return [Self.OPEN, Self.CLOSE, Self.CLOSE_TODAY, Self.EXERCISE,
+                Self.MATCH]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, POSITION_EFFECT]:
+        return EnumHelper.build_reverse_map[POSITION_EFFECT](Self.members())
+
 
 @fieldwise_init
 struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -160,6 +353,23 @@ struct POSITION_DIRECTION(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[POSITION_DIRECTION]:
+        return EnumHelper.find_member[POSITION_DIRECTION](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[POSITION_DIRECTION]:
+        return [Self.LONG, Self.SHORT]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, POSITION_DIRECTION]:
+        return EnumHelper.build_reverse_map[POSITION_DIRECTION](Self.members())
 
 
 @fieldwise_init
@@ -173,6 +383,23 @@ struct EXC_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[EXC_TYPE]:
+        return EnumHelper.find_member[EXC_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[EXC_TYPE]:
+        return [Self.USER_EXC, Self.SYSTEM_EXC, Self.NOTSET]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, EXC_TYPE]:
+        return EnumHelper.build_reverse_map[EXC_TYPE](Self.members())
 
 
 @fieldwise_init
@@ -198,6 +425,26 @@ struct INSTRUMENT_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[INSTRUMENT_TYPE]:
+        return EnumHelper.find_member[INSTRUMENT_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[INSTRUMENT_TYPE]:
+        return [Self.CS, Self.FUTURE, Self.OPTION, Self.ETF, Self.LOF,
+                Self.INDX, Self.PUBLIC_FUND, Self.FUND, Self.BOND,
+                Self.CONVERTIBLE, Self.SPOT, Self.REPO, Self.REITs,
+                Self.FutureArbitrage]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, INSTRUMENT_TYPE]:
+        return EnumHelper.build_reverse_map[INSTRUMENT_TYPE](Self.members())
+
 
 @fieldwise_init
 struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -211,6 +458,23 @@ struct PERSIST_MODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[PERSIST_MODE]:
+        return EnumHelper.find_member[PERSIST_MODE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[PERSIST_MODE]:
+        return [Self.ON_CRASH, Self.REAL_TIME, Self.ON_NORMAL_EXIT]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, PERSIST_MODE]:
+        return EnumHelper.build_reverse_map[PERSIST_MODE](Self.members())
+
 
 @fieldwise_init
 struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -222,6 +486,23 @@ struct COMMISSION_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[COMMISSION_TYPE]:
+        return EnumHelper.find_member[COMMISSION_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[COMMISSION_TYPE]:
+        return [Self.BY_MONEY, Self.BY_VOLUME]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, COMMISSION_TYPE]:
+        return EnumHelper.build_reverse_map[COMMISSION_TYPE](Self.members())
 
 
 @fieldwise_init
@@ -236,6 +517,23 @@ struct EXIT_CODE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[EXIT_CODE]:
+        return EnumHelper.find_member[EXIT_CODE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[EXIT_CODE]:
+        return [Self.EXIT_SUCCESS, Self.EXIT_USER_ERROR, Self.EXIT_INTERNAL_ERROR]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, EXIT_CODE]:
+        return EnumHelper.build_reverse_map[EXIT_CODE](Self.members())
+
 
 @fieldwise_init
 struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -248,6 +546,23 @@ struct HEDGE_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
 
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
+
+    @staticmethod
+    def __getitem__(s: String) -> Optional[HEDGE_TYPE]:
+        return EnumHelper.find_member[HEDGE_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[HEDGE_TYPE]:
+        return [Self.HEDGE, Self.SPECULATION, Self.ARBITRAGE]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, HEDGE_TYPE]:
+        return EnumHelper.build_reverse_map[HEDGE_TYPE](Self.members())
 
 
 struct DAYS_CNT:
@@ -273,6 +588,24 @@ struct EXCHANGE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[EXCHANGE]:
+        return EnumHelper.find_member[EXCHANGE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[EXCHANGE]:
+        return [Self.XSHE, Self.XSHG, Self.SHFE, Self.INE, Self.DCE,
+                Self.CZCE, Self.CFFEX, Self.SGEX, Self.BJSE]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, EXCHANGE]:
+        return EnumHelper.build_reverse_map[EXCHANGE](Self.members())
+
 
 @fieldwise_init
 struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -288,6 +621,24 @@ struct TRADING_CALENDAR_TYPE(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[TRADING_CALENDAR_TYPE]:
+        return EnumHelper.find_member[TRADING_CALENDAR_TYPE](Self.members(), s)
+
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
+
+
+    @staticmethod
+    def members() -> List[TRADING_CALENDAR_TYPE]:
+        return [Self.CN_STOCK, Self.HK_STOCK, Self.SOUTHBOUND,
+                Self.INTER_BANK, Self.EXCHANGE]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, TRADING_CALENDAR_TYPE]:
+        return EnumHelper.build_reverse_map[TRADING_CALENDAR_TYPE](Self.members())
+
 
 @fieldwise_init
 struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable):
@@ -300,105 +651,19 @@ struct MARKET(Equatable, ImplicitlyCopyable, Hashable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
+    @staticmethod
+    def __getitem__(s: String) -> Optional[MARKET]:
+        return EnumHelper.find_member[MARKET](Self.members(), s)
 
-# ============================================================
-# Variant 类型定义 - 包含所有枚举类型的列表
-# ============================================================
-comptime EnumListVariant = Variant[
-    List[EXECUTION_PHASE],
-    List[RUN_TYPE],
-    List[DEFAULT_ACCOUNT_TYPE],
-    List[MATCHING_TYPE],
-    List[ORDER_TYPE],
-    List[ALGO],
-    List[ORDER_STATUS],
-    List[SIDE],
-    List[POSITION_EFFECT],
-    List[POSITION_DIRECTION],
-    List[EXC_TYPE],
-    List[INSTRUMENT_TYPE],
-    List[PERSIST_MODE],
-    List[COMMISSION_TYPE],
-    List[EXIT_CODE],
-    List[HEDGE_TYPE],
-    List[EXCHANGE],
-    List[TRADING_CALENDAR_TYPE],
-    List[MARKET],
-]
+    @staticmethod
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
 
 
-# ============================================================
-# EnumRegistry - 枚举注册表
-# ============================================================
-struct EnumRegistry:
-    var registry: Dict[String, EnumListVariant]
-    
-    def __init__(out self):
-        self.registry = {
-            "EXECUTION_PHASE": EnumListVariant([
-                EXECUTION_PHASE.GLOBAL, EXECUTION_PHASE.ON_INIT, EXECUTION_PHASE.BEFORE_TRADING,
-                EXECUTION_PHASE.OPEN_AUCTION, EXECUTION_PHASE.ON_BAR, EXECUTION_PHASE.ON_TICK,
-                EXECUTION_PHASE.AFTER_TRADING, EXECUTION_PHASE.FINALIZED, EXECUTION_PHASE.SCHEDULED
-            ]),
-            "RUN_TYPE": EnumListVariant([RUN_TYPE.BACKTEST, RUN_TYPE.PAPER_TRADING, RUN_TYPE.LIVE_TRADING]),
-            "DEFAULT_ACCOUNT_TYPE": EnumListVariant([DEFAULT_ACCOUNT_TYPE.STOCK, DEFAULT_ACCOUNT_TYPE.FUTURE, DEFAULT_ACCOUNT_TYPE.BOND]),
-            "MATCHING_TYPE": EnumListVariant([
-                MATCHING_TYPE.CURRENT_BAR_CLOSE, MATCHING_TYPE.VWAP, MATCHING_TYPE.COUNTERPARTY_OFFER,
-                MATCHING_TYPE.NEXT_BAR_OPEN, MATCHING_TYPE.NEXT_TICK_LAST, MATCHING_TYPE.NEXT_TICK_BEST_OWN,
-                MATCHING_TYPE.NEXT_TICK_BEST_COUNTERPARTY
-            ]),
-            "ORDER_TYPE": EnumListVariant([ORDER_TYPE.MARKET, ORDER_TYPE.LIMIT, ORDER_TYPE.ALGO]),
-            "ALGO": EnumListVariant([ALGO.TWAP, ALGO.VWAP]),
-            "ORDER_STATUS": EnumListVariant([
-                ORDER_STATUS.PENDING_NEW, ORDER_STATUS.ACTIVE, ORDER_STATUS.FILLED,
-                ORDER_STATUS.REJECTED, ORDER_STATUS.PENDING_CANCEL, ORDER_STATUS.CANCELLED
-            ]),
-            "SIDE": EnumListVariant([SIDE.BUY, SIDE.SELL, SIDE.FINANCING, SIDE.MARGIN, SIDE.CONVERT_STOCK]),
-            "POSITION_EFFECT": EnumListVariant([
-                POSITION_EFFECT.OPEN, POSITION_EFFECT.CLOSE, POSITION_EFFECT.CLOSE_TODAY,
-                POSITION_EFFECT.EXERCISE, POSITION_EFFECT.MATCH
-            ]),
-            "POSITION_DIRECTION": EnumListVariant([POSITION_DIRECTION.LONG, POSITION_DIRECTION.SHORT]),
-            "EXC_TYPE": EnumListVariant([EXC_TYPE.USER_EXC, EXC_TYPE.SYSTEM_EXC, EXC_TYPE.NOTSET]),
-            "INSTRUMENT_TYPE": EnumListVariant([
-                INSTRUMENT_TYPE.CS, INSTRUMENT_TYPE.FUTURE, INSTRUMENT_TYPE.OPTION, INSTRUMENT_TYPE.ETF,
-                INSTRUMENT_TYPE.LOF, INSTRUMENT_TYPE.INDX, INSTRUMENT_TYPE.PUBLIC_FUND, INSTRUMENT_TYPE.FUND,
-                INSTRUMENT_TYPE.BOND, INSTRUMENT_TYPE.CONVERTIBLE, INSTRUMENT_TYPE.SPOT, INSTRUMENT_TYPE.REPO,
-                INSTRUMENT_TYPE.REITs, INSTRUMENT_TYPE.FutureArbitrage
-            ]),
-            "PERSIST_MODE": EnumListVariant([PERSIST_MODE.ON_CRASH, PERSIST_MODE.REAL_TIME, PERSIST_MODE.ON_NORMAL_EXIT]),
-            "COMMISSION_TYPE": EnumListVariant([COMMISSION_TYPE.BY_MONEY, COMMISSION_TYPE.BY_VOLUME]),
-            "EXIT_CODE": EnumListVariant([EXIT_CODE.EXIT_SUCCESS, EXIT_CODE.EXIT_USER_ERROR, EXIT_CODE.EXIT_INTERNAL_ERROR]),
-            "HEDGE_TYPE": EnumListVariant([HEDGE_TYPE.HEDGE, HEDGE_TYPE.SPECULATION, HEDGE_TYPE.ARBITRAGE]),
-            "EXCHANGE": EnumListVariant([
-                EXCHANGE.XSHE, EXCHANGE.XSHG, EXCHANGE.SHFE, EXCHANGE.INE, EXCHANGE.DCE,
-                EXCHANGE.CZCE, EXCHANGE.CFFEX, EXCHANGE.SGEX, EXCHANGE.BJSE
-            ]),
-            "TRADING_CALENDAR_TYPE": EnumListVariant([
-                TRADING_CALENDAR_TYPE.CN_STOCK, TRADING_CALENDAR_TYPE.HK_STOCK,
-                TRADING_CALENDAR_TYPE.SOUTHBOUND, TRADING_CALENDAR_TYPE.INTER_BANK, TRADING_CALENDAR_TYPE.EXCHANGE
-            ]),
-            "MARKET": EnumListVariant([MARKET.CN, MARKET.HK]),
-        }
-    
-    def _find_match[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
-        comptime type_name = get_base_type_name[T]()
-        comptime name_idx = struct_field_index_by_name[T, "name"]()
-        comptime value_idx = struct_field_index_by_name[T, "value"]()
-        
-        var val = self.registry[type_name]
-        for v in val[List[T]]:
-            ref name_ref = __struct_field_ref(name_idx, v)
-            ref value_ref = __struct_field_ref(value_idx, v)
-            var name_val = rebind[String](name_ref)
-            var value_val = rebind[String](value_ref)
-            if name_val == target or value_val == target:
-                return v.copy()
-        
-        return None
-    
-    def get[T: Movable & Copyable](self, target: String) raises -> Optional[T]:
-        return self._find_match[T](target)
-    
-    def contains[T: Movable & Copyable](self, target: String) raises -> Bool:
-        return self._find_match[T](target) != None
+    @staticmethod
+    def members() -> List[MARKET]:
+        return [Self.CN, Self.HK]
+
+    @staticmethod
+    def _reverse_map() -> Dict[String, MARKET]:
+        return EnumHelper.build_reverse_map[MARKET](Self.members())

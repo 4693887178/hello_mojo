@@ -108,10 +108,10 @@ def run_strategy(
     return run_backtest(config)
 
 
-def run_with_config(config: RunConfig) -> Optional[Dict[String, object]]:
+def run_with_config(config: RunConfig) -> Optional[Dict[String, String]]:
     var result_code = run_backtest(config)
     if result_code == 0:
-        var results = Dict[String, object]()
+        var results = Dict[String, String]()
         results["status"] = "success"
         return results
     return None

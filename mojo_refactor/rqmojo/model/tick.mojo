@@ -8,7 +8,7 @@ from rqmojo.model.instrument import Instrument, create_instrument_from_dict
 from rqmojo.utils.typing import DateTime
 from rqmojo.utils.i18n import gettext
 from rqmojo.utils.repr import dict_repr_from_dict
-from std.collections import Dict, List
+from std.collections import Dict, List, DynamicVector
 
 
 comptime __all__: List[String] = [
@@ -18,7 +18,7 @@ comptime __all__: List[String] = [
 
 
 @fieldwise_init
-struct TickObject(Writable, Movable):
+struct TickObject(Writable, Movable, Copyable, ImplicitlyCopyable):
     var _order_book_id: String
     var _instrument: Instrument
     var datetime: DateTime
@@ -33,9 +33,6 @@ struct TickObject(Writable, Movable):
     var limit_down: Float64
     var open_interest: Float64
     var prev_settlement: Float64
-    var asks: List[Float64]
-    var ask_vols: List[Float64]
-    var bid_vols: List[Float64]
 
     def __str__(self) -> String:
         var props = Dict[String, String]()
@@ -80,10 +77,7 @@ def create_tick_object(
     limit_up: Float64 = 0.0,
     limit_down: Float64 = 0.0,
     open_interest: Float64 = 0.0,
-    prev_settlement: Float64 = 0.0,
-    var asks: List[Float64] = List[Float64](),
-    var ask_vols: List[Float64] = List[Float64](),
-    var bid_vols: List[Float64] = List[Float64]()
+    prev_settlement: Float64 = 0.0
 ) -> TickObject:
     return TickObject(
         _order_book_id=instrument.order_book_id(),
@@ -99,8 +93,5 @@ def create_tick_object(
         limit_up=limit_up,
         limit_down=limit_down,
         open_interest=open_interest,
-        prev_settlement=prev_settlement,
-        asks=asks^,
-        ask_vols=ask_vols^,
-        bid_vols=bid_vols^
+        prev_settlement=prev_settlement
     )

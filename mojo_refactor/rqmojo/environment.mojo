@@ -4,18 +4,24 @@ Ported from rqalpha/environment.py
 """
 
 from std.collections import Dict, List, Set, Optional
+from std.memory import UnsafePointer
+from std.python import Python, PythonObject
 from rqmojo.const import (
     RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE,
-    EXECUTION_PHASE, POSITION_DIRECTION
+    EXECUTION_PHASE, POSITION_DIRECTION, DAYS_CNT
 )
-from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
+from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
+from rqmojo.utils.config import RQAlphaConfig
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy, DividendInfo
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position
 from rqmojo.portfolio.portfolio_manager import Portfolio as PortfolioManager
+from rqmojo.core.broker import SimulationBroker, create_broker
+from rqmojo.core.event_source import SimulationEventSource, create_event_source
+from rqmojo.core.strategy_loader import StrategyLoader, create_strategy_loader, FileStrategyLoader, SourceCodeStrategyLoader, UserFuncStrategyLoader
 
 
 @fieldwise_init
@@ -29,11 +35,11 @@ struct Config(Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct GlobalVars(Stringable, Movable, ImplicitlyCopyable):
+struct GlobalVars(Writable, Movable, ImplicitlyCopyable):
     var data_string: String
 
-    def __str__(self) -> String:
-        return "GlobalVars(" + self.data_string + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("GlobalVars(", self.data_string, ")")
 
     def get(self, key: String, default: String = "") -> String:
         return default
@@ -46,12 +52,12 @@ struct GlobalVars(Stringable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct FrontendValidator(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct FrontendValidator(Writable, Copyable, Movable, ImplicitlyCopyable):
     var name: String
     var instrument_type: INSTRUMENT_TYPE
 
-    def __str__(self) -> String:
-        return "FrontendValidator(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("FrontendValidator(", self.name, ")")
 
     def can_submit_order(self, order: Order, account_info: String) -> Bool:
         return True
@@ -67,36 +73,47 @@ struct FrontendValidator(Stringable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct TransactionCostDecider(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct TransactionCostDecider(Writable, Copyable, Movable, ImplicitlyCopyable):
     var name: String
     var instrument_type: INSTRUMENT_TYPE
     var market: MARKET
 
-    def __str__(self) -> String:
-        return "TransactionCostDecider(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TransactionCostDecider(", self.name, ")")
 
     def calc(self, order: Order, quantity: Int, price: Float64) -> Float64:
         return price * Float64(quantity) * 0.0003
 
 
 @fieldwise_init
-struct PersistProvider(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct PersistProvider(Writable, Copyable, Movable, ImplicitlyCopyable):
     var name: String
 
-    def __str__(self) -> String:
-        return "PersistProvider(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PersistProvider(", self.name, ")")
 
 
 @fieldwise_init
-struct PersistHelper(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct PersistHelper(Writable, Copyable, Movable, ImplicitlyCopyable):
     var name: String
 
-    def __str__(self) -> String:
-        return "PersistHelper(" + self.name + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PersistHelper(", self.name, ")")
 
 
 @fieldwise_init
-struct Portfolio(Movable):
+struct TransactionCostArgs(Writable, Copyable, Movable, ImplicitlyCopyable):
+    var order: Order
+    var instrument: Instrument
+    var quantity: Int
+    var price: Float64
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TransactionCostArgs(order=", self.order.order_book_id, ", quantity=", String(self.quantity), ")")
+
+
+@fieldwise_init
+struct Portfolio(ImplicitlyCopyable, Movable):
     var _stock_account: Account
     var _future_account: Account
     var total_value: Float64
@@ -104,8 +121,19 @@ struct Portfolio(Movable):
     var daily_pnl: Float64
     var units: Float64
     
-    def __str__(self) -> String:
-        return "Portfolio(value=" + String(self.total_value) + ", cash=" + String(self.total_cash) + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("Portfolio(value=", String(self.total_value), ", cash=", String(self.total_cash), ")")
+    
+    def get_account(self, order_book_id: String) -> Account:
+        # 根据 order_book_id 判断账户类型
+        if order_book_id.find(".XSHG") != -1 or order_book_id.find(".XSHE") != -1:
+            return self._stock_account
+        return self._future_account
+    
+    def get_account_by_type(self, account_type: DEFAULT_ACCOUNT_TYPE) -> Account:
+        if account_type == DEFAULT_ACCOUNT_TYPE.STOCK:
+            return self._stock_account
+        return self._future_account
     
     def get_position(self, order_book_id: String) -> Position:
         return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
@@ -161,6 +189,10 @@ def create_portfolio(total_value: Float64 = 100000.0) -> Portfolio:
     )
 
 
+# ============================================================
+# Environment - 核心环境类（单例模式）
+# ============================================================
+
 @fieldwise_init
 struct Environment(Movable):
     var _start_date: DateTime
@@ -188,8 +220,21 @@ struct Environment(Movable):
     var _order_id_generator: OrderIdGenerator
     var portfolio: Portfolio
     var _execution_phase: EXECUTION_PHASE
-    var _broker: String
+    var _trading_days_a_year: Optional[Int]
+    var _broker: SimulationBroker
+    
+    # 新增组件引用
+    var _event_source: SimulationEventSource
+    var _strategy_loader: StrategyLoader
+    var _user_strategy: String
+    var _profile_deco: PythonObject
+    var _mod_dict: Dict[String, String]
+    var _rqdatac_init: Bool
 
+    # ============================================================
+    # 配置相关方法
+    # ============================================================
+    
     def config(self) -> Config:
         return Config(
             base__start_date=self._start_date,
@@ -200,8 +245,22 @@ struct Environment(Movable):
             is_hold=self._is_hold
         )
 
-    def get_event_bus(mut self) -> EventBus:
-        return self._event_bus^
+    # ============================================================
+    # 事件系统相关方法
+    # ============================================================
+    
+    def get_event_bus(mut self) -> ref[self._event_bus] EventBus:
+        return self._event_bus
+    
+    def add_listener(mut self, event_type: EVENT, listener: String, priority: Int = 0) -> None:
+        self._listener_count += 1
+
+    def publish_event(mut self, event: Event) -> None:
+        _ = self._event_bus.publish_event(event)
+
+    # ============================================================
+    # 时间相关方法
+    # ============================================================
     
     def calendar_dt(self) -> DateTime:
         return self._calendar_dt
@@ -219,17 +278,21 @@ struct Environment(Movable):
         self._calendar_dt = calendar_dt
         self._trading_dt = trading_dt
 
-    def is_initialized(self) -> Bool:
-        return self._is_initialized
-
-    def set_initialized(mut self, val: Bool) -> None:
-        self._is_initialized = val
-
     def start_date(self) -> DateTime:
         return self._start_date
 
     def end_date(self) -> DateTime:
         return self._end_date
+
+    # ============================================================
+    # 运行状态相关方法
+    # ============================================================
+    
+    def is_initialized(self) -> Bool:
+        return self._is_initialized
+
+    def set_initialized(mut self, val: Bool) -> None:
+        self._is_initialized = val
 
     def run_type(self) -> RUN_TYPE:
         return self._run_type
@@ -243,15 +306,102 @@ struct Environment(Movable):
     def set_execution_phase(mut self, phase: EXECUTION_PHASE) -> None:
         self._execution_phase = phase
 
-    def add_listener(mut self, event_type: EVENT, listener: String, priority: Int = 0) -> None:
-        self._listener_count += 1
+    # ============================================================
+    # 数据访问相关方法
+    # ============================================================
+    
+    def get_bar(self, order_book_id: String, calendar_dt: DateTime, frequency: String) -> Float64:
+        # TODO: Implement get_bar using data_proxy
+        return 10.0
 
-    def publish_event(mut self, event: Event) -> None:
+    def get_last_price(self, order_book_id: String) -> Float64:
+        return self._data_proxy.get_last_price(order_book_id)
+
+    def get_instrument(self, order_book_id: String) -> Instrument:
+        return self._data_proxy.get_instrument(order_book_id)
+
+    def get_last_price_from_proxy(self, order_book_id: String) -> Float64:
+        return self._data_proxy.get_last_price(order_book_id)
+
+    def get_all_instruments_from_proxy(self, type: String = "") -> List[Instrument]:
+        return self._data_proxy.get_all_instruments(type)
+    
+    def is_suspended_from_proxy(self, order_book_id: String, dt: DateTime) -> Bool:
+        return self._data_proxy.is_suspended(order_book_id, dt)
+    
+    def get_previous_trading_date(self, dt: DateTime) -> DateTime:
+        return self._data_proxy.get_previous_trading_date(dt)
+
+    def get_previous_trading_date_from_proxy(self, dt: DateTime) -> DateTime:
+        return self._data_proxy.get_previous_trading_date(dt)
+
+    def get_dividend_from_proxy(self, ins: Instrument) -> Optional[DividendInfo]:
+        return self._data_proxy.get_dividend(ins)
+
+    # ============================================================
+    # 订单相关方法
+    # ============================================================
+    
+    def submit_order(mut self, order: Order) -> Optional[Order]:
+        if self.can_submit_order(order):
+            var account = self.get_account(order.order_book_id)
+            self._broker.submit_order(order, account)
+            return order
+        return None
+
+    def can_submit_order(mut self, order: Order) -> Bool:
+        var instrument = self.get_instrument(order.order_book_id)
+        var instrument_type = instrument.type()
+        var account = self.portfolio.get_account(order.order_book_id)
+        var validators = self._get_frontend_validators(instrument_type)
+        for v in validators:
+            var reason = v.validate_submission(order, account.__str__())
+            if reason != "":
+                self.order_creation_failed(order.order_book_id, reason)
+                return False
+        return True
+
+    def can_cancel_order(mut self, order: Order) -> Bool:
+        var instrument = self.get_instrument(order.order_book_id)
+        var instrument_type = instrument.type()
+        var account = self.portfolio.get_account(order.order_book_id)
+        var validators = self._get_frontend_validators(instrument_type)
+        for v in validators:
+            var reason = v.validate_cancellation(order, account.__str__())
+            if reason != "":
+                self.order_cancellation_failed(order.order_book_id, reason)
+                return False
+        return True
+
+    def order_creation_failed(mut self, order_book_id: String, reason: String) -> None:
+        print("WARNING: Order creation failed for " + order_book_id + ": " + reason)
+        var evt = EVENT.ORDER_CREATION_REJECT()
+        var event = Event(evt.value)
         _ = self._event_bus.publish_event(event)
 
-    def submit_order(mut self, order: Order) -> Order:
-        return order
+    def order_cancellation_failed(mut self, order_book_id: String, reason: String) -> None:
+        print("WARNING: Order cancellation failed for " + order_book_id + ": " + reason)
+        var evt = EVENT.ORDER_CANCELLATION_REJECT()
+        var event = Event(evt.value)
+        _ = self._event_bus.publish_event(event)
 
+    def get_open_orders(self, order_book_id: String = "") -> List[Order]:
+        if order_book_id == "":
+            # TODO: Return all open orders from broker
+            var orders = List[Order]()
+            return orders^
+        else:
+            # TODO: Return specific order_book_id open orders from broker
+            var orders = List[Order]()
+            return orders^
+
+    def next_order_id(mut self) -> Int:
+        return self._order_id_generator.next()
+
+    # ============================================================
+    # 验证器相关方法
+    # ============================================================
+    
     def add_frontend_validator(mut self, validator: FrontendValidator, instrument_type: INSTRUMENT_TYPE = INSTRUMENT_TYPE.CS) raises -> None:
         var key = instrument_type.value
         try:
@@ -275,69 +425,10 @@ struct Environment(Movable):
             result.append(v)
         return result^
 
-    def can_submit_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS
-        var validators = self._get_frontend_validators(instrument_type)
-        for v in validators:
-            var reason = v.validate_submission(order, "")
-            if reason != "":
-                self.order_creation_failed(order.order_book_id, reason)
-                return False
-            if not v.can_submit_order(order, ""):
-                return False
-        return True
-
-    def can_cancel_order(mut self, order: Order) -> Bool:
-        var instrument_type = INSTRUMENT_TYPE.CS
-        var validators = self._get_frontend_validators(instrument_type)
-        for v in validators:
-            var reason = v.validate_cancellation(order, "")
-            if reason != "":
-                self.order_cancellation_failed(order.order_book_id, reason)
-                return False
-            if not v.can_cancel_order(order, ""):
-                return False
-        return True
-
-    def order_creation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event(EVENT.ORDER_CREATION_REJECT.value)
-        _ = self._event_bus.publish_event(event)
-
-    def order_cancellation_failed(mut self, order_book_id: String, reason: String) -> None:
-        var event = Event(EVENT.ORDER_CANCELLATION_REJECT.value)
-        _ = self._event_bus.publish_event(event)
-
-    def get_last_price(self, order_book_id: String) -> Float64:
-        return self._data_proxy.get_last_price(order_book_id)
-
-    def get_bar(self, order_book_id: String) -> Float64:
-        return 10.0
-
-    def get_instrument(self, order_book_id: String) -> Instrument:
-        return self._data_proxy.get_instrument(order_book_id)
+    # ============================================================
+    # 交易成本相关方法
+    # ============================================================
     
-    def get_last_price_from_proxy(self, order_book_id: String) -> Float64:
-        return self._data_proxy.get_last_price(order_book_id)
-    
-    def get_all_instruments_from_proxy(self, type: String = "") -> List[Instrument]:
-        return self._data_proxy.get_all_instruments(type)
-    
-    def is_suspended_from_proxy(self, order_book_id: String, dt: DateTime) -> Bool:
-        return self._data_proxy.is_suspended(order_book_id, dt)
-    
-    def get_previous_trading_date_from_proxy(self, dt: DateTime) -> DateTime:
-        return self._data_proxy.get_previous_trading_date(dt)
-    
-    def get_dividend_from_proxy(self, ins: Instrument) -> Optional[DividendInfo]:
-        return self._data_proxy.get_dividend(ins)
-
-    def get_account_type(self, order_book_id: String) -> DEFAULT_ACCOUNT_TYPE:
-        return DEFAULT_ACCOUNT_TYPE.STOCK
-
-    def get_open_orders(self) -> List[Order]:
-        var orders = List[Order]()
-        return orders^
-
     def set_transaction_cost_decider(mut self, instrument_type: INSTRUMENT_TYPE, decider: TransactionCostDecider, market: MARKET = MARKET.CN) -> None:
         var key = instrument_type.value + "_" + market.value
         self._transaction_cost_deciders[key] = decider
@@ -349,31 +440,38 @@ struct Environment(Movable):
         except:
             return TransactionCostDecider(name="default", instrument_type=instrument_type, market=market)
 
-    def calc_transaction_cost(self, order: Order, quantity: Int, price: Float64) -> Float64:
-        var instrument = self.get_instrument(order.order_book_id)
-        var decider = self.get_transaction_cost_decider(instrument.instrument_type, MARKET_CN)
-        return decider.calc(order, quantity, price)
+    def calc_transaction_cost(self, args: TransactionCostArgs) -> Float64:
+        var instrument = args.instrument
+        var decider = self.get_transaction_cost_decider(instrument.type(), MARKET.CN)
+        return decider.calc(args.order, args.quantity, args.price)
 
-    def get_universe(self) -> Set[String]:
-        var result = Set[String]()
-        for item in self._universe:
-            result.add(item)
-        return result^
+    # ============================================================
+    # 投资组合相关方法
+    # ============================================================
+    
+    def get_account_type(self, order_book_id: String) -> DEFAULT_ACCOUNT_TYPE:
+        return DEFAULT_ACCOUNT_TYPE.STOCK
 
-    def update_universe(mut self, var universe: Set[String]) -> None:
-        self._universe = Set[String]()
-        for item in universe:
-            self._universe.add(item)
+    def get_account(self, order_book_id: String) -> Account:
+        return self.portfolio.get_account(order_book_id)
 
-    def set_data_source(mut self, name: String) -> None:
-        self._data_source_name = name
+    def get_account_by_type(self, account_type: DEFAULT_ACCOUNT_TYPE) -> Account:
+        return self.portfolio.get_account_by_type(account_type)
 
-    def set_data_proxy(mut self, var data_proxy: DataProxy) -> None:
-        self._data_proxy = data_proxy^
+    def get_stock_account(self) -> Account:
+        return self.portfolio._stock_account
 
-    def set_broker(mut self, name: String) -> None:
-        self._broker_name = name
-        self._broker = name
+    def get_future_account(self) -> Account:
+        return self.portfolio._future_account
+
+    def get_portfolio(self) -> Portfolio:
+        return self.portfolio
+
+    def get_positions(self) -> List[Position]:
+        return self.portfolio.get_positions()
+
+    def get_position(self, order_book_id: String) -> Position:
+        return self.portfolio.get_position(order_book_id)
 
     def set_portfolio(mut self, total_value: Float64, cash: Float64) -> None:
         self._portfolio_total_value = total_value
@@ -385,50 +483,152 @@ struct Environment(Movable):
     def get_portfolio_cash(self) -> Float64:
         return self._portfolio_cash
 
+    # ============================================================
+    # Universe 相关方法
+    # ============================================================
+    
+    def get_universe(self) -> Set[String]:
+        var result = Set[String]()
+        for item in self._universe:
+            result.add(item)
+        return result^
+
+    def update_universe(mut self, var universe: Set[String]) -> None:
+        self._universe = Set[String]()
+        for item in universe:
+            self._universe.add(item)
+
+    # ============================================================
+    # 组件设置方法
+    # ============================================================
+    
+    def set_data_source(mut self, name: String) -> None:
+        self._data_source_name = name
+
+    def set_data_proxy(mut self, var data_proxy: DataProxy) -> None:
+        self._data_proxy = data_proxy^
+
+    def set_broker(mut self, broker: SimulationBroker) -> None:
+        self._broker_name = "simulation"
+        self._broker = broker
+
+    def set_event_source(mut self, event_source: SimulationEventSource) -> None:
+        self._event_source = event_source
+
+    def set_strategy_loader(mut self, loader: StrategyLoader) -> None:
+        self._strategy_loader = loader
+
+    def set_user_strategy(mut self, strategy: String) -> None:
+        self._user_strategy = strategy
+
+    def set_price_board(mut self, board: String) -> None:
+        pass
+
     def set_persist_provider(mut self, provider: PersistProvider) -> None:
         self.persist_provider = provider
 
     def set_persist_helper(mut self, helper: PersistHelper) -> None:
         self.persist_helper = helper
 
+    def set_profile_deco(mut self, deco: PythonObject) -> None:
+        self._profile_deco = deco
+
+    # ============================================================
+    # 持仓策略相关方法
+    # ============================================================
+    
     def set_hold_strategy(mut self) -> None:
         self._is_hold = True
-        var event = Event(EVENT.STRATEGY_HOLD_SET.value)
+        var evt = EVENT.STRATEGY_HOLD_SET()
+        var event = Event(evt.value)
         _ = self._event_bus.publish_event(event)
 
     def cancel_hold_strategy(mut self) -> None:
         self._is_hold = False
-        var event = Event(EVENT.STRATEGY_HOLD_CANCELLED.value)
+        var evt = EVENT.STRATEGY_HOLD_CANCELLED()
+        var event = Event(evt.value)
         _ = self._event_bus.publish_event(event)
 
-    def next_order_id(mut self) -> Int:
-        return self._order_id_generator.next()
+    # ============================================================
+    # 组件访问方法
+    # ============================================================
+    
+    def data_proxy(mut self) -> ref[self._data_proxy] DataProxy:
+        return self._data_proxy
+    
+    def data_source(mut self) -> ref[self._data_proxy] DataProxy:
+        return self._data_proxy
+    
+    def price_board(mut self) -> ref[self._data_proxy] DataProxy:
+        return self._data_proxy
+    
+    def broker(self) -> SimulationBroker:
+        return self._broker
+    
+    def event_source(self) -> SimulationEventSource:
+        return self._event_source
+    
+    def strategy_loader(self) -> StrategyLoader:
+        return self._strategy_loader
+    
+    def user_strategy(self) -> String:
+        return self._user_strategy
 
-    def get_stock_account(self) -> Account:
-        return self._stock_account
+    # ============================================================
+    # 组件存在检查方法
+    # ============================================================
+    
+    def has_data_source(self) -> Bool:
+        return len(self._data_source_name) > 0
+    
+    def has_price_board(self) -> Bool:
+        return True
+    
+    def has_broker(self) -> Bool:
+        return len(self._broker_name) > 0
+    
+    def has_event_source(self) -> Bool:
+        return len(self._event_source) > 0
+    
+    def has_portfolio(self) -> Bool:
+        return self._portfolio_total_value > 0
+    
+    def has_profile_deco(self) -> Bool:
+        return True
 
-    def get_future_account(self) -> Account:
-        return self._future_account
+    # ============================================================
+    # 其他方法
+    # ============================================================
+    
+    def get_profile_output(self) -> String:
+        return "Profile output"
 
-    def get_account(self, account_type: DEFAULT_ACCOUNT_TYPE) -> Optional[Account]:
-        if account_type == DEFAULT_ACCOUNT_TYPE.STOCK:
-            return self._stock_account
-        return None
+    def clear_data_proxy_cache(mut self) -> None:
+        pass
 
-    def get_portfolio(self) -> Portfolio:
-        return self.portfolio
+    def clear_data_source_cache(mut self) -> None:
+        pass
 
-    def get_positions(self) -> List[Position]:
-        return self.portfolio.get_positions()
+    def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+        # TODO: Implement proper trading dates calculation
+        var result = List[DateTime]()
+        var current = start_date
+        while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
+            result.append(current)
+            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
+        return result^
 
-    def get_position(self, order_book_id: String) -> Position:
-        return self.portfolio.get_position(order_book_id)
+    def get_trading_days_a_year(self) -> Int:
+        if self._trading_days_a_year is None:
+            # Try to get custom trading days from config, fallback to default
+            return DAYS_CNT.TRADING_DAYS_A_YEAR
+        return self._trading_days_a_year.value()
 
     def current_snapshot(self, order_book_id: String) -> Dict[String, Float64]:
         var result = Dict[String, Float64]()
         var price = self.get_last_price(order_book_id)
         result["last"] = price
-        return result
+        return result^
 
     def history_bars(
         self,
@@ -442,69 +642,70 @@ struct Environment(Movable):
 
     def get_yield_curve(self, start_date: DateTime, end_date: DateTime, tenor: String = "") -> Dict[String, Float64]:
         return Dict[String, Float64]()
-    
-    def data_proxy(self) -> DataProxy:
-        return self._data_proxy
-    
-    def data_source(self) -> DataProxy:
-        return self._data_proxy
-    
-    def price_board(self) -> DataProxy:
-        return self._data_proxy
-    
-    def has_data_source(self) -> Bool:
-        return len(self._data_source_name) > 0
-    
-    def has_price_board(self) -> Bool:
-        return True
-    
-    def has_broker(self) -> Bool:
-        return len(self._broker_name) > 0
-    
-    def has_event_source(self) -> Bool:
-        return True
-    
-    def has_portfolio(self) -> Bool:
-        return self._portfolio_total_value > 0
-    
-    def set_strategy_loader(mut self, loader: String) -> None:
-        pass
-    
-    def strategy_loader(self) -> String:
-        return "file"
-    
-    def set_user_strategy(mut self, strategy: String) -> None:
-        pass
-    
-    def user_strategy(self) -> String:
-        return "user_strategy"
-    
-    def set_price_board(mut self, board: String) -> None:
-        pass
-    
-    def set_profile_deco(mut self, deco: PythonObject) -> None:
-        self._profile_deco = deco
-    
-    def has_profile_deco(self) -> Bool:
-        return True
-    
-    def get_profile_output(self) -> String:
-        return "Profile output"
-    
-    def clear_data_proxy_cache(mut self) -> None:
-        pass
-    
-    def clear_data_source_cache(mut self) -> None:
-        pass
-    
-    def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
-        var result = List[DateTime]()
-        var current = start_date
-        while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
-            result.append(current)
-            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
-        return result^
 
+
+# ============================================================# 单例模式支持 - 更接近Python版本的实现# ============================================================# 由于 Mojo 0.26.2 不支持真正的全局变量，这里使用模块级单例管理器# 提供与Python版本类似的使用方式
+
+@fieldwise_initstruct EnvironmentSingleton:
+    """Environment singleton manager with get_instance support."""
+    
+    # 使用指针和初始化状态
+    var _ptr: UnsafePointer[Environment, MutExternalOrigin]
+    var _initialized: Bool
+    
+    def __init__(out self):
+        """Initialize singleton manager with null pointer."""
+        # 创建空指针
+        self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
+        self._initialized = False
+    
+    def get_instance(self) raises -> Environment:
+        """Return the Environment instance."""
+        if not self._initialized:
+            raise Error("Environment has not been created. Please create Environment first.")
+        return self._ptr^()
+    
+    def set_instance(mut self, env: Environment) -> None:
+        """Set the global Environment instance."""
+        # 创建指向环境实例的指针
+        self._ptr = UnsafePointer[Environment, MutExternalOrigin].allocate()
+        self._ptr.store(env)
+        self._initialized = True
+    
+    def clear_instance(mut self) -> None:
+        """Clear the global Environment instance."""
+        if self._initialized:
+            self._ptr.free()
+        self._initialized = False
+        self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
+    
+    def has_instance(self) -> Bool:
+        """Check if the Environment instance exists."""
+        return self._initialized
+
+# 模块级单例管理器
+var _singleton = EnvironmentSingleton()
+
+def get_environment() raises -> Environment:
+    """获取Environment实例，与Python版本的get_instance()类似"""
+    return _singleton.get_instance()
+
+def set_environment(env: Environment) -> None:
+    """设置Environment实例"""
+    _singleton.set_instance(env)
+
+def clear_environment() -> None:
+    """清理Environment实例"""
+    _singleton.clear_instance()
+
+def has_environment() -> Bool:
+    """检查Environment实例是否存在"""
+    return _singleton.has_instance()
+
+
+# ============================================================
+# 工厂函数
+# ============================================================
 
 def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: Bool = False) -> Environment:
     return Environment(
@@ -533,7 +734,14 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _order_id_generator=create_order_id_generator(),
         portfolio=create_portfolio(config.base.initial_cash),
         _execution_phase=EXECUTION_PHASE.GLOBAL,
-        _broker="simulation"
+        _trading_days_a_year=Optional[Int](None),
+        _broker=create_broker(),
+        _event_source=create_event_source(config.base.start_date, config.base.end_date, config.base.frequency),
+        _strategy_loader=create_strategy_loader(config.base.strategy_file),
+        _user_strategy="user_strategy",
+        _profile_deco=PythonObject(),
+        _mod_dict=Dict[String, String](),
+        _rqdatac_init=rqdatac_initialized
     )
 
 
@@ -564,5 +772,12 @@ def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_T
         _order_id_generator=create_order_id_generator(),
         portfolio=create_portfolio(100000.0),
         _execution_phase=EXECUTION_PHASE.GLOBAL,
-        _broker="simulation"
+        _trading_days_a_year=Optional[Int](None),
+        _broker=create_broker(),
+        _event_source=create_event_source(start_date, end_date, "1d"),
+        _strategy_loader=create_strategy_loader(),
+        _user_strategy="user_strategy",
+        _profile_deco=PythonObject(),
+        _mod_dict=Dict[String, String](),
+        _rqdatac_init=False
     )

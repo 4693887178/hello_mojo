@@ -9,7 +9,7 @@ from rqmojo.const import (
     ORDER_TYPE, ALGO, ORDER_STATUS, SIDE, POSITION_EFFECT,
     POSITION_DIRECTION, EXC_TYPE, INSTRUMENT_TYPE, PERSIST_MODE,
     COMMISSION_TYPE, EXIT_CODE, HEDGE_TYPE, DAYS_CNT, EXCHANGE,
-    TRADING_CALENDAR_TYPE, MARKET, EnumRegistry
+    TRADING_CALENDAR_TYPE, MARKET
 )
 
 
@@ -318,18 +318,16 @@ def test_market() raises:
     print("  MARKET tests passed!")
 
 
-def test_enum_registry() raises:
-    print("Testing EnumRegistry...")
-    
-    var registry = EnumRegistry()
-    
-    var result = registry.get[EXECUTION_PHASE]("GLOBAL")
+def test___getitem__() raises:
+    print("Testing __getitem__()...")
+
+    var result = EXECUTION_PHASE.__getitem__("GLOBAL")
     assert_equal(result.value().name, "GLOBAL")
-    
-    var result2 = registry.get[RUN_TYPE]("BACKTEST")
+
+    var result2 = RUN_TYPE.__getitem__("BACKTEST")
     assert_equal(result2.value().name, "BACKTEST")
-    
-    print("  EnumRegistry tests passed!")
+
+    print("  __getitem__() tests passed!")
 
 
 def test_equality() raises:

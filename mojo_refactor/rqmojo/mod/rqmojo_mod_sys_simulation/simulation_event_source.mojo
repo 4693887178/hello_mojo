@@ -10,14 +10,14 @@ from rqmojo.model.instrument import Instrument
 
 
 @fieldwise_init
-struct Event(Stringable, Copyable, Movable, ImplicitlyCopyable):
+struct Event(Writable, Copyable, Movable, ImplicitlyCopyable):
     var event_type: String
     var calendar_dt: DateTime
     var trading_dt: DateTime
     var order_book_id: String
     
-    def __str__(self) -> String:
-        return "Event(" + self.event_type + ")"
+    def write_to(self, mut writer: Some[Writer]):
+        t"Event(", self.event_type, ")".write_to(writer)
 
 
 @fieldwise_init
@@ -36,7 +36,7 @@ struct SimulationEventSource(Movable):
     def events_count(self) -> Int:
         return len(self._events)
     
-    def generate_daily_events(mut self, trading_dates: List[Date]) -> None:
+    def generate_daily_events(mut self, trading_dates: List[DateTimeDate]) -> None:
         for i in range(len(trading_dates)):
             var date = trading_dates[i]
             var dt_before_trading = DateTime(date.year, date.month, date.day, 0, 0, 0, 0)
@@ -51,7 +51,7 @@ struct SimulationEventSource(Movable):
     def generate_tick_events(mut self, ticks: List[TickObject]) -> None:
         for i in range(len(ticks)):
             var tick = ticks[i]
-            var ob_id = tick.instrument.order_book_id
+            var ob_id = tick.instrument().order_book_id()
             self._events.append(Event("TICK", tick.datetime, tick.datetime, ob_id))
 
 

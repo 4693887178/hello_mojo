@@ -35,21 +35,20 @@ struct Matcher(Movable):
         return create_trade(
             order=order,
             quantity=filled_quantity,
-            price=price,
-            datetime=dt
+            price=price
         )
     
     def _get_match_price(self, order: Order, bar: BarObject) -> Float64:
-        if self.matching_type == MATCHING_TYPE_CURRENT_BAR_CLOSE:
-            return bar.close
-        elif self.matching_type == MATCHING_TYPE_VWAP:
-            if bar.volume > 0:
-                return bar.total_turnover / Float64(bar.volume)
-            return bar.close
-        elif self.matching_type == MATCHING_TYPE_NEXT_BAR_OPEN:
-            return bar.open
+        if self.matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE:
+            return bar.close()
+        elif self.matching_type == MATCHING_TYPE.VWAP:
+            if bar.volume() > 0:
+                return bar.total_turnover() / Float64(bar.volume())
+            return bar.close()
+        elif self.matching_type == MATCHING_TYPE.NEXT_BAR_OPEN:
+            return bar.open()
         else:
-            return bar.close
+            return bar.close()
     
     def _apply_slippage(self, order: Order, price: Float64) -> Float64:
         if self.slippage == 0:

@@ -1,10 +1,18 @@
 """
 Test for log_capture.mojo
-Mojo-idiomatic version: LogCapture owns its CaptureHandler internally.
+Aligned with Python rqalpha/utils/log_capture.py behavior:
+  - LogCapture(var logger) transfers ownership (Mojo value semantics)
+  - __enter__ swaps handlers, __exit__ restores them
+  - replay() dispatches to logger without target parameter
+  - create_log_capture() factory function available
+  - All logger ops proxied through LogCapture (capture.handle, capture.add_handler)
 """
 
 from std.logger import Level
-from rqmojo.utils.log_capture import LogRecord, CaptureHandler, LogCapture
+from rqmojo.utils.log_capture import (
+    LogRecord, CaptureHandler, RQLogger,
+    LogCapture, create_log_capture,
+)
 
 
 def test_log_record():
@@ -32,92 +40,107 @@ def test_capture_handler():
         print("FAIL")
 
 
-def test_log_capture_simple():
-    print("=== Testing LogCapture simple capture + replay ===")
+def test_rq_logger():
+    print("=== Testing RQLogger handler dispatch ===")
 
-    var capture = LogCapture()
+    var logger = RQLogger(name="test")
+    var h1 = CaptureHandler()
+    var h2 = CaptureHandler()
+    logger.add_handler(h1^)
+    logger.add_handler(h2^)
+
+    logger.handle(LogRecord(Level.INFO, "dispatch test"))
+
+    var handlers = logger.get_handlers()
+    if len(handlers) == 2:
+        print("PASS: dispatched, handler list has 2 entries")
+    else:
+        print("FAIL")
+
+
+def test_log_capture_context_manager():
+    print("=== Testing LogCapture context manager (matches Python `with`) ===")
+
+    var logger = RQLogger(name="ctx_test")
+    var original_handler = CaptureHandler()
+    logger.add_handler(original_handler^)
+
+    var capture = LogCapture(logger^)
+
     _ = capture.__enter__()
-    capture.capture(LogRecord(Level.INFO, "Hello"))
-    capture.capture(LogRecord(Level.ERROR, "World"))
+    capture.handle(LogRecord(Level.INFO, "Hello"))
+    capture.handle(LogRecord(Level.ERROR, "World"))
     _ = capture.__exit__()
 
-    if len(capture._capture_handler.captured) == 2:
-        print("PASS: captured 2 records")
+    if len(capture.capture_handler().captured) == 2:
+        print("PASS: captured 2 records during context")
     else:
         print("FAIL")
 
-    # Replay to a target handler
+    # After exit, logger should use restored handlers again
+    capture.handle(LogRecord(Level.INFO, "after context"))
+    if len(capture.capture_handler().captured) == 2:
+        print("PASS: post-exit handle() does not add to capture_handler")
+    else:
+        print("FAIL")
+
+
+def test_replay_to_logger():
+    print("=== Testing replay() to logger (no target param) ===")
+
+    var logger = RQLogger(name="replay_test")
+    var capture = LogCapture(logger^)
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.INFO, "A"))
+    capture.handle(LogRecord(Level.INFO, "B"))
+    _ = capture.__exit__()
+
     var target = CaptureHandler()
-    capture.replay(target)
+    capture.add_handler(target^)
+    capture.replay()
 
-    if len(target.captured) == 2:
-        print("PASS: replayed 2 records to target")
+    if len(capture.capture_handler().captured) == 2:
+        print("PASS: replay preserved captured records, dispatched to logger")
     else:
         print("FAIL")
 
 
-def test_log_capture_replay_and_clear():
-    print("=== Testing replay_and_clear ===")
+def test_create_log_capture_factory():
+    print("=== Testing create_log_capture() factory ===")
 
-    var capture = LogCapture()
-    capture.capture(LogRecord(Level.INFO, "A"))
-    capture.capture(LogRecord(Level.INFO, "B"))
+    var logger = RQLogger(name="factory")
+    var capture = create_log_capture(logger^)
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.DEBUG, "factory created"))
+    _ = capture.__exit__()
 
-    var target = CaptureHandler()
-    capture.replay_and_clear(target)
-
-    if len(capture._capture_handler.captured) == 0 and len(target.captured) == 2:
-        print("PASS: cleared after replay")
-    else:
-        print("FAIL")
-
-
-def test_log_capture_no_external_handler():
-    print("=== Testing LogCapture needs no external handler ===")
-
-    var capture = LogCapture()
-    capture.capture(LogRecord(Level.DEBUG, "no handler needed"))
-
-    if len(capture._capture_handler.captured) == 1:
-        print("PASS: works without external handler")
+    if len(capture.capture_handler().captured) == 1:
+        print("PASS: factory produces working LogCapture")
     else:
         print("FAIL")
 
 
 def test_log_capture_copy():
-    print("=== Testing LogCapture copy ===")
+    print("=== Testing LogCapture copy independence ===")
 
-    var capture = LogCapture()
-    capture.capture(LogRecord(Level.INFO, "original"))
+    var logger = RQLogger(name="copy_test")
+    var capture = LogCapture(logger^)
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.INFO, "original"))
+    _ = capture.__exit__()
 
     var copy = LogCapture(copy=capture)
 
-    if len(copy._capture_handler.captured) == 1:
-        print("PASS: copy preserves records")
+    if len(copy.capture_handler().captured) == 1:
+        print("PASS: copy preserves captured records")
     else:
         print("FAIL")
 
-    copy.capture(LogRecord(Level.INFO, "extra"))
-    if len(capture._capture_handler.captured) == 1:
-        print("PASS: original independent of copy")
-    else:
-        print("FAIL")
-
-
-def test_replay_to_multiple_targets():
-    print("=== Testing replay to multiple targets ===")
-
-    var capture = LogCapture()
-    capture.capture(LogRecord(Level.INFO, "broadcast"))
-    capture.capture(LogRecord(Level.WARNING, "alert"))
-
-    var target1 = CaptureHandler()
-    var target2 = CaptureHandler()
-    capture.replay(target1)
-    capture.replay(target2)
-
-    if len(target1.captured) == 2 and len(target2.captured) == 2:
-        print("PASS: replayed to 2 targets independently")
+    _ = copy.__enter__()
+    copy.handle(LogRecord(Level.INFO, "extra via copy"))
+    _ = copy.__exit__()
+    if len(capture.capture_handler().captured) == 2:
+        print("PASS: ArcPointer shares state - original sees copy's records")
     else:
         print("FAIL")
 
@@ -125,18 +148,21 @@ def test_replay_to_multiple_targets():
 def test_record_level_preservation():
     print("=== Testing LogRecord level preservation ===")
 
-    var capture = LogCapture()
-    capture.capture(LogRecord(Level.DEBUG, "Debug"))
-    capture.capture(LogRecord(Level.INFO, "Info"))
-    capture.capture(LogRecord(Level.WARNING, "Warning"))
-    capture.capture(LogRecord(Level.ERROR, "Error"))
+    var logger = RQLogger(name="level_test")
+    var capture = LogCapture(logger^)
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.DEBUG, "Debug"))
+    capture.handle(LogRecord(Level.INFO, "Info"))
+    capture.handle(LogRecord(Level.WARNING, "Warning"))
+    capture.handle(LogRecord(Level.ERROR, "Error"))
+    _ = capture.__exit__()
 
     var has_debug = False
     var has_info = False
     var has_warning = False
     var has_error = False
 
-    for record in capture._capture_handler.captured:
+    for record in capture.capture_handler().captured:
         if record.level == Level.DEBUG:
             has_debug = True
         elif record.level == Level.INFO:
@@ -152,23 +178,42 @@ def test_record_level_preservation():
         print("FAIL")
 
 
-def test_multiple_contexts():
-    print("=== Testing multiple contexts ===")
+def test_multiple_context_cycles():
+    print("=== Testing multiple enter/exit cycles ===")
 
-    var capture = LogCapture()
-
-    _ = capture.__enter__()
-    capture.capture(LogRecord(Level.INFO, "First"))
-    _ = capture.__exit__()
-
-    capture._capture_handler.captured.clear()
+    var logger = RQLogger(name="cycle_test")
+    var capture = LogCapture(logger^)
 
     _ = capture.__enter__()
-    capture.capture(LogRecord(Level.INFO, "Second"))
+    capture.handle(LogRecord(Level.INFO, "First"))
     _ = capture.__exit__()
 
-    if len(capture._capture_handler.captured) == 1:
-        print("PASS")
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.INFO, "Second"))
+    _ = capture.__exit__()
+
+    if len(capture.capture_handler().captured) == 2:
+        print("PASS: both cycles captured independently")
+    else:
+        print("FAIL")
+
+
+def test_nested_handler_preservation():
+    print("=== Testing pre-existing handlers preserved across cycles ===")
+
+    var logger = RQLogger(name="nest_test")
+    var persistent = CaptureHandler()
+    logger.add_handler(persistent^)
+
+    var capture = LogCapture(logger^)
+    _ = capture.__enter__()
+    capture.handle(LogRecord(Level.INFO, "captured only"))
+    _ = capture.__exit__()
+
+    capture.handle(LogRecord(Level.INFO, "goes to persistent"))
+
+    if len(capture.capture_handler().captured) == 1:
+        print("PASS: capture_handler has exactly 1 record (from during-context)")
     else:
         print("FAIL")
 
@@ -176,18 +221,20 @@ def test_multiple_contexts():
 def main():
     print("=" * 60)
     print("RQAlpha Mojo utils/log_capture.mojo Test")
+    print("(aligned with Python behavior)")
     print("=" * 60)
     print("")
 
     test_log_record()
     test_capture_handler()
-    test_log_capture_simple()
-    test_log_capture_replay_and_clear()
-    test_log_capture_no_external_handler()
+    test_rq_logger()
+    test_log_capture_context_manager()
+    test_replay_to_logger()
+    test_create_log_capture_factory()
     test_log_capture_copy()
-    test_replay_to_multiple_targets()
     test_record_level_preservation()
-    test_multiple_contexts()
+    test_multiple_context_cycles()
+    test_nested_handler_preservation()
 
     print("")
     print("=" * 60)

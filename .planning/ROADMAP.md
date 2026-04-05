@@ -1,23 +1,23 @@
 # ROADMAP.md
 
-## Milestone: 业务层重构 (Group 08-09)
+## Milestone: 高级业务层重构 (Group 10-12)
 
-### Phase 1: Group 08 Mojo 重构
+### Phase 1: Group 10 Mojo 重构
 **Status**: ⏳ Pending
 **Dependencies**: None
 **Duration**: 2-3 hours
 
 **Tasks**:
-- [ ] 重构 `cmds/run.mojo`
-- [ ] 重构 `core/strategy_context.mojo`
-- [ ] 重构 `data/base_data_source/storage_interface.mojo`
-- [ ] 重构 `data/instruments_mixin.mojo`
-- [ ] 重构 `data/trading_dates_mixin.mojo`
-- [ ] 重构 `mod/__init__.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_accounts/component_validator.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_accounts/validator.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_analyser/mod.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_analyser/plot_store.mojo`
+- [ ] 重构 `interface.mojo` - 依赖数量 5
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/mod.mojo` - 依赖数量 5
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/position_validator.mojo` - 依赖数量 5
+- [ ] 重构 `mod/rqmojo_mod_sys_analyser/plot/plot.mojo` - 依赖数量 5
+- [ ] 重构 `mod/rqmojo_mod_sys_simulation/matcher.mojo` - 依赖数量 5
+- [ ] 重构 `mod/rqmojo_mod_sys_simulation/simulation_event_source.mojo` - 依赖数量 5
+- [ ] 重构 `model/order.mojo` - 依赖数量 5
+- [ ] 重构 `model/trade.mojo` - 依赖数量 5
+- [ ] 重构 `utils/__init__.mojo` - 依赖数量 5
+- [ ] 重构 `apis/__init__.mojo` - 依赖数量 6
 
 **Deliverables**:
 - 10 个 Mojo 源文件
@@ -25,39 +25,39 @@
 
 ---
 
-### Phase 2: Group 08 测试验证
+### Phase 2: Group 10 测试验证
 **Status**: ⏳ Pending
 **Dependencies**: Phase 1
 **Duration**: 1-2 hours
 
 **Tasks**:
-- [ ] 创建/更新 Group 08 Mojo 测试文件
+- [ ] 创建/更新 Group 10 Mojo 测试文件
 - [ ] 运行 Mojo 测试
 - [ ] 修复测试失败
 - [ ] 验证功能一致性
 
 **Deliverables**:
-- Group 08 测试报告
+- Group 10 测试报告
 - 修复后的代码
 
 ---
 
-### Phase 3: Group 09 Mojo 重构
+### Phase 3: Group 11 Mojo 重构
 **Status**: ⏳ Pending
 **Dependencies**: Phase 2
 **Duration**: 2-3 hours
 
 **Tasks**:
-- [ ] 重构 `mod/rqalpha_mod_sys_analyser/report/report.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_risk/validators/price_validator.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_scheduler/scheduler.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_simulation/mod.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_simulation/signal_broker.mojo`
-- [ ] 重构 `mod/rqalpha_mod_sys_simulation/testing.mojo`
-- [ ] 重构 `model/instrument.mojo`
-- [ ] 重构 `core/strategy.mojo`
-- [ ] 重构 `data/bundle.mojo`
+- [ ] 重构 `apis/api_abstract.mojo` - 依赖数量 6
+- [ ] 重构 `cmds/__init__.mojo` - 依赖数量 6
+- [ ] 重构 `environment.mojo` - 依赖数量 6
+- [ ] 重构 `mod/rqmojo_mod_sys_risk/validators/cash_validator.mojo` - 依赖数量 6
+- [ ] 重构 `mod/rqmojo_mod_sys_risk/validators/is_trading_validator.mojo` - 依赖数量 6
+- [ ] 重构 `mod/rqmojo_mod_sys_simulation/simulation_broker.mojo` - 依赖数量 6
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/api/order_target_portfolio.mojo` - 依赖数量 6
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/api/api_future.mojo` - 依赖数量 6
+- [ ] 重构 `model/bar.mojo` - 依赖数量 6
+- [ ] 重构 `data/base_data_source/storages.mojo` - 依赖数量 6
 
 **Deliverables**:
 - 10 个 Mojo 源文件
@@ -65,26 +65,66 @@
 
 ---
 
-### Phase 4: Group 09 测试验证
+### Phase 4: Group 11 测试验证
 **Status**: ⏳ Pending
 **Dependencies**: Phase 3
 **Duration**: 1-2 hours
 
 **Tasks**:
-- [ ] 创建/更新 Group 09 Mojo 测试文件
+- [ ] 创建/更新 Group 11 Mojo 测试文件
 - [ ] 运行 Mojo 测试
 - [ ] 修复测试失败
 - [ ] 验证功能一致性
 
 **Deliverables**:
-- Group 09 测试报告
+- Group 11 测试报告
 - 修复后的代码
 
 ---
 
-### Phase 5: 集成测试
+### Phase 5: Group 12 Mojo 重构
 **Status**: ⏳ Pending
 **Dependencies**: Phase 4
+**Duration**: 2-3 hours
+
+**Tasks**:
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/api/api_stock.mojo` - 依赖数量 7
+- [ ] 重构 `apis/api_rqdatac.mojo` - 依赖数量 7
+- [ ] 重构 `mod/rqmojo_mod_sys_accounts/position_model.mojo` - 依赖数量 8
+- [ ] 重构 `data/data_proxy.mojo` - 依赖数量 8
+- [ ] 重构 `portfolio/__init__.mojo` - 依赖数量 8
+- [ ] 重构 `portfolio/position.mojo` - 依赖数量 8
+- [ ] 重构 `portfolio/account.mojo` - 依赖数量 8
+- [ ] 重构 `apis/api_base.mojo` - 依赖数量 9
+- [ ] 重构 `utils/testing/fixtures.mojo` - 依赖数量 9
+- [ ] 重构 `data/base_data_source/data_source.mojo` - 依赖数量 10
+
+**Deliverables**:
+- 10 个 Mojo 源文件
+- 编译通过验证
+
+---
+
+### Phase 6: Group 12 测试验证
+**Status**: ⏳ Pending
+**Dependencies**: Phase 5
+**Duration**: 1-2 hours
+
+**Tasks**:
+- [ ] 创建/更新 Group 12 Mojo 测试文件
+- [ ] 运行 Mojo 测试
+- [ ] 修复测试失败
+- [ ] 验证功能一致性
+
+**Deliverables**:
+- Group 12 测试报告
+- 修复后的代码
+
+---
+
+### Phase 7: 集成测试
+**Status**: ⏳ Pending
+**Dependencies**: Phase 6
 **Duration**: 1-2 hours
 
 **Tasks**:
@@ -104,11 +144,13 @@
 
 | Phase | Status | Progress |
 |-------|--------|----------|
-| Phase 1: Group 08 重构 | ⏳ Pending | 0% |
-| Phase 2: Group 08 测试 | ⏳ Pending | 0% |
-| Phase 3: Group 09 重构 | ⏳ Pending | 0% |
-| Phase 4: Group 09 测试 | ⏳ Pending | 0% |
-| Phase 5: 集成测试 | ⏳ Pending | 0% |
+| Phase 1: Group 10 重构 | ⏳ Pending | 0% |
+| Phase 2: Group 10 测试 | ⏳ Pending | 0% |
+| Phase 3: Group 11 重构 | ⏳ Pending | 0% |
+| Phase 4: Group 11 测试 | ⏳ Pending | 0% |
+| Phase 5: Group 12 重构 | ⏳ Pending | 0% |
+| Phase 6: Group 12 测试 | ⏳ Pending | 0% |
+| Phase 7: 集成测试 | ⏳ Pending | 0% |
 
 **Overall Milestone Progress**: 0%
 
@@ -118,55 +160,72 @@
 
 ```mermaid
 graph TD
-    P1[Phase 1: Group 08 重构] --> P2[Phase 2: Group 08 测试]
-    P2 --> P3[Phase 3: Group 09 重构]
-    P3 --> P4[Phase 4: Group 09 测试]
-    P4 --> P5[Phase 5: 集成测试]
+    P1[Phase 1: Group 10 重构] --> P2[Phase 2: Group 10 测试]
+    P2 --> P3[Phase 3: Group 11 重构]
+    P3 --> P4[Phase 4: Group 11 测试]
+    P4 --> P5[Phase 5: Group 12 重构]
+    P5 --> P6[Phase 6: Group 12 测试]
+    P6 --> P7[Phase 7: 集成测试]
 ```
 
 ---
 
 ## Files Summary
 
-### Group 08 Files (10 files)
+### Group 10 Files (10 files)
 
 | File | Dependencies | Status |
 |------|--------------|--------|
-| `cmds/run.mojo` | 4 | ⏳ Pending |
-| `core/strategy_context.mojo` | 4 | ⏳ Pending |
-| `data/base_data_source/storage_interface.mojo` | 4 | ⏳ Pending |
-| `data/instruments_mixin.mojo` | 4 | ⏳ Pending |
-| `data/trading_dates_mixin.mojo` | 4 | ⏳ Pending |
-| `mod/__init__.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_accounts/component_validator.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_accounts/validator.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_analyser/mod.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_analyser/plot_store.mojo` | 4 | ⏳ Pending |
+| `interface.mojo` | 5 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_accounts/mod.mojo` | 5 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_accounts/position_validator.mojo` | 5 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_analyser/plot/plot.mojo` | 5 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_simulation/matcher.mojo` | 5 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_simulation/simulation_event_source.mojo` | 5 | ⏳ Pending |
+| `model/order.mojo` | 5 | ⏳ Pending |
+| `model/trade.mojo` | 5 | ⏳ Pending |
+| `utils/__init__.mojo` | 5 | ⏳ Pending |
+| `apis/__init__.mojo` | 6 | ⏳ Pending |
 
-### Group 09 Files (10 files)
+### Group 11 Files (10 files)
 
 | File | Dependencies | Status |
 |------|--------------|--------|
-| `mod/rqalpha_mod_sys_analyser/report/report.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_risk/validators/price_validator.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_scheduler/scheduler.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_simulation/mod.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_simulation/signal_broker.mojo` | 4 | ⏳ Pending |
-| `mod/rqalpha_mod_sys_simulation/testing.mojo` | 4 | ⏳ Pending |
-| `model/instrument.mojo` | 4 | ⏳ Pending |
-| `core/strategy.mojo` | 5 | ⏳ Pending |
-| `data/bundle.mojo` | 5 | ⏳ Pending |
+| `apis/api_abstract.mojo` | 6 | ⏳ Pending |
+| `cmds/__init__.mojo` | 6 | ⏳ Pending |
+| `environment.mojo` | 6 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_risk/validators/cash_validator.mojo` | 6 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_risk/validators/is_trading_validator.mojo` | 6 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_simulation/simulation_broker.mojo` | 6 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_accounts/api/order_target_portfolio.mojo` | 6 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_accounts/api/api_future.mojo` | 6 | ⏳ Pending |
+| `model/bar.mojo` | 6 | ⏳ Pending |
+| `data/base_data_source/storages.mojo` | 6 | ⏳ Pending |
+
+### Group 12 Files (10 files)
+
+| File | Dependencies | Status |
+|------|--------------|--------|
+| `mod/rqmojo_mod_sys_accounts/api/api_stock.mojo` | 7 | ⏳ Pending |
+| `apis/api_rqdatac.mojo` | 7 | ⏳ Pending |
+| `mod/rqmojo_mod_sys_accounts/position_model.mojo` | 8 | ⏳ Pending |
+| `data/data_proxy.mojo` | 8 | ⏳ Pending |
+| `portfolio/__init__.mojo` | 8 | ⏳ Pending |
+| `portfolio/position.mojo` | 8 | ⏳ Pending |
+| `portfolio/account.mojo` | 8 | ⏳ Pending |
+| `apis/api_base.mojo` | 9 | ⏳ Pending |
+| `utils/testing/fixtures.mojo` | 9 | ⏳ Pending |
+| `data/base_data_source/data_source.mojo` | 10 | ⏳ Pending |
 
 ---
 
 ## Next Milestone Preview
 
-### Milestone 4: 入口层重构 (Group 13)
+### Milestone 3: 入口层重构 (Group 13)
 
 **Files**:
 - `main.mojo` (15 dependencies)
 - `__init__.mojo` (20 dependencies)
 - `utils/testing/integration.mojo` (1 dependency)
 
-**Dependencies**: Milestone 3 完成
+**Dependencies**: Milestone 2 完成

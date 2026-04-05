@@ -11,6 +11,6 @@ from morrow import Morrow
 
 comptime DateTime = Morrow
 comptime DateTimeDate = Morrow
-comptime DateLike = Variant[Morrow, Int, String]
+comptime DateLike = Morrow
 comptime StrOrIter = Variant[String, List[String]]
 comptime POSITION_DIRECTION_TYPE = Variant[String, POSITION_DIRECTION]

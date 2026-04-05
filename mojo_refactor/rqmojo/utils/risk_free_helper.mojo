@@ -39,7 +39,7 @@ def get_yield_curve_duration() -> List[Int]:
 
 
 def get_tenor_for(start_date: DateTimeDate, end_date: DateTimeDate) raises -> String:
-    var duration = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
+    var duration = (end_date - start_date).days
     
     var tenors = get_yield_curve_tenors()
     var durations = get_yield_curve_duration()
@@ -54,7 +54,7 @@ def get_tenor_for(start_date: DateTimeDate, end_date: DateTimeDate) raises -> St
 
 
 def get_tenors_for(start_date: DateTimeDate, end_date: DateTimeDate) raises -> List[String]:
-    var duration = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
+    var duration = (end_date - start_date).days
     
     var tenors = get_yield_curve_tenors()
     var durations = get_yield_curve_duration()

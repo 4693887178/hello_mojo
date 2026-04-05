@@ -28,12 +28,10 @@ struct AccountProxy:
     var _total_cash: Float64
     var _total_value: Float64
     
-    def __init__(account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64) -> Self:
-        return Self {
-            _account_type: account_type,
-            _total_cash: cash,
-            _total_value: cash
-        }
+    def __init__(out self, account_type: DEFAULT_ACCOUNT_TYPE, cash: Float64):
+        self._account_type = account_type
+        self._total_cash = cash
+        self._total_value = cash
     
     def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         return self._account_type

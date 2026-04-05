@@ -41,47 +41,68 @@ struct RqValue(Copyable, Movable):
         self.dict_val = Dict[String, RqValue]()
         self.list_val = List[RqValue]()
 
+    def is_dict(self) -> Bool:
+        return self.kind == KIND_DICT
+
+    def is_list(self) -> Bool:
+        return self.kind == KIND_LIST
+
+    def is_string(self) -> Bool:
+        return self.kind == KIND_STRING
+
+    def is_int(self) -> Bool:
+        return self.kind == KIND_INT
+
+    def is_float(self) -> Bool:
+        return self.kind == KIND_FLOAT
+
+    def is_bool(self) -> Bool:
+        return self.kind == KIND_BOOL
+
+    def is_none(self) -> Bool:
+        return self.kind == KIND_NONE
+
 
 def make_int_value(val: Int64) -> RqValue:
     var result = RqValue()
     result.kind = KIND_INT
     result.int_val = val
-    return result
+    return result^
 
 
 def make_float_value(val: Float64) -> RqValue:
     var result = RqValue()
     result.kind = KIND_FLOAT
     result.float_val = val
-    return result
+    return result^
 
 
 def make_bool_value(val: Bool) -> RqValue:
     var result = RqValue()
     result.kind = KIND_BOOL
     result.bool_val = val
-    return result
+    return result^
 
 
 def make_string_value(val: String) -> RqValue:
     var result = RqValue()
     result.kind = KIND_STRING
     result.string_val = val
-    return result
+    return result^
 
 
 def make_dict_value(d: Dict[String, RqValue]) -> RqValue:
     var result = RqValue()
     result.kind = KIND_DICT
     result.dict_val = d.copy()
-    return result
+    return result^
 
 
 def make_list_value(l: List[RqValue]) -> RqValue:
     var result = RqValue()
     result.kind = KIND_LIST
     result.list_val = l.copy()
-    return result
+    return result^
 
 
 struct RqAttrDict(Copyable, Movable):

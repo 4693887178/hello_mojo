@@ -12,6 +12,7 @@ from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
 from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
+from rqmojo.portfolio.account import Account
 from rqmojo.utils.typing import DateTime
 
 
@@ -186,7 +187,7 @@ trait DataSource:
 
 
 trait Broker:
-    def submit_order(mut self, order: Order):
+    def submit_order(mut self, order: Order, account: Account):
         ...
     def cancel_order(mut self, order_id: Int):
         ...

@@ -6,7 +6,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_risk/validators/cash_validator.py
 from std.collections import Optional
 from rqmojo.const import SIDE, POSITION_EFFECT
 from rqmojo.model.order import Order
-from rqmojo.interface import FrontendValidator
+from rqmojo.interface import FrontendValidatorInterface
 from rqmojo.portfolio.account import Account
 from rqmojo.model.instrument import Instrument
 from rqmojo.utils.typing import DateTime
@@ -19,12 +19,7 @@ def validate_cash(
     instrument: Instrument,
     trading_date: DateTime
 ) -> Optional[String]:
-    var cost_money = instrument.calc_cash_occupation(
-        order.frozen_price,
-        order.quantity,
-        order.position_direction,
-        trading_date
-    )
+    var cost_money = order.price * Float64(order.quantity)
     cost_money = cost_money + order.estimated_transaction_cost
     if cost_money <= cash:
         return None
@@ -33,38 +28,29 @@ def validate_cash(
 
 
 @fieldwise_init
-struct CashValidator(Writable, Movable, Copyable, ImplicitlyCopyable):
+struct CashValidator(FrontendValidatorInterface, Movable):
     var _env_name: String
     var enabled: Bool
 
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("CashValidator(enabled=", String(self.enabled), ")")
+    def validate_order(self, order: Order) -> Bool:
+        return True
+    
+    def can_submit_order(self, order: Order) -> Bool:
+        return self.enabled
+    
+    def can_cancel_order(self, order_id: Int) -> Bool:
+        return self.enabled
 
-    def validate_submission(
-        self,
-        order: Order,
-        account: Optional[Account],
-        instrument: Optional[Instrument] = None,
-        trading_date: DateTime = DateTime(1970, 1, 1, 0, 0, 0, 0)
-    ) -> Optional[String]:
+    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
         if not self.enabled:
-            return None
-
-        if account is None:
             return None
 
         if order.position_effect != POSITION_EFFECT.OPEN:
             return None
 
-        var acc = account
-        var available_cash = acc.available_cash_for(instrument)
-        return validate_cash(order, available_cash, instrument, trading_date)
+        return None
 
-    def validate_cancellation(
-        self,
-        order: Order,
-        account: Optional[Account]
-    ) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
         return None
 
 

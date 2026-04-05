@@ -59,10 +59,11 @@ struct PositionModel(Movable):
         self.frozen_quantity += quantity
         return True
     
-    def unfreeze(mut self, quantity: Int) -> None:
-        if quantity > self.frozen_quantity:
-            quantity = self.frozen_quantity
-        self.frozen_quantity -= quantity
+    def unfreeze(mut self, qty: Int) -> None:
+        var actual_qty = qty
+        if qty > self.frozen_quantity:
+            actual_qty = self.frozen_quantity
+        self.frozen_quantity -= actual_qty
 
 
 def create_position_model(order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> PositionModel:

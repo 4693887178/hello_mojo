@@ -3,8 +3,8 @@ RQAlpha Mojo - Package Helper
 Ported from rqalpha/utils/package_helper.py
 """
 
-from python import Python, PythonObject
-from rqmojo.utils.rq_logger import system_log
+from std.python import Python, PythonObject
+from rqmojo.utils.logger import system_log
 
 
 def import_mod(mod_name: String) raises -> PythonObject:

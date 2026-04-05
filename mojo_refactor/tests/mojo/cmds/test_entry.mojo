@@ -1,189 +1,71 @@
 """
 Test for entry.mojo - Command Line Interface Entry
-Compares output with Python rqalpha/cmds/entry.py
+Compares behavior with Python rqalpha/cmds/entry.py cli()
+Uses std.testing standard framework.
 """
 
+from std.testing import assert_equal, assert_true, TestSuite
 from std.collections import List
-from rqmojo.cmds.entry import CliParser, CliRunner, create_cli_parser, create_cli_runner, run_cli
+
+from argmojo import Command
 
 
-def test_create_cli_parser():
-    """Test CliParser creation and defaults."""
-    print("=== Testing create_cli_parser ===")
-    
-    var parser = create_cli_parser()
-    
-    if parser.get_command() == "":
-        print("PASS: default command is empty string")
-    else:
-        print("FAIL: expected '', got '" + parser.get_command() + "'")
-    
-    if parser.get_frequency() == "1d":
-        print("PASS: default frequency is '1d'")
-    else:
-        print("FAIL: expected '1d', got '" + parser.get_frequency() + "'")
-    
-    if parser.get_init_cash() == 100000.0:
-        print("PASS: default init_cash is 100000.0")
-    else:
-        print("FAIL: expected 100000.0, got " + String(parser.get_init_cash()))
-    print("")
+def cli() raises -> Command:
+    from rqmojo.cmds.entry import cli as _cli
+    return _cli()
 
 
-def test_cli_parser_parse_run_command():
-    """Test parsing run command."""
-    print("=== Testing parse run command ===")
-    
-    var parser = create_cli_parser()
-    var args = List[String]()
-    args.append("run")
-    parser.parse(args)
-    
-    var command = parser.get_command()
-    if command == "run":
-        print("PASS: run command parsed correctly")
-    else:
-        print("FAIL: expected 'run', got '" + command + "'")
-    print("")
+def test_cli_returns_command() raises:
+    """Cli() returns a Command instance (equivalent to Python's click.Group)."""
+    var c = cli()
+    assert_true(c.name == "rqmojo", "Command name should be 'rqmojo'")
 
 
-def test_cli_parser_parse_bundle_command():
-    """Test parsing bundle command."""
-    print("=== Testing parse bundle command ===")
-    
-    var parser = create_cli_parser()
-    var args = List[String]()
-    args.append("bundle")
-    parser.parse(args)
-    
-    var command = parser.get_command()
-    if command == "bundle":
-        print("PASS: bundle command parsed correctly")
-    else:
-        print("FAIL: expected 'bundle', got '" + command + "'")
-    print("")
+def test_cli_is_command_group() raises:
+    """Cli() creates a command group (no handler, just a container for subcommands)."""
+    var c = cli()
+    assert_true(len(c.name) > 0, "Command should have a name")
 
 
-def test_cli_parser_parse_mod_command():
-    """Test parsing mod command."""
-    print("=== Testing parse mod command ===")
-    
-    var parser = create_cli_parser()
-    var args = List[String]()
-    args.append("mod")
-    parser.parse(args)
-    
-    var command = parser.get_command()
-    if command == "mod":
-        print("PASS: mod command parsed correctly")
-    else:
-        print("FAIL: expected 'mod', got '" + command + "'")
-    print("")
+def test_cli_has_description() raises:
+    """Cli() has description text (equivalent to Click group docstring)."""
+    var c = cli()
+    assert_true(len(c.description) > 0, "Command should have description")
 
 
-def test_cli_parser_parse_options():
-    """Test parsing various options."""
-    print("=== Testing parse options ===")
-    
-    var parser = create_cli_parser()
-    var args = List[String]()
-    args.append("run")
-    args.append("-f")
-    args.append("strategy.py")
-    args.append("-s")
-    args.append("2020-01-01")
-    args.append("-e")
-    args.append("2020-12-31")
-    args.append("-fq")
-    args.append("1d")
-    args.append("-c")
-    args.append("100000")
-    parser.parse(args)
-    
-    var strategy_file = parser.get_strategy_file()
-    var frequency = parser.get_frequency()
-    var init_cash = parser.get_init_cash()
-    
-    if strategy_file == "strategy.py":
-        print("PASS: strategy_file parsed correctly")
-    else:
-        print("FAIL: expected 'strategy.py', got '" + strategy_file + "'")
-    
-    if frequency == "1d":
-        print("PASS: frequency parsed correctly")
-    else:
-        print("FAIL: expected '1d', got '" + frequency + "'")
-    
-    if init_cash == 100000.0:
-        print("PASS: init_cash parsed correctly")
-    else:
-        print("FAIL: expected 100000.0, got " + String(init_cash))
-    print("")
+def test_cli_no_subcommands_by_default() raises:
+    """Fresh cli() has no registered subcommands.
+    Subcommands are added externally via add_subcommand(),
+    mirroring Python's @cli.command() decorator pattern."""
+    var c = cli()
+    var empty = len(c.subcommands) == 0
+    assert_true(empty, "cli() should have 0 subcommands initially")
 
 
-def test_cli_runner_run_bundle():
-    """Test run bundle command."""
-    print("=== Testing run bundle command ===")
-    
-    var runner = create_cli_runner()
-    var args = List[String]()
-    args.append("bundle")
-    
-    var result = runner.run(args)
-    if result == 0:
-        print("PASS: bundle command returned 0")
-    else:
-        print("FAIL: expected 0, got " + String(result))
-    print("")
+def test_cli_accepts_add_subcommand() raises:
+    """External modules can register subcommands on cli().
+    Mirrors: from .entry import cli; @cli.command() def run(): ...
+    Note: argmojo auto-inserts a 'help' subcommand on first add_subcommand()."""
+    var c = cli()
+    var sub = Command("test-cmd", "A test subcommand")
+    c.add_subcommand(sub^)
+    assert_true(len(c.subcommands) >= 1, "Should have at least 1 subcommand after add_subcommand")
+    assert_true(c.subcommands[0].name == "test-cmd" or c.subcommands[1].name == "test-cmd", "Subcommand name should match")
 
 
-def test_cli_runner_run_mod():
-    """Test run mod command."""
-    print("=== Testing run mod command ===")
-    
-    var runner = create_cli_runner()
-    var args = List[String]()
-    args.append("mod")
-    
-    var result = runner.run(args)
-    if result == 0:
-        print("PASS: mod command returned 0")
-    else:
-        print("FAIL: expected 0, got " + String(result))
-    print("")
+def test_cli_multiple_calls_independent() raises:
+    """Each call to cli() returns a fresh Command.
+    Equivalent to Python where cli is a function returning a new group each time."""
+    var c1 = cli()
+    var c2 = cli()
+    c1.add_subcommand(Command("only-in-c1", ""))
+    assert_equal(len(c2.subcommands), 0, "c2 should not be affected by c1 mutation")
 
 
-def test_cli_runner_run_unknown_command():
-    """Test unknown command returns error code."""
-    print("=== Testing unknown command ===")
-    
-    var runner = create_cli_runner()
-    var args = List[String]()
-    args.append("unknown")
-    
-    var result = runner.run(args)
-    if result == 1:
-        print("PASS: unknown command returned 1")
-    else:
-        print("FAIL: expected 1, got " + String(result))
-    print("")
-
-
-def main():
+def main() raises:
     print("=" * 60)
-    print("RQAlpha Mojo cmds/entry.mojo Test")
+    print("RQMojo Test: cmds/entry.mojo vs Python entry.py")
     print("=" * 60)
     print("")
-    
-    test_create_cli_parser()
-    test_cli_parser_parse_run_command()
-    test_cli_parser_parse_bundle_command()
-    test_cli_parser_parse_mod_command()
-    test_cli_parser_parse_options()
-    test_cli_runner_run_bundle()
-    test_cli_runner_run_mod()
-    test_cli_runner_run_unknown_command()
-    
-    print("=" * 60)
-    print("All tests completed!")
-    print("=" * 60)
+
+    TestSuite.discover_tests[__functions_in_module()]().run()

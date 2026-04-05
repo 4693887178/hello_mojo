@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "organization": "Community",
+  "date": "April 2026",
+  "abstract": "从 Claude Code 51.2 万行源码中提炼的生产级 AI Agent Harness 设计模式 — 记忆、权限、上下文工程、多 Agent 委派、技能运行时、Hook 生命周期、Bootstrap 序列。",
+  "references": [
+    "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+    "https://github.com/anthropics/claude-code"
+  ]
+}

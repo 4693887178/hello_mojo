@@ -1,0 +1,8 @@
+{
+  "initialized": "2026-03-31T21:46:51.712Z",
+  "status": "PENDING",
+  "cvesFixed": 0,
+  "totalCves": 3,
+  "lastScan": null,
+  "_note": "Run: npx @sparkleideas/cli@latest security scan"
+}

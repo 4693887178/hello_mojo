@@ -83,16 +83,16 @@ struct SimulationBroker(Movable):
             price=price
         )
         
-        return trade
+        return trade^
 
-    def match_all_orders(mut self, bars: Dict[String, BarObject]) -> List[Trade]:
+    def match_all_orders(mut self, bars: Dict[String, BarObject]) raises -> List[Trade]:
         var trades = List[Trade]()
         var remaining_orders = List[OrderAccountPair]()
         
         for i in range(len(self._open_orders)):
             var pair = self._open_orders[i]
             var order = pair.order
-            if bars.contains(order.order_book_id):
+            if order.order_book_id in bars:
                 var bar = bars[order.order_book_id]
                 var trade = self.match_order(order, bar)
                 trades.append(trade)

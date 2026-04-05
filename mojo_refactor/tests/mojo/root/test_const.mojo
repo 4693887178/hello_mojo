@@ -9,7 +9,7 @@ from rqmojo.const import (
     ORDER_TYPE, ALGO, ORDER_STATUS, SIDE, POSITION_EFFECT,
     POSITION_DIRECTION, EXC_TYPE, INSTRUMENT_TYPE, PERSIST_MODE,
     COMMISSION_TYPE, EXIT_CODE, HEDGE_TYPE, DAYS_CNT, EXCHANGE,
-    TRADING_CALENDAR_TYPE, MARKET, EnumRegistry
+    TRADING_CALENDAR_TYPE, MARKET
 )
 
 
@@ -436,108 +436,104 @@ def test_equality() raises:
     print("  Equality tests passed!")
 
 
-def test_enum_registry_get() raises:
-    print("Testing EnumRegistry.get()...")
-    
-    var registry = EnumRegistry()
-    
-    var phase_opt = registry.get[EXECUTION_PHASE]("GLOBAL")
+def test___getitem__() raises:
+    print("Testing from_string() by name...")
+
+    var phase_opt = EXECUTION_PHASE.__getitem__("GLOBAL")
     if phase_opt:
         var phase = phase_opt.value()
         assert_equal(phase.name, "GLOBAL")
         assert_equal(phase.value, "[全局]")
     else:
         raise Error("Failed to get EXECUTION_PHASE.GLOBAL")
-    
-    var run_type_opt = registry.get[RUN_TYPE]("BACKTEST")
+
+    var run_type_opt = RUN_TYPE.__getitem__("BACKTEST")
     if run_type_opt:
         var run_type = run_type_opt.value()
         assert_equal(run_type.name, "BACKTEST")
         assert_equal(run_type.value, "BACKTEST")
     else:
         raise Error("Failed to get RUN_TYPE.BACKTEST")
-    
-    var account_type_opt = registry.get[DEFAULT_ACCOUNT_TYPE]("STOCK")
+
+    var account_type_opt = DEFAULT_ACCOUNT_TYPE.__getitem__("STOCK")
     if account_type_opt:
         var account_type = account_type_opt.value()
         assert_equal(account_type.name, "STOCK")
         assert_equal(account_type.value, "STOCK")
     else:
         raise Error("Failed to get DEFAULT_ACCOUNT_TYPE.STOCK")
-    
-    var order_type_opt = registry.get[ORDER_TYPE]("MARKET")
+
+    var order_type_opt = ORDER_TYPE.__getitem__("MARKET")
     if order_type_opt:
         var order_type = order_type_opt.value()
         assert_equal(order_type.name, "MARKET")
         assert_equal(order_type.value, "MARKET")
     else:
         raise Error("Failed to get ORDER_TYPE.MARKET")
-    
-    var side_opt = registry.get[SIDE]("BUY")
+
+    var side_opt = SIDE.__getitem__("BUY")
     if side_opt:
         var side = side_opt.value()
         assert_equal(side.name, "BUY")
         assert_equal(side.value, "BUY")
     else:
         raise Error("Failed to get SIDE.BUY")
-    
-    var exchange_opt = registry.get[EXCHANGE]("XSHE")
+
+    var exchange_opt = EXCHANGE.__getitem__("XSHE")
     if exchange_opt:
         var exchange = exchange_opt.value()
         assert_equal(exchange.name, "XSHE")
         assert_equal(exchange.value, "XSHE")
     else:
         raise Error("Failed to get EXCHANGE.XSHE")
-    
-    var market_opt = registry.get[MARKET]("CN")
+
+    var market_opt = MARKET.__getitem__("CN")
     if market_opt:
         var market = market_opt.value()
         assert_equal(market.name, "CN")
         assert_equal(market.value, "CN")
     else:
         raise Error("Failed to get MARKET.CN")
-    
-    print("  EnumRegistry.get() tests passed!")
+
+    print("  from_string() by name tests passed!")
 
 
-def test_enum_registry_get_by_value() raises:
-    print("Testing EnumRegistry.get() by value...")
-    
-    var registry = EnumRegistry()
-    
-    var phase_opt = registry.get[EXECUTION_PHASE]("[全局]")
+def test___getitem___by_value() raises:
+    print("Testing from_string() by value...")
+
+    var phase_opt = EXECUTION_PHASE.__getitem__("[全局]")
     if phase_opt:
         var phase = phase_opt.value()
         assert_equal(phase.name, "GLOBAL")
         assert_equal(phase.value, "[全局]")
     else:
         raise Error("Failed to get EXECUTION_PHASE by value")
-    
-    var run_type_opt = registry.get[RUN_TYPE]("BACKTEST")
+
+    var run_type_opt = RUN_TYPE.__getitem__("BACKTEST")
     if run_type_opt:
         var run_type = run_type_opt.value()
         assert_equal(run_type.name, "BACKTEST")
         assert_equal(run_type.value, "BACKTEST")
     else:
         raise Error("Failed to get RUN_TYPE by value")
-    
-    var hedge_type_opt = registry.get[HEDGE_TYPE]("hedge")
+
+    var hedge_type_opt = HEDGE_TYPE.__getitem__("hedge")
     if hedge_type_opt:
         var hedge_type = hedge_type_opt.value()
         assert_equal(hedge_type.name, "HEDGE")
         assert_equal(hedge_type.value, "hedge")
     else:
         raise Error("Failed to get HEDGE_TYPE by value")
-    
-    var instrument_opt = registry.get[INSTRUMENT_TYPE]("Future")
+
+    var instrument_opt = INSTRUMENT_TYPE.__getitem__("Future")
     if instrument_opt:
         var instrument = instrument_opt.value()
         assert_equal(instrument.name, "FUTURE")
         assert_equal(instrument.value, "Future")
     else:
         raise Error("Failed to get INSTRUMENT_TYPE by value")
-    
-    print("  EnumRegistry.get() by value tests passed!")
+
+    print("  from_string() by value tests passed!")
 
 
 def test_writable() raises:
@@ -554,18 +550,16 @@ def test_writable() raises:
     print("  Writable trait tests passed!")
 
 
-def test_enum_registry_not_found() raises:
-    print("Testing EnumRegistry not found cases...")
-    
-    var registry = EnumRegistry()
-    
-    var not_found1 = registry.get[EXECUTION_PHASE]("NOT_EXIST")
+def test___getitem___not_found() raises:
+    print("Testing from_string() not found cases...")
+
+    var not_found1 = EXECUTION_PHASE.__getitem__("NOT_EXIST")
     assert_true(not_found1 == None)
-    
-    var not_found2 = registry.get[RUN_TYPE]("NOT_EXIST")
+
+    var not_found2 = RUN_TYPE.__getitem__("NOT_EXIST")
     assert_true(not_found2 == None)
-    
-    print("  EnumRegistry not found tests passed!")
+
+    print("  from_string() not found tests passed!")
 
 
 def main() raises:
@@ -573,7 +567,7 @@ def main() raises:
     print("RQMojo const.mojo Test Suite")
     print("=" * 60)
     print()
-    
+
     test_execution_phase()
     test_run_type()
     test_default_account_type()
@@ -595,11 +589,11 @@ def main() raises:
     test_trading_calendar_type()
     test_market()
     test_equality()
-    test_enum_registry_get()
-    test_enum_registry_get_by_value()
+    test___getitem__()
+    test___getitem___by_value()
     test_writable()
-    test_enum_registry_not_found()
-    
+    test___getitem___not_found()
+
     print()
     print("=" * 60)
     print("All tests passed!")
