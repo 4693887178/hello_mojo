@@ -13,6 +13,7 @@ from std.os.path import exists as path_exists
 from std.pathlib import Path, cwd
 
 from argmojo import Command, Argument, ParseResult
+from rqmojo.utils.i18n import gettext as `__`
 
 
 def _copy_file(src_path: String, dst_path: String) raises -> None:
@@ -162,7 +163,7 @@ def create_examples_command() raises -> Command:
     Replaces: @cli.command(help=...) / @click.option('-d','--directory',...)
     """
     var cmd = Command(
-        "examples", "Generate example strategies to target folder"
+        "examples", `__`("Generate example strategies to target folder")
     )
     cmd.add_argument(
         Argument("directory", help="Target directory path")
@@ -179,7 +180,7 @@ def create_version_command() raises -> Command:
 
     Replaces: @cli.command(help=...) / @click.option('-v','--version', is_flag=True)
     """
-    var cmd = Command("version", "Output Version Info")
+    var cmd = Command("version", `__`("Output Version Info"))
     cmd.add_argument(
         Argument("version_flag", help="Show version info")
         .long["version"]()
@@ -195,7 +196,7 @@ def create_generate_config_command() raises -> Command:
     Replaces: @cli.command(help=...) / @click.option('-d','--directory',...)
     """
     var cmd = Command(
-        "generate_config", "Generate default config file"
+        "generate_config", `__`("Generate default config file")
     )
     cmd.add_argument(
         Argument("directory", help="Target directory path")

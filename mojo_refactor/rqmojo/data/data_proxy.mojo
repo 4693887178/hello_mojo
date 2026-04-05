@@ -8,7 +8,7 @@ from rqmojo.model.instrument import Instrument, create_stock_instrument, create_
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.tick import TickObject, create_tick_object
 from rqmojo.utils.typing import DateTime, DateTimeDate
-from rqmojo.utils.datetime_func import TimeRange
+from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018, create_trading_dates_mixin_with_november_2024, create_trading_dates_mixin_with_multiple_months
 
 
@@ -519,8 +519,8 @@ def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
         for j in range(i + 1, len(sorted_list)):
             var ti = sorted_list[i]
             var tj = sorted_list[j]
-            var cmp_i = ti.start_hour * 60 + ti.start_minute
-            var cmp_j = tj.start_hour * 60 + tj.start_minute
+            var cmp_i = ti.start.hour * 60 + ti.start.minute
+            var cmp_j = tj.start.hour * 60 + tj.start.minute
             if cmp_i > cmp_j:
                 sorted_list[i] = tj
                 sorted_list[j] = ti
@@ -530,15 +530,13 @@ def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
         
         if len(result) > 0:
             var last = result[len(result) - 1]
-            var last_end = last.end_hour * 60 + last.end_minute
-            var current_start = time_range.start_hour * 60 + time_range.start_minute
-            var current_end = time_range.end_hour * 60 + time_range.end_minute
-            
+            var last_end = last.end.hour * 60 + last.end.minute
+            var current_start = time_range.start.hour * 60 + time_range.start.minute
+            var current_end = time_range.end.hour * 60 + time_range.end.minute
+
             if last_end >= current_start:
                 var new_end = max(last_end, current_end)
-                var new_end_hour = new_end // 60
-                var new_end_minute = new_end % 60
-                result[len(result) - 1] = TimeRange(last.start_hour, last.start_minute, new_end_hour, new_end_minute)
+                result[len(result) - 1] = TimeRange(last.start, TimeOfDay(new_end // 60, new_end % 60))
             else:
                 result.append(time_range)
         else:

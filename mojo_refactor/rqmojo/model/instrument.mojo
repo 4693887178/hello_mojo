@@ -5,7 +5,7 @@ Ported from rqalpha/model/instrument.py
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET, POSITION_DIRECTION
 from rqmojo.utils.typing import DateTime
-from rqmojo.utils.datetime_func import TimeRange
+from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
 
 
 def is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
@@ -157,35 +157,35 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         var obid = self.order_book_id_val
         
         if obid.startswith("RB"):
-            result.append(TimeRange(21, 1, 23, 0))
-            result.append(TimeRange(9, 1, 10, 15))
-            result.append(TimeRange(10, 31, 11, 30))
-            result.append(TimeRange(13, 31, 15, 0))
+            result.append(TimeRange(TimeOfDay(21, 1), TimeOfDay(23, 0)))
+            result.append(TimeRange(TimeOfDay(9, 1), TimeOfDay(10, 15)))
+            result.append(TimeRange(TimeOfDay(10, 31), TimeOfDay(11, 30)))
+            result.append(TimeRange(TimeOfDay(13, 31), TimeOfDay(15, 0)))
         elif obid.startswith("AG"):
-            result.append(TimeRange(21, 1, 23, 59))
-            result.append(TimeRange(0, 0, 2, 30))
-            result.append(TimeRange(9, 1, 11, 30))
-            result.append(TimeRange(13, 31, 15, 15))
+            result.append(TimeRange(TimeOfDay(21, 1), TimeOfDay(23, 59)))
+            result.append(TimeRange(TimeOfDay(0, 0), TimeOfDay(2, 30)))
+            result.append(TimeRange(TimeOfDay(9, 1), TimeOfDay(11, 30)))
+            result.append(TimeRange(TimeOfDay(13, 31), TimeOfDay(15, 15)))
         elif obid.startswith("TF") or obid.startswith("T"):
-            result.append(TimeRange(9, 15, 11, 30))
-            result.append(TimeRange(13, 0, 15, 15))
+            result.append(TimeRange(TimeOfDay(9, 15), TimeOfDay(11, 30)))
+            result.append(TimeRange(TimeOfDay(13, 0), TimeOfDay(15, 15)))
         else:
-            result.append(TimeRange(9, 31, 11, 30))
-            result.append(TimeRange(13, 1, 15, 0))
+            result.append(TimeRange(TimeOfDay(9, 31), TimeOfDay(11, 30)))
+            result.append(TimeRange(TimeOfDay(13, 1), TimeOfDay(15, 0)))
         
         return result^
     
     def _stock_trading_period(self) -> List[TimeRange]:
         var result = List[TimeRange]()
-        result.append(TimeRange(9, 31, 11, 30))
-        result.append(TimeRange(13, 1, 15, 0))
+        result.append(TimeRange(TimeOfDay(9, 31), TimeOfDay(11, 30)))
+        result.append(TimeRange(TimeOfDay(13, 1), TimeOfDay(15, 0)))
         return result^
     
     def trade_at_night(self) -> Bool:
         var hours = self.trading_hours()
         for i in range(len(hours)):
             var r = hours[i]
-            if r.start_hour <= 4 or r.end_hour >= 19:
+            if r.start.hour <= 4 or r.end.hour >= 19:
                 return True
         return False
 

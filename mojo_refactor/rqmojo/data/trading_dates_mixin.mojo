@@ -4,7 +4,11 @@ Ported from rqalpha/data/trading_dates_mixin.py
 """
 
 from rqmojo.const import TRADING_CALENDAR_TYPE
-from rqmojo.utils.typing import DateTimeDate, DateLike
+from rqmojo.utils.typing import DateTimeDate
+from std.utils import Variant
+
+
+comptime DateLike = Variant[DateTimeDate, Int]
 
 
 def _to_timestamp(d: DateLike) -> DateTimeDate:

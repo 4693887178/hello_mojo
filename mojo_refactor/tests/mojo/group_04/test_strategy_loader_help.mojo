@@ -1,93 +1,62 @@
 """
 第四组测试 - utils/strategy_loader_help.mojo
-测试Mojo版本的策略加载辅助模块
+与Python原版 strategy_loader_help.py 严格对齐
 """
 
-from rqmojo.utils.strategy_loader_help import (
-    compile_strategy,
-    compile_strategy_safe,
-    load_strategy_from_code,
-    validate_strategy_functions,
-    extract_strategy_functions,
-)
-from python import Python
+from rqmojo.utils.strategy_loader_help import compile_strategy
+from std.python import Python, PythonObject
 
-
-from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
-
-def test_compile_strategy_exists() raises:
-    assert_true(True, "compile_strategy exists")
+from std.testing import assert_equal, assert_true, assert_raises, TestSuite
 
 
 def test_compile_strategy_basic() raises:
-    var py = Python()
-    var scope = py.dict()
-    var builtins = py.import_module("builtins")
-    scope["__builtins__"] = builtins
-    
-    try:
-        var result = compile_strategy("x = 1 + 1", "test_strategy", scope)
-        assert_true(True, "compile_strategy works")
-    except:
-        assert_true(True, "compile_strategy handled")
+    var scope = Python.dict()
+    scope["__builtins__"] = Python.import_module("builtins")
+
+    var result = compile_strategy("x = 1 + 1", "test_strategy", scope)
+    assert_equal(Int(py=result.__getitem__("x")), 2)
 
 
 def test_compile_strategy_with_function() raises:
-    var py = Python()
-    var scope = py.dict()
-    var builtins = py.import_module("builtins")
-    scope["__builtins__"] = builtins
-    
-    var code = "def my_func():\n    return 42"
-    
-    try:
-        var result = compile_strategy(code, "test_strategy", scope)
-        assert_true(True, "compile_strategy with function works")
-    except:
-        assert_true(True, "compile_strategy with function handled")
+    var scope = Python.dict()
+    scope["__builtins__"] = Python.import_module("builtins")
+
+    var result = compile_strategy(
+        "def my_func():\n    return 42",
+        "test_strategy",
+        scope,
+    )
+    var ret = result.__getitem__("my_func")()
+    assert_equal(Int(py=ret), 42)
 
 
-def test_compile_strategy_safe_exists() raises:
-    var py = Python()
-    var scope = py.dict()
-    var builtins = py.import_module("builtins")
-    scope["__builtins__"] = builtins
-    
-    try:
-        var result = compile_strategy_safe("x = 1", "test", scope)
-        assert_true(True, "compile_strategy_safe works")
-    except:
-        assert_true(True, "compile_strategy_safe handled")
+def test_compile_strategy_with_class() raises:
+    var scope = Python.dict()
+    scope["__builtins__"] = Python.import_module("builtins")
+
+    var result = compile_strategy(
+        "class MyClass:\n    def __init__(self):\n        self.value = 100",
+        "test_strategy",
+        scope,
+    )
+    var obj = result.__getitem__("MyClass")()
+    assert_equal(Int(py=obj.value), 100)
 
 
-def test_load_strategy_from_code_exists() raises:
-    try:
-        var result = load_strategy_from_code("x = 1", "test")
-        assert_true(True, "load_strategy_from_code works")
-    except:
-        assert_true(True, "load_strategy_from_code handled")
+def test_compile_strategy_syntax_error() raises:
+    var scope = Python.dict()
+    scope["__builtins__"] = Python.import_module("builtins")
+
+    with assert_raises():
+        _ = compile_strategy("def broken(", "test_strategy", scope)
 
 
-def test_validate_strategy_functions_exists() raises:
-    var py = Python()
-    var scope = py.dict()
-    
-    try:
-        var result = validate_strategy_functions(scope)
-        assert_true(True, "validate_strategy_functions works")
-    except:
-        assert_true(True, "validate_strategy_functions handled")
+def test_compile_strategy_with_import() raises:
+    var scope = Python.dict()
+    scope["__builtins__"] = Python.import_module("builtins")
 
-
-def test_extract_strategy_functions_exists() raises:
-    var py = Python()
-    var scope = py.dict()
-    
-    try:
-        var result = extract_strategy_functions(scope)
-        assert_true(True, "extract_strategy_functions works")
-    except:
-        assert_true(True, "extract_strategy_functions handled")
+    var result = compile_strategy("import os", "test_strategy", scope)
+    assert_true(result.__contains__("os"))
 
 
 def main() raises:

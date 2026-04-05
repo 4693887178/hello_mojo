@@ -11,7 +11,7 @@ from rqmojo.const import (
     EXECUTION_PHASE, POSITION_DIRECTION, DAYS_CNT
 )
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
-from rqmojo.core.events import EventBus, EVENT, Event, EventListener
+from rqmojo.core.events import EventBus, EVENT, Event
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
 from rqmojo.utils.config import RQAlphaConfig
@@ -700,7 +700,7 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _calendar_dt=config.base.start_date,
         _trading_dt=config.base.start_date,
         _is_initialized=False,
-        _event_bus=EventBus(listeners=Dict[String, List[EventListener]](), user_listeners=Dict[String, List[EventListener]]()),
+        _event_bus=EventBus(),
         _listener_count=0,
         _data_source_name="default",
         _broker_name="simulation",

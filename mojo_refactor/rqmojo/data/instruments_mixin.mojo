@@ -6,7 +6,7 @@ Ported from rqalpha/data/instruments_mixin.py
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.utils.typing import DateTime, DateTimeDate
-from rqmojo.utils.datetime_func import TimeRange
+from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
 
 
 @fieldwise_init
@@ -31,18 +31,18 @@ struct InstrumentsMixin(Movable):
         for i in range(len(order_book_ids)):
             var order_book_id = order_book_ids[i]
             if order_book_id == "RB1912":
-                result.append(TimeRange(21, 1, 23, 0))
-                result.append(TimeRange(9, 1, 10, 15))
-                result.append(TimeRange(10, 31, 11, 30))
-                result.append(TimeRange(13, 31, 15, 0))
+                result.append(TimeRange(TimeOfDay(21, 1), TimeOfDay(23, 0)))
+                result.append(TimeRange(TimeOfDay(9, 1), TimeOfDay(10, 15)))
+                result.append(TimeRange(TimeOfDay(10, 31), TimeOfDay(11, 30)))
+                result.append(TimeRange(TimeOfDay(13, 31), TimeOfDay(15, 0)))
             elif order_book_id == "AG1912":
-                result.append(TimeRange(21, 1, 23, 59))
-                result.append(TimeRange(0, 0, 2, 30))
-                result.append(TimeRange(9, 1, 11, 30))
-                result.append(TimeRange(13, 31, 15, 0))
+                result.append(TimeRange(TimeOfDay(21, 1), TimeOfDay(23, 59)))
+                result.append(TimeRange(TimeOfDay(0, 0), TimeOfDay(2, 30)))
+                result.append(TimeRange(TimeOfDay(9, 1), TimeOfDay(11, 30)))
+                result.append(TimeRange(TimeOfDay(13, 31), TimeOfDay(15, 0)))
             elif order_book_id == "TF1912":
-                result.append(TimeRange(9, 31, 11, 30))
-                result.append(TimeRange(13, 1, 15, 15))
+                result.append(TimeRange(TimeOfDay(9, 31), TimeOfDay(11, 30)))
+                result.append(TimeRange(TimeOfDay(13, 1), TimeOfDay(15, 15)))
         return result^
     
     def is_night_trading(self, order_book_ids: List[String]) -> Bool:

@@ -4,7 +4,7 @@ Ported from rqalpha/utils/rq_json.py
 Uses Python simplejson module
 """
 
-from python import Python, PythonObject
+from std.python import Python, PythonObject
 from std.collections import List
 
 

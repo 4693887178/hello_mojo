@@ -82,7 +82,7 @@ struct RQAlphaLogger(Copyable, Movable, ImplicitlyCopyable, Writable):
 
     def critical(self, message: String):
         var logger = Logger(prefix=self._prefix)
-        logger.critical(message)
+        logger.error("[CRITICAL] " + message)
 
     def exception(self, message: String):
         self.error(message)

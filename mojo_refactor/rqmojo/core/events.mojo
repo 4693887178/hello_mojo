@@ -2,14 +2,17 @@
 RQAlpha Mojo - Event System
 Ported from rqalpha/core/events.py
 
-EventListener 使用 PythonObject 的原因:
-  Mojo 所有集合类型要求元素 Copyable，而捕获非 Copyable 引用的闭包
-  是 escaping 且非 ImplicitlyDestructible，无法存入集合。
-  PythonObject 天然是 ImplicitlyCopyable，作为桥接类型。
+Pure Mojo implementation using ArcPointer for shared-state listeners.
+No Python interop required for event dispatch.
+
+Architecture:
+  EventListener = ArcPointer[ListenerBase]
+  ListenerBase is a Copyable tagged-union wrapper around concrete handlers.
+  Each handler uses ArcPointer to capture shared state by reference.
 """
 
-from std.collections import Dict, List
-from std.python import Python, PythonObject
+from std.collections import Dict, List, Optional
+from std.memory import ArcPointer
 from std.reflection import get_base_type_name
 from std.utils.variant import Variant
 
@@ -45,25 +48,114 @@ struct Event(Writable, Movable):
         else:
             return ""
 
-    def to_python_object(self) raises -> PythonObject:
-        var py_dict: PythonObject = {}
-        py_dict["event_type"] = self.event_type
-        for key in self.attributes:
-            var key_str = String(key)
-            var value = self.attributes.get(key_str, EventValue(""))
-            if value.isa[String]():
-                py_dict[key_str] = value[String]
-            elif value.isa[Int]():
-                py_dict[key_str] = value[Int]
-            elif value.isa[Float64]():
-                py_dict[key_str] = value[Float64]
-            elif value.isa[Bool]():
-                py_dict[key_str] = value[Bool]
-        return py_dict
+
+# ============================================================
+# Listener Type System — ArcPointer-based type erasure
+# ============================================================
+
+struct PersistHandlerState(Movable):
+    var persist_called: ArcPointer[Int]
+
+    def __init__(out self, counter: ArcPointer[Int]):
+        self.persist_called = counter
+
+    def should_persist(self, event_type: String) -> Bool:
+        return (event_type == "post_before_trading"
+            or event_type == "post_after_trading"
+            or event_type == "post_bar"
+            or event_type == "do_persist"
+            or event_type == "post_settlement")
+
+    def on_event(mut self, event: Event) -> Bool:
+        if self.should_persist(event.event_type):
+            self.persist_called[] += 1
+        return False
 
 
-comptime EventListener = PythonObject
+struct ModHandlerState(Movable):
+    var mod_name: String
+    var call_count: ArcPointer[Int]
 
+    def __init__(out self, mod_name: String, counter: ArcPointer[Int]):
+        self.mod_name = mod_name
+        self.call_count = counter
+
+    def on_event(mut self, event: Event) -> Bool:
+        self.call_count[] += 1
+        return False
+
+
+struct GenericHandlerFn(Movable):
+    var _name: String
+    var _call_count: ArcPointer[Int]
+
+    def __init__(out self, name: String, counter: ArcPointer[Int]):
+        self._name = name
+        self._call_count = counter
+
+    def on_event(mut self, event: Event) -> Bool:
+        self._call_count[] += 1
+        return False
+
+
+comptime TAG_PERSIST = 0
+comptime TAG_MOD = 1
+comptime TAG_GENERIC = 2
+
+comptime EventListener = ArcPointer[ListenerBase]
+
+struct ListenerBase(Movable, Copyable):
+    """Type-erased event listener wrapper. Copyable via ArcPointer indirection."""
+    var _tag: Int
+    var _persist: ArcPointer[PersistHandlerState]
+    var _mod: ArcPointer[ModHandlerState]
+    var _generic: ArcPointer[GenericHandlerFn]
+
+    def __init__(out self):
+        self._tag = TAG_GENERIC
+        self._persist = ArcPointer(PersistHandlerState(ArcPointer[Int](0)))
+        self._mod = ArcPointer(ModHandlerState("", ArcPointer[Int](0)))
+        self._generic = ArcPointer(GenericHandlerFn("empty", ArcPointer[Int](0)))
+
+    def __init__(out self, *, copy: Self):
+        self._tag = copy._tag
+        self._persist = copy._persist.copy()
+        self._mod = copy._mod.copy()
+        self._generic = copy._generic.copy()
+
+    def dispatch(mut self, event: Event) -> Bool:
+        if self._tag == TAG_PERSIST:
+            return self._persist[].on_event(event)
+        elif self._tag == TAG_MOD:
+            return self._mod[].on_event(event)
+        else:
+            return self._generic[].on_event(event)
+
+
+def create_persist_listener(counter: ArcPointer[Int]) -> EventListener:
+    var base = ListenerBase()
+    base._tag = TAG_PERSIST
+    base._persist = ArcPointer(PersistHandlerState(counter))
+    return ArcPointer(base^)
+
+
+def create_mod_listener(mod_name: String, counter: ArcPointer[Int]) -> EventListener:
+    var base = ListenerBase()
+    base._tag = TAG_MOD
+    base._mod = ArcPointer(ModHandlerState(mod_name, counter))
+    return ArcPointer(base^)
+
+
+def create_generic_listener(name: String, counter: ArcPointer[Int]) -> EventListener:
+    var base = ListenerBase()
+    base._tag = TAG_GENERIC
+    base._generic = ArcPointer(GenericHandlerFn(name, counter))
+    return ArcPointer(base^)
+
+
+# ============================================================
+# EventBus
+# ============================================================
 
 struct EventBus(Movable):
     var listeners: Dict[String, List[EventListener]]
@@ -78,17 +170,35 @@ struct EventBus(Movable):
             self.listeners[event_type] = List[EventListener]()
             self.listeners[event_type].append(listener)
 
+    def prepend_listener(mut self, event_type: String, listener: EventListener) raises:
+        try:
+            var lst = self.listeners[event_type].copy()
+            var new_list = List[EventListener]()
+            new_list.append(listener)
+            for item in lst:
+                new_list.append(item)
+            self.listeners[event_type] = new_list^
+        except:
+            self.listeners[event_type] = List[EventListener]()
+            self.listeners[event_type].append(listener)
+
     def publish_event(mut self, event: Event) raises -> Bool:
         try:
-            var py_event = event.to_python_object()
             for listener in self.listeners[event.event_type]:
-                var result = listener(py_event)
-                if Bool(py=result):
+                if listener[].dispatch(event):
                     return True
         except:
             pass
         return False
 
+
+def create_event_bus() -> EventBus:
+    return EventBus()
+
+
+# ============================================================
+# EVENT enum
+# ============================================================
 
 @fieldwise_init
 struct EVENT(Equatable, ImplicitlyCopyable, Hashable, Writable):

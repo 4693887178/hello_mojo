@@ -1,11 +1,18 @@
 """
 RQAlpha Mojo - Class Helper
 Ported from rqalpha/utils/class_helper.py
+
+Key Design Decisions vs Python:
+  1. gettext as _: Matches Python convention (line 18 of original: `from rqalpha.utils.i18n import gettext as _`)
+  2. @deprecated decorator: Mojo 0.26.2 built-in, used for compile-time API deprecation warnings
+  3. deprecated_property(): Runtime property-level deprecation with i18n + attribute redirection
+     (different purpose from @deprecated - one is compile-time, the other is runtime)
+  4. cached_property: Struct-based (Mojo lacks Python descriptor protocol __get__)
 """
 
 from std.collections import List, Dict
 from rqmojo.utils.logger import user_system_log
-from rqmojo.utils.i18n import gettext
+from rqmojo.utils.i18n import gettext as _
 
 
 comptime __all__: List[String] = [
@@ -14,14 +21,30 @@ comptime __all__: List[String] = [
     "CachedProperty",
     "property_repr",
     "make_cached_property",
+    "DeprecatedPropertyInfo",
 ]
 
 
-def deprecated_property(property_name: String, instead_property_name: String) raises -> String:
+@fieldwise_init
+struct DeprecatedPropertyInfo(Movable, Copyable):
+    var old_name: String
+    var new_name: String
+
+    def get_old_name(self) -> String:
+        return self.old_name
+
+    def get_new_name(self) -> String:
+        return self.new_name
+
+
+def deprecated_property(property_name: String, instead_property_name: String) raises -> DeprecatedPropertyInfo:
     if property_name == instead_property_name:
-        raise Error(gettext("property_name and instead_property_name must be different"))
-    user_system_log().warn(gettext("\"") + property_name + gettext("\" is deprecated, please use \"") + instead_property_name + gettext("\" instead, check the document for more information"))
-    return instead_property_name
+        raise Error(_("property_name and instead_property_name must be different"))
+    user_system_log().warn(
+        _("\"") + property_name + _("\" is deprecated, please use \"")
+        + instead_property_name + _("\" instead, check the document for more information")
+    )
+    return DeprecatedPropertyInfo(property_name, instead_property_name)
 
 
 @fieldwise_init

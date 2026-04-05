@@ -2,16 +2,17 @@
 RQAlpha Mojo - Persistence Provider and Helper
 Ported from rqalpha/utils/persisit_helper.py
 
-EventListener 使用 PythonObject 的原因:
-  Mojo 的所有集合类型（List/DynamicVector/InlineArray）都要求元素是 Copyable，
-  而捕获了非 Copyable 引用的闭包是 escaping 且非 ImplicitlyDestructible，
-  无法存入集合。PythonObject 天然是 ImplicitlyCopyable，可作为桥接类型。
+Pure Mojo implementation using ArcPointer-based event listeners.
+No Python interop required for event registration.
 """
 
 from std.collections import Dict, List
-from std.python import Python, PythonObject
+from std.memory import ArcPointer
 from rqmojo.const import PERSIST_MODE
-from rqmojo.core.events import EVENT, EventBus, Event, EventValue, EventListener
+from rqmojo.core.events import (
+    EVENT, EventBus, Event, EventValue, EventListener,
+    create_persist_listener
+)
 from rqmojo.utils.logger import system_log
 
 
@@ -124,6 +125,7 @@ struct PersistHelper(Movable):
     var _persist_mode: PERSIST_MODE
     var _listeners_registered: Bool
     var _helper_id: Int
+    var _persist_count: ArcPointer[Int]
 
     def __init__(
         out self,
@@ -137,6 +139,7 @@ struct PersistHelper(Movable):
         self._persist_mode = persist_mode
         self._listeners_registered = False
         self._helper_id = 0
+        self._persist_count = ArcPointer[Int](0)
         self._register_event_listeners()
 
     def __str__(self) -> String:
@@ -153,33 +156,7 @@ struct PersistHelper(Movable):
         if self._listeners_registered:
             return
         if self._persist_mode == PERSIST_MODE.REAL_TIME:
-            var py_registry_code = (
-                "_persist_actions = {}\n"
-                "_persist_counter = [0]\n"
-                "\n"
-                "def register_persist_action(action_type):\n"
-                "    cid = _persist_counter[0]\n"
-                "    _persist_counter[0] += 1\n"
-                "    key = '__ph_' + str(cid)\n"
-                "    _persist_actions[key] = action_type\n"
-                "    return key\n"
-                "\n"
-                "def make_listener(action_key):\n"
-                "    action = _persist_actions.get(action_key)\n"
-                "    def on_event(event):\n"
-                "        return False\n"
-                "    return on_event\n"
-            )
-            var py_mod = Python.evaluate(py_registry_code, file=True)
-
-            var register_fn: PythonObject = py_mod.register_persist_action
-            var make_listener_fn: PythonObject = py_mod.make_listener
-
-            var persist_key = register_fn("persist")
-            var restore_key = register_fn("restore")
-
-            var persist_listener = make_listener_fn(persist_key)
-            var restore_listener = make_listener_fn(restore_key)
+            var persist_listener = create_persist_listener(self._persist_count)
 
             var persist_events = [
                 EVENT.POST_BEFORE_TRADING.value,
@@ -191,7 +168,6 @@ struct PersistHelper(Movable):
             for event_type in persist_events:
                 self._event_bus.add_listener(event_type, persist_listener)
 
-            self._event_bus.add_listener(EVENT.DO_RESTORE.value, restore_listener)
             self._listeners_registered = True
 
     def on_event(mut self, event: Event) -> Bool:
