@@ -1,9 +1,16 @@
 """
 RQAlpha Mojo - Event System
 Ported from rqalpha/core/events.py
+
+EventListener 使用 PythonObject 的原因:
+  Mojo 所有集合类型要求元素 Copyable，而捕获非 Copyable 引用的闭包
+  是 escaping 且非 ImplicitlyDestructible，无法存入集合。
+  PythonObject 天然是 ImplicitlyCopyable，作为桥接类型。
 """
 
 from std.collections import Dict, List
+from std.python import Python, PythonObject
+from std.reflection import get_base_type_name
 from std.utils.variant import Variant
 
 
@@ -11,21 +18,19 @@ comptime EventValue = Variant[String, Int, Float64, Bool]
 
 
 @fieldwise_init
-struct Event(Stringable, Movable):
+struct Event(Writable, Movable):
     var event_type: String
     var attributes: Dict[String, EventValue]
 
     def __init__(event_type: String) -> Self:
         return Self(event_type, Dict[String, EventValue]())
 
-    def __str__(self) -> String:
-        var parts = List[String]()
-        parts.append("event_type:" + self.event_type)
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("event_type:", self.event_type)
         for key in self.attributes:
             var key_str = String(key)
             var value = self.attributes.get(key_str, EventValue(""))
-            parts.append(key_str + ":" + Self._variant_to_string(value))
-        return " ".join(parts)
+            writer.write(" ", key_str, ":", Self._variant_to_string(value))
 
     @staticmethod
     def _variant_to_string(mut value: EventValue) -> String:
@@ -40,306 +45,140 @@ struct Event(Stringable, Movable):
         else:
             return ""
 
+    def to_python_object(self) raises -> PythonObject:
+        var py_dict: PythonObject = {}
+        py_dict["event_type"] = self.event_type
+        for key in self.attributes:
+            var key_str = String(key)
+            var value = self.attributes.get(key_str, EventValue(""))
+            if value.isa[String]():
+                py_dict[key_str] = value[String]
+            elif value.isa[Int]():
+                py_dict[key_str] = value[Int]
+            elif value.isa[Float64]():
+                py_dict[key_str] = value[Float64]
+            elif value.isa[Bool]():
+                py_dict[key_str] = value[Bool]
+        return py_dict
 
-comptime EventListener = def(Event) -> Bool
+
+comptime EventListener = PythonObject
 
 
-@fieldwise_init
 struct EventBus(Movable):
     var listeners: Dict[String, List[EventListener]]
-    var user_listeners: Dict[String, List[EventListener]]
-    
+
     def __init__(out self):
         self.listeners = Dict[String, List[EventListener]]()
-        self.user_listeners = Dict[String, List[EventListener]]()
 
-    def add_listener(mut self, event_type: String, listener: EventListener, user: Bool = False) raises -> None:
-        if user:
-            try:
-                self.user_listeners[event_type].append(listener)
-            except:
-                self.user_listeners[event_type] = List[EventListener]()
-                self.user_listeners[event_type].append(listener)
-        else:
-            try:
-                self.listeners[event_type].append(listener)
-            except:
-                self.listeners[event_type] = List[EventListener]()
-                self.listeners[event_type].append(listener)
-
-    def prepend_listener(mut self, event_type: String, listener: EventListener, user: Bool = False) raises -> None:
-        if user:
-            try:
-                var new_vec = List[EventListener]()
-                new_vec.append(listener)
-                for entry in self.user_listeners[event_type]:
-                    new_vec.append(entry)
-                self.user_listeners[event_type] = new_vec^
-            except:
-                self.user_listeners[event_type] = List[EventListener]()
-                self.user_listeners[event_type].append(listener)
-        else:
-            try:
-                var new_vec = List[EventListener]()
-                new_vec.append(listener)
-                for entry in self.listeners[event_type]:
-                    new_vec.append(entry)
-                self.listeners[event_type] = new_vec^
-            except:
-                self.listeners[event_type] = List[EventListener]()
-                self.listeners[event_type].append(listener)
-
-    def publish_event(mut self, event: Event) -> Bool:
+    def add_listener(mut self, event_type: String, listener: EventListener) raises:
         try:
+            self.listeners[event_type].append(listener)
+        except:
+            self.listeners[event_type] = List[EventListener]()
+            self.listeners[event_type].append(listener)
+
+    def publish_event(mut self, event: Event) raises -> Bool:
+        try:
+            var py_event = event.to_python_object()
             for listener in self.listeners[event.event_type]:
-                if listener(event):
+                var result = listener(py_event)
+                if Bool(py=result):
                     return True
         except:
             pass
-
-        try:
-            for listener in self.user_listeners[event.event_type]:
-                _ = listener(event)
-        except:
-            pass
-
         return False
 
 
 @fieldwise_init
-struct EVENT(Writable, Copyable, Movable, Equatable, ImplicitlyCopyable):
+struct EVENT(Equatable, ImplicitlyCopyable, Hashable, Writable):
     var name: String
     var value: String
 
+    comptime POST_SYSTEM_INIT = EVENT("POST_SYSTEM_INIT", "post_system_init")
+    comptime BEFORE_SYSTEM_RESTORED = EVENT("BEFORE_SYSTEM_RESTORED", "before_system_restored")
+    comptime POST_SYSTEM_RESTORED = EVENT("POST_SYSTEM_RESTORED", "post_system_restored")
+    comptime POST_USER_INIT = EVENT("POST_USER_INIT", "post_user_init")
+    comptime POST_UNIVERSE_CHANGED = EVENT("POST_UNIVERSE_CHANGED", "post_universe_changed")
+    comptime PRE_BEFORE_TRADING = EVENT("PRE_BEFORE_TRADING", "pre_before_trading")
+    comptime BEFORE_TRADING = EVENT("BEFORE_TRADING", "before_trading")
+    comptime POST_BEFORE_TRADING = EVENT("POST_BEFORE_TRADING", "post_before_trading")
+    comptime PRE_OPEN_AUCTION = EVENT("PRE_OPEN_AUCTION", "pre_open_auction")
+    comptime OPEN_AUCTION = EVENT("OPEN_AUCTION", "open_auction")
+    comptime POST_OPEN_AUCTION = EVENT("POST_OPEN_AUCTION", "post_open_auction")
+    comptime PRE_BAR = EVENT("PRE_BAR", "pre_bar")
+    comptime BAR = EVENT("BAR", "bar")
+    comptime POST_BAR = EVENT("POST_BAR", "post_bar")
+    comptime PRE_TICK = EVENT("PRE_TICK", "pre_tick")
+    comptime TICK = EVENT("TICK", "tick")
+    comptime POST_TICK = EVENT("POST_TICK", "post_tick")
+    comptime PRE_SCHEDULED = EVENT("PRE_SCHEDULED", "pre_scheduled")
+    comptime POST_SCHEDULED = EVENT("POST_SCHEDULED", "post_scheduled")
+    comptime PRE_AFTER_TRADING = EVENT("PRE_AFTER_TRADING", "pre_after_trading")
+    comptime AFTER_TRADING = EVENT("AFTER_TRADING", "after_trading")
+    comptime POST_AFTER_TRADING = EVENT("POST_AFTER_TRADING", "post_after_trading")
+    comptime PRE_SETTLEMENT = EVENT("PRE_SETTLEMENT", "pre_settlement")
+    comptime SETTLEMENT = EVENT("SETTLEMENT", "settlement")
+    comptime POST_SETTLEMENT = EVENT("POST_SETTLEMENT", "post_settlement")
+    comptime ORDER_PENDING_NEW = EVENT("ORDER_PENDING_NEW", "order_pending_new")
+    comptime ORDER_CREATION_PASS = EVENT("ORDER_CREATION_PASS", "order_creation_pass")
+    comptime ORDER_CREATION_REJECT = EVENT("ORDER_CREATION_REJECT", "order_pending_new")
+    comptime ORDER_PENDING_CANCEL = EVENT("ORDER_PENDING_CANCEL", "order_pending_cancel")
+    comptime ORDER_CANCELLATION_PASS = EVENT("ORDER_CANCELLATION_PASS", "order_cancellation_pass")
+    comptime ORDER_CANCELLATION_REJECT = EVENT("ORDER_CANCELLATION_REJECT", "order_order_UNSOLICITED_UPDATE")
+    comptime ORDER_UNSOLICITED_UPDATE = EVENT("ORDER_UNSOLICITED_UPDATE", "order_unsolicited_update")
+    comptime TRADE = EVENT("TRADE", "trade")
+    comptime ON_LINE_PROFILER_RESULT = EVENT("ON_LINE_PROFILER_RESULT", "on_line_profiler_result")
+    comptime DO_PERSIST = EVENT("DO_PERSIST", "do_persist")
+    comptime DO_RESTORE = EVENT("DO_RESTORE", "do_restore")
+    comptime STRATEGY_HOLD_SET = EVENT("STRATEGY_HOLD_SET", "strategy_hold_set")
+    comptime STRATEGY_HOLD_CANCELLED = EVENT("STRATEGY_HOLD_CANCELLED", "strategy_hold_canceled")
+    comptime HEARTBEAT = EVENT("HEARTBEAT", "heartbeat")
+    comptime BEFORE_STRATEGY_RUN = EVENT("BEFORE_STRATEGY_RUN", "before_strategy_run")
+    comptime POST_STRATEGY_RUN = EVENT("POST_STRATEGY_RUN", "post_strategy_run")
+    comptime USER = EVENT("USER", "user")
+
     def write_to(self, mut writer: Some[Writer]):
-        writer.write(self.value)
+        t"{get_base_type_name[Self]()}.{self.name}".write_to(writer)
 
     @staticmethod
-    def POST_SYSTEM_INIT() -> EVENT:
-        return EVENT("POST_SYSTEM_INIT", "post_system_init")
+    def __getitem__(s: String) -> Optional[EVENT]:
+        for m in Self.members():
+            if m.name == s or m.value == s:
+                return m.copy()
+        return None
 
     @staticmethod
-    def BEFORE_SYSTEM_RESTORED() -> EVENT:
-        return EVENT("BEFORE_SYSTEM_RESTORED", "before_system_restored")
+    def contains(s: String) -> Bool:
+        return Self.__getitem__(s) != None
 
     @staticmethod
-    def POST_SYSTEM_RESTORED() -> EVENT:
-        return EVENT("POST_SYSTEM_RESTORED", "post_system_restored")
-
-    @staticmethod
-    def POST_USER_INIT() -> EVENT:
-        return EVENT("POST_USER_INIT", "post_user_init")
-
-    @staticmethod
-    def POST_UNIVERSE_CHANGED() -> EVENT:
-        return EVENT("POST_UNIVERSE_CHANGED", "post_universe_changed")
-
-    @staticmethod
-    def PRE_BEFORE_TRADING() -> EVENT:
-        return EVENT("PRE_BEFORE_TRADING", "pre_before_trading")
-
-    @staticmethod
-    def BEFORE_TRADING() -> EVENT:
-        return EVENT("BEFORE_TRADING", "before_trading")
-
-    @staticmethod
-    def POST_BEFORE_TRADING() -> EVENT:
-        return EVENT("POST_BEFORE_TRADING", "post_before_trading")
-
-    @staticmethod
-    def PRE_OPEN_AUCTION() -> EVENT:
-        return EVENT("PRE_OPEN_AUCTION", "pre_open_auction")
-
-    @staticmethod
-    def OPEN_AUCTION() -> EVENT:
-        return EVENT("OPEN_AUCTION", "open_auction")
-
-    @staticmethod
-    def POST_OPEN_AUCTION() -> EVENT:
-        return EVENT("POST_OPEN_AUCTION", "post_open_auction")
-
-    @staticmethod
-    def PRE_BAR() -> EVENT:
-        return EVENT("PRE_BAR", "pre_bar")
-
-    @staticmethod
-    def BAR() -> EVENT:
-        return EVENT("BAR", "bar")
-
-    @staticmethod
-    def POST_BAR() -> EVENT:
-        return EVENT("POST_BAR", "post_bar")
-
-    @staticmethod
-    def PRE_TICK() -> EVENT:
-        return EVENT("PRE_TICK", "pre_tick")
-
-    @staticmethod
-    def TICK() -> EVENT:
-        return EVENT("TICK", "tick")
-
-    @staticmethod
-    def POST_TICK() -> EVENT:
-        return EVENT("POST_TICK", "post_tick")
-
-    @staticmethod
-    def PRE_SCHEDULED() -> EVENT:
-        return EVENT("PRE_SCHEDULED", "pre_scheduled")
-
-    @staticmethod
-    def POST_SCHEDULED() -> EVENT:
-        return EVENT("POST_SCHEDULED", "post_scheduled")
-
-    @staticmethod
-    def PRE_AFTER_TRADING() -> EVENT:
-        return EVENT("PRE_AFTER_TRADING", "pre_after_trading")
-
-    @staticmethod
-    def AFTER_TRADING() -> EVENT:
-        return EVENT("AFTER_TRADING", "after_trading")
-
-    @staticmethod
-    def POST_AFTER_TRADING() -> EVENT:
-        return EVENT("POST_AFTER_TRADING", "post_after_trading")
-
-    @staticmethod
-    def PRE_SETTLEMENT() -> EVENT:
-        return EVENT("PRE_SETTLEMENT", "pre_settlement")
-
-    @staticmethod
-    def SETTLEMENT() -> EVENT:
-        return EVENT("SETTLEMENT", "settlement")
-
-    @staticmethod
-    def POST_SETTLEMENT() -> EVENT:
-        return EVENT("POST_SETTLEMENT", "post_settlement")
-
-    @staticmethod
-    def ORDER_PENDING_NEW() -> EVENT:
-        return EVENT("ORDER_PENDING_NEW", "order_pending_new")
-
-    @staticmethod
-    def ORDER_CREATION_PASS() -> EVENT:
-        return EVENT("ORDER_CREATION_PASS", "order_creation_pass")
-
-    @staticmethod
-    def ORDER_CREATION_REJECT() -> EVENT:
-        return EVENT("ORDER_CREATION_REJECT", "order_creation_reject")
-
-    @staticmethod
-    def ORDER_PENDING_CANCEL() -> EVENT:
-        return EVENT("ORDER_PENDING_CANCEL", "order_pending_cancel")
-
-    @staticmethod
-    def ORDER_CANCELLATION_PASS() -> EVENT:
-        return EVENT("ORDER_CANCELLATION_PASS", "order_cancellation_pass")
-
-    @staticmethod
-    def ORDER_CANCELLATION_REJECT() -> EVENT:
-        return EVENT("ORDER_CANCELLATION_REJECT", "order_cancellation_reject")
-
-    @staticmethod
-    def ORDER_UNSOLICITED_UPDATE() -> EVENT:
-        return EVENT("ORDER_UNSOLICITED_UPDATE", "order_unsolicited_update")
-
-    @staticmethod
-    def TRADE() -> EVENT:
-        return EVENT("TRADE", "trade")
-
-    @staticmethod
-    def ON_LINE_PROFILER_RESULT() -> EVENT:
-        return EVENT("ON_LINE_PROFILER_RESULT", "on_line_profiler_result")
-
-    @staticmethod
-    def DO_PERSIST() -> EVENT:
-        return EVENT("DO_PERSIST", "do_persist")
-
-    @staticmethod
-    def DO_RESTORE() -> EVENT:
-        return EVENT("DO_RESTORE", "do_restore")
-
-    @staticmethod
-    def STRATEGY_HOLD_SET() -> EVENT:
-        return EVENT("STRATEGY_HOLD_SET", "strategy_hold_set")
-
-    @staticmethod
-    def STRATEGY_HOLD_CANCELLED() -> EVENT:
-        return EVENT("STRATEGY_HOLD_CANCELLED", "strategy_hold_canceled")
-
-    @staticmethod
-    def HEARTBEAT() -> EVENT:
-        return EVENT("HEARTBEAT", "heartbeat")
-
-    @staticmethod
-    def BEFORE_STRATEGY_RUN() -> EVENT:
-        return EVENT("BEFORE_STRATEGY_RUN", "before_strategy_run")
-
-    @staticmethod
-    def POST_STRATEGY_RUN() -> EVENT:
-        return EVENT("POST_STRATEGY_RUN", "post_strategy_run")
-
-    @staticmethod
-    def USER() -> EVENT:
-        return EVENT("USER", "user")
-
-
-def _get_event_map() -> Dict[String, EVENT]:
-    var m = Dict[String, EVENT]()
-    m["POST_SYSTEM_INIT"] = EVENT.POST_SYSTEM_INIT()
-    m["BEFORE_SYSTEM_RESTORED"] = EVENT.BEFORE_SYSTEM_RESTORED()
-    m["POST_SYSTEM_RESTORED"] = EVENT.POST_SYSTEM_RESTORED()
-    m["POST_USER_INIT"] = EVENT.POST_USER_INIT()
-    m["POST_UNIVERSE_CHANGED"] = EVENT.POST_UNIVERSE_CHANGED()
-    m["PRE_BEFORE_TRADING"] = EVENT.PRE_BEFORE_TRADING()
-    m["BEFORE_TRADING"] = EVENT.BEFORE_TRADING()
-    m["POST_BEFORE_TRADING"] = EVENT.POST_BEFORE_TRADING()
-    m["PRE_OPEN_AUCTION"] = EVENT.PRE_OPEN_AUCTION()
-    m["OPEN_AUCTION"] = EVENT.OPEN_AUCTION()
-    m["POST_OPEN_AUCTION"] = EVENT.POST_OPEN_AUCTION()
-    m["PRE_BAR"] = EVENT.PRE_BAR()
-    m["BAR"] = EVENT.BAR()
-    m["POST_BAR"] = EVENT.POST_BAR()
-    m["PRE_TICK"] = EVENT.PRE_TICK()
-    m["TICK"] = EVENT.TICK()
-    m["POST_TICK"] = EVENT.POST_TICK()
-    m["PRE_SCHEDULED"] = EVENT.PRE_SCHEDULED()
-    m["POST_SCHEDULED"] = EVENT.POST_SCHEDULED()
-    m["PRE_AFTER_TRADING"] = EVENT.PRE_AFTER_TRADING()
-    m["AFTER_TRADING"] = EVENT.AFTER_TRADING()
-    m["POST_AFTER_TRADING"] = EVENT.POST_AFTER_TRADING()
-    m["PRE_SETTLEMENT"] = EVENT.PRE_SETTLEMENT()
-    m["SETTLEMENT"] = EVENT.SETTLEMENT()
-    m["POST_SETTLEMENT"] = EVENT.POST_SETTLEMENT()
-    m["ORDER_PENDING_NEW"] = EVENT.ORDER_PENDING_NEW()
-    m["ORDER_CREATION_PASS"] = EVENT.ORDER_CREATION_PASS()
-    m["ORDER_CREATION_REJECT"] = EVENT.ORDER_CREATION_REJECT()
-    m["ORDER_PENDING_CANCEL"] = EVENT.ORDER_PENDING_CANCEL()
-    m["ORDER_CANCELLATION_PASS"] = EVENT.ORDER_CANCELLATION_PASS()
-    m["ORDER_CANCELLATION_REJECT"] = EVENT.ORDER_CANCELLATION_REJECT()
-    m["ORDER_UNSOLICITED_UPDATE"] = EVENT.ORDER_UNSOLICITED_UPDATE()
-    m["TRADE"] = EVENT.TRADE()
-    m["ON_LINE_PROFILER_RESULT"] = EVENT.ON_LINE_PROFILER_RESULT()
-    m["DO_PERSIST"] = EVENT.DO_PERSIST()
-    m["DO_RESTORE"] = EVENT.DO_RESTORE()
-    m["STRATEGY_HOLD_SET"] = EVENT.STRATEGY_HOLD_SET()
-    m["STRATEGY_HOLD_CANCELLED"] = EVENT.STRATEGY_HOLD_CANCELLED()
-    m["HEARTBEAT"] = EVENT.HEARTBEAT()
-    m["BEFORE_STRATEGY_RUN"] = EVENT.BEFORE_STRATEGY_RUN()
-    m["POST_STRATEGY_RUN"] = EVENT.POST_STRATEGY_RUN()
-    m["USER"] = EVENT.USER()
-    return m^
+    def members() -> List[EVENT]:
+        return [Self.POST_SYSTEM_INIT, Self.BEFORE_SYSTEM_RESTORED,
+                Self.POST_SYSTEM_RESTORED, Self.POST_USER_INIT,
+                Self.POST_UNIVERSE_CHANGED, Self.PRE_BEFORE_TRADING,
+                Self.BEFORE_TRADING, Self.POST_BEFORE_TRADING,
+                Self.PRE_OPEN_AUCTION, Self.OPEN_AUCTION,
+                Self.POST_OPEN_AUCTION, Self.PRE_BAR, Self.BAR,
+                Self.POST_BAR, Self.PRE_TICK, Self.TICK,
+                Self.POST_TICK, Self.PRE_SCHEDULED, Self.POST_SCHEDULED,
+                Self.PRE_AFTER_TRADING, Self.AFTER_TRADING,
+                Self.POST_AFTER_TRADING, Self.PRE_SETTLEMENT,
+                Self.SETTLEMENT, Self.POST_SETTLEMENT,
+                Self.ORDER_PENDING_NEW, Self.ORDER_CREATION_PASS,
+                Self.ORDER_CREATION_REJECT, Self.ORDER_PENDING_CANCEL,
+                Self.ORDER_CANCELLATION_PASS, Self.ORDER_CANCELLATION_REJECT,
+                Self.ORDER_UNSOLICITED_UPDATE, Self.TRADE,
+                Self.ON_LINE_PROFILER_RESULT, Self.DO_PERSIST,
+                Self.DO_RESTORE, Self.STRATEGY_HOLD_SET,
+                Self.STRATEGY_HOLD_CANCELLED, Self.HEARTBEAT,
+                Self.BEFORE_STRATEGY_RUN, Self.POST_STRATEGY_RUN,
+                Self.USER]
 
 
 def parse_event(event_str: String) raises -> EVENT:
     var upper_str = event_str.upper()
-    var event_map = _get_event_map()
-    if event_map.__contains__(upper_str):
-        return event_map[upper_str]
+    var result = EVENT.__getitem__(upper_str)
+    if result != None:
+        return result.value()
     raise Error("Unknown event type: " + event_str)
-
-
-def create_event_bus() -> EventBus:
-    return EventBus(
-        listeners=Dict[String, List[EventListener]](),
-        user_listeners=Dict[String, List[EventListener]]()
-    )
