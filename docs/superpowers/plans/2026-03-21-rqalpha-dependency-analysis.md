@@ -61,7 +61,7 @@
 | -- | ------------------------------------- | ----- | ---- | ----------------------------------------------- | --------------- |
 | 1  | `apis/names.py`                       | ✅ 已完成 | 1    | `rqalpha.const`                                 | 2026-04-06 0046 |
 | 2  | `cmds/misc.py`                        | ✅ 已完成 | 1    | `rqalpha.utils.i18n`                            | <br />          |
-| 3  | `core/global_var.py`                  | ✅ 已完成 | 1    | `rqalpha.utils.logger`                          | <br />          |
+| 3  | `core/global_var.py`                  | ✅ 已完成 | 1    | `rqalpha.utils.logger`                          | 2026-04-06 0138 |
 | 4  | `data/__init__.py`                    | ✅ 已完成 | 1    | 内部相对导入                                          | <br />          |
 | 5  | `model/__init__.py`                   | ✅ 已完成 | 1    | 内部相对导入                                          | <br />          |
 | 6  | `utils/i18n.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.translations`                    | <br />          |

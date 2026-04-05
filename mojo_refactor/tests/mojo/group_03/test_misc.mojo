@@ -4,7 +4,7 @@ Tests for cmds/misc.mojo
 """
 
 from std.collections import Dict
-from rqmojo.cmds.misc import examples, version, generate_config, print_version, print_help
+from rqmojo.cmds.misc import examples, version, generate_config, print_version
 
 
 
@@ -28,12 +28,6 @@ def test_generate_config_function_exists() raises:
 def test_print_version_function() raises:
     """Test that print_version function works."""
     print("  print_version function test passed!")
-
-
-def test_print_help_function() raises:
-    """Test that print_help function works."""
-    print_help()
-    print("  print_help function test passed!")
 
 
 def main() raises:

@@ -32,23 +32,7 @@ struct Config(Copyable, Movable, ImplicitlyCopyable):
     var base__run_type: RUN_TYPE
     var account_count: Int
     var is_hold: Bool
-
-
-@fieldwise_init
-struct GlobalVars(Writable, Movable, ImplicitlyCopyable):
-    var data_string: String
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("GlobalVars(", self.data_string, ")")
-
-    def get(self, key: String, default: String = "") -> String:
-        return default
-
-    def set(mut self, key: String, value: String) -> None:
-        pass
-
-    def contains(self, key: String) -> Bool:
-        return False
+from rqmojo.core.global_var import GlobalVars, create_global_vars
 
 
 @fieldwise_init
@@ -723,7 +707,7 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _portfolio_total_value=config.base.initial_cash,
         _portfolio_cash=config.base.initial_cash,
         _is_hold=False,
-        global_vars=GlobalVars(data_string=""),
+        global_vars=create_global_vars(),
         persist_provider=PersistProvider(name=""),
         persist_helper=PersistHelper(name=""),
         _frontend_validators=Dict[String, List[FrontendValidator]](),
@@ -761,7 +745,7 @@ def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_T
         _portfolio_total_value=100000.0,
         _portfolio_cash=100000.0,
         _is_hold=False,
-        global_vars=GlobalVars(data_string=""),
+        global_vars=create_global_vars(),
         persist_provider=PersistProvider(name=""),
         persist_helper=PersistHelper(name=""),
         _frontend_validators=Dict[String, List[FrontendValidator]](),

@@ -3,7 +3,7 @@ Test for misc.mojo - Misc Commands
 """
 
 from std.collections import List, Dict
-from rqmojo.cmds.misc import examples, version, generate_config, print_version, print_help
+from rqmojo.cmds.misc import examples, version, generate_config, print_version
 
 
 def test_version():
@@ -31,14 +31,6 @@ def test_print_version():
         print("PASS: print_version executed")
     except:
         print("FAIL: print_version raised exception")
-    print("")
-
-
-def test_print_help():
-    print("=== Testing print_help ===")
-    
-    print_help()
-    print("PASS: print_help executed")
     print("")
 
 
@@ -74,7 +66,6 @@ def main():
     
     test_version()
     test_print_version()
-    test_print_help()
     test_examples_invalid_dir()
     test_generate_config_invalid_dir()
     

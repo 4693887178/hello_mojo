@@ -27,7 +27,6 @@ def get_valid_history_fields() -> List[String]:
     result.append("prev_settlement")
     return result^
 
-
 def get_valid_tenors() -> List[String]:
     var result = List[String]()
     result.append("0S")
@@ -53,30 +52,6 @@ def get_valid_tenors() -> List[String]:
     result.append("50Y")
     return result^
 
-
-def get_valid_margin_fields() -> List[String]:
-    var result = List[String]()
-    result.append("margin_balance")
-    result.append("buy_on_margin_value")
-    result.append("short_sell_quantity")
-    result.append("margin_repayment")
-    result.append("short_balance_quantity")
-    result.append("short_repayment_quantity")
-    result.append("short_balance")
-    result.append("total_balance")
-    return result^
-
-
-def get_valid_share_fields() -> List[String]:
-    var result = List[String]()
-    result.append("total")
-    result.append("circulation_a")
-    result.append("management_circulation")
-    result.append("non_circulation_a")
-    result.append("total_a")
-    return result^
-
-
 def get_valid_instrument_types() -> List[String]:
     var result = List[String]()
     result.append(INSTRUMENT_TYPE.CS.value)
@@ -96,7 +71,27 @@ def get_valid_instrument_types() -> List[String]:
     result.append("Fund")
     result.append("Stock")
     return result^
+    
+def get_valid_margin_fields() -> List[String]:
+    var result = List[String]()
+    result.append("margin_balance")
+    result.append("buy_on_margin_value")
+    result.append("short_sell_quantity")
+    result.append("margin_repayment")
+    result.append("short_balance_quantity")
+    result.append("short_repayment_quantity")
+    result.append("short_balance")
+    result.append("total_balance")
+    return result^
 
+def get_valid_share_fields() -> List[String]:
+    var result = List[String]()
+    result.append("total")
+    result.append("circulation_a")
+    result.append("management_circulation")
+    result.append("non_circulation_a")
+    result.append("total_a")
+    return result^
 
 def get_valid_turnover_fields() -> List[String]:
     var result = List[String]()
@@ -110,13 +105,11 @@ def get_valid_turnover_fields() -> List[String]:
     result.append("total")
     return result^
 
-
 def get_valid_stock_connect_fields() -> List[String]:
     var result = List[String]()
     result.append("shares_holding")
     result.append("holding_ratio")
     return result^
-
 
 def get_valid_current_performance_fields() -> List[String]:
     var result = List[String]()
@@ -162,5 +155,3 @@ def get_valid_current_performance_fields() -> List[String]:
     return result^
 
 
-def main():
-    print("names.mojo - API names module loaded successfully")
