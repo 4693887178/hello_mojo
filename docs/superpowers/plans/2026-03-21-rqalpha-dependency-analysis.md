@@ -65,7 +65,7 @@
 | 4  | `data/__init__.py`                    | ✅ 已完成 | 1    | 内部相对导入                                          | 2026-04-06 01:50 |
 | 5  | `model/__init__.py`                   | ✅ 已完成 | 1    | 内部相对导入                                          | 2026-04-06 01:54 |
 | 6  | `utils/i18n.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.translations`                    | <br />           |
-| 7  | `data/base_data_source/deprecated.py` | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument`     | <br />           |
+| 7  | `data/base_data_source/deprecated.py` | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument`     | 2026-04-06 03:40 |
 | 8  | `utils/config.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.logger`    | <br />           |
 | 9  | `utils/datetime_func.py`              | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.exception` | <br />           |
 | 10 | `utils/exception.py`                  | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`           | <br />           |

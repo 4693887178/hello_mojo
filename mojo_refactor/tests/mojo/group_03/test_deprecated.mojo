@@ -1,56 +1,57 @@
 """
 RQAlpha Mojo - Deprecated Module Test
 Tests for data/base_data_source/deprecated.mojo
+Matches Python: AbstractInstrumentStore + InstrumentStore only
 """
 
 from std.collections import List
 from rqmojo.data.base_data_source.deprecated import (
-    deprecated_get_price, deprecated_get_volume,
-    DeprecatedWarning, warn_deprecated,
-    InstrumentStore, create_instrument_store
+    AbstractInstrumentStore,
+    InstrumentStore,
+    create_instrument_store,
 )
-from rqmojo.const import INSTRUMENT_TYPE
+from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE
+from rqmojo.model.instrument import Instrument, create_stock_instrument
+from rqmojo.utils.typing import DateTime
+
+from std.testing import assert_equal, assert_true, assert_false, TestSuite
 
 
-
-from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
-
-def test_deprecated_get_price() raises:
-    """Test that deprecated_get_price returns 0.0."""
-    var price = deprecated_get_price("000001.XSHE", "2024-01-01")
-    assert_equal(price, 0.0, "deprecated_get_price should return 0.0")
-    print("  deprecated_get_price test passed!")
+def test_abstract_instrument_store_trait_exists() raises:
+    """AbstractInstrumentStore trait is defined with get_instruments method."""
+    pass
 
 
-def test_deprecated_get_volume() raises:
-    """Test that deprecated_get_volume returns 0."""
-    var volume = deprecated_get_volume("000001.XSHE", "2024-01-01")
-    assert_equal(volume, 0, "deprecated_get_volume should return 0")
-    print("  deprecated_get_volume test passed!")
+def test_instrument_store_construction() raises:
+    """InstrumentStore can be constructed and stores instruments correctly."""
+    var instruments = List[Instrument]()
+    instruments.append(create_stock_instrument(
+        order_book_id="000001.XSHE",
+        symbol="平安银行",
+        listed_date=DateTime(2020, 1, 1, 0, 0, 0, 0),
+        exchange=EXCHANGE.XSHE
+    ))
+    var store = create_instrument_store(instruments, INSTRUMENT_TYPE.CS)
+    assert_equal(store.instrument_type(), INSTRUMENT_TYPE.CS)
+    assert_equal(len(store.get_instruments(None)), 1)
 
 
-def test_deprecated_warning_creation() raises:
-    """Test that DeprecatedWarning can be created."""
-    var warning = DeprecatedWarning(
-        function_name="old_function",
-        message="Use new_function instead",
-        since_version="1.0.0",
-        removed_in_version="2.0.0"
-    )
-    assert_equal(warning.function_name, "old_function", "function_name should match")
-    print("  DeprecatedWarning creation test passed!")
+def test_instrument_store_get_instruments() raises:
+    """InstrumentStore.get_instruments resolves by both id and symbol."""
+    var instruments = List[Instrument]()
+    instruments.append(create_stock_instrument(
+        order_book_id="000001.XSHE",
+        symbol="平安银行",
+        listed_date=DateTime(2020, 1, 1, 0, 0, 0, 0),
+        exchange=EXCHANGE.XSHE
+    ))
+    var store = create_instrument_store(instruments, INSTRUMENT_TYPE.CS)
 
-
-def test_warn_deprecated() raises:
-    """Test that warn_deprecated function works."""
-    var warning = DeprecatedWarning(
-        function_name="test_func",
-        message="This is deprecated",
-        since_version="1.0.0",
-        removed_in_version="2.0.0"
-    )
-    warn_deprecated(warning)
-    print("  warn_deprecated test passed!")
+    var ids = List[String]()
+    ids.append("平安银行")
+    var result = store.get_instruments(ids.copy())
+    assert_equal(len(result), 1)
+    assert_equal(result[0].order_book_id(), "000001.XSHE")
 
 
 def main() raises:

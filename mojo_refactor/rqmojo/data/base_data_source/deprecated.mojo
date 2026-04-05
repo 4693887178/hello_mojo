@@ -8,28 +8,8 @@ from rqmojo.const import INSTRUMENT_TYPE
 from rqmojo.model.instrument import Instrument
 
 
-def deprecated_get_price(order_book_id: String, dt: String) -> Float64:
-    return 0.0
-
-
-def deprecated_get_volume(order_book_id: String, dt: String) -> Int:
-    return 0
-
-
-@fieldwise_init
-struct DeprecatedWarning(Movable):
-    var function_name: String
-    var message: String
-    var since_version: String
-    var removed_in_version: String
-
-
-def warn_deprecated(warning: DeprecatedWarning) -> None:
-    print("DeprecationWarning: " + warning.function_name + " is deprecated since version " + warning.since_version + ". " + warning.message)
-
-
 trait AbstractInstrumentStore:
-    def get_instruments(self, id_or_syms: Optional[List[String]]) -> List[Instrument]
+    def get_instruments(self, id_or_syms: Optional[List[String]]) raises -> List[Instrument]
 
 
 @fieldwise_init
@@ -43,8 +23,7 @@ struct InstrumentStore(Movable):
         self._instruments = Dict[String, Instrument]()
         self._sym_id_map = Dict[String, String]()
         
-        for i in range(len(instruments)):
-            var ins = instruments[i]
+        for ins in instruments:
             if ins.type() != instrument_type:
                 continue
             self._instruments[ins.order_book_id()] = ins
@@ -61,23 +40,22 @@ struct InstrumentStore(Movable):
             result.append(key)
         return result^
 
-    def get_instruments(self, id_or_syms: Optional[List[String]]) -> List[Instrument]:
-        if id_or_syms.is_none():
+    def get_instruments(self, id_or_syms: Optional[List[String]]) raises -> List[Instrument]:
+        if id_or_syms == None:
             var result = List[Instrument]()
             for value in self._instruments.values():
                 result.append(value)
             return result^
-        
-        var ids = id_or_syms.value()
+
+        var ids = id_or_syms.value().copy()
         var order_book_ids = Set[String]()
-        
-        for i in range(len(ids)):
-            var id_or_sym = ids[i]
-            if self._instruments.contains(id_or_sym):
+
+        for id_or_sym in ids:
+            if id_or_sym in self._instruments:
                 order_book_ids.add(id_or_sym)
-            elif self._sym_id_map.contains(id_or_sym):
+            elif id_or_sym in self._sym_id_map:
                 order_book_ids.add(self._sym_id_map[id_or_sym])
-        
+
         var result = List[Instrument]()
         for obid in order_book_ids:
             result.append(self._instruments[obid])
