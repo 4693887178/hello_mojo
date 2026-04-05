@@ -14,3 +14,6 @@ wheels/
 
 # Sensitive files (contains tokens)
 github_pr.py
+
+# Node.js modules
+node_modules/
