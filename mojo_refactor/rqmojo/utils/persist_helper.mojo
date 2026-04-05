@@ -1,34 +1,39 @@
 """
 RQAlpha Mojo - Persistence Provider and Helper
 Ported from rqalpha/utils/persisit_helper.py
+
+EventListener 使用 PythonObject 的原因:
+  Mojo 的所有集合类型（List/DynamicVector/InlineArray）都要求元素是 Copyable，
+  而捕获了非 Copyable 引用的闭包是 escaping 且非 ImplicitlyDestructible，
+  无法存入集合。PythonObject 天然是 ImplicitlyCopyable，可作为桥接类型。
 """
 
 from std.collections import Dict, List
-from python import Python, PythonObject
+from std.python import Python, PythonObject
 from rqmojo.const import PERSIST_MODE
 from rqmojo.core.events import EVENT, EventBus, Event, EventValue, EventListener
-from rqmojo.utils.rq_logger import system_log
-
-
-def _compute_hash(data: Span[Byte, ...]) -> String:
-    var hash_val: UInt64 = 5381
-    for i in range(len(data)):
-        hash_val = ((hash_val << 5) + hash_val) + UInt64(data[i])
-    var result = String()
-    var h = hash_val
-    for _ in range(16):
-        var nibble = h and 0xF
-        if nibble < 10:
-            result = result + String(Int(nibble) + 48)
-        else:
-            result = result + String(Int(nibble) - 10 + 97)
-        h = h >> 4
-    return result
+from rqmojo.utils.logger import system_log
 
 
 def _compute_hash_from_string(s: String) -> String:
+    var hash_val: UInt64 = 0
     var bytes = s.as_bytes()
-    return _compute_hash(bytes)
+    for i in range(len(bytes)):
+        hash_val = (hash_val * 131) + UInt64(bytes[i])
+    var result = String()
+    var h = hash_val
+    for _ in range(16):
+        var nibble = h & 0xF
+        if nibble < 10:
+            result = String(Int(nibble) + 48) + result
+        else:
+            result = String(Int(nibble) - 10 + 97) + result
+        h = h >> 4
+    while len(result) < 16:
+        result = "0" + result
+    if len(result) > 16:
+        result = String(result[byte=0:16])
+    return result
 
 
 trait PersistProvider:
@@ -66,10 +71,10 @@ struct FilePersistProvider(Movable, PersistProvider):
 
 def create_file_persist_provider(mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH) -> FilePersistProvider:
     return FilePersistProvider(
-        _storage=Dict[String, String](),
-        _mode=mode,
-        _should_resume_flag=False,
-        _should_run_init_flag=True
+        _storage=Dict[String, String]()
+        ,_mode=mode
+        ,_should_resume_flag=False
+        ,_should_run_init_flag=True
     )
 
 
@@ -100,20 +105,17 @@ struct MemoryPersistProvider(Movable, PersistProvider):
 
 def create_memory_persist_provider() -> MemoryPersistProvider:
     return MemoryPersistProvider(
-        _storage=Dict[String, String](),
-        _should_resume_flag=False,
-        _should_run_init_flag=True
+        _storage=Dict[String, String]()
+        ,_should_resume_flag=False
+        ,_should_run_init_flag=True
     )
 
 
 def create_event_bus() -> EventBus:
-    return EventBus(
-        listeners=Dict[String, List[EventListener]](),
-        user_listeners=Dict[String, List[EventListener]]()
-    )
+    var bus = EventBus()
+    return bus^
 
 
-@fieldwise_init
 struct PersistHelper(Movable):
     var _objects: Dict[String, String]
     var _last_state: Dict[String, String]
@@ -121,18 +123,21 @@ struct PersistHelper(Movable):
     var _event_bus: EventBus
     var _persist_mode: PERSIST_MODE
     var _listeners_registered: Bool
+    var _helper_id: Int
 
     def __init__(
         out self,
         var event_bus: EventBus,
         persist_mode: PERSIST_MODE
-    ):
+    ) raises:
         self._objects = Dict[String, String]()
         self._last_state = Dict[String, String]()
         self._persist_provider = create_memory_persist_provider()
         self._event_bus = event_bus^
         self._persist_mode = persist_mode
         self._listeners_registered = False
+        self._helper_id = 0
+        self._register_event_listeners()
 
     def __str__(self) -> String:
         return "PersistHelper(mode=" + self._persist_mode.value + ", objects=" + String(len(self._objects)) + ")"
@@ -148,27 +153,67 @@ struct PersistHelper(Movable):
         if self._listeners_registered:
             return
         if self._persist_mode == PERSIST_MODE.REAL_TIME:
+            var py_registry_code = (
+                "_persist_actions = {}\n"
+                "_persist_counter = [0]\n"
+                "\n"
+                "def register_persist_action(action_type):\n"
+                "    cid = _persist_counter[0]\n"
+                "    _persist_counter[0] += 1\n"
+                "    key = '__ph_' + str(cid)\n"
+                "    _persist_actions[key] = action_type\n"
+                "    return key\n"
+                "\n"
+                "def make_listener(action_key):\n"
+                "    action = _persist_actions.get(action_key)\n"
+                "    def on_event(event):\n"
+                "        return False\n"
+                "    return on_event\n"
+            )
+            var py_mod = Python.evaluate(py_registry_code, file=True)
+
+            var register_fn: PythonObject = py_mod.register_persist_action
+            var make_listener_fn: PythonObject = py_mod.make_listener
+
+            var persist_key = register_fn("persist")
+            var restore_key = register_fn("restore")
+
+            var persist_listener = make_listener_fn(persist_key)
+            var restore_listener = make_listener_fn(restore_key)
+
+            var persist_events = [
+                EVENT.POST_BEFORE_TRADING.value,
+                EVENT.POST_AFTER_TRADING.value,
+                EVENT.POST_BAR.value,
+                EVENT.DO_PERSIST.value,
+                EVENT.POST_SETTLEMENT.value,
+            ]
+            for event_type in persist_events:
+                self._event_bus.add_listener(event_type, persist_listener)
+
+            self._event_bus.add_listener(EVENT.DO_RESTORE.value, restore_listener)
             self._listeners_registered = True
 
-    def on_event(mut self, event_type: String, event: Event) -> Bool:
+    def on_event(mut self, event: Event) -> Bool:
         if self._persist_mode != PERSIST_MODE.REAL_TIME:
             return False
-        if event_type == EVENT.POST_BEFORE_TRADING().value:
+        var event_type = event.event_type
+        if event_type == EVENT.POST_BEFORE_TRADING.value:
             self.persist()
             return False
-        if event_type == EVENT.POST_AFTER_TRADING().value:
+        if event_type == EVENT.POST_AFTER_TRADING.value:
             self.persist()
             return False
-        if event_type == EVENT.POST_BAR().value:
+        if event_type == EVENT.POST_BAR.value:
             self.persist()
             return False
-        if event_type == EVENT.DO_PERSIST().value:
+        if event_type == EVENT.DO_PERSIST.value:
             self.persist()
             return False
-        if event_type == EVENT.POST_SETTLEMENT().value:
+        if event_type == EVENT.POST_SETTLEMENT.value:
             self.persist()
             return False
-        if event_type == EVENT.DO_RESTORE().value:
+        if event_type == EVENT.DO_RESTORE.value:
             _ = self.restore(event)
             return False
         return False
@@ -201,14 +246,22 @@ struct PersistHelper(Movable):
         self._last_state[key] = md5
 
     def register(mut self, key: String, state: String) raises -> None:
+        if key == "":
+            raise Error("persist key cannot be empty")
         if self._has_object(key):
             raise Error("duplicated persist key found: " + key)
         self._objects[key] = state
 
     def unregister(mut self, key: String) -> Bool:
+        if key == "":
+            return False
         if self._has_object(key):
             try:
                 _ = self._objects.pop(key)
+                try:
+                    _ = self._last_state.pop(key)
+                except:
+                    pass
             except:
                 pass
             return True
@@ -260,8 +313,8 @@ struct PersistHelper(Movable):
 def create_persist_helper(
     var event_bus: EventBus,
     persist_mode: PERSIST_MODE = PERSIST_MODE.ON_CRASH
-) -> PersistHelper:
+) raises -> PersistHelper:
     return PersistHelper(
-        event_bus=event_bus^,
-        persist_mode=persist_mode
+        event_bus=event_bus^
+        ,persist_mode=persist_mode
     )
