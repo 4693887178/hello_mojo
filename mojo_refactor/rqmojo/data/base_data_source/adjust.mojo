@@ -8,7 +8,7 @@ Zero numpy import — all numpy objects obtained via pandas bridge.
 
 from std.collections import Set, List
 from std.python import Python, PythonObject
-from rqmojo.utils.datetime_func import convert_date_to_int, to_date_from_string
+from rqmojo.utils.datetime_func import convert_date_to_int, to_date
 from bison import Series
 
 
@@ -109,7 +109,7 @@ def adjust_bars(
     var base_adjust_rate: Float64
     if String(py=adjust_type) == "pre":
         var adjust_orig_str = String(py=adjust_orig)
-        var adjust_orig_date = to_date_from_string(adjust_orig_str)
+        var adjust_orig_date = to_date(adjust_orig_str)
         var adjust_orig_dt = convert_date_to_int(adjust_orig_date)
         base_adjust_rate = _factor_for_date(dates, ex_cum_factors, Int64(adjust_orig_dt))
     else:
