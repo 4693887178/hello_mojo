@@ -1,163 +1,262 @@
 """
 Test for concurrent.mojo - Concurrent Utilities
+
+Uses Mojo standard library testing framework (std.testing).
+Tests cover: TaskResult, CallItem, Future, ProgressedTask,
+           _InlineProgressBar, ProgressedProcessPoolExecutor.
 """
 
-from std.collections import List
-from std.utils import Variant
-from rqmojo.utils.concurrent import TaskResult, ProgressedTask
-
-
-comptime TaskResultValue = Variant[String, Int, Float64]
+from std.testing import assert_equal, assert_true, assert_false, TestSuite
+from rqmojo.utils.concurrent import (
+    TaskResult,
+    TaskResultValue,
+    CallItem,
+    Future,
+    ProgressedTask,
+    _InlineProgressBar,
+    ProgressedProcessPoolExecutor,
+)
 
 
 @fieldwise_init
 struct SimpleProgressedTask(ProgressedTask, Movable):
-    var steps: Int
-    
+    var _steps: Int
+    var _result_value: Int
+
     def total_steps(self) -> Int:
-        return self.steps
-    
-    def execute(self) -> TaskResultValue:
-        return TaskResultValue("done")
+        return self._steps
+
+    def execute(mut self) raises -> TaskResultValue:
+        return TaskResultValue(self._result_value)
 
 
 @fieldwise_init
-struct CountingProgressedTask(ProgressedTask, Movable):
-    var count_to: Int
-    
+struct FailingProgressedTask(ProgressedTask, Movable):
+    var _steps: Int
+    var _error_msg: String
+
     def total_steps(self) -> Int:
-        return self.count_to
-    
-    def execute(self) -> TaskResultValue:
-        return TaskResultValue("counted")
+        return self._steps
+
+    def execute(mut self) raises -> TaskResultValue:
+        raise Error(self._error_msg)
 
 
-def test_task_result_struct():
-    print("=== Testing TaskResult struct ===")
-    
-    var result = TaskResult(task_id=1, result=None, exception=None)
-    print("TaskResult created: task_id=" + String(result.task_id))
-    
-    if result.task_id == 1:
-        print("PASS: TaskResult created correctly")
-    else:
-        print("FAIL: TaskResult task_id mismatch")
-    print("")
+def test_task_result_creation() raises:
+    var r = TaskResult(task_id=42, result=None, exception=None)
+    assert_equal(r.task_id, 42)
+    assert_true(r.exception == None)
+    assert_true(r.result == None)
+    assert_true(r.is_success())
 
 
-def test_task_result_fields():
-    print("=== Testing TaskResult fields ===")
-    
-    var result = TaskResult(task_id=5, result=TaskResultValue("test"), exception=None)
-    
-    print("task_id: " + String(result.task_id))
-    
-    print("PASS: TaskResult fields accessible")
-    print("")
+def test_task_result_with_result() raises:
+    var r = TaskResult(
+        task_id=1,
+        result=Optional[TaskResultValue](TaskResultValue(99)),
+        exception=None,
+    )
+    assert_equal(r.task_id, 1)
+    assert_true(r.is_success())
+    var val = r.get_result()
+    assert_true(val.isa[Int]())
 
 
-def test_simple_progressed_task():
-    print("=== Testing SimpleProgressedTask ===")
-    
-    var task = SimpleProgressedTask(steps=5)
-    var steps = task.total_steps()
-    
-    print("total_steps: " + String(steps))
-    if steps == 5:
-        print("PASS: SimpleProgressedTask total_steps correct")
-    else:
-        print("FAIL: expected 5, got " + String(steps))
-    print("")
+def test_task_result_with_exception() raises:
+    var r = TaskResult(
+        task_id=3,
+        result=None,
+        exception=Optional[String]("something went wrong"),
+    )
+    assert_false(r.is_success())
 
 
-def test_counting_progressed_task():
-    print("=== Testing CountingProgressedTask ===")
-    
-    var task = CountingProgressedTask(count_to=10)
-    var steps = task.total_steps()
-    
-    print("total_steps: " + String(steps))
-    if steps == 10:
-        print("PASS: CountingProgressedTask total_steps correct")
-    else:
-        print("FAIL: expected 10, got " + String(steps))
-    print("")
+def test_call_item_creation() raises:
+    var item = CallItem(work_id=10, fn_name="test_fn", is_progressed=True, total_steps=50)
+    assert_equal(item.work_id, 10)
+    assert_equal(item.fn_name, "test_fn")
+    assert_true(item.is_progressed)
+    assert_equal(item.total_steps, 50)
 
 
-def test_multiple_progressed_tasks():
-    print("=== Testing multiple ProgressedTask instances ===")
-    
-    var task1 = SimpleProgressedTask(steps=3)
-    var task2 = SimpleProgressedTask(steps=5)
-    var task3 = SimpleProgressedTask(steps=7)
-    
-    print("task1.total_steps: " + String(task1.total_steps()))
-    print("task2.total_steps: " + String(task2.total_steps()))
-    print("task3.total_steps: " + String(task3.total_steps()))
-    
-    if task1.total_steps() == 3 and task2.total_steps() == 5 and task3.total_steps() == 7:
-        print("PASS: Multiple instances work independently")
-    else:
-        print("FAIL: Instances not independent")
-    print("")
+def test_future_initial_state() raises:
+    var fut = Future(work_id=7)
+    assert_equal(fut.work_id, 7)
+    assert_true(fut.running())
+    assert_false(fut.done())
 
 
-def test_task_result_equality():
-    print("=== Testing TaskResult equality ===")
-    
-    var result1 = TaskResult(task_id=1, result=None, exception=None)
-    var result2 = TaskResult(task_id=1, result=None, exception=None)
-    
-    if result1.task_id == result2.task_id:
-        print("PASS: TaskResult equality works")
-    else:
-        print("FAIL: TaskResult equality failed")
-    print("")
+def test_future_set_result() raises:
+    var fut = Future(work_id=1)
+    fut.set_result(TaskResultValue(42))
+    assert_false(fut.running())
+    assert_true(fut.done())
+    var res = fut.result()
+    assert_true(res.isa[Int]())
+    assert_true(fut.exception() == None)
 
 
-def test_task_result_with_exception():
-    print("=== Testing TaskResult with exception ===")
-    
-    var result = TaskResult(task_id=2, result=None, exception="Error occurred")
-    
-    if result.exception != None:
-        print("PASS: TaskResult with exception works")
-    else:
-        print("FAIL: Exception not stored")
-    print("")
+def test_future_set_exception() raises:
+    var fut = Future(work_id=2)
+    fut.set_exception("boom")
+    assert_false(fut.running())
+    assert_true(fut.done())
+    assert_true(fut.exception() != None)
 
 
-def test_total_steps_calculation():
-    print("=== Testing total steps calculation ===")
-    
-    var task1 = CountingProgressedTask(count_to=5)
-    var task2 = CountingProgressedTask(count_to=3)
-    
-    var total = task1.total_steps() + task2.total_steps()
-    print("Total steps: " + String(total))
-    
-    if total == 8:
-        print("PASS: Total steps calculation correct")
-    else:
-        print("FAIL: expected 8, got " + String(total))
-    print("")
+def test_progressed_task_trait() raises:
+    var task = SimpleProgressedTask(_steps=100, _result_value=77)
+    assert_equal(task.total_steps(), 100)
+    var result = task.execute()
+    assert_true(result.isa[Int]())
 
 
-def main():
-    print("=" * 60)
-    print("RQAlpha Mojo utils/concurrent.mojo Test")
-    print("=" * 60)
-    print("")
-    
-    test_task_result_struct()
-    test_task_result_fields()
-    test_simple_progressed_task()
-    test_counting_progressed_task()
-    test_multiple_progressed_tasks()
-    test_task_result_equality()
-    test_task_result_with_exception()
-    test_total_steps_calculation()
-    
-    print("=" * 60)
-    print("All tests completed!")
-    print("=" * 60)
+def test_failing_progressed_task() raises:
+    var task = FailingProgressedTask(_steps=5, _error_msg="test error")
+    assert_equal(task.total_steps(), 5)
+    var caught = False
+    try:
+        _ = task.execute()
+    except e:
+        caught = True
+    assert_true(caught)
+
+
+def test_inline_progress_bar() raises:
+    var bar = _InlineProgressBar(length=100)
+    bar.update(50)
+    bar.update(50)
+    bar.render_finish()
+
+
+def test_inline_progress_bar_zero_length() raises:
+    var bar = _InlineProgressBar(length=0)
+    bar.update(10)
+    bar.render_finish()
+
+
+def test_executor_init() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    assert_true(executor._total_steps == 0)
+    assert_true(executor._next_work_id == 0)
+
+
+def test_executor_submit_simple() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    _ = executor.submit_simple("task_a", steps=5)
+    assert_equal(executor._total_steps, 5)
+
+
+def test_executor_submit_multiple_simple() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    _ = executor.submit_simple("t1", steps=3)
+    _ = executor.submit_simple("t2", steps=7)
+    _ = executor.submit_simple("t3", steps=10)
+    assert_equal(executor._total_steps, 20)
+
+
+def test_executor_submit_progressed_success() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    var task = SimpleProgressedTask(_steps=50, _result_value=123)
+    var result = task.execute()
+
+    var fut = executor.submit_progressed(
+        task.total_steps(),
+        result,
+        "backtest",
+    )
+
+    assert_equal(executor._total_steps, 50)
+    assert_true(fut.done())
+    var res = fut.result()
+    assert_true(res.isa[Int]())
+
+
+def test_executor_submit_progressed_failure_case() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    var bad_task = FailingProgressedTask(_steps=10, _error_msg="calculation failed")
+
+    var caught_error = False
+    try:
+        _ = bad_task.execute()
+    except e:
+        caught_error = True
+
+    assert_true(caught_error)
+
+    var fut = executor.submit_progressed(
+        bad_task.total_steps(),
+        TaskResultValue(-1),
+        "bad_task_recorded",
+    )
+
+    assert_true(fut.done())
+    var res = fut.result()
+    assert_true(res.isa[Int]())
+
+
+def test_executor_shutdown_no_wait() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    _ = executor.submit_simple("quick", steps=1)
+    executor.shutdown(wait=False)
+
+
+def test_executor_shutdown_with_wait() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    var task1 = SimpleProgressedTask(_steps=30, _result_value=1)
+    var task2 = SimpleProgressedTask(_steps=70, _result_value=2)
+
+    var result1 = task1.execute()
+    var result2 = task2.execute()
+
+    _ = executor.submit_progressed(
+        task1.total_steps(),
+        result1,
+        "task1",
+    )
+    _ = executor.submit_progressed(
+        task2.total_steps(),
+        result2,
+        "task2",
+    )
+    _ = executor.submit_simple("cleanup", steps=5)
+
+    assert_equal(executor._total_steps, 105)
+    executor.shutdown(wait=True)
+
+
+def test_executor_mixed_submit() raises:
+    var executor = ProgressedProcessPoolExecutor()
+    var main_task = SimpleProgressedTask(_steps=25, _result_value=99)
+    var main_result = main_task.execute()
+
+    _ = executor.submit_progressed(
+        main_task.total_steps(),
+        main_result,
+        "main_task",
+    )
+    _ = executor.submit_simple("subtask_1", steps=5)
+    _ = executor.submit_simple("subtask_2", steps=10)
+
+    assert_equal(executor._total_steps, 40)
+    assert_equal(len(executor._futures), 3)
+    assert_equal(len(executor._call_items), 3)
+
+    executor.shutdown(wait=True)
+
+
+def test_task_result_value_variant_int() raises:
+    var v = TaskResultValue(42)
+    assert_true(v.isa[Int]())
+
+def test_task_result_value_variant_float() raises:
+    var v = TaskResultValue(3.14)
+    assert_true(v.isa[Float64]())
+
+def test_task_result_value_variant_string() raises:
+    var v = TaskResultValue("hello")
+    assert_true(v.isa[String]())
+
+
+def main() raises:
+    TestSuite.discover_tests[__functions_in_module()]().run()

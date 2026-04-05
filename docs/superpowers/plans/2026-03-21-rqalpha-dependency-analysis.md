@@ -23,35 +23,35 @@
 
 ## 第一组：依赖数量 0（共10个文件）
 
-| 序号 | 文件路径                       | 状态    | 依赖模块 | 人工复盘时间 |
-| -- | -------------------------- | ----- | ---- | ------------ |
+| 序号 | 文件路径                       | 状态    | 依赖模块 | 人工复盘时间           |
+| -- | -------------------------- | ----- | ---- | ---------------- |
 | 1  | `_version.py`              | ✅ 已完成 | 无    | 2026-03-24 00:21 |
-| 2  | `cmds/entry.py`            | ✅ 已完成 | 无    |              |
-| 3  | `user_module.py`           | ✅ 已完成 | 无    |              |
-| 4  | `utils/click_helper.py`    | ✅ 已完成 | 无    |              |
-| 5  | `utils/concurrent.py`      | ✅ 已完成 | 无    |              |
+| 2  | `cmds/entry.py`            | ✅ 已完成 | 无    | 2026-04-05 06:58    |
+| 3  | `user_module.py`           | ✅ 已完成 | 无    | 2026-04-05 07:08 |
+| 4  | `utils/click_helper.py`    | ✅ 已完成 | 无    | 2026-04-05 08:04 |
+| 5  | `utils/concurrent.py`      | ✅ 已完成 | 无    | 2026-04-05 08:42    |
 | 6  | `utils/log_capture.py`     | ✅ 已完成 | 无    | 2026-03-23 13:16 |
-| 7  | `utils/package_helper.py`  | ✅ 已完成 | 无    |              |
-| 8  | `utils/persisit_helper.py` | ✅ 已完成 | 无    |              |
-| 9  | `utils/repr.py`            | ✅ 已完成 | 无    |              |
+| 7  | `utils/package_helper.py`  | ✅ 已完成 | 无    | <br />           |
+| 8  | `utils/persisit_helper.py` | ✅ 已完成 | 无    | <br />           |
+| 9  | `utils/repr.py`            | ✅ 已完成 | 无    | <br />           |
 | 10 | `utils/typing.py`          | ✅ 已完成 | 无    | 2026-03-24 00:21 |
 
 ***
 
 ## 第二组：依赖数量 0-1（共10个文件）
 
-| 序号 | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                          | 人工复盘时间 |
-| -- | ------------------------------------------------------- | ----- | ---- | ----------------------------- | ------------ |
+| 序号 | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                          | 人工复盘时间           |
+| -- | ------------------------------------------------------- | ----- | ---- | ----------------------------- | ---------------- |
 | 1  | `const.py`                                              | ✅ 已完成 | 0    | 无                             | 2026-03-23 15:30 |
 | 2  | `core/__init__.py`                                      | ✅ 已完成 | 0    | 无                             | 2026-03-24 00:26 |
-| 3  | `core/events.py`                                        | ✅ 已完成 | 0    | 无                             |              |
-| 4  | `mod/rqalpha_mod_sys_accounts/api/__init__.py`          | ✅ 已完成 | 0    | 无                             |              |
-| 5  | `utils/dict_func.py`                                    | ✅ 已完成 | 0    | 无                             |              |
-| 6  | `utils/risk_free_helper.py`                             | ✅ 已完成 | 0    | 无                             |              |
-| 7  | `utils/translations/__init__.py`                        | ✅ 已完成 | 0    | 无                             |              |
-| 8  | `utils/translations/zh_Hans_CN/__init__.py`             | ✅ 已完成 | 0    | 无                             |              |
-| 9  | `utils/translations/zh_Hans_CN/LC_MESSAGES/__init__.py` | ✅ 已完成 | 0    | 无                             |              |
-| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` |              |
+| 3  | `core/events.py`                                        | ✅ 已完成 | 0    | 无                             | <br />           |
+| 4  | `mod/rqalpha_mod_sys_accounts/api/__init__.py`          | ✅ 已完成 | 0    | 无                             | <br />           |
+| 5  | `utils/dict_func.py`                                    | ✅ 已完成 | 0    | 无                             | <br />           |
+| 6  | `utils/risk_free_helper.py`                             | ✅ 已完成 | 0    | 无                             | <br />           |
+| 7  | `utils/translations/__init__.py`                        | ✅ 已完成 | 0    | 无                             | <br />           |
+| 8  | `utils/translations/zh_Hans_CN/__init__.py`             | ✅ 已完成 | 0    | 无                             | <br />           |
+| 9  | `utils/translations/zh_Hans_CN/LC_MESSAGES/__init__.py` | ✅ 已完成 | 0    | 无                             | <br />           |
+| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` | <br />           |
 
 ***
 
