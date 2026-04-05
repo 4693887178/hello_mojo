@@ -51,24 +51,24 @@
 | 7  | `utils/translations/__init__.py`                        | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:47 |
 | 8  | `utils/translations/zh_Hans_CN/__init__.py`             | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:48 |
 | 9  | `utils/translations/zh_Hans_CN/LC_MESSAGES/__init__.py` | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:50 |
-| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` | 2026-04-06 00:00                    |
+| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` | 2026-04-06 00:00 |
 
 ***
 
 ## 第三组：依赖数量 1-2（共10个文件）
 
-| 序号 | 文件路径                                  | 状态    | 依赖数量 | 依赖模块                                            |
-| -- | ------------------------------------- | ----- | ---- | ----------------------------------------------- |
-| 1  | `apis/names.py`                       | ✅ 已完成 | 1    | `rqalpha.const`                                 |
-| 2  | `cmds/misc.py`                        | ✅ 已完成 | 1    | `rqalpha.utils.i18n`                            |
-| 3  | `core/global_var.py`                  | ✅ 已完成 | 1    | `rqalpha.utils.logger`                          |
-| 4  | `data/__init__.py`                    | ✅ 已完成 | 1    | 内部相对导入                                          |
-| 5  | `model/__init__.py`                   | ✅ 已完成 | 1    | 内部相对导入                                          |
-| 6  | `utils/i18n.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.translations`                    |
-| 7  | `data/base_data_source/deprecated.py` | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument`     |
-| 8  | `utils/config.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.logger`    |
-| 9  | `utils/datetime_func.py`              | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.exception` |
-| 10 | `utils/exception.py`                  | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`           |
+| 序号 | 文件路径                                  | 状态    | 依赖数量 | 依赖模块                                            | 人工复盘时间          |
+| -- | ------------------------------------- | ----- | ---- | ----------------------------------------------- | --------------- |
+| 1  | `apis/names.py`                       | ✅ 已完成 | 1    | `rqalpha.const`                                 | 2026-04-06 0046 |
+| 2  | `cmds/misc.py`                        | ✅ 已完成 | 1    | `rqalpha.utils.i18n`                            | <br />          |
+| 3  | `core/global_var.py`                  | ✅ 已完成 | 1    | `rqalpha.utils.logger`                          | <br />          |
+| 4  | `data/__init__.py`                    | ✅ 已完成 | 1    | 内部相对导入                                          | <br />          |
+| 5  | `model/__init__.py`                   | ✅ 已完成 | 1    | 内部相对导入                                          | <br />          |
+| 6  | `utils/i18n.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.translations`                    | <br />          |
+| 7  | `data/base_data_source/deprecated.py` | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument`     | <br />          |
+| 8  | `utils/config.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.logger`    | <br />          |
+| 9  | `utils/datetime_func.py`              | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.exception` | <br />          |
+| 10 | `utils/exception.py`                  | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`           | <br />          |
 
 ***
 
