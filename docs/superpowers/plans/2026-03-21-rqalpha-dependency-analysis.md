@@ -51,7 +51,7 @@
 | 7  | `utils/translations/__init__.py`                        | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:47 |
 | 8  | `utils/translations/zh_Hans_CN/__init__.py`             | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:48 |
 | 9  | `utils/translations/zh_Hans_CN/LC_MESSAGES/__init__.py` | ✅ 已完成 | 0    | 无                             | 2026-04-05 19:50 |
-| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` | 2026-04-05 07:20                    |
+| 10 | `data/base_data_source/adjust.py`                       | ✅ 已完成 | 1    | `rqalpha.utils.datetime_func` | 2026-04-06 00:00                    |
 
 ***
 
