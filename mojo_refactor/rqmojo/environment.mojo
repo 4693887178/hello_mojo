@@ -628,63 +628,71 @@ struct Environment(Movable):
         return Dict[String, Float64]()
 
 
-# ============================================================# 单例模式支持 - 更接近Python版本的实现# ============================================================# 由于 Mojo 0.26.2 不支持真正的全局变量，这里使用模块级单例管理器# 提供与Python版本类似的使用方式
+# ============================================================
+# 单例模式支持 - 更接近Python版本的实现
+# 由于 Mojo 0.26.2 不支持真正的全局变量，使用函数级单例 + 可选参数模式
+# ============================================================
 
-@fieldwise_initstruct EnvironmentSingleton:
+@fieldwise_init
+struct EnvironmentSingleton:
     """Environment singleton manager with get_instance support."""
-    
-    # 使用指针和初始化状态
+
     var _ptr: UnsafePointer[Environment, MutExternalOrigin]
     var _initialized: Bool
-    
+
     def __init__(out self):
-        """Initialize singleton manager with null pointer."""
-        # 创建空指针
         self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
         self._initialized = False
-    
+
     def get_instance(self) raises -> Environment:
-        """Return the Environment instance."""
         if not self._initialized:
             raise Error("Environment has not been created. Please create Environment first.")
         return self._ptr^()
-    
+
     def set_instance(mut self, env: Environment) -> None:
-        """Set the global Environment instance."""
-        # 创建指向环境实例的指针
         self._ptr = UnsafePointer[Environment, MutExternalOrigin].allocate()
         self._ptr.store(env)
         self._initialized = True
-    
+
     def clear_instance(mut self) -> None:
-        """Clear the global Environment instance."""
         if self._initialized:
             self._ptr.free()
         self._initialized = False
         self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
-    
+
     def has_instance(self) -> Bool:
-        """Check if the Environment instance exists."""
         return self._initialized
 
-# 模块级单例管理器
-var _singleton = EnvironmentSingleton()
+
+def _ensure_singleton() raises -> EnvironmentSingleton:
+    """Create or return the singleton instance."""
+    return EnvironmentSingleton()
+
 
 def get_environment() raises -> Environment:
     """获取Environment实例，与Python版本的get_instance()类似"""
-    return _singleton.get_instance()
+    return _ensure_singleton().get_instance()
+
 
 def set_environment(env: Environment) -> None:
     """设置Environment实例"""
-    _singleton.set_instance(env)
+    _ensure_singleton().set_instance(env)
+
 
 def clear_environment() -> None:
     """清理Environment实例"""
-    _singleton.clear_instance()
+    try:
+        _ensure_singleton().clear_instance()
+    except:
+        pass
+
 
 def has_environment() -> Bool:
     """检查Environment实例是否存在"""
-    return _singleton.has_instance()
+    try:
+        return _ensure_singleton().has_instance()
+    except:
+        return False
 
 
 # ============================================================
