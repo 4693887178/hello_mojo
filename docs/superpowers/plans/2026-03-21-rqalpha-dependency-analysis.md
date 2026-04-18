@@ -129,7 +129,7 @@
 | -- | --------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------- | ----------- |
 | 1  | `core/strategy_universe.py`                   | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.model.instrument` | 2026-04-19 00:39 |
 | 2  | `data/bar_dict_price_board.py`                | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.bar`           | 2026-04-19 00:12 |
-| 3  | `mod/rqalpha_mod_sys_analyser/__init__.py`    | ✅ 已完成 | 3    | `rqalpha`, `rqalpha.utils.i18n`                                           | <br />      |
+| 3  | `mod/rqalpha_mod_sys_analyser/__init__.py`    | ✅ 已完成 | 3    | `rqalpha`, `rqalpha.utils.i18n`                                           | 2026-04-19 00:46 |
 | 4  | `mod/rqalpha_mod_sys_analyser/plot/utils.py`  | ✅ 已完成 | 3    | 内部相对导入                                                                    | <br />      |
 | 5  | `mod/rqalpha_mod_sys_risk/mod.py`             | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`               | <br />      |
 | 6  | `mod/rqalpha_mod_sys_scheduler/mod.py`        | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger`        | <br />      |
