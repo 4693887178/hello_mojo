@@ -412,22 +412,20 @@ def h5_file(path: String) raises -> PythonObject:
 
 
 def load_instruments_from_pkl(pkl_path: String, future_info_store: FutureInfoStore) raises -> PythonObject:
-    var _ = Python()
-    var py = Python()
-    var pickle = py.import_module("pickle")
-    var builtins = py.import_module("builtins")
-    var datetime = py.import_module("datetime")
-    
+    var pickle = Python().import_module("pickle")
+    var builtins = Python().import_module("builtins")
+    var datetime = Python().import_module("datetime")
+
     var f = builtins.open(pkl_path, "rb")
     var data = pickle.load(f)
     f.close()
-    
-    var instruments = py.list()
+
+    var instruments = Python().list()
     for i in data:
         var i_type = i.get("type")
         if i_type == "Future":
             var order_book_id = i.get("order_book_id")
-            if order_book_id and "Future" in py.str(order_book_id):
+            if order_book_id and "Future" in String(py=order_book_id):
                 i["listed_date"] = datetime.datetime(1990, 1, 1)
         
         instruments.append(i)

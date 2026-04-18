@@ -91,35 +91,35 @@
 
 ## 第五组：依赖数量 2（共10个文件）
 
-| 序号 | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                                        | 人工复盘时间           |
-| -- | ------------------------------------------------------- | ----- | ---- | ------------------------------------------- | ---------------- |
-| 1  | `mod/rqalpha_mod_sys_transaction_cost/__init__.py`      | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | 2026-04-18 09:28 |
-| 2  | `mod/rqalpha_mod_sys_transaction_cost/deciders.py`      | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument` | 2026-04-18 11:03 |
-| 3  | `mod/rqalpha_mod_sys_transaction_cost/mod.py`           | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.const`        | 2026-04-18 12:14 |
-| 4  | `mod/rqalpha_mod_sys_scheduler/__init__.py`             | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 13:02 |
-| 5  | `mod/rqalpha_mod_sys_simulation/__init__.py`            | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | 2026-04-18 16:05 |
-| 6  | `mod/rqalpha_mod_sys_analyser/plot/__init__.py`         | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 15:01 |
-| 7  | `mod/rqalpha_mod_sys_analyser/plot/consts.py`           | ✅ 已完成 | 2    | 无内部依赖                                       | 2026-04-18 15:41 |
-| 8  | `mod/rqalpha_mod_sys_analyser/report/__init__.py`       | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 16:38 |
-| 9  | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 17:38 |
-| 10 | `data/base_data_source/__init__.py`                     | ✅ 已完成 | 2    | 内部相对导入                                      | <br />           |
+| 序号     | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                                        | 人工复盘时间           |
+| ------ | ------------------------------------------------------- | ----- | ---- | ------------------------------------------- | ---------------- |
+| 1      | `mod/rqalpha_mod_sys_transaction_cost/__init__.py`      | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | 2026-04-18 09:28 |
+| 2      | `mod/rqalpha_mod_sys_transaction_cost/deciders.py`      | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument` | 2026-04-18 11:03 |
+| 3      | `mod/rqalpha_mod_sys_transaction_cost/mod.py`           | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.const`        | 2026-04-18 12:14 |
+| 4      | `mod/rqalpha_mod_sys_scheduler/__init__.py`             | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 13:02 |
+| 5      | `mod/rqalpha_mod_sys_simulation/__init__.py`            | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | 2026-04-18 16:05 |
+| 6      | `mod/rqalpha_mod_sys_analyser/plot/__init__.py`         | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 15:01 |
+| 7      | `mod/rqalpha_mod_sys_analyser/plot/consts.py`           | ✅ 已完成 | 2    | 无内部依赖                                       | 2026-04-18 15:41 |
+| 8      | `mod/rqalpha_mod_sys_analyser/report/__init__.py`       | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 16:38 |
+| 9      | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 17:38 |
+| 10 | `data/base_data_source/__init__.py`                     | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 20:18 |
 
 ***
 
 ## 第六组：依赖数量 2-3（共10个文件）
 
-| 序号 | 文件路径                                              | 状态    | 依赖数量 | 依赖模块                                                                    | 人工复盘时间 |
-| -- | ------------------------------------------------- | ----- | ---- | ----------------------------------------------------------------------- | ------ |
+| 序号 | 文件路径                                              | 状态    | 依赖数量 | 依赖模块                                                                    | 人工复盘时间           |
+| -- | ------------------------------------------------- | ----- | ---- | ----------------------------------------------------------------------- | ---------------- |
 | 1  | `mod/rqalpha_mod_sys_risk/__init__.py`            | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`                                         | 2026-04-18 19:08 |
 | 2  | `mod/rqalpha_mod_sys_risk/validators/__init__.py` | ✅ 已完成 | 2    | 内部相对导入                                                                  | 2026-04-18 19:08 |
-| 3  | `mod/rqalpha_mod_sys_accounts/__init__.py`        | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`                                         | <br /> |
-| 4  | `__main__.py`                                     | ✅ 已完成 | 2    | `rqalpha.cmds`, `rqalpha.mod.utils`                                     | <br /> |
-| 5  | `api.py`                                          | ✅ 已完成 | 3    | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const`             | <br /> |
-| 6  | `cmds/bundle.py`                                  | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils`             | <br /> |
-| 7  | `cmds/mod.py`                                     | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry`      | <br /> |
-| 8  | `core/execution_context.py`                       | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`        | <br /> |
-| 9  | `core/executor.py`                                | ✅ 已完成 | 3    | `rqalpha.core.events`, `rqalpha.utils.rq_json`, `rqalpha.utils.logger`  | <br /> |
-| 10 | `core/strategy_loader.py`                         | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` | <br /> |
+| 3  | `mod/rqalpha_mod_sys_accounts/__init__.py`        | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`                                         | <br />           |
+| 4  | `__main__.py`                                     | ✅ 已完成 | 2    | `rqalpha.cmds`, `rqalpha.mod.utils`                                     | <br />           |
+| 5  | `api.py`                                          | ✅ 已完成 | 3    | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const`             | <br />           |
+| 6  | `cmds/bundle.py`                                  | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils`             | <br />           |
+| 7  | `cmds/mod.py`                                     | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry`      | <br />           |
+| 8  | `core/execution_context.py`                       | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`        | <br />           |
+| 9  | `core/executor.py`                                | ✅ 已完成 | 3    | `rqalpha.core.events`, `rqalpha.utils.rq_json`, `rqalpha.utils.logger`  | <br />           |
+| 10 | `core/strategy_loader.py`                         | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` | <br />           |
 
 ***
 
