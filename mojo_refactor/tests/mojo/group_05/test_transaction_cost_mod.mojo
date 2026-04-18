@@ -1,48 +1,41 @@
 """
-第五组测试 - mod/rqmojo_mod_sys_transaction_cost/__init__.mojo
-测试Mojo版本的事务成本模块
+Group 5 tests - mod/rqmojo_mod_sys_transaction_cost/mod.mojo
+Tests for Mojo version of transaction cost mod.
 """
 
 from rqmojo.mod.rqmojo_mod_sys_transaction_cost import StockTransactionCostDecider, FutureTransactionCostDecider, BondTransactionCostDecider
 from rqmojo.mod.rqmojo_mod_sys_transaction_cost import TransactionCostMod, create_transaction_cost_mod
 
+from std.testing import assert_equal, assert_true, assert_false, TestSuite
 
-
-from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
 def test_create_transaction_cost_mod() raises:
     var mod = create_transaction_cost_mod()
-    assert_equal(mod.name, "transaction_cost", "values should match")
+    assert_equal(mod.name, "transaction_cost")
 
 
 def test_transaction_cost_mod_name() raises:
     var mod = create_transaction_cost_mod()
-    assert_equal(mod.name, "transaction_cost", "values should match")
+    assert_equal(mod.name, "transaction_cost")
 
 
 def test_stock_decider_exists() raises:
     var decider = StockTransactionCostDecider(
         commission_multiplier=0.0003,
         min_commission=5.0,
-        stamp_tax_rate=0.001,
-        transfer_fee_rate=0.00002
     )
-    assert_equal(decider.commission_multiplier, 0.0003, "values should match")
+    assert_equal(decider.commission_multiplier, 0.0003)
+    assert_equal(decider.min_commission, 5.0)
 
 
 def test_future_decider_exists() raises:
-    var decider = FutureTransactionCostDecider(
-        commission_multiplier=0.0001,
-        close_commission_multiplier=0.0001
-    )
-    assert_equal(decider.commission_multiplier, 0.0001, "values should match")
+    var decider = FutureTransactionCostDecider(commission_multiplier=0.0001)
+    assert_equal(decider.commission_multiplier, 0.0001)
 
 
 def test_bond_decider_exists() raises:
-    var decider = BondTransactionCostDecider(
-        commission_multiplier=0.0001
-    )
-    assert_equal(decider.commission_multiplier, 0.0001, "values should match")
+    var decider = BondTransactionCostDecider(commission_multiplier=0.0001)
+    assert_equal(decider.commission_multiplier, 0.0001)
 
 
 def main() raises:
