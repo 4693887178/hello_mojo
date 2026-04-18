@@ -3,9 +3,11 @@ RQAlpha Mojo - Order Style Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/validator.py
 """
 
+from std.collections import Optional
 from rqmojo.model.order import Order
 from rqmojo.const import ORDER_TYPE
 from rqmojo.interface import FrontendValidatorInterface
+from rqmojo.portfolio.account import Account
 
 
 struct OrderStyleValidator(FrontendValidatorInterface, Movable):
@@ -23,13 +25,13 @@ struct OrderStyleValidator(FrontendValidatorInterface, Movable):
     def can_cancel_order(self, order_id: Int) -> Bool:
         return True
 
-    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_submission(self, order: Order, account: Optional[Account]) -> Optional[String]:
         if order.style.style_type == ORDER_TYPE.ALGO:
             if self.frequency == "1m" or self.frequency == "tick":
                 return Optional[String]("algo order no support 1m and tick frequency")
         return Optional[String](None)
 
-    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
         return Optional[String](None)
 
 
