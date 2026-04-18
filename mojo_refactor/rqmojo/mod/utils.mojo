@@ -4,6 +4,9 @@ Ported from rqalpha/mod/utils.py
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, MARKET
+from std.utils import Variant
+
+comptime ConfigValue = Variant[Float64, Bool, String]
 
 
 def register_mod(mod_name: String, mod_config: Dict[String, String]):
