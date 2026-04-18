@@ -125,35 +125,35 @@
 
 ## 第七组：依赖数量 3-4（共10个文件）
 
-| 序号 | 文件路径                                          | 状态    | 依赖数量 | 依赖模块                                                                      |
-| -- | --------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------- |
-| 1  | `core/strategy_universe.py`                   | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.model.instrument` |
-| 2  | `data/bar_dict_price_board.py`                | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.bar`           |
-| 3  | `mod/rqalpha_mod_sys_analyser/__init__.py`    | ✅ 已完成 | 3    | `rqalpha`, `rqalpha.utils.i18n`                                           |
-| 4  | `mod/rqalpha_mod_sys_analyser/plot/utils.py`  | ✅ 已完成 | 3    | 内部相对导入                                                                    |
-| 5  | `mod/rqalpha_mod_sys_risk/mod.py`             | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`               |
-| 6  | `mod/rqalpha_mod_sys_scheduler/mod.py`        | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger`        |
-| 7  | `mod/rqalpha_mod_sys_simulation/slippage.py`  | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment`             |
-| 8  | `mod/rqalpha_mod_sys_simulation/validator.py` | ✅ 已完成 | 3    | `rqalpha.model.order`, `rqalpha.interface`                                |
-| 9  | `mod/utils.py`                                | ✅ 已完成 | 3    | `rqalpha.utils.config`, `rqalpha.mod`, `rqalpha.utils.package_helper`     |
-| 10 | `utils/testing/mocking.py`                    | ✅ 已完成 | 3    | `rqalpha.model.instrument`, `rqalpha.model.bar`, `rqalpha.model.tick`     |
+| 序号 | 文件路径                                          | 状态    | 依赖数量 | 依赖模块                                                                      | 人工复盘时间 |
+| -- | --------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------- | ----------- |
+| 1  | `core/strategy_universe.py`                   | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.model.instrument` | <br />      |
+| 2  | `data/bar_dict_price_board.py`                | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.bar`           | <br />      |
+| 3  | `mod/rqalpha_mod_sys_analyser/__init__.py`    | ✅ 已完成 | 3    | `rqalpha`, `rqalpha.utils.i18n`                                           | <br />      |
+| 4  | `mod/rqalpha_mod_sys_analyser/plot/utils.py`  | ✅ 已完成 | 3    | 内部相对导入                                                                    | <br />      |
+| 5  | `mod/rqalpha_mod_sys_risk/mod.py`             | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`               | <br />      |
+| 6  | `mod/rqalpha_mod_sys_scheduler/mod.py`        | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger`        | <br />      |
+| 7  | `mod/rqalpha_mod_sys_simulation/slippage.py`  | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment`             | <br />      |
+| 8  | `mod/rqalpha_mod_sys_simulation/validator.py` | ✅ 已完成 | 3    | `rqalpha.model.order`, `rqalpha.interface`                                | <br />      |
+| 9  | `mod/utils.py`                                | ✅ 已完成 | 3    | `rqalpha.utils.config`, `rqalpha.mod`, `rqalpha.utils.package_helper`     | <br />      |
+| 10 | `utils/testing/mocking.py`                    | ✅ 已完成 | 3    | `rqalpha.model.instrument`, `rqalpha.model.bar`, `rqalpha.model.tick`     | <br />      |
 
 ***
 
 ## 第八组：依赖数量 4（共10个文件）
 
-| 序号 | 文件路径                                                  | 状态    | 依赖数量 | 依赖模块                                                                                             |
-| -- | ----------------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------------------------------ |
-| 1  | `cmds/run.py`                                         | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.utils.click_helper`, `rqalpha.utils.config`, `rqalpha.cmds.entry` |
-| 2  | `core/strategy_context.py`                            | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             |
-| 3  | `data/base_data_source/storage_interface.py`          | ✅ 已完成 | 4    | `rqalpha.model.instrument`, `rqalpha.utils.typing`, `rqalpha.const`, `.deprecated`               |
-| 4  | `data/instruments_mixin.py`                           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     |
-| 5  | `data/trading_dates_mixin.py`                         | ✅ 已完成 | 4    | `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.interface`        |
-| 6  | `mod/__init__.py`                                     | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.utils`               |
-| 7  | `mod/rqalpha_mod_sys_accounts/component_validator.py` | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     |
-| 8  | `mod/rqalpha_mod_sys_accounts/validator.py`           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     |
-| 9  | `mod/rqalpha_mod_sys_analyser/mod.py`                 | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`, `rqalpha.utils.i18n`                |
-| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py`          | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             |
+| 序号 | 文件路径                                                  | 状态    | 依赖数量 | 依赖模块                                                                                             | 人工复盘时间 |
+| -- | ----------------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------------------------------ | ----------- |
+| 1  | `cmds/run.py`                                         | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.utils.click_helper`, `rqalpha.utils.config`, `rqalpha.cmds.entry` | <br />      |
+| 2  | `core/strategy_context.py`                            | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | <br />      |
+| 3  | `data/base_data_source/storage_interface.py`          | ✅ 已完成 | 4    | `rqalpha.model.instrument`, `rqalpha.utils.typing`, `rqalpha.const`, `.deprecated`               | <br />      |
+| 4  | `data/instruments_mixin.py`                           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | <br />      |
+| 5  | `data/trading_dates_mixin.py`                         | ✅ 已完成 | 4    | `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.interface`        | <br />      |
+| 6  | `mod/__init__.py`                                     | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.utils`               | <br />      |
+| 7  | `mod/rqalpha_mod_sys_accounts/component_validator.py` | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | <br />      |
+| 8  | `mod/rqalpha_mod_sys_accounts/validator.py`           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | <br />      |
+| 9  | `mod/rqalpha_mod_sys_analyser/mod.py`                 | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`, `rqalpha.utils.i18n`                | <br />      |
+| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py`          | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | <br />      |
 
 ***
 
