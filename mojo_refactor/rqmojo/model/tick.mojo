@@ -157,3 +157,30 @@ def _get_or_list(d: Dict[String, TickValue], key: String) raises -> List[Float64
         if v.isa[List[Float64]]():
             return v[List[Float64]].copy()
     return _default_order_book()
+
+
+def create_tick_object(
+    var instrument: Instrument,
+    var dt: DateTime,
+    last: Float64 = 10.5,
+    volume: Float64 = 10000.0,
+    total_turnover: Float64 = 105000.0,
+    open: Float64 = 10.0,
+    high: Float64 = 11.0,
+    low: Float64 = 9.0,
+    prev_close: Float64 = 10.0,
+    limit_up: Float64 = 11.55,
+    limit_down: Float64 = 9.45,
+) raises -> TickObject:
+    var tick_dict = Dict[String, TickValue]()
+    tick_dict["datetime"] = TickValue(dt^)
+    tick_dict["last"] = TickValue(last)
+    tick_dict["volume"] = TickValue(volume)
+    tick_dict["total_turnover"] = TickValue(total_turnover)
+    tick_dict["open"] = TickValue(open)
+    tick_dict["high"] = TickValue(high)
+    tick_dict["low"] = TickValue(low)
+    tick_dict["prev_close"] = TickValue(prev_close)
+    tick_dict["limit_up"] = TickValue(limit_up)
+    tick_dict["limit_down"] = TickValue(limit_down)
+    return TickObject(instrument^, tick_dict^)

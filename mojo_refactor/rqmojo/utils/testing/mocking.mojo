@@ -1,6 +1,15 @@
 """
 RQAlpha Mojo - Mocking Utilities
 Ported from rqalpha/utils/testing/mocking.py
+
+Python original provides 3 simple factory functions:
+  - mock_instrument(order_book_id, _type, exchange, **kwargs)
+  - mock_bar(instrument, **kwargs)
+  - mock_tick(instrument, **kwargs)
+
+Mojo version adds explicit parameters (no **kwargs in Mojo) plus:
+  - MockDataProxy: mock data proxy for testing
+  - create_mock_order: convenience factory for Order objects
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, SIDE, POSITION_EFFECT
@@ -53,7 +62,7 @@ def mock_tick(
     last: Float64 = 10.5,
     volume: Float64 = 10000.0,
     total_turnover: Float64 = 105000.0,
-) -> TickObject:
+) raises -> TickObject:
     return create_tick_object(
         instrument=instrument^,
         dt=dt^,
