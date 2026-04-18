@@ -117,7 +117,7 @@
 | 5  | `api.py`                                          | ✅ 已完成 | 3    | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const`             | 2026-04-18 21:18 |
 | 6  | `cmds/bundle.py`                                  | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils`             | <br />           |
 | 7  | `cmds/mod.py`                                     | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry`      | <br />           |
-| 8  | `core/execution_context.py`                       | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`        | <br />           |
+| 8  | `core/execution_context.py`                       | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`        | 2026-04-18 22:31 |
 | 9  | `core/executor.py`                                | ✅ 已完成 | 3    | `rqalpha.core.events`, `rqalpha.utils.rq_json`, `rqalpha.utils.logger`  | <br />           |
 | 10 | `core/strategy_loader.py`                         | ✅ 已完成 | 3    | `rqalpha.utils.logger`, `rqalpha.utils.exception`, `rqalpha.utils.i18n` | <br />           |
 
