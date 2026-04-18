@@ -1,79 +1,80 @@
 """
 RQAlpha Mojo - Mod Utilities
 Ported from rqalpha/mod/utils.py
+
+Core functions:
+  - mod_config_value_parse: Parse config string values to typed values (returns RqAttrDict)
+  - inject_mod_commands: Inject mod commands from config
+
+Utility functions (rqmojo extensions):
+  - parse_instrument_types: Parse instrument type strings to INSTRUMENT_TYPE list
+  - parse_markets: Parse market strings to MARKET list
 """
 
+from std.python import Python, PythonObject
+from std.collections import Dict, List
 from rqmojo.const import INSTRUMENT_TYPE, MARKET
 from rqmojo.utils import RqAttrDict
 
 
-@fieldwise_init
-struct ConfigValue(Movable, Copyable, Writable, ImplicitlyCopyable):
-    var bool_value: Optional[Bool]
-    var float_value: Optional[Float64]
-    var int_value: Optional[Int]
-    var string_value: Optional[String]
+def mod_config_value_parse(value: String) raises -> RqAttrDict:
+    if value == "True" or value == "true":
+        return RqAttrDict(True)
+    if value == "False" or value == "false":
+        return RqAttrDict(False)
 
-    def __init__(out self, value: Bool):
-        self.bool_value = value
-        self.float_value = None
-        self.int_value = None
-        self.string_value = None
+    var py_str = PythonObject(value)
+    var py_isdigit = Python.evaluate("__builtins__.str.isdigit")
+    if Bool(py=py_isdigit(py_str)):
+        return RqAttrDict(Int(py=py_str))
 
-    def __init__(out self, value: Float64):
-        self.bool_value = None
-        self.float_value = value
-        self.int_value = None
-        self.string_value = None
+    try:
+        var fval = Float64(py=Python.evaluate("__builtins__.float('" + value + "')"))
+        return RqAttrDict(fval)
+    except:
+        pass
 
-    def __init__(out self, value: Int):
-        self.bool_value = None
-        self.float_value = None
-        self.int_value = value
-        self.string_value = None
+    return RqAttrDict(value)
 
-    def __init__(out self, value: String):
-        self.bool_value = None
-        self.float_value = None
-        self.int_value = None
-        self.string_value = value
 
-    def __init__(out self, *, copy: Self):
-        self.bool_value = copy.bool_value
-        self.float_value = copy.float_value
-        self.int_value = copy.int_value
-        self.string_value = copy.string_value
+def inject_mod_commands() raises:
+    from std.python import Python
+    var rqalpha_utils_config = Python.import_module("rqalpha.utils.config")
+    var get_mod_conf = rqalpha_utils_config.get_mod_conf
+    var mod_config = get_mod_conf()
+    var mod_dict = mod_config["mod"]
 
-    def write_to(self, mut writer: Some[Writer]):
-        if self.bool_value.__ne__(None):
-            writer.write("ConfigValue(bool=", self.bool_value.or_else(False), ")")
-        elif self.float_value.__ne__(None):
-            writer.write("ConfigValue(float=", self.float_value.or_else(0.0), ")")
-        elif self.int_value.__ne__(None):
-            writer.write("ConfigValue(int=", self.int_value.or_else(0), ")")
-        elif self.string_value.__ne__(None):
-            writer.write("ConfigValue(string=", self.string_value.or_else(""), ")")
+    var system_mod_list = Python.import_module("rqalpha.mod").SYSTEM_MOD_LIST
+    var package_helper = Python.import_module("rqalpha.utils.package_helper")
+    var import_mod_fn = package_helper.import_mod
+    var builtins = Python.import_module("builtins")
+
+    for entry in mod_dict.items():
+        var mod_name = String(py=entry.key())
+        var config = entry.value()
+        var enabled = config.get("enabled", True)
+        if not Bool(py=enabled):
+            continue
+        var lib_name: String
+        if builtins.hasattr(config, "lib"):
+            lib_name = String(py=builtins.getattr(config, "lib"))
         else:
-            writer.write("ConfigValue(None)")
-
-    def as_bool(self) -> Bool:
-        return self.bool_value.or_else(False)
-
-    def as_float(self) -> Float64:
-        return self.float_value.or_else(0.0)
-
-    def as_int(self) -> Int:
-        return self.int_value.or_else(0)
-
-    def as_string(self) -> String:
-        return self.string_value.or_else("")
+            lib_name = "rqalpha_mod_" + mod_name
+        try:
+            var is_system = Bool(py=system_mod_list.__contains__(PythonObject(mod_name)))
+            if is_system:
+                import_mod_fn("rqalpha.mod." + lib_name)
+            else:
+                import_mod_fn(lib_name)
+        except:
+            pass
 
 
-def register_mod(mod_name: String, mod_config: RqAttrDict):
+def register_mod(mod_name: String, mut mod_config: RqAttrDict) raises:
     pass
 
 
-def unregister_mod(mod_name: String):
+def unregister_mod(mod_name: String) raises:
     pass
 
 
@@ -92,6 +93,14 @@ def parse_instrument_types(type_str: String) -> List[INSTRUMENT_TYPE]:
             result.append(INSTRUMENT_TYPE.ETF)
         elif trimmed == "FUTURE":
             result.append(INSTRUMENT_TYPE.FUTURE)
+        elif trimmed == "INDX":
+            result.append(INSTRUMENT_TYPE.INDX)
+        elif trimmed == "LOF":
+            result.append(INSTRUMENT_TYPE.LOF)
+        elif trimmed == "FUND":
+            result.append(INSTRUMENT_TYPE.FUND)
+        elif trimmed == "BOND":
+            result.append(INSTRUMENT_TYPE.BOND)
     return result^
 
 
