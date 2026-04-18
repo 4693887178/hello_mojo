@@ -4,6 +4,7 @@ Ported from rqalpha/interface.py
 """
 
 from std.collections import Dict, List, Optional
+from std.python import Python, PythonObject
 from rqmojo.const import (
     INSTRUMENT_TYPE, SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE,
     POSITION_DIRECTION, EXIT_CODE, MARKET
@@ -113,17 +114,7 @@ trait PositionInterface(Persistable):
 
 
 trait StrategyLoader:
-    def load(mut self):
-        ...
-    def init(mut self):
-        ...
-    def handle_bar(mut self, bar: BarObject):
-        ...
-    def handle_tick(mut self, tick: TickObject):
-        ...
-    def before_trading(mut self):
-        ...
-    def after_trading(mut self):
+    def load(mut self, scope: PythonObject) raises -> PythonObject:
         ...
 
 

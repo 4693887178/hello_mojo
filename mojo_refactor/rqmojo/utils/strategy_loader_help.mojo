@@ -11,11 +11,10 @@ from rqmojo.const import EXC_TYPE
 
 def compile_strategy(source_code: String, strategy: String, scope: PythonObject) raises -> PythonObject:
     var builtins = Python.import_module("builtins")
-    var six = Python.import_module("six")
 
     try:
         var code = builtins.compile(source_code, strategy, "exec")
-        six.exec_(code, scope)
+        builtins.exec(code, scope)
         return scope
     except:
         var sys = Python.import_module("sys")
@@ -26,12 +25,11 @@ def compile_strategy(source_code: String, strategy: String, scope: PythonObject)
         var exc_val = exc_info.__getitem__(1)
         var exc_tb = exc_info.__getitem__(2)
 
-        var msg: String = ""
+        var msg: String
         try:
             msg = String(builtins.str(exc_val))
         except:
             msg = ""
-            six.print_("failed to convert exception to string")
 
         var error = CustomError(msg, error_type=patch_user_exc(EXC_TYPE.NOTSET, force=True))
         error.set_exc(

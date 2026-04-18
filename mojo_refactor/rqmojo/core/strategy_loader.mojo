@@ -1,155 +1,94 @@
 """
 RQAlpha Mojo - Strategy Loader Implementation
 Ported from rqalpha/core/strategy_loader.py
+
+Three strategy loaders:
+  - FileStrategyLoader:     Load strategy from file path
+  - SourceCodeStrategyLoader: Load strategy from source code string
+  - UserFuncStrategyLoader:   Load strategy from user-provided function dict.
 """
 
-from std.collections import Dict, List, Optional
+from std.python import Python, PythonObject
 from rqmojo.interface import StrategyLoader
-from rqmojo.model.bar import BarObject
-from rqmojo.model.tick import TickObject
+from rqmojo.utils.strategy_loader_help import compile_strategy
 
 
 @fieldwise_init
 struct FileStrategyLoader(StrategyLoader, Movable, Writable):
-    var _strategy_file: String
-    var _scope: Dict[String, String]
-    
+    var _strategy_file_path: String
+
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("FileStrategyLoader(file=", self._strategy_file, ")")
-    
-    def load(mut self):
-        """从文件加载策略"""
-        # 模拟从文件加载策略
-        self._scope["__name__"] = "rqmojo.strategy"
-        self._scope["init"] = "init"
-        self._scope["handle_bar"] = "handle_bar"
-        self._scope["before_trading"] = "before_trading"
-        self._scope["after_trading"] = "after_trading"
-    
-    def init(mut self):
-        """初始化策略"""
-        print("FileStrategyLoader: init called")
-    
-    def handle_bar(mut self, bar: BarObject):
-        """处理bar数据"""
-        print("FileStrategyLoader: handle_bar called")
-    
-    def handle_tick(mut self, tick: TickObject):
-        """处理tick数据"""
-        print("FileStrategyLoader: handle_tick called")
-    
-    def before_trading(mut self):
-        """交易前处理"""
-        print("FileStrategyLoader: before_trading called")
-    
-    def after_trading(mut self):
-        """交易后处理"""
-        print("FileStrategyLoader: after_trading called")
+        writer.write("FileStrategyLoader(path=", self._strategy_file_path, ")")
+
+    def load(mut self, scope: PythonObject) raises -> PythonObject:
+        """Load strategy from file, compile and return scope."""
+        var builtins = Python.import_module("builtins")
+
+        var f = builtins.open(self._strategy_file_path, PythonObject("r"))
+        var source_code = f.read()
+        f.close()
+
+        return compile_strategy(
+            String(py=source_code), self._strategy_file_path, scope
+        )
 
 
 @fieldwise_init
 struct SourceCodeStrategyLoader(StrategyLoader, Movable, Writable):
-    var _source_code: String
-    var _scope: Dict[String, String]
-    
+    var _code: String
+
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("SourceCodeStrategyLoader(code_length=", String(len(self._source_code)), ")")
-    
-    def load(mut self):
-        """从源代码加载策略"""
-        # 模拟从源代码加载策略
-        self._scope["__name__"] = "rqmojo.strategy"
-        self._scope["init"] = "init"
-        self._scope["handle_bar"] = "handle_bar"
-        self._scope["before_trading"] = "before_trading"
-        self._scope["after_trading"] = "after_trading"
-    
-    def init(mut self):
-        """初始化策略"""
-        print("SourceCodeStrategyLoader: init called")
-    
-    def handle_bar(mut self, bar: BarObject):
-        """处理bar数据"""
-        print("SourceCodeStrategyLoader: handle_bar called")
-    
-    def handle_tick(mut self, tick: TickObject):
-        """处理tick数据"""
-        print("SourceCodeStrategyLoader: handle_tick called")
-    
-    def before_trading(mut self):
-        """交易前处理"""
-        print("SourceCodeStrategyLoader: before_trading called")
-    
-    def after_trading(mut self):
-        """交易后处理"""
-        print("SourceCodeStrategyLoader: after_trading called")
+        writer.write(
+            "SourceCodeStrategyLoader(code_length=", String(len(self._code)), ")"
+        )
+
+    def load(mut self, scope: PythonObject) raises -> PythonObject:
+        """Load strategy from source code string, compile and return scope."""
+        return compile_strategy(self._code, "strategy.py", scope)
 
 
 @fieldwise_init
 struct UserFuncStrategyLoader(StrategyLoader, Movable, Writable):
-    var _user_funcs: Dict[String, String]
-    var _scope: Dict[String, String]
-    
+    var _user_funcs: PythonObject
+    var _func_count: Int
+
+    def __init__(out self, user_funcs: PythonObject) raises:
+        self._user_funcs = user_funcs
+        var builtins = Python.import_module("builtins")
+        self._func_count = Int(py=builtins.len(user_funcs))
+
+    def __init__(out self, *, copy: Self):
+        self._user_funcs = copy._user_funcs
+        self._func_count = copy._func_count
+
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("UserFuncStrategyLoader(funcs=", String(self._user_funcs.len()), ")")
-    
-    def load(mut self):
-        """从用户函数加载策略"""
-        # 模拟从用户函数加载策略
-        self._scope["__name__"] = "rqmojo.strategy"
-        for key, value in self._user_funcs.items():
-            self._scope[key] = value
-    
-    def init(mut self):
-        """初始化策略"""
-        print("UserFuncStrategyLoader: init called")
-    
-    def handle_bar(mut self, bar: BarObject):
-        """处理bar数据"""
-        print("UserFuncStrategyLoader: handle_bar called")
-    
-    def handle_tick(mut self, tick: TickObject):
-        """处理tick数据"""
-        print("UserFuncStrategyLoader: handle_tick called")
-    
-    def before_trading(mut self):
-        """交易前处理"""
-        print("UserFuncStrategyLoader: before_trading called")
-    
-    def after_trading(mut self):
-        """交易后处理"""
-        print("UserFuncStrategyLoader: after_trading called")
+        writer.write(
+            "UserFuncStrategyLoader(funcs=", String(self._func_count), ")"
+        )
+
+    def load(mut self, scope: PythonObject) raises -> PythonObject:
+        """Update each function's globals with scope and return funcs."""
+        var six = Python.import_module("six")
+        for user_func in six.itervalues(self._user_funcs):
+            var func_globals = user_func.__globals__
+            func_globals.update(scope)
+        return self._user_funcs
 
 
-def create_file_strategy_loader(strategy_file: String) -> FileStrategyLoader:
-    """创建文件策略加载器"""
-    return FileStrategyLoader(
-        _strategy_file=strategy_file,
-        _scope=Dict[String, String]()
-    )
+def create_file_strategy_loader(
+    strategy_file_path: String,
+) -> FileStrategyLoader:
+    """Create a file strategy loader."""
+    return FileStrategyLoader(_strategy_file_path=strategy_file_path)
 
 
-def create_source_code_strategy_loader(source_code: String) -> SourceCodeStrategyLoader:
-    """创建源代码策略加载器"""
-    return SourceCodeStrategyLoader(
-        _source_code=source_code,
-        _scope=Dict[String, String]()
-    )
+def create_source_code_strategy_loader(code: String) -> SourceCodeStrategyLoader:
+    """Create a source code strategy loader."""
+    return SourceCodeStrategyLoader(_code=code)
 
 
-def create_user_func_strategy_loader(user_funcs: Dict[String, String]) -> UserFuncStrategyLoader:
-    """创建用户函数策略加载器"""
-    return UserFuncStrategyLoader(
-        _user_funcs=user_funcs,
-        _scope=Dict[String, String]()
-    )
-
-
-def create_strategy_loader(strategy_file: String = "", source_code: String = "", user_funcs: Dict[String, String] = Dict[String, String]()) -> StrategyLoader:
-    """创建策略加载器"""
-    if len(strategy_file) > 0:
-        return create_file_strategy_loader(strategy_file)
-    elif len(source_code) > 0:
-        return create_source_code_strategy_loader(source_code)
-    else:
-        return create_user_func_strategy_loader(user_funcs)
+def create_user_func_strategy_loader(
+    user_funcs: PythonObject,
+) raises -> UserFuncStrategyLoader:
+    """Create a user function strategy loader."""
+    return UserFuncStrategyLoader(user_funcs)
