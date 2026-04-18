@@ -91,9 +91,9 @@
 
 ## 第五组：依赖数量 2（共10个文件）
 
-| 序号 | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                                        |
-| -- | ------------------------------------------------------- | ----- | ---- | ------------------------------------------- |
-| 1  | `mod/rqalpha_mod_sys_transaction_cost/__init__.py`      | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             |
+| 序号 | 文件路径                                                    | 状态    | 依赖数量 | 依赖模块                                        | 人工复盘时间           |
+| -- | ------------------------------------------------------- | ----- | ---- | ------------------------------------------- | ---------------- |
+| 1  | `mod/rqalpha_mod_sys_transaction_cost/__init__.py`      | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | 2026-04-18 09:28 |
 | 2  | `mod/rqalpha_mod_sys_transaction_cost/deciders.py`      | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument` |
 | 3  | `mod/rqalpha_mod_sys_transaction_cost/mod.py`           | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.const`        |
 | 4  | `mod/rqalpha_mod_sys_scheduler/__init__.py`             | ✅ 已完成 | 2    | 内部相对导入                                      |
