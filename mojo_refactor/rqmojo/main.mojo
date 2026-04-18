@@ -34,7 +34,7 @@ from rqmojo.utils.logger import user_log, system_log, user_system_log, init_logg
 from rqmojo.utils.log_capture import LogCapture, create_log_capture
 from rqmojo.utils.persist_helper import PersistHelper, PersistProvider, create_memory_persist_provider
 from rqmojo.utils.config import RQAlphaConfig, BaseConfig, ExtraConfig, ModConfig, parse_config
-from rqmojo.utils import RqAttrDict, RqValue
+from rqmojo.utils import RqAttrDict
 
 
 comptime RUN_TYPE_BACKTEST_VAL: RUN_TYPE = RUN_TYPE.BACKTEST

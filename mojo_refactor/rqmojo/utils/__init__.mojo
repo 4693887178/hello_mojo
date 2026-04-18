@@ -1,263 +1,223 @@
 """
-RQMojo utils - RqValue and helper functions
+RQMojo utils - RqAttrDict with chain assignment support
+
+Python: config.base.start_date = "20150101"
+Mojo:  config["base"]["start_date"] = "20150101"
 """
 
-from std.collections import Dict, List
+from std.collections import Dict, List as StdList
+from std.utils import Variant
+from std.memory import ArcPointer
 
 
-comptime KIND_NONE: Int = 0
-comptime KIND_INT: Int = 1
-comptime KIND_FLOAT: Int = 2
-comptime KIND_BOOL: Int = 3
-comptime KIND_STRING: Int = 4
-comptime KIND_DICT: Int = 5
-comptime KIND_LIST: Int = 6
+struct NullValue(TrivialRegisterPassable, Writable):
+    @always_inline
+    def __init__(out self):
+        pass
+
+    @always_inline
+    def __eq__(self, other: NullValue) -> Bool:
+        return True
+
+    @always_inline
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("None")
 
 
-struct KeyValuePair(Copyable, Movable):
-    var key: String
-    var value: RqValue
+struct RqAttrDictIterator[origin: Origin](Iterator):
+    comptime Element: Movable = String
 
-    def __init__(out self, key: String, value: RqValue):
-        self.key = key
-        self.value = value.copy()
+    var _keys: StdList[String]
+    var _idx: Int
+    var _done: Bool
+
+    def __init__(out self, ref dict_ref: RqAttrDict):
+        self._keys = StdList[String]()
+        for k in dict_ref._children: self._keys.append(k)
+        for k in dict_ref._values:
+            if k != "__value__": self._keys.append(k)
+        self._idx = 0
+        self._done = len(self._keys) == 0
+
+    def __next__(mut self) raises StopIteration -> Self.Element:
+        if self._done:
+            raise StopIteration()
+        var key = self._keys[self._idx]
+        self._idx += 1
+        if self._idx >= len(self._keys):
+            self._done = True
+        return key
 
 
-struct RqValue(Copyable, Movable):
-    var kind: Int
-    var int_val: Int64
-    var float_val: Float64
-    var bool_val: Bool
-    var string_val: String
-    var dict_val: Dict[String, RqValue]
-    var list_val: List[RqValue]
+struct RqAttrDict(ImplicitlyCopyable, Movable, Writable, Iterable):
+    var _children: Dict[String, ArcPointer[RqAttrDict]]
+    var _values: Dict[String, Variant[NullValue, Int, Float64, String, Bool]]
 
     def __init__(out self):
-        self.kind = KIND_NONE
-        self.int_val = 0
-        self.float_val = 0.0
-        self.bool_val = False
-        self.string_val = ""
-        self.dict_val = Dict[String, RqValue]()
-        self.list_val = List[RqValue]()
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
 
-    def is_dict(self) -> Bool:
-        return self.kind == KIND_DICT
+    def __init__(out self, *, copy: RqAttrDict):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        for entry in copy._children.items():
+            var c = entry.value[].copy()
+            self._children[entry.key] = ArcPointer[RqAttrDict](c^)
+        for entry in copy._values.items():
+            self._values[entry.key] = entry.value
 
-    def is_list(self) -> Bool:
-        return self.kind == KIND_LIST
+    @implicit
+    def __init__(out self, value: NoneType._mlir_type):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        self._values["__value__"] = Variant[NullValue, Int, Float64, String, Bool](NullValue())
 
-    def is_string(self) -> Bool:
-        return self.kind == KIND_STRING
+    @implicit
+    def __init__(out self, value: Int):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        self._values["__value__"] = Variant[NullValue, Int, Float64, String, Bool](value)
 
-    def is_int(self) -> Bool:
-        return self.kind == KIND_INT
+    @implicit
+    def __init__(out self, value: Float64):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        self._values["__value__"] = Variant[NullValue, Int, Float64, String, Bool](value)
 
-    def is_float(self) -> Bool:
-        return self.kind == KIND_FLOAT
+    @implicit
+    def __init__(out self, value: String):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        self._values["__value__"] = Variant[NullValue, Int, Float64, String, Bool](value)
 
-    def is_bool(self) -> Bool:
-        return self.kind == KIND_BOOL
+    @implicit
+    def __init__(out self, value: Bool):
+        self._children = Dict[String, ArcPointer[RqAttrDict]]()
+        self._values = Dict[String, Variant[NullValue, Int, Float64, String, Bool]]()
+        self._values["__value__"] = Variant[NullValue, Int, Float64, String, Bool](value)
 
-    def is_none(self) -> Bool:
-        return self.kind == KIND_NONE
+    comptime IteratorType[
+        iterable_mut: Bool,
+    ]: Iterator = RqAttrDictIterator[origin=iterable_origin]
 
+    def __iter__(ref self) -> Self.IteratorType[origin_of(self)]:
+        var iter = RqAttrDictIterator[origin_of(self)](self)
+        return iter^
 
-def make_int_value(val: Int64) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_INT
-    result.int_val = val
-    return result^
+    def __getitem__(self, key: String) raises -> RqAttrDict:
+        if key in self._children:
+            return self._children[key][].copy()
+        if key in self._values:
+            var result = RqAttrDict()
+            result._values["__value__"] = self._values[key]
+            return result
+        return RqAttrDict()
 
+    def __setitem__(mut self, key: String, value: RqAttrDict) raises:
+        if "__value__" in value._values:
+            self._values[key] = value._values["__value__"]
+        elif len(value._children) > 0 or len(value._values) > 0:
+            var vcopy = value.copy()
+            self._children[key] = ArcPointer[RqAttrDict](vcopy^)
 
-def make_float_value(val: Float64) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_FLOAT
-    result.float_val = val
-    return result^
+    def to[ValueType: ImplicitlyCopyable](mut self, default: ValueType) raises -> ValueType:
+        if "__value__" in self._values and self._values["__value__"].isa[ValueType]():
+            return self._values["__value__"][ValueType]
+        return default
 
+    def contains(self, key: String) -> Bool:
+        return key in self._children or key in self._values
 
-def make_bool_value(val: Bool) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_BOOL
-    result.bool_val = val
-    return result^
+    def size(self) -> Int:
+        return len(self._children) + len(self._values)
 
-
-def make_string_value(val: String) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_STRING
-    result.string_val = val
-    return result^
-
-
-def make_dict_value(d: Dict[String, RqValue]) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_DICT
-    result.dict_val = d.copy()
-    return result^
-
-
-def make_list_value(l: List[RqValue]) -> RqValue:
-    var result = RqValue()
-    result.kind = KIND_LIST
-    result.list_val = l.copy()
-    return result^
-
-
-struct RqAttrDict(Copyable, Movable):
-    var data: Dict[String, RqValue]
-
-    def __init__(out self):
-        self.data = Dict[String, RqValue]()
-
-
-    def __init__(out self, d: Dict[String, RqValue]) raises:
-        self.data = Dict[String, RqValue]()
-        _init_from_dict(self.data, d)
-
-    def __str__(self) raises -> String:
-        return _dict_to_string(self.data)
-
-
-    def __repr__(self) raises -> String:
-        return _dict_to_string(self.data)
-
+    def is_empty(self) -> Bool:
+        return self.size() == 0
 
     def __bool__(self) -> Bool:
-        return len(self.data) > 0
+        return self.size() > 0
 
-    def __getitem__(self, key: String) raises -> RqValue:
-        return self.data[key].copy()
+    def keys(self) -> StdList[String]:
+        var r = StdList[String]()
+        for k in self._children: r.append(k)
+        for k in self._values:
+            if k != "__value__": r.append(k)
+        return r^
 
-    def __setitem__(mut self, key: String, value: RqValue):
-        self.data[key] = value.copy()
+    def child_keys(self) -> StdList[String]:
+        var r = StdList[String]()
+        for k in self._children: r.append(k)
+        return r^
 
-    def keys(self) -> List[String]:
-        var result = List[String]()
-        for k in self.data.keys():
-            result.append(k)
-        return result^
+    def value_keys(self) -> StdList[String]:
+        var r = StdList[String]()
+        for k in self._values:
+            if k != "__value__": r.append(k)
+        return r^
 
-    def values(self) raises -> List[RqValue]:
-        var result = List[RqValue]()
-        for k in self.data.keys():
-            result.append(self.data[k].copy())
-        return result^
+    def has_children(self) -> Bool:
+        return len(self._children) > 0
 
-    def items(self) raises -> List[KeyValuePair]:
-        var result = List[KeyValuePair]()
-        for k in self.data.keys():
-            result.append(KeyValuePair(k, self.data[k].copy()))
-        return result^
-
-    def iteritems(self) raises -> List[KeyValuePair]:
-        return self.items()
-
-    def __iter__(self) -> List[String]:
-        return self.keys()
+    def has_value(self) -> Bool:
+        return "__value__" in self._values
 
     def update(mut self, other: RqAttrDict) raises:
-        _merge_dicts(self.data, other.data)
+        for ck in other.child_keys():
+            var other_child = other._children[ck][].copy()
+            if ck in self._children:
+                self._children[ck][].update(other_child)
+            else:
+                self._children[ck] = ArcPointer[RqAttrDict](other_child^)
+        for vk in other.value_keys():
+            self._values[vk] = other._values[vk]
 
-    def convert_to_dict(self) raises -> Dict[String, RqValue]:
-        var result = Dict[String, RqValue]()
-        _copy_dict_recursive(result, self.data)
+    def items(self) raises -> Dict[String, String]:
+        var result = Dict[String, String]()
+        for vk in self.value_keys():
+            var v = self._values[vk]
+            if v.isa[String]():
+                result[vk] = v[String]
+            elif v.isa[Int]():
+                result[vk] = String(v[Int])
+            elif v.isa[Float64]():
+                result[vk] = String(v[Float64])
+            elif v.isa[Bool]():
+                result[vk] = "true" if v[Bool] else "false"
+            elif v.isa[NullValue]():
+                result[vk] = "None"
+        for ck in self.child_keys():
+            var child_items = self._children[ck][].items()
+            var child_keys_list = StdList[String]()
+            for chk in child_items.keys():
+                child_keys_list.append(chk)
+            for child_k in child_keys_list:
+                result[ck + "." + child_k] = child_items[child_k]
         return result^
 
+    def convert_to_dict(self) raises -> Dict[String, String]:
+        return self.items()
 
-def _dict_to_string(d: Dict[String, RqValue]) raises -> String:
-    var parts = List[String]()
-    for k in d.keys():
-        parts.append("'" + k + "': " + _value_to_string(d[k]))
-    return "{" + ", ".join(parts) + "}"
-
-
-def _value_to_string(v: RqValue) raises -> String:
-    if v.kind == KIND_NONE:
-        return "None"
-    if v.kind == KIND_INT:
-        return String(v.int_val)
-    if v.kind == KIND_FLOAT:
-        return String(v.float_val)
-    if v.kind == KIND_BOOL:
-        return "True" if v.bool_val else "False"
-    if v.kind == KIND_STRING:
-        return v.string_val
-    if v.kind == KIND_DICT:
-        return _dict_to_string(v.dict_val)
-    if v.kind == KIND_LIST:
-        return _list_to_string(v.list_val)
-    return "Unknown"
-
-
-def _list_to_string(l: List[RqValue]) raises -> String:
-    var parts = List[String]()
-    for item in l:
-        parts.append(_value_to_string(item))
-    return "[" + ", ".join(parts) + "]"
-
-
-def _copy_dict_recursive(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
-    for k in source.keys():
-        var v = source[k].copy()
-        if v.kind == KIND_DICT:
-            var nested = Dict[String, RqValue]()
-            _copy_dict_recursive(nested, v.dict_val)
-            target[k] = RqValue()
-            target[k].kind = KIND_DICT
-            target[k].dict_val = nested^
-        elif v.kind == KIND_LIST:
-            target[k] = RqValue()
-            target[k].kind = KIND_LIST
-            target[k].list_val = _copy_list_recursive(v.list_val)
-        else:
-            target[k] = v.copy()
-
-
-def _copy_list_recursive(source: List[RqValue]) raises -> List[RqValue]:
-    var result = List[RqValue]()
-    for item in source:
-        var v = item.copy()
-        if v.kind == KIND_DICT:
-            var nested = Dict[String, RqValue]()
-            _copy_dict_recursive(nested, v.dict_val)
-            var new_val = RqValue()
-            new_val.kind = KIND_DICT
-            new_val.dict_val = nested^
-            result.append(new_val^)
-        else:
-            result.append(v.copy())
-    return result^
-
-
-def _init_from_dict(mut target: Dict[String, RqValue], source: Dict[String, RqValue]) raises:
-    for k in source.keys():
-        var v = source[k].copy()
-        if v.kind == KIND_DICT:
-            var nested = Dict[String, RqValue]()
-            _init_from_dict(nested, v.dict_val)
-            target[k] = RqValue()
-            target[k].kind = KIND_DICT
-            target[k].dict_val = nested^
-        elif v.kind == KIND_LIST:
-            target[k] = RqValue()
-            target[k].kind = KIND_LIST
-            target[k].list_val = _copy_list_recursive(v.list_val)
-        else:
-            target[k] = v.copy()
-
-
-def _merge_dicts(mut target: Dict[String, RqValue], other: Dict[String, RqValue]) raises:
-    for k in other.keys():
-        var v = other[k].copy()
-        if v.kind == KIND_DICT:
-            if target.__contains__(k):
-                var existing = target[k].copy()
-                if existing.kind == KIND_DICT:
-                    _merge_dicts(existing.dict_val, v.dict_val)
-                    target[k] = existing.copy()
-                else:
-                    target[k] = v.copy()
-            else:
-                target[k] = v.copy()
+    def write_to(self, mut writer: Some[Writer]) raises:
+        writer.write("{")
+        var first = True
+        for vk in self.value_keys():
+            if not first: writer.write(", ")
+            first = False
+            var v = self._values[vk]
+            writer.write("'", vk, "': ")
+            if v.isa[String]():
+                writer.write("'", v[String], "'")
+            elif v.isa[Int]():
+                writer.write(v[Int])
+            elif v.isa[Float64]():
+                writer.write(v[Float64])
+            elif v.isa[Bool]():
+                writer.write("true" if v[Bool] else "false")
+            elif v.isa[NullValue]():
+                writer.write("None")
+        for ck in self.child_keys():
+            if not first: writer.write(", ")
+            first = False
+            writer.write("'", ck, "': ")
+            self._children[ck][].write_to(writer)
+        writer.write("}")

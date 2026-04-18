@@ -3,8 +3,8 @@ RQAlpha Mojo - Testing Fixtures
 Ported from rqalpha/utils/testing/fixtures.py
 """
 
-from std.collections import Dict, List
-from rqmojo.utils import RqAttrDict, RqValue
+from std.collections import Dict, List as StdList
+from rqmojo.utils import RqAttrDict
 from rqmojo.environment import Environment
 from rqmojo.core.strategy_universe import StrategyUniverse
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy
@@ -12,25 +12,25 @@ from rqmojo.data.data_proxy import DataProxy, create_data_proxy
 
 struct MagicMock(Movable):
     var _call_count: Int
-    var _call_args_list: List[String]
-    var _return_value: RqValue
+    var _call_args_list: StdList[String]
+    var _return_value: RqAttrDict
 
     def __init__(out self):
         self._call_count = 0
-        self._call_args_list = List[String]()
-        self._return_value = RqValue(None)
+        self._call_args_list = StdList[String]()
+        self._return_value = RqAttrDict()
 
-    def __call__(mut self) -> RqValue:
+    def __call__(mut self) -> RqAttrDict:
         self._call_count += 1
         self._call_args_list.append("()")
-        return self._return_value
+        return self._return_value.copy()
 
     def call_count(self) -> Int:
         return self._call_count
 
     def reset_mock(mut self):
         self._call_count = 0
-        self._call_args_list = List[String]()
+        self._call_args_list = StdList[String]()
 
 
 struct RQAlphaFixture:
