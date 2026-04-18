@@ -43,17 +43,17 @@ struct FrontendValidator(Writable, Copyable, Movable, ImplicitlyCopyable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("FrontendValidator(", self.name, ")")
 
-    def can_submit_order(self, order: Order, account_info: String) -> Bool:
+    def can_submit_order(self, order: Order, account: Optional[Account]) -> Bool:
         return True
 
-    def can_cancel_order(self, order: Order, account_info: String) -> Bool:
+    def can_cancel_order(self, order: Order, account: Optional[Account]) -> Bool:
         return True
 
-    def validate_submission(self, order: Order, account_info: String) -> String:
-        return ""
+    def validate_submission(self, order: Order, account: Optional[Account]) -> Optional[String]:
+        return Optional[String](None)
 
-    def validate_cancellation(self, order: Order, account_info: String) -> String:
-        return ""
+    def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
+        return Optional[String](None)
 
 
 @fieldwise_init
@@ -339,9 +339,9 @@ struct Environment(Movable):
         var account = self.portfolio.get_account(order.order_book_id)
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
-            var reason = v.validate_submission(order, account.__str__())
-            if reason != "":
-                self.order_creation_failed(order.order_book_id, reason)
+            var result = v.validate_submission(order, Optional[Account](account))
+            if result is not None and result.value() != "":
+                self.order_creation_failed(order.order_book_id, result.value())
                 return False
         return True
 
@@ -351,9 +351,9 @@ struct Environment(Movable):
         var account = self.portfolio.get_account(order.order_book_id)
         var validators = self._get_frontend_validators(instrument_type)
         for v in validators:
-            var reason = v.validate_cancellation(order, account.__str__())
-            if reason != "":
-                self.order_cancellation_failed(order.order_book_id, reason)
+            var result = v.validate_cancellation(order, Optional[Account](account))
+            if result is not None and result.value() != "":
+                self.order_cancellation_failed(order.order_book_id, result.value())
                 return False
         return True
 
