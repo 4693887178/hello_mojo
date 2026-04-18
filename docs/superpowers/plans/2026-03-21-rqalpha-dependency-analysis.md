@@ -114,7 +114,7 @@
 | 2  | `mod/rqalpha_mod_sys_risk/validators/__init__.py` | ✅ 已完成 | 2    | 内部相对导入                                                                  | 2026-04-18 20:36 |
 | 3  | `mod/rqalpha_mod_sys_accounts/__init__.py`        | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`                                         | 2026-04-18 20:30 |
 | 4  | `__main__.py`                                     | ✅ 已完成 | 2    | `rqalpha.cmds`, `rqalpha.mod.utils`                                     | <br />           |
-| 5  | `api.py`                                          | ✅ 已完成 | 3    | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const`             | <br />           |
+| 5  | `api.py`                                          | ✅ 已完成 | 3    | `rqalpha.utils`, `rqalpha.utils.exception`, `rqalpha.const`             | 2026-04-18 21:18 |
 | 6  | `cmds/bundle.py`                                  | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.cmds.entry`, `rqalpha.utils`             | <br />           |
 | 7  | `cmds/mod.py`                                     | ✅ 已完成 | 3    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.cmds.entry`      | <br />           |
 | 8  | `core/execution_context.py`                       | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.utils.exception`, `rqalpha.utils.i18n`        | <br />           |
