@@ -78,12 +78,12 @@
 | -- | ------------------------------------------ | ----- | ---- | ----------------------------------------------------------------------- | ---------------- |
 | 1  | `utils/logger.py`                          | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.config`, `rqalpha.utils.exception` | 2026-04-06 05:44 |
 | 2  | `utils/rq_json.py`                         | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.datetime_func`                   | 2026-04-06 06:02 |
-| 3  | `utils/strategy_loader_help.py`            | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.exception`                       | 2026-04-06 |
-| 4  | `utils/testing/__init__.py`                | ✅ 已完成 | 2    | `.mocking`, `.fixtures`, `.integration`                                    | 2026-04-06 |
-| 5  | `utils/arg_checker.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    |                      |
-| 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | 2026-04-06 |
-| 7  | `utils/functools.py`                       | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`                                   | 2026-04-06 |
-| 8  | `model/tick.py`                            | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.repr`                              | 2026-04-06 |
+| 3  | `utils/strategy_loader_help.py`            | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.exception`                       | 2026-04-06       |
+| 4  | `utils/testing/__init__.py`                | ✅ 已完成 | 2    | `.mocking`, `.fixtures`, `.integration`                                 | 2026-04-06       |
+| 5  | `utils/arg_checker.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | <br />           |
+| 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | 2026-04-06       |
+| 7  | `utils/functools.py`                       | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`                                   | 2026-04-06       |
+| 8  | `model/tick.py`                            | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.repr`                              | 2026-04-06       |
 | 9  | `mod/rqalpha_mod_sys_progress/__init__.py` | ✅ 已完成 | 2    | 内部相对导入                                                                  | 2026-04-18 10:08 |
 | 10 | `mod/rqalpha_mod_sys_progress/mod.py`      | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.utils.logger`                             | 2026-04-18 10:08 |
 
@@ -97,12 +97,12 @@
 | 2  | `mod/rqalpha_mod_sys_transaction_cost/deciders.py`      | ✅ 已完成 | 2    | `rqalpha.const`, `rqalpha.model.instrument` | 2026-04-18 11:03 |
 | 3  | `mod/rqalpha_mod_sys_transaction_cost/mod.py`           | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.const`        | 2026-04-18 12:14 |
 | 4  | `mod/rqalpha_mod_sys_scheduler/__init__.py`             | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 13:02 |
-| 5  | `mod/rqalpha_mod_sys_simulation/__init__.py`            | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             |
+| 5  | `mod/rqalpha_mod_sys_simulation/__init__.py`            | ✅ 已完成 | 2    | `rqalpha`, `rqalpha.utils.i18n`             | <br />           |
 | 6  | `mod/rqalpha_mod_sys_analyser/plot/__init__.py`         | ✅ 已完成 | 2    | 内部相对导入                                      | 2026-04-18 15:01 |
-| 7  | `mod/rqalpha_mod_sys_analyser/plot/consts.py`           | ✅ 已完成 | 2    | 无内部依赖                                       | 2026-04-18 15:01 |
-| 8  | `mod/rqalpha_mod_sys_analyser/report/__init__.py`       | ✅ 已完成 | 2    | 内部相对导入                                      |
-| 9  | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | ✅ 已完成 | 2    | 内部相对导入                                      |
-| 10 | `data/base_data_source/__init__.py`                     | ✅ 已完成 | 2    | 内部相对导入                                      |
+| 7  | `mod/rqalpha_mod_sys_analyser/plot/consts.py`           | ✅ 已完成 | 2    | 无内部依赖                                       | 2026-04-18 15:41 |
+| 8  | `mod/rqalpha_mod_sys_analyser/report/__init__.py`       | ✅ 已完成 | 2    | 内部相对导入                                      | <br />           |
+| 9  | `mod/rqalpha_mod_sys_analyser/report/excel_template.py` | ✅ 已完成 | 2    | 内部相对导入                                      | <br />           |
+| 10 | `data/base_data_source/__init__.py`                     | ✅ 已完成 | 2    | 内部相对导入                                      | <br />           |
 
 ***
 

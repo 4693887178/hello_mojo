@@ -1,36 +1,34 @@
 """
-RQAlpha Mojo - Order Validator
+RQAlpha Mojo - Order Style Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_simulation/validator.py
 """
 
-from rqmojo.const import ORDER_TYPE, MATCHING_TYPE
 from rqmojo.model.order import Order
+from rqmojo.const import ORDER_TYPE
 from rqmojo.interface import FrontendValidatorInterface
 
 
-struct OrderStyleValidator(FrontendValidatorInterface, Movable, Copyable):
+struct OrderStyleValidator(FrontendValidatorInterface, Movable):
     var frequency: String
-    
+
     def __init__(out self, frequency: String = "1d"):
         self.frequency = frequency
-    
+
     def validate_order(self, order: Order) -> Bool:
         return True
-    
+
     def can_submit_order(self, order: Order) -> Bool:
         return True
-    
+
     def can_cancel_order(self, order_id: Int) -> Bool:
         return True
-    
+
     def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
-        if order.style.style_type == ORDER_TYPE.LIMIT:
-            if order.style.limit_price <= 0:
-                return Optional[String]("Limit order price must be positive")
-        if self.frequency == "tick":
-            pass
+        if order.style.style_type == ORDER_TYPE.ALGO:
+            if self.frequency == "1m" or self.frequency == "tick":
+                return Optional[String]("algo order no support 1m and tick frequency")
         return Optional[String](None)
-    
+
     def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
         return Optional[String](None)
 

@@ -162,6 +162,18 @@ struct DataProxy(Movable):
     
     def get_last_price(self, order_book_id: String) -> Float64:
         return 10.0
+
+    def get_limit_up(self, order_book_id: String) -> Float64:
+        return 11.0
+
+    def get_limit_down(self, order_book_id: String) -> Float64:
+        return 9.0
+
+    def get_a1(self, order_book_id: String) -> Float64:
+        return 10.01
+
+    def get_b1(self, order_book_id: String) -> Float64:
+        return 9.99
     
     def get_all_instruments(self, type: String = "") -> List[Instrument]:
         var result = List[Instrument]()

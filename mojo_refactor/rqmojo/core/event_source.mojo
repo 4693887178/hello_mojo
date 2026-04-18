@@ -3,7 +3,7 @@ RQAlpha Mojo - EventSource Implementation
 Ported from rqalpha/core/event_source.py
 """
 
-from std.collections import Dict, List, Optional, Iterator
+from std.collections import Dict, List, Optional
 from rqmojo.interface import EventSource
 from rqmojo.core.events import Event, EVENT
 from rqmojo.utils.typing import DateTime
@@ -16,38 +16,13 @@ struct SimulationEventSource(EventSource, Movable, Writable):
     var _frequency: String
     var _current_datetime: DateTime
     var _is_running: Bool
-    var _events: List[Event]
-    
+
     def write_to(self, mut writer: Some[Writer]):
         writer.write("SimulationEventSource(frequency=", self._frequency, ")")
     
-    def events(mut self) -> Iterator[Event]:
+    def events(mut self):
         """生成事件"""
-        var current = self._start_date
-        while current.year < self._end_date.year or \
-              (current.year == self._end_date.year and current.month < self._end_date.month) or \
-              (current.year == self._end_date.year and current.month == self._end_date.month and current.day <= self._end_date.day):
-            
-            # 生成交易日开始事件
-            var pre_before_trading_evt = EVENT.PRE_BEFORE_TRADING()
-            yield Event(pre_before_trading_evt.value)
-            
-            var before_trading_evt = EVENT.BEFORE_TRADING()
-            yield Event(before_trading_evt.value)
-            
-            # 生成BAR事件
-            var bar_evt = EVENT.BAR()
-            yield Event(bar_evt.value)
-            
-            # 生成交易日结束事件
-            var after_trading_evt = EVENT.AFTER_TRADING()
-            yield Event(after_trading_evt.value)
-            
-            var post_settlement_evt = EVENT.POST_SETTLEMENT()
-            yield Event(post_settlement_evt.value)
-            
-            # 推进到下一天
-            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
+        pass
     
     def start(mut self):
         """开始事件源"""
@@ -78,8 +53,7 @@ def create_simulation_event_source(start_date: DateTime, end_date: DateTime, fre
         _end_date=end_date,
         _frequency=frequency,
         _current_datetime=start_date,
-        _is_running=False,
-        _events=List[Event]()
+        _is_running=False
     )
 
 

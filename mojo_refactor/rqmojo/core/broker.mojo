@@ -8,6 +8,7 @@ from rqmojo.interface import Broker
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
 from rqmojo.model.trade import Trade, create_trade
 from rqmojo.const import ORDER_STATUS, SIDE
+from rqmojo.portfolio.account import Account
 from rqmojo.utils.typing import DateTime
 
 

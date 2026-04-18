@@ -209,7 +209,7 @@ struct Environment(Movable):
     
     # 新增组件引用
     var _event_source: SimulationEventSource
-    var _strategy_loader: StrategyLoader
+    var _strategy_loader: FileStrategyLoader
     var _user_strategy: String
     var _profile_deco: PythonObject
     var _mod_dict: Dict[String, String]
@@ -499,7 +499,7 @@ struct Environment(Movable):
     def set_event_source(mut self, event_source: SimulationEventSource) -> None:
         self._event_source = event_source
 
-    def set_strategy_loader(mut self, loader: StrategyLoader) -> None:
+    def set_strategy_loader(mut self, loader: FileStrategyLoader) -> None:
         self._strategy_loader = loader
 
     def set_user_strategy(mut self, strategy: String) -> None:
@@ -552,7 +552,7 @@ struct Environment(Movable):
     def event_source(self) -> SimulationEventSource:
         return self._event_source
     
-    def strategy_loader(self) -> StrategyLoader:
+    def strategy_loader(self) -> FileStrategyLoader:
         return self._strategy_loader
     
     def user_strategy(self) -> String:
@@ -644,10 +644,10 @@ struct EnvironmentSingleton:
         self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
         self._initialized = False
 
-    def get_instance(self) raises -> Environment:
+    def get_instance(self) raises -> ref[Self] Environment:
         if not self._initialized:
             raise Error("Environment has not been created. Please create Environment first.")
-        return self._ptr^()
+        return self._ptr[]
 
     def set_instance(mut self, env: Environment) -> None:
         self._ptr = UnsafePointer[Environment, MutExternalOrigin].allocate()
@@ -664,14 +664,16 @@ struct EnvironmentSingleton:
         return self._initialized
 
 
-def _ensure_singleton() raises -> EnvironmentSingleton:
-    """Create or return the singleton instance."""
-    return EnvironmentSingleton()
+from std.python import Python, PythonObject
+
+var _global_env: PythonObject = Python.none()
 
 
 def get_environment() raises -> Environment:
     """获取Environment实例，与Python版本的get_instance()类似"""
-    return _ensure_singleton().get_instance()
+    if _global_env.is_none():
+        raise Error("Environment has not been created. Please create Environment first.")
+    raise Error("Use env parameter instead")
 
 
 def set_environment(env: Environment) -> None:
@@ -729,7 +731,7 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _trading_days_a_year=Optional[Int](None),
         _broker=create_broker(),
         _event_source=create_event_source(config.base.start_date, config.base.end_date, config.base.frequency),
-        _strategy_loader=create_strategy_loader(config.base.strategy_file),
+        _strategy_loader=create_file_strategy_loader(config.base.strategy_file),
         _user_strategy="user_strategy",
         _profile_deco=PythonObject(),
         _mod_dict=Dict[String, String](),
@@ -767,7 +769,7 @@ def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_T
         _trading_days_a_year=Optional[Int](None),
         _broker=create_broker(),
         _event_source=create_event_source(start_date, end_date, "1d"),
-        _strategy_loader=create_strategy_loader(),
+        _strategy_loader=create_file_strategy_loader(""),
         _user_strategy="user_strategy",
         _profile_deco=PythonObject(),
         _mod_dict=Dict[String, String](),

@@ -72,6 +72,9 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
             return fix_date(self.listed_date_str, DateTime(1990, 1, 1, 0, 0, 0, 0))
         except:
             return DateTime(1990, 1, 1, 0, 0, 0, 0)
+
+    def tick_size(self) -> Float64:
+        return 0.01
     
     def de_listed_date(self) -> DateTime:
         try:
