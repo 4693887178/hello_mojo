@@ -133,7 +133,7 @@
 | 4  | `mod/rqalpha_mod_sys_analyser/plot/utils.py`  | ✅ 已完成 | 3    | 内部相对导入                                                                    | 2026-04-19 01:23 |
 | 5  | `mod/rqalpha_mod_sys_risk/mod.py`             | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`               | 2026-04-19 01:56 |
 | 6  | `mod/rqalpha_mod_sys_scheduler/mod.py`        | ✅ 已完成 | 3    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.utils.logger`        | 2026-04-19 02:38 |
-| 7  | `mod/rqalpha_mod_sys_simulation/slippage.py`  | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment`             | <br />      |
+| 7  | `mod/rqalpha_mod_sys_simulation/slippage.py`  | ✅ 已完成 | 3    | `rqalpha.const`, `rqalpha.model.order`, `rqalpha.environment`             | 2026-04-19 03:23 |
 | 8  | `mod/rqalpha_mod_sys_simulation/validator.py` | ✅ 已完成 | 3    | `rqalpha.model.order`, `rqalpha.interface`                                | <br />      |
 | 9  | `mod/utils.py`                                | ✅ 已完成 | 3    | `rqalpha.utils.config`, `rqalpha.mod`, `rqalpha.utils.package_helper`     | 2026-04-19 01:10 |
 | 10 | `utils/testing/mocking.py`                    | ✅ 已完成 | 3    | `rqalpha.model.instrument`, `rqalpha.model.bar`, `rqalpha.model.tick`     | 2026-04-19 01:37 |

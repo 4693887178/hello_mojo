@@ -24,6 +24,7 @@ from rqmojo.mod.rqmojo_mod_sys_simulation.signal_broker import (
     create_signal_broker,
 )
 from rqmojo.mod.rqmojo_mod_sys_simulation.slippage import (
+    SlippageModel,
     SlippageDecider,
     PriceRatioSlippage,
     TickSizeSlippage,
