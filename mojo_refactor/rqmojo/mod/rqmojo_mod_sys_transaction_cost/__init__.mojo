@@ -4,7 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_transaction_cost/__init__.py
 """
 
 from rqmojo.mod.rqmojo_mod_sys_transaction_cost.deciders import StockTransactionCostDecider, FutureTransactionCostDecider, BondTransactionCostDecider
-from rqmojo.mod.rqmojo_mod_sys_transaction_cost.mod import TransactionCostMod, create_transaction_cost_mod
+from rqmojo.mod.rqmojo_mod_sys_transaction_cost.mod import TransactionCostMod, create_transaction_cost_mod, get_inst_type_in_stock_account
 from rqmojo.mod.utils import ConfigValue
 from argmojo import Argument, Command
 from std.collections import Dict, List

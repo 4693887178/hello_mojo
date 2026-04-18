@@ -55,11 +55,14 @@ def disable_mod(mod_name: String) -> Bool:
     return True
 
 
-def get_mod_config(mod_name: String) -> Dict[String, String]:
-    var config = Dict[String, String]()
+from rqmojo.utils import RqAttrDict
+
+
+def get_mod_config(mod_name: String) raises -> RqAttrDict:
+    var config = RqAttrDict()
     config["enabled"] = "true"
     config["name"] = mod_name
-    return config^
+    return config
 
 
 def run_mod_command(action: String, params: List[String]) -> Int:

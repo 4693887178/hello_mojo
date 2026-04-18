@@ -3,7 +3,7 @@ RQAlpha Mojo - Scheduler
 Ported from rqalpha/mod/rqalpha_mod_sys_scheduler/scheduler.py
 """
 
-from std.collections import Dict, List, Set
+from std.collections import Dict, List
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE, EXECUTION_PHASE
 from rqmojo.core.events import EVENT, Event, EventBus
 from rqmojo.environment import Environment
@@ -111,16 +111,15 @@ struct Scheduler(Writable, Movable):
     var _stage: String
     var _trading_minute_ranges: List[TradingMinuteRange]
     var _start_minute: Int
-    var _day_checkers: Dict[Int, String]
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("Scheduler(entries=", String(self._registry.__len__()), ")")
+        writer.write("Scheduler(entries=", String(len(self._registry)), ")")
 
     def __init__(out self, frequency: String):
         var trading_ranges = List[TradingMinuteRange]()
         trading_ranges.append(TradingMinuteRange(571, 690))
         trading_ranges.append(TradingMinuteRange(780, 900))
-        
+
         self._registry = List[ScheduleEntry]()
         self._frequency = frequency
         self._today = Optional[DateTime](None)
@@ -129,7 +128,6 @@ struct Scheduler(Writable, Movable):
         self._stage = ""
         self._trading_minute_ranges = trading_ranges^
         self._start_minute = 571
-        self._day_checkers = Dict[Int, String]()
 
     def _always_true_id(self) -> Int:
         return 0
@@ -154,7 +152,7 @@ struct Scheduler(Writable, Movable):
             return self._stage == "before_trading"
 
         var n = time_rule.minutes_since_midnight
-        
+
         if not self._is_in_trading_time(n):
             return False
 
@@ -217,34 +215,34 @@ struct Scheduler(Writable, Movable):
     def clear(mut self) -> None:
         self._registry.clear()
 
-    def next_day(mut self, var trading_dt: DateTime) -> None:
-        if self._registry.__len__() == 0:
+    def next_day(mut self, trading_dt: DateTime) -> None:
+        if len(self._registry) == 0:
             return
 
-        self._today = Optional[DateTime](trading_dt^)
+        self._today = Optional[DateTime](trading_dt)
         self._last_minute = self._start_minute
         self._current_minute = 0
 
-    def next_bar(mut self, var current_time: DateTime) -> List[String]:
+    def next_bar(mut self, current_time: DateTime) -> List[String]:
         self._current_minute = current_time.hour * 60 + current_time.minute
-        
+
         var result = List[String]()
-        
+
         for entry in self._registry:
             if self._check_time_rule(entry.time_rule):
                 result.append(entry.func_name)
-        
+
         self._last_minute = self._current_minute
         return result^
 
     def before_trading(mut self) -> List[String]:
         self._stage = "before_trading"
         var result = List[String]()
-        
+
         for entry in self._registry:
             if entry.time_rule.is_before_trading:
                 result.append(entry.func_name)
-        
+
         self._stage = ""
         return result^
 
@@ -254,12 +252,14 @@ struct Scheduler(Writable, Movable):
     def get_state(self) -> String:
         if self._today:
             var today = self._today.value()
-            return today.to_string() + "|" + String(self._last_minute)
+            return String(today) + "|" + String(self._last_minute)
         return ""
 
     def set_state(mut self, state: String) raises:
+        if len(state) == 0:
+            return
         var parts = state.split("|")
-        if parts.__len__() >= 2:
+        if len(parts) >= 2:
             var minute_str = String(parts[1])
             self._last_minute = _parse_int(minute_str)
             self._today = Optional[DateTime](_parse_datetime(String(parts[0])))
@@ -275,6 +275,9 @@ def _parse_int(s: String) raises -> Int:
 
 
 def create_scheduler(frequency: String = "1d") -> Scheduler:
+    var trading_ranges = List[TradingMinuteRange]()
+    trading_ranges.append(TradingMinuteRange(571, 690))
+    trading_ranges.append(TradingMinuteRange(780, 900))
     return Scheduler(
         _registry=List[ScheduleEntry](),
         _frequency=frequency,
@@ -282,7 +285,6 @@ def create_scheduler(frequency: String = "1d") -> Scheduler:
         _last_minute=0,
         _current_minute=0,
         _stage="",
-        _trading_minute_ranges=List[TradingMinuteRange](),
-        _start_minute=571,
-        _day_checkers=Dict[Int, String]()
+        _trading_minute_ranges=trading_ranges^,
+        _start_minute=571
     )

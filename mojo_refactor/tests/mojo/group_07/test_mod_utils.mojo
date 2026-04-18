@@ -5,13 +5,14 @@ Group 07 - File 09
 
 from std.collections import Dict, List
 from rqmojo.mod.utils import register_mod, unregister_mod, get_mod_config, parse_instrument_types, parse_markets
+from rqmojo.utils import RqAttrDict
 from rqmojo.const import INSTRUMENT_TYPE, MARKET
 
 from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 
 def test_register_mod() raises:
     print("Test: register_mod function")
-    var config = Dict[String, String]()
+    var config = RqAttrDict()
     config["enabled"] = "true"
     register_mod("test_mod", config)
     print("  PASSED")

@@ -4,12 +4,10 @@ Ported from rqalpha/mod/utils.py
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, MARKET
-from std.utils import Variant
-
-comptime ConfigValue = Variant[Float64, Bool, String]
+from rqmojo.utils import RqAttrDict
 
 
-def register_mod(mod_name: String, mod_config: Dict[String, String]):
+def register_mod(mod_name: String, mod_config: RqAttrDict):
     pass
 
 
@@ -17,8 +15,8 @@ def unregister_mod(mod_name: String):
     pass
 
 
-def get_mod_config(mod_name: String) -> Dict[String, String]:
-    return Dict[String, String]()
+def get_mod_config(mod_name: String) -> RqAttrDict:
+    return RqAttrDict()
 
 
 def parse_instrument_types(type_str: String) -> List[INSTRUMENT_TYPE]:

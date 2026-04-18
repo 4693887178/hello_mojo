@@ -5,6 +5,7 @@
 
 from rqmojo.mod.rqmojo_mod_sys_scheduler import SchedulerMod, create_scheduler_mod
 from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import Scheduler, create_scheduler
+from rqmojo.const import EXIT_CODE
 
 
 from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
@@ -21,9 +22,8 @@ def test_scheduler_mod_start_up() raises:
 
 
 def test_scheduler_mod_tear_down() raises:
-    from rqmojo.const import EXIT_CODE
     var mod = create_scheduler_mod()
-    mod.tear_down(EXIT_CODE.EXIT_SUCCESS, None)
+    mod.tear_down(EXIT_CODE.EXIT_SUCCESS, Optional[String](None))
     assert_true(True, "tear_down works")
 
 

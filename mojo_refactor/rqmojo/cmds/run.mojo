@@ -5,6 +5,7 @@ Ported from rqalpha/cmds/run.py
 
 from std.collections import Dict, List, Optional
 from rqmojo.const import RUN_TYPE, EXECUTION_PHASE, RUN_TYPE_BACKTEST, RUN_TYPE_PAPER_TRADING, RUN_TYPE_LIVE_TRADING
+from rqmojo.utils import RqAttrDict
 from rqmojo.environment import Environment, create_environment
 from rqmojo.core.executor import Executor, create_executor
 from rqmojo.core.events import EVENT, Event, create_event_bus
@@ -38,7 +39,7 @@ struct RunConfig(Movable, Copyable, ImplicitlyCopyable):
     var extra_vars: String
     var enable_profiler: Bool
     var config_path: String
-    var mod_configs: Dict[String, String]
+    var mod_configs: RqAttrDict
     var resume_mode: Bool
 
 
@@ -101,10 +102,10 @@ def run_strategy(
         extra_vars="",
         enable_profiler=False,
         config_path="",
-        mod_configs=Dict[String, String](),
+        mod_configs=RqAttrDict(),
         resume_mode=False
     )
-    
+
     return run_backtest(config)
 
 
@@ -263,6 +264,6 @@ def create_run_config_from_dict(params: Dict[String, String]) -> RunConfig:
         extra_vars=params.get("extra_vars", ""),
         enable_profiler=False,
         config_path=params.get("config_path", ""),
-        mod_configs=Dict[String, String](),
+        mod_configs=RqAttrDict(),
         resume_mode=False
     )

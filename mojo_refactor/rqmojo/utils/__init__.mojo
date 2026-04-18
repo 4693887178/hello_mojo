@@ -98,6 +98,7 @@ struct RqAttrDict(ImplicitlyCopyable, Movable, Writable, Iterable):
 
     comptime IteratorType[
         iterable_mut: Bool,
+        //, iterable_origin: Origin[mut=iterable_mut]
     ]: Iterator = RqAttrDictIterator[origin=iterable_origin]
 
     def __iter__(ref self) -> Self.IteratorType[origin_of(self)]:
