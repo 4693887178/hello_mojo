@@ -145,7 +145,7 @@
 | 序号 | 文件路径                                                  | 状态    | 依赖数量 | 依赖模块                                                                                             | 人工复盘时间 |
 | -- | ----------------------------------------------------- | ----- | ---- | ------------------------------------------------------------------------------------------------ | ----------- |
 | 1  | `cmds/run.py`                                         | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.utils.click_helper`, `rqalpha.utils.config`, `rqalpha.cmds.entry` | 2026-04-19 02:07 |
-| 2  | `core/strategy_context.py`                            | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | <br />      |
+| 2  | `core/strategy_context.py`                            | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | 2026-04-19 02:31 |
 | 3  | `data/base_data_source/storage_interface.py`          | ✅ 已完成 | 4    | `rqalpha.model.instrument`, `rqalpha.utils.typing`, `rqalpha.const`, `.deprecated`               | <br />      |
 | 4  | `data/instruments_mixin.py`                           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | <br />      |
 | 5  | `data/trading_dates_mixin.py`                         | ✅ 已完成 | 4    | `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.interface`        | <br />      |
