@@ -169,7 +169,7 @@
 | 6  | `mod/rqalpha_mod_sys_simulation/signal_broker.py`             | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.utils.logger`, `rqalpha.utils.i18n`, `rqalpha.core.events`                                               | 2026-04-19 09:59 |
 | 7  | `mod/rqalpha_mod_sys_simulation/testing.py`                   | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model`                                                           | 2026-04-19 11:06 |
 | 8  | `model/instrument.py`                                         | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`                                                           | 2026-04-19 12:02 |
-| 9  | `core/strategy.py`                                            | ✅ 已完成 | 5    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.const`                        | 2026-04-19 12:35 |
+| 9  | `core/strategy.py`                                            | ✅ 已完成 | 5    | `rqalpha.utils.logger`, `rqalpha.core.events`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`, `rqalpha.const`                        | 2026-04-19 12:36 |
 | 10 | `data/bundle.py`                                              | ✅ 已完成 | 5    | `rqalpha.apis.api_rqdatac`, `rqalpha.utils.concurrent`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools` | <br />           |
 
 ***
