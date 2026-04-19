@@ -153,7 +153,7 @@
 | 7  | `mod/rqalpha_mod_sys_accounts/component_validator.py` | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | 2026-04-19 06:04 |
 | 8  | `mod/rqalpha_mod_sys_accounts/validator.py`           | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`     | 2026-04-19 06:48 |
 | 9  | `mod/rqalpha_mod_sys_analyser/mod.py`                 | ✅ 已完成 | 4    | `rqalpha.interface`, `rqalpha.core.events`, `rqalpha.const`, `rqalpha.utils.i18n`                | 2026-04-19 12:25 |
-| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py`          | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | <br />           |
+| 10 | `mod/rqalpha_mod_sys_analyser/plot_store.py`          | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`             | 2026-04-19 12:52 |
 
 ***
 
