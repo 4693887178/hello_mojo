@@ -178,7 +178,7 @@ trait DataSource:
 
 
 trait Broker:
-    def submit_order(mut self, order: Order, account: Account):
+    def submit_order(mut self, mut order: Order, mut account: Account):
         ...
     def cancel_order(mut self, order_id: Int):
         ...
@@ -189,7 +189,7 @@ trait Broker:
 trait ModInterface:
     def start_up(mut self, env_name: String, mod_config_name: String):
         ...
-    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
+    def tear_down(mut self, code: EXIT_CODE, exception_msg: Optional[String]):
         ...
 
 

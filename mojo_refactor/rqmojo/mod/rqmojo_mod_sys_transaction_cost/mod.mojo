@@ -48,7 +48,7 @@ struct TransactionCostMod(ModInterface, Writable, Movable):
     def start_up(mut self, env_name: String, mod_config_name: String):
         pass
 
-    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]):
+    def tear_down(mut self, code: EXIT_CODE, exception_msg: Optional[String]):
         pass
 
     def init_from_config(mut self, config: Dict[String, ConfigValue]) raises:

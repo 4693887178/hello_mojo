@@ -512,11 +512,10 @@ struct DataProxy(Movable):
     
     def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
         var result = List[DateTime]()
-        var current = start_date
-        while current.year < end_date.year or (current.year == end_date.year and current.month < end_date.month) or (current.year == end_date.year and current.month == end_date.month and current.day <= end_date.day):
-            if self.is_trading_date(current):
-                result.append(current)
-            current = DateTime(current.year, current.month, current.day + 1, 0, 0, 0, 0)
+        var trading_results = self._trading_dates_mixin.get_trading_dates(start_date.year, start_date.month, start_date.day, end_date.year, end_date.month, end_date.day)
+        for i in range(len(trading_results)):
+            var tr = trading_results[i]
+            result.append(DateTime(tr.year, tr.month, tr.day, 0, 0, 0, 0))
         return result^
 
 

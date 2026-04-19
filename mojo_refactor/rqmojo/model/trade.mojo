@@ -36,6 +36,7 @@ struct Trade(Writable, Movable, Copyable, ImplicitlyCopyable):
     var quantity: Int
     var price: Float64
     var datetime: DateTime
+    var trading_datetime: DateTime
     var commission: Float64
     var tax: Float64
     
@@ -62,6 +63,7 @@ def create_trade_with_id(
         quantity=quantity,
         price=price,
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
+        trading_datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
         commission=commission,
         tax=tax
     )
@@ -98,6 +100,39 @@ def create_trade_from_order(
         quantity=quantity,
         price=price,
         datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
+        trading_datetime=DateTime(1970, 1, 1, 0, 0, 0, 0),
         commission=0.0,
         tax=0.0
+    )
+
+
+def create_trade_full(
+    trade_id: Int,
+    exec_id: String,
+    order_id: Int,
+    order_book_id: String,
+    side: SIDE,
+    position_effect: POSITION_EFFECT,
+    position_direction: POSITION_DIRECTION,
+    quantity: Int,
+    price: Float64,
+    datetime: DateTime,
+    trading_datetime: DateTime,
+    commission: Float64 = 0.0,
+    tax: Float64 = 0.0
+) -> Trade:
+    return Trade(
+        trade_id=trade_id,
+        exec_id=exec_id,
+        order_id=order_id,
+        order_book_id=order_book_id,
+        side=side,
+        position_effect=position_effect,
+        position_direction=position_direction,
+        quantity=quantity,
+        price=price,
+        datetime=datetime,
+        trading_datetime=trading_datetime,
+        commission=commission,
+        tax=tax
     )

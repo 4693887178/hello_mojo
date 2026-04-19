@@ -94,7 +94,7 @@ struct ProgressMod(ModInterface, Writable, Movable):
             bar.update(1)
             self._progress_bar = Optional[ProgressBar](bar^)
 
-    def tear_down(self, code: EXIT_CODE, exception_msg: Optional[String]) -> None:
+    def tear_down(mut self, code: EXIT_CODE, exception_msg: Optional[String]) -> None:
         if self._show and self._initialized and self._progress_bar:
             var bar = self._progress_bar.value().copy()
             bar.render_finish()
