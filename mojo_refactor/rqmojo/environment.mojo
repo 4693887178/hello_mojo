@@ -4,7 +4,6 @@ Ported from rqalpha/environment.py
 """
 
 from std.collections import Dict, List, Set, Optional
-from std.memory import UnsafePointer
 from std.python import Python, PythonObject
 from rqmojo.const import (
     RUN_TYPE, DEFAULT_ACCOUNT_TYPE, INSTRUMENT_TYPE, MARKET, SIDE, EXCHANGE,
@@ -21,7 +20,7 @@ from rqmojo.portfolio.position import Position
 from rqmojo.portfolio.portfolio_manager import Portfolio as PortfolioManager
 from rqmojo.core.broker import SimulationBroker, create_broker
 from rqmojo.core.event_source import SimulationEventSource, create_event_source
-from rqmojo.core.strategy_loader import StrategyLoader, create_strategy_loader, FileStrategyLoader, SourceCodeStrategyLoader, UserFuncStrategyLoader, create_file_strategy_loader
+from rqmojo.core.strategy_loader import StrategyLoader, FileStrategyLoader, SourceCodeStrategyLoader, UserFuncStrategyLoader, create_file_strategy_loader
 
 
 @fieldwise_init
@@ -86,7 +85,7 @@ struct PersistHelper(Writable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct TransactionCostArgs(Writable, Copyable, Movable, ImplicitlyCopyable):
+struct TransactionCostArgs(Writable, Copyable, Movable):
     var order: Order
     var instrument: Instrument
     var quantity: Int
@@ -345,7 +344,7 @@ struct Environment(Movable):
                 return False
         return True
 
-    def can_cancel_order(mut self, order: Order) -> Bool:
+    def can_cancel_order(mut self, order: Order) raises -> Bool:
         var instrument = self.get_instrument(order.order_book_id)
         var instrument_type = instrument.type()
         var account = self.portfolio.get_account(order.order_book_id)
@@ -363,10 +362,9 @@ struct Environment(Movable):
         var event = Event(evt.value)
         _ = self._event_bus.publish_event(event)
 
-    def order_cancellation_failed(mut self, order_book_id: String, reason: String) -> None:
+    def order_cancellation_failed(mut self, order_book_id: String, reason: String) raises -> None:
         print("WARNING: Order cancellation failed for " + order_book_id + ": " + reason)
-        var evt = EVENT.ORDER_CANCELLATION_REJECT()
-        var event = Event(evt.value)
+        var event = Event(EVENT.ORDER_CANCELLATION_REJECT.value)
         _ = self._event_bus.publish_event(event)
 
     def get_open_orders(self, order_book_id: String = "") -> List[Order]:
@@ -496,11 +494,11 @@ struct Environment(Movable):
         self._broker_name = "simulation"
         self._broker = broker^
 
-    def set_event_source(mut self, event_source: SimulationEventSource) -> None:
-        self._event_source = event_source
+    def set_event_source(mut self, var event_source: SimulationEventSource) -> None:
+        self._event_source = event_source^
 
-    def set_strategy_loader(mut self, loader: FileStrategyLoader) -> None:
-        self._strategy_loader = loader
+    def set_strategy_loader(mut self, var loader: FileStrategyLoader) -> None:
+        self._strategy_loader = loader^
 
     def set_user_strategy(mut self, strategy: String) -> None:
         self._user_strategy = strategy
@@ -521,16 +519,14 @@ struct Environment(Movable):
     # 持仓策略相关方法
     # ============================================================
     
-    def set_hold_strategy(mut self) -> None:
+    def set_hold_strategy(mut self) raises -> None:
         self._is_hold = True
-        var evt = EVENT.STRATEGY_HOLD_SET()
-        var event = Event(evt.value)
+        var event = Event(EVENT.STRATEGY_HOLD_SET.value)
         _ = self._event_bus.publish_event(event)
 
-    def cancel_hold_strategy(mut self) -> None:
+    def cancel_hold_strategy(mut self) raises -> None:
         self._is_hold = False
-        var evt = EVENT.STRATEGY_HOLD_CANCELLED()
-        var event = Event(evt.value)
+        var event = Event(EVENT.STRATEGY_HOLD_CANCELLED.value)
         _ = self._event_bus.publish_event(event)
 
     # ============================================================
@@ -545,15 +541,6 @@ struct Environment(Movable):
     
     def price_board(mut self) -> ref[self._data_proxy] DataProxy:
         return self._data_proxy
-    
-    def broker(self) -> SimulationBroker:
-        return self._broker
-    
-    def event_source(self) -> SimulationEventSource:
-        return self._event_source
-    
-    def strategy_loader(self) -> FileStrategyLoader:
-        return self._strategy_loader
     
     def user_strategy(self) -> String:
         return self._user_strategy
@@ -572,7 +559,7 @@ struct Environment(Movable):
         return len(self._broker_name) > 0
     
     def has_event_source(self) -> Bool:
-        return len(self._event_source) > 0
+        return self._event_source._start_date.year > 1970
     
     def has_portfolio(self) -> Bool:
         return self._portfolio_total_value > 0
@@ -629,44 +616,11 @@ struct Environment(Movable):
 
 
 # ============================================================
-# 单例模式支持 - 更接近Python版本的实现
-# 由于 Mojo 0.26.2 不支持真正的全局变量，使用函数级单例 + 可选参数模式
+# Single instance support via Python object backend.
+# Mojo 0.26.2 does not support module-level global variables,
+# so we use Python's evaluate() as a global state store,
+# matching Python's class-level _env pattern.
 # ============================================================
-
-@fieldwise_init
-struct EnvironmentSingleton:
-    """Environment singleton manager with get_instance support."""
-
-    var _ptr: UnsafePointer[Environment, MutExternalOrigin]
-    var _initialized: Bool
-
-    def __init__(out self):
-        self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
-        self._initialized = False
-
-    def get_instance(self) raises -> Environment:
-        if not self._initialized:
-            raise Error("Environment has not been created. Please create Environment first.")
-        return self._ptr[].copy()
-
-    def set_instance(mut self, env: Environment) -> None:
-        if self._initialized:
-            self._ptr.free()
-        self._ptr = UnsafePointer[Environment, MutExternalOrigin].allocate()
-        self._ptr.store(env)
-        self._initialized = True
-
-    def clear_instance(mut self) -> None:
-        if self._initialized:
-            self._ptr.free()
-        self._initialized = False
-        self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
-
-    def has_instance(self) -> Bool:
-        return self._initialized
-
-
-from std.python import Python, PythonObject
 
 
 def _get_env_store() raises -> PythonObject:
@@ -677,31 +631,30 @@ def _get_env_store() raises -> PythonObject:
     return store
 
 
-def get_environment() raises -> Environment:
-    """获取Environment实例，与Python版本的get_instance()类似"""
+def get_environment() raises -> PythonObject:
+    """Get the Environment instance, equivalent to Python's Environment.get_instance()."""
     var store = _get_env_store()
     var py_env = store.get("_env", Python.none())
     if Bool(py=py_env is None):
         raise Error("Environment has not been created. Please create Environment first.")
-    var ptr = py_env.downcast_value_ptr[Environment]()
-    return ptr[].copy()
+    return py_env
 
 
 def set_environment(var env: Environment) raises -> None:
-    """设置Environment实例"""
+    """Set the Environment instance as the global singleton."""
     var store = _get_env_store()
     store["_env"] = PythonObject(alloc=env^)
 
 
 def clear_environment() raises -> None:
-    """清理Environment实例"""
+    """Clear the Environment singleton."""
     var store = _get_env_store()
     if Bool(py="_env" in store):
         _ = store.pop("_env", Python.none())
 
 
 def has_environment() raises -> Bool:
-    """检查Environment实例是否存在"""
+    """Check whether an Environment instance exists."""
     var store = _get_env_store()
     return Bool(py="_env" in store)
 
