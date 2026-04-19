@@ -1,18 +1,20 @@
 """
 RQAlpha Mojo - Abstract Interfaces
 Ported from rqalpha/interface.py
+Complete implementation matching Python original
 """
 
 from std.collections import Dict, List, Optional
 from std.python import Python, PythonObject
 from rqmojo.const import (
     INSTRUMENT_TYPE, SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE,
-    POSITION_DIRECTION, EXIT_CODE, MARKET
+    POSITION_DIRECTION, EXIT_CODE, MARKET, TRADING_CALENDAR_TYPE
 )
 from rqmojo.model.order import Order
 from rqmojo.model.trade import Trade
 from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
+from rqmojo.model.instrument import Instrument
 from rqmojo.portfolio.account import Account
 from rqmojo.utils.typing import DateTime
 
@@ -34,7 +36,7 @@ struct TransactionCostArgs(Movable):
     var quantity: Int
     var side: SIDE
     var position_effect: POSITION_EFFECT
-    var order_id: Int
+    var order_id: Optional[Int]
     var close_today_quantity: Int
 
 
@@ -76,9 +78,9 @@ struct Snapshot(Copyable, Movable, ImplicitlyCopyable):
 
 
 trait Persistable:
-    def get_state(self) -> String:
+    def get_state(self) -> PythonObject:
         ...
-    def set_state(mut self, state: String):
+    def set_state(mut self, state: PythonObject):
         ...
 
 
@@ -119,11 +121,7 @@ trait StrategyLoader:
 
 
 trait EventSource:
-    def events(mut self):
-        ...
-    def start(mut self):
-        ...
-    def stop(mut self):
+    def events(mut self, start_date: DateTime, end_date: DateTime, frequency: String):
         ...
 
 
@@ -141,55 +139,154 @@ trait PriceBoard:
 
 
 trait DataSource:
-    def get_instrument_order_book_id(self, order_book_id: String) -> String:
+    def get_instruments(
+        self,
+        id_or_syms: Optional[List[String]] = None,
+        types: Optional[List[INSTRUMENT_TYPE]] = None
+    ) -> List[Instrument]:
         ...
-    def get_instrument_order_book_ids(
-        self, id_or_syms: Optional[List[String]]
-    ) -> List[String]:
+
+    def get_trading_calendars(self) -> Dict[TRADING_CALENDAR_TYPE, PythonObject]:
         ...
-    def get_bar(self, order_book_id: String, dt: DateTime) -> BarObject:
+
+    def get_yield_curve(
+        self,
+        start_date: DateTime,
+        end_date: DateTime,
+        tenor: Optional[String] = None
+    ) -> PythonObject:
         ...
-    def get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
+
+    def get_dividend(self, instrument: Instrument) -> Optional[PythonObject]:
         ...
-    def get_trading_dates(self, start_date: DateTime, end_date: DateTime) -> List[DateTime]:
+
+    def get_split(self, instrument: Instrument) -> Optional[PythonObject]:
         ...
+
+    def get_bar(
+        self,
+        order_book_id: String,
+        dt: DateTime,
+        frequency: String
+    ) -> PythonObject:
+        ...
+
+    def get_open_auction_bar(self, instrument: Instrument, dt: DateTime) -> Dict[String, PythonObject]:
+        ...
+
+    def get_open_auction_volume(self, instrument: Instrument, dt: DateTime) -> Float64:
+        ...
+
+    def get_settle_price(self, instrument: Instrument, date: DateTime) -> String:
+        ...
+
     def history_bars(
         self,
         order_book_id: String,
-        bar_count: Int,
+        bar_count: Optional[Int],
         frequency: String,
         fields: String,
         dt: DateTime,
-        skip_suspended: Bool,
-        include_now: Bool,
-        adjust_type: String
-    ) -> Optional[List[BarObject]]:
+        skip_suspended: Bool = True,
+        include_now: Bool = False,
+        adjust_type: String = 'pre',
+        adjust_orig: Optional[DateTime] = None
+    ) -> Optional[PythonObject]:
         ...
-    def history_ticks(self, order_book_id: String, count: Int, dt: DateTime) -> List[TickObject]:
+
+    def history_ticks(
+        self,
+        order_book_id: String,
+        count: Int,
+        dt: DateTime
+    ) -> List[TickObject]:
         ...
-    def current_snapshot(self, order_book_id: String, frequency: String, dt: DateTime) -> Snapshot:
+
+    def current_snapshot(
+        self,
+        instrument: Instrument,
+        frequency: String,
+        dt: DateTime
+    ) -> Snapshot:
         ...
+
+    def get_trading_minutes_for(
+        self,
+        instrument: Instrument,
+        trading_dt: DateTime
+    ) -> List[DateTime]:
+        ...
+
     def available_data_range(self, frequency: String) -> Tuple[DateTime, DateTime]:
         ...
-    def is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
+
+    def get_futures_trading_parameters(
+        self,
+        instrument: Instrument,
+        dt: DateTime
+    ) -> FuturesTradingParameters:
         ...
-    def is_st_stock(self, order_book_id: String, dt: DateTime) -> Bool:
+
+    def get_merge_ticks(
+        self,
+        order_book_id_list: List[String],
+        trading_date: DateTime,
+        last_dt: Optional[DateTime] = None
+    ) -> PythonObject:
+        ...
+
+    def get_share_transformation(self, order_book_id: String) -> Tuple[String, Float64]:
+        ...
+
+    def is_suspended(
+        self,
+        order_book_id: String,
+        dates: List[DateTime]
+    ) -> List[Bool]:
+        ...
+
+    def is_st_stock(
+        self,
+        order_book_id: String,
+        dates: List[DateTime]
+    ) -> List[Bool]:
+        ...
+
+    def get_algo_bar(
+        self,
+        id_or_ins: String,
+        start_min: Int,
+        end_min: Int,
+        dt: DateTime
+    ) -> Optional[PythonObject]:
+        ...
+
+    def get_exchange_rate(
+        self,
+        trading_date: DateTime,
+        local: MARKET,
+        settlement: MARKET = MARKET.CN
+    ) -> ExchangeRate:
         ...
 
 
 trait Broker:
-    def submit_order(mut self, mut order: Order, mut account: Account):
+    def submit_order(mut self, mut order: Order):
         ...
-    def cancel_order(mut self, order_id: Int):
+    def cancel_order(mut self, order: Order):
         ...
-    def get_open_orders(self) -> List[Order]:
+    def get_open_orders(self, order_book_id: Optional[String] = None) -> List[Order]:
         ...
 
 
 trait ModInterface:
-    def start_up(mut self, env_name: String, mod_config_name: String):
+    def start_up(mut self, env_name: PythonObject, mod_config: PythonObject):
         ...
-    def tear_down(mut self, code: EXIT_CODE, exception_msg: Optional[String]):
+    def tear_down(
+        mut self,
+        code: EXIT_CODE,
+        exception_msg: Optional[PythonObject] = None
+    ):
         ...
 
 
@@ -197,11 +294,9 @@ comptime Mod = ModInterface
 
 
 trait PersistProviderInterface:
-    def store(mut self, key: String, value: String):
+    def store(mut self, key: String, value: PythonObject):
         ...
-    def load(self, key: String) -> Optional[String]:
-        ...
-    def remove(mut self, key: String):
+    def load(self, key: String) -> Optional[PythonObject]:
         ...
     def should_resume(self) -> Bool:
         ...
@@ -210,20 +305,20 @@ trait PersistProviderInterface:
 
 
 trait FrontendValidatorInterface:
-    def validate_order(self, order: Order) -> Bool:
+    def validate_submission(
+        self,
+        order: Order,
+        account: Optional[Account] = None
+    ) -> Optional[String]:
         ...
-    def can_submit_order(self, order: Order) -> Bool:
-        ...
-    def can_cancel_order(self, order_id: Int) -> Bool:
-        ...
-    def validate_submission(self, order: Order, account: Optional[Account]) -> Optional[String]:
-        ...
-    def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
+    def validate_cancellation(
+        self,
+        order: Order,
+        account: Optional[Account] = None
+    ) -> Optional[String]:
         ...
 
 
 trait TransactionCostDeciderInterface:
-    def get_transaction_cost(self, order: Order, trade: Trade) -> Float64:
-        ...
     def calc(self, args: TransactionCostArgs) -> TransactionCost:
         ...
