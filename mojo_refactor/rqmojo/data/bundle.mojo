@@ -478,7 +478,7 @@ def gen_future_info(d: String) raises:
     f_out.close()
 
 
-def process_init(args: PythonObject = Python.none(), kwargs: PythonObject = Python.dict()) raises:
+def process_init(args: PythonObject, kwargs: PythonObject) raises:
     var warnings = Python.import_module("warnings")
     var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
     warnings.catch_warnings(record=True)
@@ -487,11 +487,16 @@ def process_init(args: PythonObject = Python.none(), kwargs: PythonObject = Pyth
     init_logger()
 
 
+def process_init_default() raises:
+    var kwargs = Python.dict()
+    process_init(Python.none(), kwargs)
+
+
 def gather_tasks(
     path: String,
     create: Bool,
     enable_compression: Bool,
-    h5_kwargs: PythonObject = Python.dict()
+    h5_kwargs: PythonObject
 ) raises -> PythonObject:
     var tasks: PythonObject = []
 
@@ -650,7 +655,7 @@ def gather_tasks(
     return tasks
 
 
-def run_tasks(tasks: PythonObject, concurrency: Int = 1, rqdatac_kwargs: PythonObject = Python.dict()) raises -> Bool:
+def run_tasks(tasks: PythonObject, concurrency: Int, rqdatac_kwargs: PythonObject) raises -> Bool:
     var multiprocessing = Python.import_module("multiprocessing")
     var ctypes_mod = Python.import_module("ctypes")
 
@@ -664,29 +669,31 @@ def run_tasks(tasks: PythonObject, concurrency: Int = 1, rqdatac_kwargs: PythonO
             _execute_day_bar_update(task)
         elif task_type == "gen_func":
             var func_name = task["func_name"]
-            var path = task["path"]
+            var path_py = task["path"]
+            var path_str = String(py=path_py)
             if func_name == "gen_instruments":
-                gen_instruments(path)
+                gen_instruments(path_str)
             elif func_name == "gen_trading_dates":
-                gen_trading_dates(path)
+                gen_trading_dates(path_str)
             elif func_name == "gen_st_days":
-                gen_st_days(path)
+                gen_st_days(path_str)
             elif func_name == "gen_suspended_days":
-                gen_suspended_days(path)
+                gen_suspended_days(path_str)
             elif func_name == "gen_yield_curve":
-                gen_yield_curve(path)
+                gen_yield_curve(path_str)
             elif func_name == "gen_share_transformation":
-                gen_share_transformation(path)
+                gen_share_transformation(path_str)
             elif func_name == "gen_future_info":
-                gen_future_info(path)
+                gen_future_info(path_str)
             elif func_name == "gen_dividend":
-                gen_dividend(path)
+                gen_dividend(path_str)
             elif func_name == "gen_split":
-                gen_split(path)
+                gen_split(path_str)
             elif func_name == "gen_ex_factor":
-                gen_ex_factor(path)
+                gen_ex_factor(path_str)
 
-    return succeed.value != 0
+    var result_val = succeed.value
+    return Bool(py=result_val)
 
 
 def _execute_day_bar_generate(task: PythonObject) raises:
@@ -714,17 +721,18 @@ def _execute_day_bar_generate(task: PythonObject) raises:
             expect_df=True, market=market
         )
         var df_is_none = df is None
-        var df_empty = False
+        var df_empty: Bool = False
         if not df_is_none:
-            df_empty = bool(df.empty)
+            var empty_val = df.empty
+            df_empty = Bool(py=empty_val)
         if not (df_is_none or df_empty):
             df.reset_index(inplace=True)
             df["datetime"] = _convert_dates_to_python(df["date"], True)
-            del df["date"]
+            df.pop("date")
             df.set_index(Python.list("order_book_id", "datetime"), inplace=True)
             df.sort_index(inplace=True)
             for order_book_id in df.index.levels[0]:
-                h5.create_dataset(order_book_id, data=df.loc[order_book_id].to_records(), **h5_kwargs)
+                h5.create_dataset(order_book_id, data=df.loc[order_book_id].to_records())
         i += step
         if i >= len(order_book_ids):
             break
@@ -751,8 +759,6 @@ def _execute_day_bar_update(task: PythonObject) raises:
         h5_check.close()
     except OSError:
         need_recreate_h5 = True
-    except RuntimeError:
-        need_recreate_h5 = True
 
     if need_recreate_h5:
         _execute_day_bar_generate(task)
@@ -774,10 +780,8 @@ def _execute_day_bar_update(task: PythonObject) raises:
                 var last_date = Int(py=last_date_val) // 1000000
             except OSError:
                 print("Error: File update failed - " + file_path)
-                h5.pop(order_book_id)
-                start_date = START_DATE
-            except ValueError:
-                h5.pop(order_book_id)
+                if order_book_id in h5:
+                    h5.pop(order_book_id)
                 start_date = START_DATE
             else:
                 var next_dt = rqdatac.get_next_trading_date(last_date)
@@ -791,15 +795,16 @@ def _execute_day_bar_update(task: PythonObject) raises:
             expect_df=True, market=market
         )
         var df_is_none = df is None
-        var df_empty = False
+        var df_empty: Bool = False
         if not df_is_none:
-            df_empty = bool(df.empty)
+            var empty_val2 = df.empty
+            df_empty = Bool(py=empty_val2)
         if not (df_is_none or df_empty):
             df = df[fields]
             df = df.loc[order_book_id]
             df.reset_index(inplace=True)
             df["datetime"] = _convert_dates_to_python(df["date"], True)
-            del df["date"]
+            df.pop("date", None)
             df.set_index("datetime", inplace=True)
 
             if order_book_id in h5:
@@ -811,48 +816,56 @@ def _execute_day_bar_update(task: PythonObject) raises:
                 for nr in new_records:
                     combined.append(nr)
                 var data = numpy.array(combined, dtype=h5[order_book_id].dtype)
-                h5.pop(order_book_id)
+                h5.pop(order_book_id, None)
                 h5.create_dataset(order_book_id, data=data, **h5_kwargs)
             else:
                 h5.create_dataset(order_book_id, data=df.to_records(), **h5_kwargs)
     h5.close()
 
 
-def _h5_has_valid_fields(h5: PythonObject, wanted_fields: PythonObject) -> Bool:
+def _h5_has_valid_fields(h5: PythonObject, wanted_fields: PythonObject) raises -> Bool:
     var keys_iter = h5.keys()
     var wanted_fields_set: PythonObject = Python.dict()
     for wf in wanted_fields:
         wanted_fields_set[wf] = True
     wanted_fields_set["datetime"] = True
-    try:
-        var first_key = next(keys_iter)
-        var h5_fields = h5[first_key].dtype.fields.keys()
-        var result: Bool = True
-        for key in wanted_fields_set.keys():
-            var found: Bool = False
-            for hf in h5_fields:
-                if key == hf:
-                    found = True
-                    break
-            if not found:
-                result = False
+    var has_keys: Bool = False
+    var first_key: PythonObject = Python.none()
+    for k in keys_iter:
+        if not has_keys:
+            first_key = k
+            has_keys = True
+    if not has_keys:
+        return False
+    var h5_fields = h5[first_key].dtype.fields.keys()
+    var result: Bool = True
+    for key in wanted_fields_set.keys():
+        var found: Bool = False
+        for hf in h5_fields:
+            if key == hf:
+                found = True
                 break
-        return result
-    except StopIteration:
-        pass
-    return False
+        if not found:
+            result = False
+            break
+    return result
 
 
 def update_bundle(
     path: String,
     create: Bool,
-    enable_compression: Bool = False,
-    concurrency: Int = 1,
-    rqdata_kwargs: PythonObject = Python.dict(),
-    h5_kwargs: PythonObject = Python.dict()
+    enable_compression: Bool,
+    concurrency: Int,
+    rqdata_kwargs: PythonObject,
+    h5_kwargs: PythonObject
 ) raises -> Bool:
     var tasks = gather_tasks(path, create, enable_compression, h5_kwargs)
     return run_tasks(tasks, concurrency, rqdata_kwargs)
+
+
+def update_bundle_default(path: String, create: Bool) raises -> Bool:
+    var empty_dict = Python.dict()
+    return update_bundle(path, create, False, 1, empty_dict, empty_dict)
 
 
 @fieldwise_init
@@ -1004,12 +1017,17 @@ struct AutomaticUpdateBundle(Writable, Movable):
         self._bundle = Bundle(path)
         self._filename = os_path.join(path, filename)
         self._api = api
-        self._fields = fields
+        var fields_copy: List[String] = []
+        for f in fields:
+            fields_copy.append(f)
+        self._fields = fields_copy^
         self._end_date = end_date
         self._start_date = start_date
-        self._updated = List[String]()
+        var updated_list: List[String] = []
+        self._updated = updated_list^
         from rqmojo.environment import Environment
-        self._env = Environment.get_instance()
+        var env_mod = Python.import_module("rqmojo.environment")
+        self._env = env_mod.Environment.get_instance()
         var filelock = Python.import_module("filelock")
         self._file_lock = filelock.FileLock(self._filename + ".lock")
 
@@ -1019,10 +1037,14 @@ struct AutomaticUpdateBundle(Writable, Movable):
         if data is None:
             return None
         else:
+            if data is None:
+                return None
             var numpy = Python.import_module("numpy")
-            var searchsorted_result = numpy.searchsorted(data, dt_int)
+            var data_for_search = data
+            var searchsorted_result = numpy.searchsorted(data_for_search, dt_int)
             var idx_int = Int(py=searchsorted_result)
-            if idx_int >= len(data):
+            var data_len: Int = len(data)
+            if idx_int >= data_len:
                 return None
             return data[idx_int]
 
