@@ -1,36 +1,41 @@
 """
-RQAlpha Mojo - Account Validator
+RQAlpha Mojo - Margin Instrument Validator
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/validator.py
 """
 
-from rqmojo.const import SIDE, POSITION_EFFECT, DEFAULT_ACCOUNT_TYPE
 from rqmojo.model.order import Order
+from rqmojo.portfolio.account import Account
 from rqmojo.interface import FrontendValidatorInterface
 
 
-@fieldwise_init
-struct AccountValidator(FrontendValidatorInterface, Movable):
-    var enabled: Bool
-    
+struct MarginInstrumentValidator(FrontendValidatorInterface, Movable, Copyable, ImplicitlyCopyable, Writable):
+    def __init__(out self):
+        pass
+
     def validate_order(self, order: Order) -> Bool:
-        if not self.enabled:
-            return True
         return True
-    
+
     def can_submit_order(self, order: Order) -> Bool:
         return True
-    
+
     def can_cancel_order(self, order_id: Int) -> Bool:
         return True
-    
-    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
-        if not self.enabled:
+
+    def validate_submission(self, order: Order, account: Optional[Account]) -> Optional[String]:
+        if account is None:
             return None
-        return None
-    
-    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+        var acc = account.value()
+        if acc.cash_liabilities > 0:
+            var reason = "Order Creation Failed: cash liabilities > 0, " + order.order_book_id + " not support submit order"
+            return reason
         return None
 
+    def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
+        return None
 
-def create_account_validator(enabled: Bool = True) -> AccountValidator:
-    return AccountValidator(enabled=enabled)
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("MarginInstrumentValidator()")
+
+
+def create_margin_instrument_validator() -> MarginInstrumentValidator:
+    return MarginInstrumentValidator()

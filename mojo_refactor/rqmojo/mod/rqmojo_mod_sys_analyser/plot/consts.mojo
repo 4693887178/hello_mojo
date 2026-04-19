@@ -4,6 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/consts.py
 """
 
 from std.io import Writer
+from std.collections import List, Dict
 
 
 @fieldwise_init
@@ -57,6 +58,21 @@ struct IndexRange(Copyable, Movable, Writable):
 
     def _days(self) -> Int:
         return self.end - self.start
+
+    @staticmethod
+    def new(start_idx: Int, end_idx: Int, index: List[String]) -> IndexRange:
+        """Factory method matching Python IndexRange.new(start, end, index).
+        
+        Extracts date strings from index at given positions.
+        Falls back to empty string if index is too short.
+        """
+        var sd = ""
+        var ed = ""
+        if start_idx >= 0 and start_idx < len(index):
+            sd = index[start_idx]
+        if end_idx >= 0 and end_idx < len(index):
+            ed = index[end_idx]
+        return IndexRange(start=start_idx, end=end_idx, start_date=sd, end_date=ed)
 
 
 @fieldwise_init

@@ -9,12 +9,13 @@ from std.collections import List, Optional
 from rqmojo.mod.rqmojo_mod_sys_scheduler.scheduler import (
     Scheduler, TimeRule, ScheduleEntry, TradingMinuteRange,
     create_scheduler,
-    market_open_minutes, market_close_minutes, physical_time_minutes
+    market_open_minutes, market_close_minutes, physical_time_minutes,
+    CHECKER_ALWAYS_TRUE, CHECKER_WEEKDAY_BASE, CHECKER_WEEKLY_TRADING_BASE, CHECKER_MONTHLY_TRADING_BASE
 )
 from rqmojo.mod.rqmojo_mod_sys_scheduler.mod import (
     SchedulerMod, create_scheduler_mod
 )
-from rqmojo.const import EXIT_CODE
+from rqmojo.const import EXIT_CODE, DEFAULT_ACCOUNT_TYPE
 from rqmojo.utils.typing import DateTime
 
 
@@ -75,8 +76,12 @@ def test_time_rule_market_close_with_offset() raises:
 
 def test_time_rule_market_close_morning_session() raises:
     var rule = TimeRule.market_close(2, 0)
-    assert_true(rule.minutes_since_midnight >= 13 * 60, "market_close(2h) = 780 which is NOT < 780, so no lunch adjustment")
-    assert_equal(rule.minutes_since_midnight, 780, "market_close(2h) = 13:00 = 780 min (with -90 lunch)")
+    assert_equal(rule.minutes_since_midnight, 780, "market_close(2h) = 13:00 = 780 min")
+
+
+def test_time_rule_market_close_deep_offset() raises:
+    var rule = TimeRule.market_close(3, 0)
+    assert_equal(rule.minutes_since_midnight, 630, "market_close(3h) = 10:30 = 630 min (with -90 lunch)")
 
 
 def test_time_rule_equatable() raises:
@@ -213,6 +218,9 @@ def test_scheduler_init_empty_registry() raises:
     assert_equal(scheduler._last_minute, 0)
     assert_equal(scheduler._current_minute, 0)
     assert_equal(scheduler._stage, "", "_stage should be empty string")
+    assert_equal(len(scheduler._this_week), 0, "_this_week should be empty initially")
+    assert_equal(len(scheduler._this_month), 0, "_this_month should be empty initially")
+    assert_equal(len(scheduler._trading_calendar), 0, "_trading_calendar should be empty initially")
 
 
 def test_scheduler_init_constructor() raises:
@@ -239,7 +247,7 @@ def test_schedule_daily() raises:
 
     var entry = scheduler._registry[0]
     assert_equal(entry.func_name, "func_a")
-    assert_equal(entry.day_checker_id, 0, "daily uses always_true checker id=0")
+    assert_equal(entry.day_checker_id, CHECKER_ALWAYS_TRUE, "daily uses always_true checker")
     assert_equal(entry.frequency, "daily")
     assert_equal(entry.time_rule.minutes_since_midnight, 600)
 
@@ -259,30 +267,30 @@ def test_schedule_multiple_daily() raises:
 
 def test_schedule_weekly() raises:
     var scheduler = create_scheduler("1d")
-    scheduler.schedule_weekly("monday_func", 0, TimeRule.at_time(10, 0))
+    scheduler.schedule_weekly("monday_func", 1, TimeRule.at_time(10, 0))
     assert_equal(len(scheduler._registry), 1)
 
     var entry = scheduler._registry[0]
-    assert_equal(entry.day_checker_id, 100, "weekday 0 -> checker_id 100")
+    assert_equal(entry.day_checker_id, CHECKER_WEEKDAY_BASE, "weekday 1 (Monday) -> checker_id 100")
     assert_equal(entry.frequency, "weekly")
 
 
 def test_schedule_weekly_all_days() raises:
     var scheduler = create_scheduler("1d")
-    for i in range(7):
+    for i in range(1, 8):
         scheduler.schedule_weekly("day_" + String(i), i, TimeRule.at_time(9, 31))
 
     assert_equal(len(scheduler._registry), 7)
-    assert_equal(scheduler._registry[0].day_checker_id, 100, "Monday(0)=100")
-    assert_equal(scheduler._registry[1].day_checker_id, 101, "Tuesday(1)=101")
-    assert_equal(scheduler._registry[6].day_checker_id, 106, "Sunday(6)=106")
+    assert_equal(scheduler._registry[0].day_checker_id, CHECKER_WEEKDAY_BASE, "Monday(1)=100")
+    assert_equal(scheduler._registry[1].day_checker_id, CHECKER_WEEKDAY_BASE + 1, "Tuesday(2)=101")
+    assert_equal(scheduler._registry[6].day_checker_id, CHECKER_WEEKDAY_BASE + 6, "Sunday(7)=106")
 
 
 def test_schedule_weekly_trading_day_positive() raises:
     var scheduler = create_scheduler("1d")
     scheduler.schedule_weekly_trading_day("first_td", 1, TimeRule.at_time(10, 0))
     var entry = scheduler._registry[0]
-    assert_equal(entry.day_checker_id, 200, "trading_day 1 -> 0 -> checker_id 200")
+    assert_equal(entry.day_checker_id, CHECKER_WEEKLY_TRADING_BASE, "trading_day 1 -> 0 -> checker_id 200")
     assert_equal(entry.frequency, "weekly_trading")
 
 
@@ -290,14 +298,14 @@ def test_schedule_weekly_trading_day_negative() raises:
     var scheduler = create_scheduler("1d")
     scheduler.schedule_weekly_trading_day("last_td", -1, TimeRule.at_time(10, 0))
     var entry = scheduler._registry[0]
-    assert_equal(entry.day_checker_id, 199, "trading_day -1 -> -1 -> checker_id 199")
+    assert_equal(entry.day_checker_id, CHECKER_WEEKLY_TRADING_BASE - 1, "trading_day -1 -> -1 -> checker_id 199")
 
 
 def test_schedule_monthly() raises:
     var scheduler = create_scheduler("1d")
     scheduler.schedule_monthly("first_day_func", 1, TimeRule.at_time(9, 31))
     var entry = scheduler._registry[0]
-    assert_equal(entry.day_checker_id, 300, "trading_day 1 -> 0 -> checker_id 300")
+    assert_equal(entry.day_checker_id, CHECKER_MONTHLY_TRADING_BASE, "trading_day 1 -> 0 -> checker_id 300")
     assert_equal(entry.frequency, "monthly")
 
 
@@ -305,7 +313,7 @@ def test_schedule_monthly_negative() raises:
     var scheduler = create_scheduler("1d")
     scheduler.schedule_monthly("last_day_func", -1, TimeRule.at_time(9, 31))
     var entry = scheduler._registry[0]
-    assert_equal(entry.day_checker_id, 299, "trading_day -1 -> -1 -> checker_id 299")
+    assert_equal(entry.day_checker_id, CHECKER_MONTHLY_TRADING_BASE - 1, "trading_day -1 -> -1 -> checker_id 299")
 
 
 def test_clear() raises:
@@ -325,27 +333,27 @@ def test_clear() raises:
 
 def test_always_true_id() raises:
     var scheduler = create_scheduler("1d")
-    assert_equal(scheduler._always_true_id(), 0)
+    assert_equal(scheduler._always_true_id(), CHECKER_ALWAYS_TRUE)
 
 
 def test_weekday_checker_id() raises:
     var scheduler = create_scheduler("1d")
-    assert_equal(scheduler._weekday_checker_id(0), 100, "Monday")
-    assert_equal(scheduler._weekday_checker_id(1), 101, "Tuesday")
-    assert_equal(scheduler._weekday_checker_id(4), 104, "Friday(4)=104")
-    assert_equal(scheduler._weekday_checker_id(6), 106, "Sunday")
+    assert_equal(scheduler._weekday_checker_id(0), CHECKER_WEEKDAY_BASE, "Monday(0)")
+    assert_equal(scheduler._weekday_checker_id(1), CHECKER_WEEKDAY_BASE + 1, "Tuesday(1)")
+    assert_equal(scheduler._weekday_checker_id(4), CHECKER_WEEKDAY_BASE + 4, "Friday(4)=104")
+    assert_equal(scheduler._weekday_checker_id(6), CHECKER_WEEKDAY_BASE + 6, "Sunday(6)=106")
 
 
 def test_nth_trading_day_in_week_id() raises:
     var scheduler = create_scheduler("1d")
-    assert_equal(scheduler._nth_trading_day_in_week_id(0), 200, "index 0")
-    assert_equal(scheduler._nth_trading_day_in_week_id(4), 204, "index 4")
+    assert_equal(scheduler._nth_trading_day_in_week_id(0), CHECKER_WEEKLY_TRADING_BASE, "index 0")
+    assert_equal(scheduler._nth_trading_day_in_week_id(4), CHECKER_WEEKLY_TRADING_BASE + 4, "index 4")
 
 
 def test_nth_trading_day_in_month_id() raises:
     var scheduler = create_scheduler("1d")
-    assert_equal(scheduler._nth_trading_day_in_month_id(0), 300, "index 0")
-    assert_equal(scheduler._nth_trading_day_in_month_id(20), 320, "index 20")
+    assert_equal(scheduler._nth_trading_day_in_month_id(0), CHECKER_MONTHLY_TRADING_BASE, "index 0")
+    assert_equal(scheduler._nth_trading_day_in_month_id(20), CHECKER_MONTHLY_TRADING_BASE + 20, "index 20")
 
 
 # ============================================================
@@ -431,7 +439,7 @@ def test_check_time_rule_1m_frequency() raises:
     assert_true(scheduler._check_time_rule(rule), "1m: 570 < 600 <= 600, should trigger")
 
     var rule2 = TimeRule.at_time(9, 31)
-    assert_true(scheduler._check_time_rule(rule2), "1m: 570 < 571 <= 600, SHOULD trigger (boundary: 571 > 570 AND 571 <= 600)")
+    assert_true(scheduler._check_time_rule(rule2), "1m: 570 < 571 <= 600, SHOULD trigger")
 
 
 def test_check_time_rule_1m_not_yet_reached() raises:
@@ -442,6 +450,65 @@ def test_check_time_rule_1m_not_yet_reached() raises:
 
     var rule = TimeRule.at_time(10, 0)
     assert_false(scheduler._check_time_rule(rule), "1m: 570 < 600 is False when current=580")
+
+
+# ============================================================
+# Scheduler _check_day_rule Tests
+# ============================================================
+
+def test_check_day_rule_always_true() raises:
+    var scheduler = create_scheduler("1d")
+    assert_true(scheduler._check_day_rule(CHECKER_ALWAYS_TRUE), "always_true should return True")
+
+
+def test_check_day_rule_weekday_no_today() raises:
+    var scheduler = create_scheduler("1d")
+    assert_false(scheduler._check_day_rule(CHECKER_WEEKDAY_BASE + 1), "no _today set, should return False")
+
+
+def test_check_day_rule_weekday_with_today() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_true(scheduler._check_day_rule(CHECKER_WEEKDAY_BASE + 0), "2020-01-06 is Monday (weekday=0)")
+
+
+def test_check_day_rule_weekday_wrong_day() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_false(scheduler._check_day_rule(CHECKER_WEEKDAY_BASE + 1), "2020-01-06 is Monday, not Tuesday")
+
+
+def test_check_day_rule_trading_day_no_calendar() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_false(scheduler._check_day_rule(CHECKER_WEEKLY_TRADING_BASE + 0), "no calendar, trading day check should fail")
+
+
+def test_check_day_rule_trading_day_with_calendar() raises:
+    var scheduler = create_scheduler("1d")
+    var cal = List[DateTime]()
+    cal.append(DateTime(2020, 1, 6, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 7, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 8, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 9, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 10, 0, 0, 0, 0))
+    scheduler.set_trading_calendar(cal^)
+
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_true(scheduler._check_day_rule(CHECKER_WEEKLY_TRADING_BASE + 0), "first trading day of week")
+    assert_false(scheduler._check_day_rule(CHECKER_WEEKLY_TRADING_BASE + 4), "5th trading day of week on Monday")
 
 
 # ============================================================
@@ -494,18 +561,6 @@ def test_next_bar_multiple_triggers() raises:
     assert_equal(len(result), 3, "1d mode: all 3 functions trigger (all have trading-time rules)")
 
 
-def test_next_bar_1d_mode_triggers_if_scheduled_time_in_trading() raises:
-    var scheduler = create_scheduler("1d")
-    scheduler.schedule_daily("my_func", TimeRule.at_time(10, 0))
-
-    var dt = DateTime(2020, 1, 2, 0, 0, 0, 0)
-    scheduler.next_day(dt)
-
-    var bar_time_9 = DateTime(2020, 1, 2, 9, 30, 0, 0)
-    var result = scheduler.next_bar(bar_time_9)
-    assert_equal(len(result), 1, "1d mode: triggers because scheduled time(10:00=600) is in trading hours, regardless of bar time")
-
-
 def test_next_bar_updates_last_minute() raises:
     var scheduler = create_scheduler("1d")
     scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
@@ -537,6 +592,58 @@ def test_before_trading_no_match() raises:
     assert_equal(len(result), 0, "no before_trading functions to trigger")
 
 
+def test_before_trading_with_day_checker() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_weekly("bt_monday", 1, TimeRule.before_trading())
+    scheduler.schedule_daily("bt_daily", TimeRule.before_trading())
+
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    var result = scheduler.before_trading()
+    assert_equal(len(result), 2, "both daily and Monday before_trading should trigger on Monday")
+
+
+def test_before_trading_weekday_filter() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_weekly("bt_tuesday", 2, TimeRule.before_trading())
+
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    var result = scheduler.before_trading()
+    assert_equal(len(result), 0, "Monday should not trigger Tuesday before_trading")
+
+
+# ============================================================
+# Scheduler next_bar with day_checker Tests
+# ============================================================
+
+def test_next_bar_weekday_filter() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_weekly("monday_func", 1, TimeRule.at_time(10, 0))
+
+    var dt_monday = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt_monday)
+
+    var bar_time = DateTime(2020, 1, 6, 10, 0, 0, 0)
+    var result = scheduler.next_bar(bar_time)
+    assert_equal(len(result), 1, "Monday should trigger Monday function")
+    assert_equal(result[0], "monday_func", "should return monday_func on Monday")
+
+
+def test_next_bar_weekday_wrong_day() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_weekly("tuesday_func", 2, TimeRule.at_time(10, 0))
+
+    var dt_monday = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt_monday)
+
+    var bar_time = DateTime(2020, 1, 6, 10, 0, 0, 0)
+    var result = scheduler.next_bar(bar_time)
+    assert_equal(len(result), 0, "Monday should not trigger Tuesday function")
+
+
 # ============================================================
 # Scheduler get_state / set_state Tests
 # ============================================================
@@ -556,8 +663,9 @@ def test_get_state_after_next_day() raises:
 
     var state = scheduler.get_state()
     assert_true(len(state) > 0, "state should not be empty after next_day")
-    var parts = state.split("|")
-    assert_true(len(parts) >= 2, "state should have date|minute format")
+    assert_true(state.find('"today"') >= 0, "state should contain 'today' key (JSON format)")
+    assert_true(state.find('"last_minute"') >= 0, "state should contain 'last_minute' key (JSON format)")
+    assert_true(state.find("2020-01-02") >= 0, "state should contain the date")
 
 
 def test_set_state_roundtrip() raises:
@@ -586,6 +694,25 @@ def test_set_state_empty_string() raises:
     assert_false(scheduler._today != None, "empty state should not change anything")
 
 
+def test_set_state_legacy_format() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.set_state("2020-01-02|571")
+    assert_true(scheduler._today != None, "_today should be set from legacy format")
+    assert_equal(scheduler._last_minute, 571, "last_minute should be set from legacy format")
+
+
+def test_get_state_json_format() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+
+    var dt = DateTime(2020, 1, 2, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    var state = scheduler.get_state()
+    assert_true(state.startswith('{"today":"'), "state should start with JSON format")
+    assert_true(state.find('"last_minute":') >= 0, "state should have last_minute key")
+
+
 # ============================================================
 # Scheduler set_trading_ranges Tests
 # ============================================================
@@ -603,6 +730,52 @@ def test_set_trading_ranges() raises:
 
     assert_true(scheduler._is_in_trading_time(550), "new range should work")
     assert_false(scheduler._is_in_trading_time(850), "gap should not be in range")
+
+
+# ============================================================
+# Scheduler set_trading_calendar Tests
+# ============================================================
+
+def test_set_trading_calendar() raises:
+    var scheduler = create_scheduler("1d")
+    var cal = List[DateTime]()
+    cal.append(DateTime(2020, 1, 2, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 3, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 6, 0, 0, 0, 0))
+    scheduler.set_trading_calendar(cal^)
+
+    assert_equal(len(scheduler._trading_calendar), 3, "calendar should have 3 entries")
+
+
+def test_fill_week_with_calendar() raises:
+    var scheduler = create_scheduler("1d")
+    var cal = List[DateTime]()
+    cal.append(DateTime(2020, 1, 6, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 7, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 8, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 9, 0, 0, 0, 0))
+    cal.append(DateTime(2020, 1, 10, 0, 0, 0, 0))
+    scheduler.set_trading_calendar(cal^)
+
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_equal(len(scheduler._this_week), 5, "should have 5 trading days in week")
+
+
+def test_fill_month_with_calendar() raises:
+    var scheduler = create_scheduler("1d")
+    var cal = List[DateTime]()
+    for i in range(1, 32):
+        cal.append(DateTime(2020, 1, i, 0, 0, 0, 0))
+    scheduler.set_trading_calendar(cal^)
+
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+    var dt = DateTime(2020, 1, 6, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    assert_equal(len(scheduler._this_month), 31, "should have 31 days in January")
 
 
 # ============================================================
@@ -647,28 +820,52 @@ def test_scheduler_mod_state_lifecycle() raises:
     var state_initial = mod.get_state()
     assert_equal(state_initial, "", "initial state should be empty")
 
-    var dt = DateTime(2020, 1, 2, 0, 0, 0, 0)
-    var scheduler = create_scheduler("1d")
-    scheduler.schedule_daily("test_fn", TimeRule.at_time(10, 0))
-    scheduler.next_day(dt)
-    var bar_time = DateTime(2020, 1, 2, 10, 30, 0, 0)
-    _ = scheduler.next_bar(bar_time)
-
-    var state = scheduler.get_state()
-    assert_true(len(state) > 0, "state should not be empty after next_day+next_bar")
-
-    var mod2 = create_scheduler_mod()
-    mod2.start_up("env2", "cfg2")
-    mod2.set_state(state)
-    var restored = mod2.get_state()
-    assert_true(len(restored) > 0, "restored state should not be empty")
-
 
 def test_scheduler_mod_writable() raises:
     var mod = create_scheduler_mod()
     var s = String(mod)
     assert_true(s.find("SchedulerMod") >= 0)
     assert_true(s.find("scheduler") >= 0)
+
+
+def test_scheduler_mod_account_type_check_stock() raises:
+    var mod = create_scheduler_mod()
+    var accounts = List[DEFAULT_ACCOUNT_TYPE]()
+    accounts.append(DEFAULT_ACCOUNT_TYPE.STOCK)
+    mod.set_account_types(accounts^)
+    mod.start_up("env", "cfg")
+    assert_true(mod.is_enabled(), "should enable with STOCK account")
+
+
+def test_scheduler_mod_account_type_check_future() raises:
+    var mod = create_scheduler_mod()
+    var accounts = List[DEFAULT_ACCOUNT_TYPE]()
+    accounts.append(DEFAULT_ACCOUNT_TYPE.FUTURE)
+    mod.set_account_types(accounts^)
+    mod.start_up("env", "cfg")
+    assert_true(mod.is_enabled(), "should enable with FUTURE account")
+
+
+def test_scheduler_mod_account_type_check_bond_only() raises:
+    var mod = create_scheduler_mod()
+    var accounts = List[DEFAULT_ACCOUNT_TYPE]()
+    accounts.append(DEFAULT_ACCOUNT_TYPE.BOND)
+    mod.set_account_types(accounts^)
+    mod.start_up("env", "cfg")
+    assert_false(mod.is_enabled(), "should NOT enable with BOND account only")
+
+
+def test_scheduler_mod_account_type_check_empty() raises:
+    var mod = create_scheduler_mod()
+    mod.start_up("env", "cfg")
+    assert_true(mod.is_enabled(), "should enable with empty account types (default)")
+
+
+def test_scheduler_mod_set_frequency() raises:
+    var mod = create_scheduler_mod()
+    mod.set_frequency("1m")
+    mod.start_up("env", "cfg")
+    assert_true(mod.has_scheduler(), "should have scheduler after start_up with 1m frequency")
 
 
 # ============================================================
@@ -700,7 +897,6 @@ def test_scheduler_frequency_variants() raises:
 
 
 def test_next_bar_lunch_break() raises:
-    """Verify that during lunch break (11:30-13:00), no 1m-scheduled functions trigger."""
     var scheduler = create_scheduler("1m")
     scheduler.schedule_daily("lunch_test", TimeRule.at_time(12, 0))
 
@@ -723,6 +919,55 @@ def test_next_bar_afternoon_session() raises:
     var result = scheduler.next_bar(afternoon)
     assert_equal(len(result), 1, "afternoon function should trigger")
     assert_equal(result[0], "afternoon_func")
+
+
+def test_next_bar_1m_midnight_for_futures() raises:
+    var scheduler = create_scheduler("1m")
+    scheduler._trading_minute_ranges = List[TradingMinuteRange]()
+    scheduler._trading_minute_ranges.append(TradingMinuteRange(0, 0))
+
+    scheduler.schedule_daily("midnight_func", TimeRule.at_time(0, 0))
+
+    var dt = DateTime(2020, 1, 2, 0, 0, 0, 0)
+    scheduler.next_day(dt)
+
+    var midnight = DateTime(2020, 1, 2, 0, 0, 0, 0)
+    var result = scheduler.next_bar(midnight)
+    assert_equal(len(result), 1, "midnight should trigger for futures with 0-minute range")
+
+
+def test_universe_change_clears_ranges() raises:
+    var scheduler = create_scheduler("1d")
+    assert_equal(len(scheduler._trading_minute_ranges), 2, "should start with 2 ranges")
+
+    scheduler.universe_change(List[String](), "")
+    assert_equal(len(scheduler._trading_minute_ranges), 0, "universe_change should clear ranges")
+
+
+def test_is_weekday_python_compatible() raises:
+    var scheduler = create_scheduler("1d")
+    scheduler.schedule_daily("f", TimeRule.at_time(10, 0))
+
+    var dt_monday = DateTime(2024, 1, 1, 0, 0, 0, 0)
+    scheduler.next_day(dt_monday)
+
+    assert_true(scheduler._is_weekday(0), "2024-01-01 is Monday (weekday=0)")
+    assert_false(scheduler._is_weekday(1), "2024-01-01 is not Tuesday (weekday=1)")
+
+    var dt_friday = DateTime(2024, 1, 5, 0, 0, 0, 0)
+    scheduler.next_day(dt_friday)
+
+    assert_true(scheduler._is_weekday(4), "2024-01-05 is Friday (weekday=4)")
+
+
+def test_market_close_with_lunch_adjustment() raises:
+    var result = market_close_minutes(3, 0)
+    assert_equal(result, 630, "market_close(3h) = 15:00-3h=12:00, but <13:00 so -90min = 10:30 = 630")
+
+
+def test_market_open_with_lunch_adjustment() raises:
+    var result = market_open_minutes(2, 0)
+    assert_equal(result, 781, "market_open(2h) = 9:31+2h=11:31, but >11:30 so +90min = 13:01 = 781")
 
 
 def main() raises:

@@ -11,7 +11,7 @@ from rqmojo.const import (
     EXECUTION_PHASE, POSITION_DIRECTION, DAYS_CNT
 )
 from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generator
-from rqmojo.core.events import EventBus, EVENT, Event
+from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
 from rqmojo.utils.config import RQAlphaConfig
@@ -21,7 +21,7 @@ from rqmojo.portfolio.position import Position
 from rqmojo.portfolio.portfolio_manager import Portfolio as PortfolioManager
 from rqmojo.core.broker import SimulationBroker, create_broker
 from rqmojo.core.event_source import SimulationEventSource, create_event_source
-from rqmojo.core.strategy_loader import StrategyLoader, create_strategy_loader, FileStrategyLoader, SourceCodeStrategyLoader, UserFuncStrategyLoader
+from rqmojo.core.strategy_loader import StrategyLoader, create_strategy_loader, FileStrategyLoader, SourceCodeStrategyLoader, UserFuncStrategyLoader, create_file_strategy_loader
 
 
 @fieldwise_init
@@ -239,7 +239,7 @@ struct Environment(Movable):
     def add_listener(mut self, event_type: EVENT, listener: String, priority: Int = 0) -> None:
         self._listener_count += 1
 
-    def publish_event(mut self, event: Event) -> None:
+    def publish_event(mut self, event: Event) raises -> None:
         _ = self._event_bus.publish_event(event)
 
     # ============================================================
@@ -666,14 +666,12 @@ struct EnvironmentSingleton:
 
 from std.python import Python, PythonObject
 
-var _global_env: PythonObject = Python.none()
-
 
 def get_environment() raises -> Environment:
     """获取Environment实例，与Python版本的get_instance()类似"""
-    if _global_env.is_none():
+    if not _ensure_singleton().has_instance():
         raise Error("Environment has not been created. Please create Environment first.")
-    raise Error("Use env parameter instead")
+    return _ensure_singleton().get_instance()^
 
 
 def set_environment(env: Environment) -> None:
@@ -748,7 +746,7 @@ def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_T
         _calendar_dt=start_date,
         _trading_dt=start_date,
         _is_initialized=False,
-        _event_bus=EventBus(listeners=Dict[String, List[EventListener]](), user_listeners=Dict[String, List[EventListener]]()),
+        _event_bus=EventBus(),
         _listener_count=0,
         _data_source_name="default",
         _broker_name="simulation",

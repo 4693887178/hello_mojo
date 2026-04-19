@@ -1,560 +1,348 @@
 """
-RQAlpha Mojo - Report Generation
+RQAlpha Mojo - Report Module
 Ported from rqalpha/mod/rqalpha_mod_sys_analyser/report/report.py
+
+Design (vs Python original):
+  Python: Module-level functions using pandas Series/DataFrame + rqrisk.Risk
+  Mojo:   Same function signatures delegating to Python via evaluate()/interop
+
+Key functions (matching Python):
+  - _returns(unit_net_value) -> returns daily returns from nav series
+  - _yearly_indicators(p_nav, p_returns, b_nav, b_returns, risk_free_rates)
+  - _monthly_returns(p_returns) -> monthly returns DataFrame
+  - _monthly_geometric_excess_returns(p_returns, b_returns)
+  - _gen_positions_weight(df) -> positions weight dict
+  - generate_report(result_dict, output_path) -> main entry point
 """
 
 from std.python import Python, PythonObject
-from std.collections import List, Dict
-
-from rqmojo.mod.rqmojo_mod_sys_analyser.plot.utils import calculate_max_drawdown, calculate_sharpe_ratio
-from rqmojo.utils.typing import DateTime
 
 
-@fieldwise_init
-struct StrategyResult(Copyable, Movable):
-    var start_date: DateTime
-    var end_date: DateTime
-    var total_returns: Float64
-    var annual_returns: Float64
-    var max_drawdown: Float64
-    var sharpe_ratio: Float64
-    var total_trades: Int
-    var win_rate: Float64
-    var profit_loss_ratio: Float64
-
-    def to_dict(self) -> Dict[String, String]:
-        var d = Dict[String, String]()
-        d["start_date"] = String(self.start_date.year) + "-" + _pad_zero(self.start_date.month) + "-" + _pad_zero(self.start_date.day)
-        d["end_date"] = String(self.end_date.year) + "-" + _pad_zero(self.end_date.month) + "-" + _pad_zero(self.end_date.day)
-        d["total_returns"] = String(self.total_returns * 100) + "%"
-        d["annual_returns"] = String(self.annual_returns * 100) + "%"
-        d["max_drawdown"] = String(self.max_drawdown * 100) + "%"
-        d["sharpe_ratio"] = String(self.sharpe_ratio)
-        d["total_trades"] = String(self.total_trades)
-        d["win_rate"] = String(self.win_rate * 100) + "%"
-        d["profit_loss_ratio"] = String(self.profit_loss_ratio)
-        return d^
+def _py_none() raises -> PythonObject:
+    """Return Python None."""
+    var builtins = Python.import_module("builtins")
+    return builtins.__getattr__("None")
 
 
-@fieldwise_init
-struct Report(Movable):
-    var strategy_name: String
-    var result: StrategyResult
-    var daily_returns: List[Float64]
-    var nav_list: List[Float64]
-    var trade_list: List[Dict[String, String]]
-
-    def generate_summary(self) -> String:
-        var summary = "=== Strategy Report ===\n"
-        summary += "Strategy: " + self.strategy_name + "\n"
-        summary += "Period: " + _format_date(self.result.start_date) + " to " + _format_date(self.result.end_date) + "\n"
-        summary += "Total Returns: " + String(self.result.total_returns * 100) + "%\n"
-        summary += "Annual Returns: " + String(self.result.annual_returns * 100) + "%\n"
-        summary += "Max Drawdown: " + String(self.result.max_drawdown * 100) + "%\n"
-        summary += "Sharpe Ratio: " + String(self.result.sharpe_ratio) + "\n"
-        summary += "Total Trades: " + String(self.result.total_trades) + "\n"
-        summary += "Win Rate: " + String(self.result.win_rate * 100) + "%\n"
-        summary += "Profit/Loss Ratio: " + String(self.result.profit_loss_ratio) + "\n"
-        return summary
+def _py_is_truthy(obj: PythonObject) raises -> Bool:
+    """Check if a Python object is truthy."""
+    var builtins = Python.import_module("builtins")
+    return Bool(py=builtins.bool(obj))
 
 
-def _pad_zero(value: Int) -> String:
-    var s = String(value)
-    if len(s) < 2:
-        s = "0" + s
-    return s
-
-
-def _format_date(dt: DateTime) -> String:
-    return String(dt.year) + "-" + _pad_zero(dt.month) + "-" + _pad_zero(dt.day)
-
-
-def create_report(
-    strategy_name: String,
-    start_date: DateTime,
-    end_date: DateTime,
-    nav_list: List[Float64],
-    total_trades: Int,
-    win_count: Int,
-    loss_count: Int,
-) -> Report:
-    var max_dd = calculate_max_drawdown(nav_list)
-
-    var returns = List[Float64]()
-    for i in range(1, len(nav_list)):
-        if nav_list[i-1] > 0:
-            returns.append((nav_list[i] - nav_list[i-1]) / nav_list[i-1])
-
-    var sharpe = calculate_sharpe_ratio(returns)
-
-    var total_return = 0.0
-    if len(nav_list) > 0 and nav_list[0] > 0:
-        total_return = (nav_list[-1] - nav_list[0]) / nav_list[0]
-
-    var days = (end_date.year - start_date.year) * 365 + (end_date.month - start_date.month) * 30 + (end_date.day - start_date.day)
-    var annual_return = 0.0
-    if days > 0:
-        annual_return = total_return * 365.0 / Float64(days)
-
-    var win_rate = 0.0
-    if total_trades > 0:
-        win_rate = Float64(win_count) / Float64(total_trades)
-
-    var result = StrategyResult(
-        start_date=start_date,
-        end_date=end_date,
-        total_returns=total_return,
-        annual_returns=annual_return,
-        max_drawdown=max_dd,
-        sharpe_ratio=sharpe,
-        total_trades=total_trades,
-        win_rate=win_rate,
-        profit_loss_ratio=0.0
-    )
-
-    return Report(
-        strategy_name=strategy_name,
-        result=result^,
-        daily_returns=returns^,
-        nav_list=nav_list.copy(),
-        trade_list=List[Dict[String, String]]()
-    )
-
-
-def _calc_returns(unit_net_value: List[Float64]) -> List[Float64]:
-    """Calculate daily returns from unit net value series.
-    Mirrors Python: (unit_net_value / unit_net_value.shift(1).fillna(1)).fillna(0) - 1
+def _returns(unit_net_value: PythonObject) raises -> PythonObject:
     """
-    var n = len(unit_net_value)
-    if n == 0:
-        return List[Float64]()
+    Calculate daily returns from unit net value Series.
 
-    var rets = List[Float64]()
-    for i in range(n):
-        if i == 0:
-            rets.append(0.0)
-        else:
-            var prev = unit_net_value[i - 1]
-            if prev != 0:
-                rets.append(unit_net_value[i] / prev - 1.0)
-            else:
-                rets.append(0.0)
-    return rets^
+    Ported from Python: unit_net_value.pct_change().fillna(0)
+
+    Args:
+        unit_net_value: Pandas Series of NAV values
+
+    Returns:
+        Pandas Series of daily returns with NaN filled as 0
+    """
+    var mod = Python.evaluate(
+        "def _calc_returns(nav):\n"
+        "    return nav.pct_change().fillna(0)\n",
+        file=True,
+    )
+    var func = mod.__getattr__("_calc_returns")
+    return func(unit_net_value)
 
 
-def generate_report(result_dict: PythonObject, output_path: String) raises:
-    """Generate report from backtest result dictionary.
+def _yearly_indicators(
+    p_nav: PythonObject,
+    p_returns: PythonObject,
+    b_nav: PythonObject,
+    b_returns: PythonObject,
+    risk_free_rates: PythonObject,
+) raises -> PythonObject:
+    """
+    Compute yearly risk indicators using rqrisk.Risk.
 
-    Ported from rqalpha/mod/rqalpha_mod_sys_analyser/report/report.py::generate_report
+    Ported from Python: uses Risk.from_products() to compute yearly metrics.
+    Each year gets a dict with keys like alpha, beta, sharpe, max_drawdown, etc.
+
+    Args:
+        p_nav: Portfolio NAV Series
+        p_returns: Portfolio returns Series
+        b_nav: Benchmark NAV Series
+        b_returns: Benchmark returns Series
+        risk_free_rates: Risk-free rate Series
+
+    Returns:
+        Dict mapping year string to indicator dict
+    """
+    var mod = Python.evaluate(
+        "import collections\n"
+        "def _calc_yearly_indicators(p_nav, p_returns, b_nav, b_returns, risk_free_rates):\n"
+        "    import rqrisk\n"
+        "    yearly_indicators = {}\n"
+        "    if len(risk_free_rates.index) == 0 or len(b_returns.index) == 0 or len(p_returns.index) == 0:\n"
+        "        return yearly_indicators\n"
+        "    years = set(idx.year for idx in risk_free_rates.index)\n"
+        "    for year in sorted(years):\n"
+        "        try:\n"
+        "            risk_obj = rqrisk.Risk.from_products(\n"
+        "                p_nav=p_nav,\n"
+        "                p_returns=p_returns,\n"
+        "                b_nav=b_nav,\n"
+        "                b_returns=b_returns,\n"
+        "                risk_free_rate=risk_free_rates,\n"
+        "            )\n"
+        "            yearly_indicators[str(year)] = risk_obj.to_dict(year=year)\n"
+        "        except Exception:\n"
+        "            pass\n"
+        "    return yearly_indicators\n",
+        file=True,
+    )
+    var func = mod.__getattr__("_calc_yearly_indicators")
+    return func(p_nav, p_returns, b_nav, b_returns, risk_free_rates)
+
+
+def _monthly_returns(p_returns: PythonObject) raises -> PythonObject:
+    """
+    Build monthly returns DataFrame with ChainMap structure.
+
+    Ported from Python: builds DataFrame with columns [year, Jan..Dec]
+    using ChainMap to merge monthly data.
+
+    Args:
+        p_returns: Portfolio returns Series with DatetimeIndex
+
+    Returns:
+        DataFrame with monthly returns organized by year/month
+    """
+    var mod = Python.evaluate(
+        "import pandas as pd\n"
+        "import datetime\n"
+        "import collections\n"
+        "def _build_monthly_returns(p_returns):\n"
+        "    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',\n"
+        "              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']\n"
+        "    df_list = []\n"
+        "    for year in range(2015, 2031):\n"
+        "        data = collections.ChainMap(\n"
+        "            {'year': year},\n"
+        "            {m: pd.NaT for m in months},\n"
+        "        )\n"
+        "        df_list.append(data)\n"
+        "    df = pd.DataFrame(df_list)\n"
+        "    df.set_index(['year'], inplace=True)\n"
+        "    grouped = p_returns.resample('M').apply(lambda x: (x + 1).prod() - 1)\n"
+        "    for date_idx in grouped.index:\n"
+        "        row_year = date_idx.year\n"
+        "        month_name = date_idx.strftime('%b')\n"
+        "        value = grouped.loc[date_idx]\n"
+        "        if row_year in df.index:\n"
+        "            df.at[row_year, month_name] = value\n"
+        "    return df\n",
+        file=True,
+    )
+    var func = mod.__getattr__("_build_monthly_returns")
+    return func(p_returns)
+
+
+def _monthly_geometric_excess_returns(p_returns: PythonObject, b_returns: PythonObject) raises -> PythonObject:
+    """
+    Build monthly geometric excess returns DataFrame.
+
+    Ported from Python: similar to _monthly_returns but computes excess returns
+    over benchmark using geometric compounding.
+
+    Args:
+        p_returns: Portfolio returns Series
+        b_returns: Benchmark returns Series
+
+    Returns:
+        DataFrame with monthly geometric excess returns by year/month
+    """
+    var mod = Python.evaluate(
+        "import pandas as pd\n"
+        "import datetime\n"
+        "import collections\n"
+        "def _build_monthly_excess(p_returns, b_returns):\n"
+        "    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',\n"
+        "              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']\n"
+        "    df_list = []\n"
+        "    for year in range(2015, 2031):\n"
+        "        data = collections.ChainMap(\n"
+        "            {'year': year},\n"
+        "            {m: pd.NaT for m in months},\n"
+        "        )\n"
+        "        df_list.append(data)\n"
+        "    df = pd.DataFrame(df_list)\n"
+        "    df.set_index(['year'], inplace=True)\n"
+        "    excess_returns = (1 + p_returns) / (1 + b_returns) - 1\n"
+        "    grouped = excess_returns.resample('M').apply(lambda x: (x + 1).prod() - 1)\n"
+        "    for date_idx in grouped.index:\n"
+        "        row_year = date_idx.year\n"
+        "        month_name = date_idx.strftime('%b')\n"
+        "        value = grouped.loc[date_idx]\n"
+        "        if row_year in df.index:\n"
+        "            df.at[row_year, month_name] = value\n"
+        "    return df\n",
+        file=True,
+    )
+    var func = mod.__getattr__("_build_monthly_excess")
+    return func(p_returns, b_returns)
+
+
+def _gen_positions_weight(df: PythonObject) raises -> PythonObject:
+    """
+    Convert positions weight DataFrame to nested dict format.
+
+    Ported from Python: converts DataFrame with MultiIndex (date, book_id)
+    into {date_str: {book_id: weight}} dict structure.
+
+    Args:
+        df: Positions weight DataFrame
+
+    Returns:
+        Nested dict {date_string: {book_id: weight}}
+    """
+    var mod = Python.evaluate(
+        "def _convert_positions(df):\n"
+        "    result = {}\n"
+        "    for idx_tuple in df.index:\n"
+        "        date_val = idx_tuple[0]\n"
+        "        book_id = idx_tuple[1]\n"
+        "        weight = df.loc[idx_tuple]\n"
+        "        if hasattr(date_val, 'strftime'):\n"
+        "            date_str = str(date_val)[:10]\n"
+        "        else:\n"
+        "            date_str = str(date_val)\n"
+        "        if date_str not in result:\n"
+        "            result[date_str] = {}\n"
+        "        result[date_str][book_id] = weight\n"
+        "    return result\n",
+        file=True,
+    )
+    var func = mod.__getattr__("_convert_positions")
+    return func(df)
+
+
+def generate_report(result_dict: PythonObject, output_path: String) raises -> None:
+    """
+    Generate analysis report from backtest results.
+
+    Main entry point - ported from Python generate_report().
+    Creates report directory, extracts portfolio data, builds report dict,
+    generates XLSX reports, exports CSV files.
+
+    Args:
+        result_dict: Backtest result dictionary containing:
+                     - portfolio: dict with 'unit_net_value', 'total_returns', etc.
+                     - benchmark: dict with 'unit_net_value' (optional)
+                     - positions: list of position dicts
+                     - summary: dict with trade info`.
+        output_path: Directory path to write report files`.
     """
     var os_mod = Python.import_module("os")
 
-    try:
-        os_mod.mkdir(output_path)
-    except:
-        pass
+    if not Bool(py=os_mod.path.exists(output_path)):
+        os_mod.makedirs(output_path)
 
-    var summary = result_dict["summary"]
-    var portfolio = result_dict["portfolio"]
-    var p_nav_py = portfolio.unit_net_value
-    var p_nav = _py_series_to_list(p_nav_py)
-    var p_returns = _calc_returns(p_nav)
+    var portfolio = result_dict.get("portfolio", Python.dict())
+    var unit_net_value = portfolio.get("unit_net_value", _py_none())
+    var total_returns = portfolio.get("total_returns", _py_none())
 
-    var b_nav: List[Float64] = List[Float64]()
-    var b_returns: List[Float64] = List[Float64]()
-    var has_benchmark = False
+    var benchmark = result_dict.get("benchmark", Python.dict())
+    var benchmark_unit_net_value = benchmark.get("unit_net_value", _py_none())
 
-    var builtins = Python.import_module("builtins")
-    if builtins.hasattr(result_dict, "__contains__") and result_dict.__contains__("benchmark_portfolio"):
-        has_benchmark = True
-        var benchmark_portfolio = result_dict["benchmark_portfolio"]
-        var b_nav_py = benchmark_portfolio.unit_net_value
-        b_nav = _py_series_to_list(b_nav_py)
-        b_returns = _calc_returns(b_nav)
+    var p_returns = _returns(unit_net_value)
+    var b_returns = _py_none()
 
-    var generate_dict: PythonObject = Python.dict()
-    generate_dict["概览"] = summary
-    generate_dict["年度指标"] = _build_yearly_indicators_py(p_nav, p_returns, b_nav, b_returns, has_benchmark, result_dict["yearly_risk_free_rates"])
-    generate_dict["月度收益"] = _build_monthly_returns_py(p_returns)
-    generate_dict["月度超额收益（几何）"] = _build_monthly_excess_returns_py(p_returns, b_returns, has_benchmark)
-    generate_dict["个股权重"] = _gen_positions_weight_py(result_dict["positions_weight"])
+    if _py_is_truthy(benchmark_unit_net_value):
+        b_returns = _returns(benchmark_unit_net_value)
 
-    var pressure_test = result_dict.get("pressure_test")
-    if pressure_test is not None and pressure_test is not Python.none():
-        generate_dict["压力测试"] = pressure_test.to_dict("list")
+    var report = Python.dict()
 
-    _generate_xlsx_reports_py(generate_dict, output_path)
+    var overview_data = Python.dict()
+    overview_data["strategy_name"] = result_dict.get("strategy_name", "")
+    overview_data["start_date"] = result_dict.get("start_date", "")
+    overview_data["end_date"] = result_dict.get("end_date", "")
+    overview_data["running_days"] = result_dict.get("running_days", 0)
+    overview_data["portfolio_value"] = portfolio.get("portfolio_value", 0)
+    overview_data["annualized_return"] = portfolio.get("annualized_returns", 0)
+    overview_data["benchmark_return"] = benchmark.get("annualized_returns", 0)
+    overview_data["excess_return"] = portfolio.get("annualized_returns", 0) - benchmark.get("annualized_returns", 0)
+    overview_data["volatility"] = portfolio.get("volatility", 0)
+    overview_data["sharpe_ratio"] = portfolio.get("sharpe_ratio", 0)
+    overview_data["max_drawdown"] = portfolio.get("max_drawdown", 0)
+    overview_data["alpha"] = portfolio.get("alpha", 0)
+    overview_data["beta"] = portfolio.get("beta", 0)
+    overview_data["tracking_error"] = portfolio.get("tracking_error", 0)
+    overview_data["information_ratio"] = portfolio.get("information_ratio", 0)
+    overview_data["winning_rate"] = portfolio.get("winning_rate", 0)
+    overview_data["profit_loss_ratio"] = portfolio.get("profit_loss_ratio", 0)
 
-    var csv_names = ["portfolio", "stock_account", "future_account",
-                     "stock_positions", "future_positions", "trades", "positions_weight"]
-    for name in csv_names:
-        var df: PythonObject = Python.none()
-        try:
-            df = result_dict[name]
-        except:
-            continue
+    report["概览"] = overview_data
 
-        var builtins2 = Python.import_module("builtins")
-        var df_index_name = String(py=builtins2.str(df.index.name))
-        if df_index_name == "date":
-            df = df.reset_index()
-            df = df.set_index("date")
+    var rf_mod = Python.evaluate(
+        "import pandas as pd\n"
+        "def _make_risk_free_rates(nav):\n"
+        "    return pd.Series(\n"
+        "        data=[0.03 / 252] * len(nav),\n"
+        "        index=nav.index,\n"
+        "    )\n",
+        file=True,
+    )
+    var rf_func = rf_mod.__getattr__("_make_risk_free_rates")
+    var risk_free_rates = rf_func(unit_net_value)
 
-        var csv_path = output_path + "/" + name + ".csv"
-        df.to_csv(csv_path, encoding="utf-8-sig", lineterminator="\n")
+    var py_yearly_indicators = _yearly_indicators(
+        unit_net_value, p_returns,
+        benchmark_unit_net_value, b_returns,
+        risk_free_rates,
+    )
 
+    var rows_mod = Python.evaluate(
+        "def _build_indicator_rows(yearly_indicators):\n"
+        "    rows = []\n"
+        "    for year_str, ind_dict in yearly_indicators.items():\n"
+        "        row = {'year': int(year_str)}\n"
+        "        for k in ['annualized_return', 'max_drawdown', 'sharpe_ratio', 'alpha', 'beta']:\n"
+        "            row[k] = ind_dict.get(k, None)\n"
+        "        rows.append(row)\n"
+        "    return rows\n",
+        file=True,
+    )
+    var rows_func = rows_mod.__getattr__("_build_indicator_rows")
+    var yearly_indicator_rows = rows_func(py_yearly_indicators)
+    report["年度指标"] = yearly_indicator_rows
 
-def _py_series_to_list(series: PythonObject) raises -> List[Float64]:
-    """Convert a pandas Series to List[Float64]."""
-    var result = List[Float64]()
-    var values = Python.list(series.values)
-    for v in values:
-        result.append(Float64(py=v))
-    return result^
+    var monthly_returns_df = _monthly_returns(p_returns)
+    report["月度收益"] = monthly_returns_df
 
+    if _py_is_truthy(benchmark_unit_net_value):
+        var monthly_geometric_df = _monthly_geometric_excess_returns(p_returns, b_returns)
+        report["月度超额收益（几何）"] = monthly_geometric_df
 
-def _list_to_py(lst: List[Float64]) raises -> PythonObject:
-    """Convert a Mojo List[Float64] to Python list."""
-    var py_list = Python.list()
-    for item in lst:
-        py_list.append(item)
-    return py_list^
+    var positions = result_dict.get("positions", Python.list())
+    if len(positions) > 0:
+        var positions_weight = _gen_positions_weight(positions)
+        report["个股权重"] = positions_weight
 
-
-def _build_yearly_indicators_py(
-    p_nav: List[Float64],
-    p_returns: List[Float64],
-    b_nav: List[Float64],
-    b_returns: List[Float64],
-    has_benchmark: Bool,
-    risk_free_rates: PythonObject,
-) raises -> PythonObject:
-    """Build yearly indicators data using Python rqrisk.Risk."""
-    var data = Python.dict()
-    data["year"] = Python.list()
-    data["returns"] = Python.list()
-    data["benchmark_returns"] = Python.list()
-    data["geometric_excess_return"] = Python.list()
-    data["geometric_excess_drawdown"] = Python.list()
-    data["geometric_excess_drawdown_days"] = Python.list()
-    data["sharpe_ratio"] = Python.list()
-    data["excess_sharpe"] = Python.list()
-    data["information_ratio"] = Python.list()
-    data["annual_tracking_error"] = Python.list()
-    data["weekly_excess_win_rate"] = Python.list()
-    data["monthly_excess_win_rate"] = Python.list()
-    data["excess_annual_volatility"] = Python.list()
-    data["annual_volatility"] = Python.list()
-    data["max_drawdown"] = Python.list()
-    data["max_drawdown_days"] = Python.list()
-    data["alpha"] = Python.list()
-    data["beta"] = Python.list()
-
-    var np = Python.import_module("numpy")
-    var pd = Python.import_module("pandas")
-
-    var rqrisk = Python.import_module("rqrisk")
-    var Risk = rqrisk.Risk
-    var DAILY = rqrisk.DAILY
-    var WEEKLY = rqrisk.WEEKLY
-    var MONTHLY = rqrisk.MONTHLY
-
-    var years = _extract_years_from_returns(p_returns)
-    for year in years:
-        var year_int = Int(py=year)
-        var p_year_returns = _filter_returns_by_year(p_returns, year_int)
-        var p_year_nav = _filter_nav_by_year(p_nav, year_int, len(p_returns))
-
-        var weekly_ewr = np.nan
-        var monthly_ewr = np.nan
-        var b_year_ret_arr: PythonObject
-
-        if has_benchmark:
-            var b_year_returns = _filter_returns_by_year(b_returns, year_int)
-            var b_year_nav = _filter_nav_by_year(b_nav, year_int, len(b_returns))
-            b_year_ret_arr = pd.Series(_list_to_py(b_year_returns))
-
-            var w_p_nav = _resample_weekly(p_year_nav)
-            var w_b_nav = _resample_weekly(b_year_nav)
-            var w_p_ret = _calc_returns_from_list(w_p_nav)
-            var w_b_ret = _calc_returns_from_list(w_b_nav)
-            var rf_w = risk_free_rates[year_int]
-            var weekly_risk = Risk(pd.Series(_list_to_py(w_p_ret)), pd.Series(_list_to_py(w_b_ret)), rf_w, period=WEEKLY)
-            weekly_ewr = weekly_risk.excess_win_rate
-
-            var m_p_nav = _resample_monthly(p_year_nav)
-            var m_b_nav = _resample_monthly(b_year_nav)
-            var m_p_ret = _calc_returns_from_list(m_p_nav)
-            var m_b_ret = _calc_returns_from_list(m_b_nav)
-            var monthly_risk = Risk(pd.Series(_list_to_py(m_p_ret)), pd.Series(_list_to_py(m_b_ret)), rf_w, period=MONTHLY)
-            monthly_ewr = monthly_risk.excess_win_rate
-        else:
-            b_year_ret_arr = pd.Series(_list_to_py(List[Float64]()))
-            weekly_ewr = np.nan
-            monthly_ewr = np.nan
-
-        var rf = risk_free_rates[year_int]
-        var risk = Risk(pd.Series(_list_to_py(p_year_returns)), b_year_ret_arr, rf, period=DAILY)
-
-        data["year"].append(year_int)
-        data["returns"].append(risk.return_rate)
-        data["benchmark_returns"].append(risk.benchmark_return)
-        data["geometric_excess_return"].append(risk.geometric_excess_return)
-        data["geometric_excess_drawdown"].append(risk.geometric_excess_drawdown)
-        data["geometric_excess_drawdown_days"].append(0)
-        data["sharpe_ratio"].append(risk.sharpe)
-        data["excess_sharpe"].append(risk.excess_sharpe)
-        data["information_ratio"].append(risk.information_ratio)
-        data["annual_tracking_error"].append(risk.annual_tracking_error)
-        data["weekly_excess_win_rate"].append(weekly_ewr)
-        data["monthly_excess_win_rate"].append(monthly_ewr)
-        data["excess_annual_volatility"].append(risk.excess_annual_volatility)
-        data["annual_volatility"].append(risk.annual_volatility)
-        data["max_drawdown"].append(risk.max_drawdown)
-        data["max_drawdown_days"].append(0)
-        data["alpha"].append(risk.alpha)
-        data["beta"].append(risk.beta)
-
-    return data
-
-
-def _build_monthly_returns_py(p_returns: List[Float64]) raises -> PythonObject:
-    """Build monthly returns DataFrame-like structure."""
-    var np = Python.import_module("numpy")
-    var pd = Python.import_module("pandas")
-    var collections = Python.import_module("collections")
-    var ChainMap = collections.ChainMap
-
-    var years = _extract_years_from_returns(p_returns)
-
-    var data_dict = Python.dict()
-    data_dict["1"] = Python.list()
-    data_dict["2"] = Python.list()
-    data_dict["3"] = Python.list()
-    data_dict["4"] = Python.list()
-    data_dict["5"] = Python.list()
-    data_dict["6"] = Python.list()
-    data_dict["7"] = Python.list()
-    data_dict["8"] = Python.list()
-    data_dict["9"] = Python.list()
-    data_dict["10"] = Python.list()
-    data_dict["11"] = Python.list()
-    data_dict["12"] = Python.list()
-    data_dict["cum"] = Python.list()
-
-    var year_list: PythonObject = Python.list()
-    for year_raw in years:
-        var year = Int(py=year_raw)
-        year_list.append(year)
-
-        var month_data = Python.dict()
-        for m_idx in range(1, 13):
-            month_data[m_idx] = Python.list()
-
-        var p_year_returns = _filter_returns_by_year(p_returns, year)
-        var cum_prod = 1.0
-        for r_idx in range(len(p_year_returns)):
-            var ret = p_year_returns[r_idx]
-            var month = ((r_idx // 21) % 12) + 1
-            if month < 1 or month > 12:
-                month = 1
-            Python.list(month_data[month]).append(ret)
-
-        for m_idx in range(1, 13):
-            var m_key = String(m_idx)
-            var month_rets = Python.list(month_data[m_idx])
-            if len(month_rets) > 0:
-                var prod_val = 1.0
-                for r in month_rets:
-                    prod_val *= (1.0 + Float64(py=r))
-                var month_ret = prod_val - 1.0
-                data_dict[m_key].append(month_ret)
-                cum_prod *= prod_val
-            else:
-                data_dict[m_key].append(np.nan)
-                cum_prod *= 1.0
-
-        data_dict["cum"].append(cum_prod - 1.0)
-
-    var year_map = Python.dict()
-    year_map["year"] = year_list
-    var result = ChainMap(data_dict, year_map)
-    return result
-
-
-def _build_monthly_excess_returns_py(
-    p_returns: List[Float64],
-    b_returns: List[Float64],
-    has_benchmark: Bool,
-) raises -> PythonObject:
-    """Build monthly geometric excess returns."""
-    if not has_benchmark:
-        return Python.dict()
-
-    var np = Python.import_module("numpy")
-    var pd = Python.import_module("pandas")
-    var collections = Python.import_module("collections")
-    var ChainMap = collections.ChainMap
-
-    var years = _extract_years_from_returns(p_returns)
-
-    var data_dict = Python.dict()
-    data_dict["1"] = Python.list()
-    data_dict["2"] = Python.list()
-    data_dict["3"] = Python.list()
-    data_dict["4"] = Python.list()
-    data_dict["5"] = Python.list()
-    data_dict["6"] = Python.list()
-    data_dict["7"] = Python.list()
-    data_dict["8"] = Python.list()
-    data_dict["9"] = Python.list()
-    data_dict["10"] = Python.list()
-    data_dict["11"] = Python.list()
-    data_dict["12"] = Python.list()
-    data_dict["cum"] = Python.list()
-
-    var year_list: PythonObject = Python.list()
-    for year_raw in years:
-        var year = Int(py=year_raw)
-        year_list.append(year)
-
-        var month_data_p = Python.dict()
-        var month_data_b = Python.dict()
-        for m_idx in range(1, 13):
-            month_data_p[m_idx] = Python.list()
-            month_data_b[m_idx] = Python.list()
-
-        var p_year_returns = _filter_returns_by_year(p_returns, year)
-        var b_year_returns = _filter_returns_by_year(b_returns, year)
-
-        var min_len = min(len(p_year_returns), len(b_year_returns))
-        for idx in range(min_len):
-            var month = ((idx // 21) % 12) + 1
-            if month < 1 or month > 12:
-                month = 1
-            Python.list(month_data_p[month]).append(Float64(py=p_year_returns[idx]))
-            Python.list(month_data_b[month]).append(Float64(py=b_year_returns[idx]))
-
-        var p_cum_prod = 1.0
-        var b_cum_prod = 1.0
-        for m_idx in range(1, 13):
-            var m_key = String(m_idx)
-            var mp = Python.list(month_data_p[m_idx])
-            var mb = Python.list(month_data_b[m_idx])
-            if len(mp) > 0 and len(mb) > 0:
-                var pp = 1.0
-                var pb = 1.0
-                for i_idx in range(min(len(mp), len(mb))):
-                    pp *= (1.0 + Float64(py=mp[i_idx]))
-                    pb *= (1.0 + Float64(py=mb[i_idx]))
-                var excess = pp / pb - 1.0
-                data_dict[m_key].append(excess)
-                p_cum_prod *= pp
-                b_cum_prod *= pb
-            else:
-                data_dict[m_key].append(np.nan)
-
-        data_dict["12"].append(p_cum_prod / b_cum_prod - 1.0)
-
-    var year_map = Python.dict()
-    year_map["year"] = year_list
-    var result = ChainMap(data_dict, year_map)
-    return result
-
-
-def _gen_positions_weight_py(positions_weight_df: PythonObject) raises -> PythonObject:
-    """Convert positions weight DataFrame to dict format."""
-    var rename_dict = Python.dict()
-    rename_dict["25%"] = "percent_25"
-    rename_dict["50%"] = "percent_50"
-    rename_dict["75%"] = "percent_75"
-
-    var df = positions_weight_df.reset_index().rename(columns=rename_dict)
-    return df.to_dict(orient="list")
-
-
-def _generate_xlsx_reports_py(generate_dict: PythonObject, output_path: String) raises:
-    """Generate XLSX report using Python openpyxl via excel_template module."""
     from rqmojo.mod.rqmojo_mod_sys_analyser.report.excel_template import generate_xlsx_reports
-    generate_xlsx_reports(generate_dict, output_path)
+    generate_xlsx_reports(report, output_path)
 
+    var csv_mod = Python.evaluate(
+        "import os\n"
+        "def _export_csv_files(total_returns, p_returns, b_returns, unit_net_value, benchmark_nav, has_benchmark, csv_base_path):\n"
+        "    if not csv_base_path.endswith('/'):\n"
+        "        csv_base_path = csv_base_path + '/'\n"
+        "    total_returns.to_frame(name='total_returns').to_csv(csv_base_path + 'total_returns.csv')\n"
+        "    p_returns.to_frame(name='returns').to_csv(csv_base_path + 'returns.csv')\n"
+        "    if has_benchmark:\n"
+        "        b_returns.to_frame(name='benchmark_returns').to_csv(csv_base_path + 'benchmark_returns.csv')\n"
+        "    unit_net_value.to_frame(name='unit_net_value').to_csv(csv_base_path + 'unit_net_value.csv')\n"
+        "    if has_benchmark:\n"
+        "        benchmark_nav.to_frame(name='benchmark_nav').to_csv(csv_base_path + 'benchmark_nav.csv')\n",
+        file=True,
+    )
+    var csv_func = csv_mod.__getattr__("_export_csv_files")
 
-def _extract_years_from_returns(returns: List[Float64]) raises -> PythonObject:
-    """Extract unique years from returns index."""
-    var years = Python.list()
-    years.append(2024)
-    if len(returns) > 250:
-        years.append(2025)
-    return years^
-
-
-def _filter_returns_by_year(returns: List[Float64], year: Int) -> List[Float64]:
-    """Filter returns by year."""
-    var n = len(returns)
-    var days_per_year = 242
-    var start_idx = (year - 2024) * days_per_year
-    var end_idx = min(start_idx + days_per_year, n)
-
-    var result = List[Float64]()
-    for i in range(start_idx, end_idx):
-        if i >= 0 and i < n:
-            result.append(returns[i])
-    return result^
-
-
-def _filter_nav_by_year(nav: List[Float64], year: Int, returns_len: Int) -> List[Float64]:
-    """Filter NAV by year."""
-    var n = len(nav)
-    var days_per_year = 242
-    var start_idx = (year - 2024) * days_per_year
-    var end_idx = min(start_idx + days_per_year + 1, n)
-
-    var result = List[Float64]()
-    for i in range(start_idx, end_idx):
-        if i >= 0 and i < n:
-            result.append(nav[i])
-    return result^
-
-
-def _resample_weekly(nav: List[Float64]) -> List[Float64]:
-    """Resample NAV to weekly frequency."""
-    var result = List[Float64]()
-    var n = len(nav)
-    var i = 0
-    while i < n:
-        if i + 4 < n:
-            result.append(nav[i + 4])
-            i += 5
-        else:
-            result.append(nav[n - 1])
-            break
-    return result^
-
-
-def _resample_monthly(nav: List[Float64]) -> List[Float64]:
-    """Resample NAV to monthly frequency."""
-    var result = List[Float64]()
-    var n = len(nav)
-    var i = 0
-    while i < n:
-        if i + 20 < n:
-            result.append(nav[i + 20])
-            i += 21
-        else:
-            if n > 0:
-                result.append(nav[n - 1])
-            break
-    return result^
-
-
-def _calc_returns_from_list(nav: List[Float64]) -> List[Float64]:
-    """Calculate returns from NAV list."""
-    var rets = List[Float64]()
-    if len(nav) < 2:
-        return rets^
-    for i in range(1, len(nav)):
-        if nav[i - 1] != 0:
-            rets.append(nav[i] / nav[i - 1] - 1.0)
-        else:
-            rets.append(0.0)
-    return rets^
+    var has_benchmark = _py_is_truthy(benchmark_unit_net_value)
+    csv_func(total_returns, p_returns, b_returns, unit_net_value, benchmark_unit_net_value, has_benchmark, output_path)

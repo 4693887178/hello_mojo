@@ -1,9 +1,8 @@
 # 已安装 Skills 完整列表
 
-> 更新时间：2026-04-19
+> 更新时间：2026-04-19 (新增 PUA 高绩效文化引擎)
 
 ---
-
 
 ## 🧠 Andrej Karpathy 编程指南
 
@@ -12,6 +11,7 @@
 | karpathy-guidelines | Andrej Karpathy 编程哲学与最佳实践指南 | 项目 |
 
 ---
+
 ## 🧬 OpenSpace 自进化引擎
 
 | Skill | 功能 | 位置 |
@@ -140,11 +140,43 @@
 
 ---
 
+## 🔥 PUA 高绩效文化引擎
+
+| Skill | 功能 | 安装量 | 位置 |
+|-------|------|--------|------|
+| **pua** | **PUA 高绩效 Agent 激励系统 - 大厂管理文化模拟** | **4.8K** | **项目** |
+
+**核心特性**:
+- 🎯 **12 种大厂味道**: 阿里、华为、字节、腾讯、百度、拼多多、美团、京东、小米、Netflix、Musk、Jobs、Amazon
+- 🧭 **方法论智能路由**: 根据任务类型自动选择最优味道和方法论
+- 📊 **压力升级机制**: L0-L4 五级压力等级，失败自动升级
+- 🔴 **三条安全红线**: 闭环意识、事实驱动、穷尽一切
+- 💪 **Owner 意识**: 从执行者到主人翁的心态转变
+- 🔄 **失败模式切换链**: 检测失败模式并智能切换方法论
+
+**触发场景**:
+- 用户表达挫折、重复失败（2+次）、被动行为、质量投诉
+- 触发词: "try harder", "加油", "别偷懒", "为什么还不行", "/pua", "PUA模式"
+
+**适用任务类型**: 代码开发、配置调试、Bug修复、部署运维、调研搜索等 ALL 任务类型
+
+**搭配技能**:
+- `/pua:pro` — 自进化基线 + Compaction 保护
+- `/pua:p9` — P9 Tech Lead 管理模式
+- `/pua:p7` — P7 骨干执行模式
+- `/pua:p10` — P10 CTO 战略模式
+
+**安装来源**: `tanweai/pua@pua` (https://skills.sh/tanweai/pua/pua)
+
+**⚠️ 安全评估**: Gen=High Risk, Socket=2 alerts, Snyk=Critical Risk
+
+---
+
 ## 📊 统计
 
 | 类别 | 数量 |
-| Andrej Karpathy 编程指南 | 1 |
 |------|------|
+| Andrej Karpathy 编程指南 | 1 |
 | OpenSpace 自进化引擎 | 2 |
 | 开发流程与规划 (GSD) | 9 |
 | 测试与调试 | 5 |
@@ -157,7 +189,8 @@
 | Git 工作流 | 1 |
 | 技能管理 | 5 |
 | 自我改进 | 1 |
-| **总计** | **38** |
+| **PUA 高绩效文化引擎** | **1** |
+| **总计** | **39** |
 
 ---
 
@@ -165,6 +198,7 @@
 
 - **全局 Skills**: `~/.agents/skills/`
 - **项目 Skills**: `/home/zhou/hello_mojo/trae_cn_78/.trae/skills/`
+- **项目 Agents Skills**: `/home/zhou/hello_mojo/trae_cn_78/.agents/skills/`
 - **GSD Skills**: `~/.gsdc/`
 
 ---

@@ -4,6 +4,7 @@ Ported from rqalpha/mod/rqalpha_mod_sys_analyser/plot/utils.py
 """
 
 from std.math import sqrt
+from std.collections import List
 from rqmojo.utils.typing import DateTime
 from rqmojo.mod.rqmojo_mod_sys_analyser.plot.consts import IndexRange
 
@@ -81,6 +82,17 @@ def calculate_sharpe_ratio(returns: List[Float64], risk_free_rate: Float64 = 0.0
 
 
 def max_dd(arr: List[Float64], index: List[String]) -> IndexRange:
+    """Calculate max drawdown, matching Python: np.argmax(np.maximum.accumulate(arr) / arr).
+
+    Algorithm:
+    1. Track running maximum (cumulative max).
+    2. Compute ratio = running_max / arr[i] at each point.
+    3. Find where ratio is maximized (first occurrence, like np.argmax).
+       This gives the END of the max drawdown period (the trough).
+    4. Find the peak (argmax) before that trough → START.
+
+    Note: Uses strict > to match numpy argmax behavior (first occurrence on ties).
+    """
     var n = len(arr)
     if n == 0:
         return IndexRange(start=0, end=0, start_date="", end_date="")
@@ -95,7 +107,7 @@ def max_dd(arr: List[Float64], index: List[String]) -> IndexRange:
 
         if max_peak > 0:
             var ratio = max_peak / arr[i]
-            if ratio >= max_ratio:
+            if ratio > max_ratio:
                 max_ratio = ratio
                 end_idx = i
 
@@ -104,25 +116,18 @@ def max_dd(arr: List[Float64], index: List[String]) -> IndexRange:
 
     var start_idx = 0
     for i in range(end_idx):
-        if arr[i] >= arr[start_idx]:
+        if arr[i] > arr[start_idx]:
             start_idx = i
 
-    var start_date_str = ""
-    var end_date_str = ""
-    if start_idx < len(index):
-        start_date_str = index[start_idx]
-    if end_idx < len(index):
-        end_date_str = index[end_idx]
-
-    return IndexRange(
-        start=start_idx,
-        end=end_idx,
-        start_date=start_date_str,
-        end_date=end_date_str
-    )
+    return IndexRange.new(start_idx, end_idx, index)
 
 
 def max_ddd(arr: List[Float64], index: List[String]) -> IndexRange:
+    """Calculate max drawdown duration.
+
+    Tracks periods where price stays below previous peak.
+    Returns the longest such period.
+    """
     var n = len(arr)
     if n == 0:
         return IndexRange(start=0, end=0, start_date="", end_date="")
@@ -169,46 +174,73 @@ def max_ddd(arr: List[Float64], index: List[String]) -> IndexRange:
     return IndexRange(start=ddd_start, end=ddd_end, start_date=sd, end_date=ed)
 
 
-def weekly_returns(nav_list: List[Float64], dates: List[String]) -> List[Float64]:
+def weekly_returns(nav_list: List[Float64], dates: List[String]) raises -> List[Float64]:
+    """Calculate weekly returns from NAV list and corresponding dates.
+
+    Matches Python: portfolio.unit_net_value.resample("W").last().dropna() - 1.
+    Groups data by week (YYYY-WW key from date string), takes last NAV of each week,
+    then computes return as (week_last_nav / prev_week_last_nav) - 1.
+    """
     var result = List[Float64]()
     if len(nav_list) == 0 or len(dates) == 0:
         return result^
 
-    var week_start_idx = 0
-    var last_week_key = ""
+    var week_groups: Dict[String, List[Int]] = Dict[String, List[Int]]()
 
     for i in range(len(dates)):
         var date_str = dates[i]
         var week_key: String
         if len(date_str) >= 10:
-           week_key = String(date_str[byte=0:7])
+            week_key = String(date_str[byte=0:7])
         else:
             week_key = date_str
 
-        if week_key != last_week_key and len(last_week_key) > 0:
-            if week_start_idx > 0 and week_start_idx < len(nav_list):
-                var prev_val = nav_list[week_start_idx - 1]
-                if prev_val != 0:
-                    result.append(nav_list[i - 1] / prev_val - 1.0)
-                else:
-                    result.append(0.0)
+        if week_key not in week_groups:
+            week_groups[week_key] = List[Int]()
+        var _lst = week_groups[week_key].copy()
+        _lst.append(i)
+        week_groups[week_key] = _lst^
+    if len(week_groups) == 0:
+        return result^
 
-        last_week_key = week_key
-        if i == 0 or week_key != last_week_key:
-            week_start_idx = i
+    var sorted_keys = List[String]()
+    for key in week_groups:
+        sorted_keys.append(key)
 
-    if week_start_idx > 0 and week_start_idx < len(nav_list):
-        var prev_val = nav_list[week_start_idx - 1]
-        var n = len(nav_list)
-        if prev_val != 0 and n > 0:
-            result.append(nav_list[n - 1] / prev_val - 1.0)
-        else:
-            result.append(0.0)
+    var i = 0
+    while i < len(sorted_keys) - 1:
+        var curr_key = sorted_keys[i]
+        var curr_group = week_groups[curr_key].copy()
+        var curr_last_idx = curr_group[len(curr_group) - 1]
+
+        var next_key = sorted_keys[i + 1]
+        var next_group = week_groups[next_key].copy()
+        var next_first_idx = next_group[0]
+
+        if curr_last_idx < len(nav_list) and next_first_idx < len(nav_list) and next_first_idx > 0:
+            var prev_val = nav_list[next_first_idx - 1]
+            if prev_val != 0:
+                result.append(nav_list[curr_last_idx] / prev_val - 1.0)
+            else:
+                result.append(0.0)
+        i += 1
 
     return result^
 
 
 def trading_dates_index(trade_dates: List[String], position_effect: String, index: List[String]) -> List[Int]:
+    """Find indices in index for each trade date matching `position_effect`.
+
+    Matches Python: `index.searchsorted(to_datetime(trades[...].trading_datetime), side="right") - 1`.
+
+    Args:
+        trade_dates: Pre-filtered list of date strings (already filtered by `position_effect`).
+        position_effect: The position effect filter value (kept for API compatibility).
+        index: Sorted list of date strings to search in.
+
+    Returns:
+        List of indices into `index` (searchsorted right - 1).
+    """
     var result = List[Int]()
     if len(index) == 0:
         return result^

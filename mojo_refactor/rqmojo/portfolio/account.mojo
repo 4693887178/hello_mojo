@@ -4,7 +4,7 @@ Ported from rqalpha/portfolio/account.py
 """
 
 from std.collections import List
-from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION
+from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION, POSITION_EFFECT
 from rqmojo.model.trade import Trade
 from rqmojo.portfolio.position import Position, create_position, create_future_position
 from rqmojo.utils.typing import DateTime
@@ -18,6 +18,7 @@ struct Account(ImplicitlyCopyable):
     var frozen_cash: Float64
     var margin_val: Float64
     var daily_pnl: Float64
+    var cash_liabilities: Float64
     var _positions: List[Position]
 
     def __str__(self) -> String:
@@ -25,7 +26,7 @@ struct Account(ImplicitlyCopyable):
 
     def __init__(out self, account_type: DEFAULT_ACCOUNT_TYPE, total_cash: Float64, total_value: Float64, 
                  positions_count: Int, frozen_cash: Float64, margin_val: Float64, daily_pnl: Float64,
-                 var _positions: List[Position]):
+                 cash_liabilities: Float64, var _positions: List[Position]):
         self.account_type = account_type
         self.total_cash = total_cash
         self.total_value = total_value
@@ -33,6 +34,7 @@ struct Account(ImplicitlyCopyable):
         self.frozen_cash = frozen_cash
         self.margin_val = margin_val
         self.daily_pnl = daily_pnl
+        self.cash_liabilities = cash_liabilities
         self._positions = _positions^
 
     def __init__(out self, *, copy: Self):
@@ -43,6 +45,7 @@ struct Account(ImplicitlyCopyable):
         self.frozen_cash = copy.frozen_cash
         self.margin_val = copy.margin_val
         self.daily_pnl = copy.daily_pnl
+        self.cash_liabilities = copy.cash_liabilities
         self._positions = List[Position]()
         for i in range(len(copy._positions)):
             self._positions.append(copy._positions[i])
@@ -55,6 +58,7 @@ struct Account(ImplicitlyCopyable):
         self.frozen_cash = take.frozen_cash
         self.margin_val = take.margin_val
         self.daily_pnl = take.daily_pnl
+        self.cash_liabilities = take.cash_liabilities
         self._positions = take._positions^
 
     def available_cash(self) -> Float64:
@@ -146,6 +150,17 @@ struct Account(ImplicitlyCopyable):
             self._positions[i].today_quantity = 0
         self.daily_pnl = 0.0
 
+    def calc_close_today_amount(
+        self,
+        order_book_id: String,
+        quantity: Int,
+        position_direction: POSITION_DIRECTION,
+        position_effect: POSITION_EFFECT
+    ) -> Int:
+        if position_effect == POSITION_EFFECT.CLOSE_TODAY:
+            return quantity
+        return 0
+
 
 def create_account(account_type: DEFAULT_ACCOUNT_TYPE, total_cash: Float64) -> Account:
     return Account(
@@ -156,6 +171,7 @@ def create_account(account_type: DEFAULT_ACCOUNT_TYPE, total_cash: Float64) -> A
         frozen_cash=0.0,
         margin_val=0.0,
         daily_pnl=0.0,
+        cash_liabilities=0.0,
         _positions=List[Position]()
     )
 

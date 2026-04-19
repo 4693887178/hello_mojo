@@ -4,13 +4,13 @@ Ported from tests/integration_tests/test_api/mod/sys_simulation/test_signal_brok
 Tests signal broker functionality using pure rqmojo implementation.
 """
 
-from std.testing import assert_equal, assert_true, assert_false
+from std.testing import assert_equal, assert_true, assert_false, assert_raises, TestSuite
 from std.collections import Dict, List
-from rqmojo.const import ORDER_STATUS, SIDE, POSITION_EFFECT, SIDE_BUY, POSITION_EFFECT_OPEN
+from rqmojo.const import ORDER_STATUS, SIDE, POSITION_EFFECT, ORDER_TYPE
 from rqmojo.model.order import Order, create_order_with_id, MarketOrder, LimitOrder
-from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.mod.rqmojo_mod_sys_simulation.signal_broker import SignalBroker, create_signal_broker
-from rqmojo.utils.datetime_func import DateTime
+from rqmojo.environment import create_environment
+from rqmojo.utils.typing import DateTime
 
 
 comptime TEST_START_DATE_YEAR = 2015
@@ -28,277 +28,258 @@ def is_close(a: Float64, b: Float64, tolerance: Float64 = 1e-6) -> Bool:
 
 
 def test_signal_broker_creation() raises:
-    """
-    Test creating signal broker in Mojo.
-    """
+    """Test creating signal broker in Mojo."""
     print("=== Testing Signal Broker Creation ===")
-    
-    var broker = create_signal_broker()
-    print("  SignalBroker created: " + String(broker))
-    
-    assert_equal(broker.get_order_count(), 0)
-    
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+    print("  SignalBroker created")
+
+    var open_orders = broker.get_open_orders()
+    assert_equal(len(open_orders), 0, "Should have no open orders initially")
+
     print("Test test_signal_broker_creation: PASSED")
 
 
-def test_signal_broker_submit_order() raises:
-    """
-    Test submitting orders to signal broker.
-    """
-    print("=== Testing Signal Broker Submit Order ===")
-    
-    var broker = create_signal_broker()
-    
+def test_signal_broker_submit_market_order() raises:
+    """Test submitting market orders to signal broker."""
+    print("=== Testing Signal Broker Submit Market Order ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
     var order = create_order_with_id(
         order_id=1,
         order_book_id="000001.XSHE",
-        side=SIDE_BUY,
+        side=SIDE.BUY,
         quantity=100,
-        style=LimitOrder(10.0),
-        position_effect=POSITION_EFFECT_OPEN
+        style=MarketOrder(),
+        position_effect=POSITION_EFFECT.OPEN
     )
-    
+
     broker.submit_order(order)
-    assert_equal(broker.get_order_count(), 1)
-    print("  Order submitted, count: " + String(broker.get_order_count()))
-    
-    print("Test test_signal_broker_submit_order: PASSED")
+    assert_true(order.is_filled(), "Market buy order should be filled")
+    assert_equal(order.filled_quantity, 100, "Filled quantity should be 100")
+    print("  Market order submitted and filled, qty: " + String(order.filled_quantity))
+
+    print("Test test_signal_broker_submit_market_order: PASSED")
+
+
+def test_signal_broker_submit_limit_order() raises:
+    """Test submitting limit orders to signal broker."""
+    print("=== Testing Signal Broker Submit Limit Order ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
+    var limit_up = 11.0
+    var price = 10.0
+
+    var order = create_order_with_id(
+        order_id=1,
+        order_book_id="000001.XSHE",
+        side=SIDE.BUY,
+        quantity=100,
+        style=LimitOrder(price),
+        position_effect=POSITION_EFFECT.OPEN
+    )
+
+    broker.submit_order(order)
+    assert_true(order.is_filled(), "Limit order below limit_up should be filled")
+    assert_equal(order.filled_quantity, 100)
+    print("  Limit order at " + String(price) + " filled successfully")
+
+    print("Test test_signal_broker_submit_limit_order: PASSED")
 
 
 def test_signal_broker_cancel_order() raises:
-    """
-    Test cancelling orders in signal broker.
-    """
+    """Test cancelling orders in signal broker (should warn)."""
     print("=== Testing Signal Broker Cancel Order ===")
-    
-    var broker = create_signal_broker()
-    
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
     var order = create_order_with_id(
         order_id=1,
         order_book_id="000001.XSHE",
-        side=SIDE_BUY,
+        side=SIDE.BUY,
         quantity=100,
         style=LimitOrder(10.0),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.OPEN
     )
-    
-    broker.submit_order(order)
-    assert_equal(broker.get_order_count(), 1)
-    
-    broker.cancel_order(1)
-    
+
+    broker.cancel_order(order)
+
     var open_orders = broker.get_open_orders()
-    assert_equal(len(open_orders), 0)
-    print("  Order cancelled, open orders: " + String(len(open_orders)))
-    
+    assert_equal(len(open_orders), 0, "Signal broker always returns empty open orders")
+    print("  cancel_order called (warns as expected), open orders: " + String(len(open_orders)))
+
     print("Test test_signal_broker_cancel_order: PASSED")
 
 
 def test_signal_broker_get_open_orders() raises:
-    """
-    Test getting open orders from signal broker.
-    """
+    """Test getting open orders from signal broker."""
     print("=== Testing Signal Broker Get Open Orders ===")
-    
-    var broker = create_signal_broker()
-    
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
     var order1 = create_order_with_id(
         order_id=1,
         order_book_id="000001.XSHE",
-        side=SIDE_BUY,
+        side=SIDE.BUY,
         quantity=100,
         style=LimitOrder(10.0),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.OPEN
     )
-    
+
     var order2 = create_order_with_id(
         order_id=2,
-        order_book_id="000002.XSHE",
-        side=SIDE_BUY,
+        order_book_id="000001.XSHE",
+        side=SIDE.SELL,
         quantity=200,
-        style=LimitOrder(20.0),
-        position_effect=POSITION_EFFECT_OPEN
+        style=LimitOrder(10.5),
+        position_effect=POSITION_EFFECT.CLOSE
     )
-    
+
     broker.submit_order(order1)
     broker.submit_order(order2)
-    
-    assert_equal(broker.get_order_count(), 2)
-    print("  Orders submitted, count: " + String(broker.get_order_count()))
-    
+
+    assert_true(order1.is_filled(), "Order 1 should be filled")
+    assert_true(order2.is_filled(), "Order 2 should be filled")
+
+    var open_orders = broker.get_open_orders()
+    assert_equal(len(open_orders), 0, "Filled orders should not appear in open orders")
+    print("  Orders submitted and filled, open orders: " + String(len(open_orders)))
+
     print("Test test_signal_broker_get_open_orders: PASSED")
 
 
-def test_price_limit_simulation() raises:
-    """
-    Test price limit simulation (ported from test_price_limit).
-    
-    In Python test:
-    - Order at limit_up * 0.99 should succeed
-    - Order at limit_up should be rejected
-    """
-    print("=== Testing Price Limit Simulation ===")
-    
-    var broker = create_signal_broker()
-    
-    var limit_up = 20.0
-    var price = limit_up * 0.99
-    
+def test_price_limit_buy_reject() raises:
+    """Test that buy orders at or above limit_up are rejected."""
+    print("=== Testing Price Limit Buy Reject ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^, price_limit=True)
+
+    var limit_up = 11.0
+    var order_at_limit = create_order_with_id(
+        order_id=1,
+        order_book_id="000001.XSHE",
+        side=SIDE.BUY,
+        quantity=100,
+        style=LimitOrder(limit_up),
+        position_effect=POSITION_EFFECT.OPEN
+    )
+
+    broker.submit_order(order_at_limit)
+    assert_true(order_at_limit.is_rejected(), "Buy at limit_up should be rejected")
+    print("  Buy order at limit_up rejected: " + order_at_limit.message)
+
+    print("Test test_price_limit_buy_reject: PASSED")
+
+
+def test_price_limit_sell_reject() raises:
+    """Test that sell orders at or below limit_down are rejected."""
+    print("=== Testing Price Limit Sell Reject ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^, price_limit=True)
+
+    var limit_down = 9.0
+    var order_at_limit = create_order_with_id(
+        order_id=1,
+        order_book_id="000001.XSHE",
+        side=SIDE.SELL,
+        quantity=100,
+        style=LimitOrder(limit_down),
+        position_effect=POSITION_EFFECT.CLOSE
+    )
+
+    broker.submit_order(order_at_limit)
+    assert_true(order_at_limit.is_rejected(), "Sell at limit_down should be rejected")
+    print("  Sell order at limit_down rejected: " + order_at_limit.message)
+
+    print("Test test_price_limit_sell_reject: PASSED")
+
+
+def test_price_limit_disabled() raises:
+    """Test that disabling price_limit allows all prices through."""
+    print("=== Testing Price Limit Disabled ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^, price_limit=False)
+
+    var limit_up = 11.0
     var order = create_order_with_id(
         order_id=1,
         order_book_id="000001.XSHE",
-        side=SIDE_BUY,
-        quantity=100,
-        style=LimitOrder(price),
-        position_effect=POSITION_EFFECT_OPEN
-    )
-    
-    broker.submit_order(order)
-    assert_equal(broker.get_order_count(), 1)
-    print("  Order at limit_up * 0.99 submitted successfully")
-    
-    var order_at_limit = create_order_with_id(
-        order_id=2,
-        order_book_id="000001.XSHE",
-        side=SIDE_BUY,
+        side=SIDE.BUY,
         quantity=100,
         style=LimitOrder(limit_up),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.OPEN
     )
-    
-    broker.submit_order(order_at_limit)
-    assert_equal(broker.get_order_count(), 2)
-    print("  Order at limit_up submitted (validation happens in matching)")
-    
-    print("Test test_price_limit_simulation: PASSED")
+
+    broker.submit_order(order)
+    assert_true(order.is_filled(), "With price_limit disabled, order at limit_up should fill")
+    print("  Price limit disabled, order filled successfully")
+
+    print("Test test_price_limit_disabled: PASSED")
 
 
-def test_signal_open_auction_simulation() raises:
-    """
-    Test signal open auction simulation (ported from test_signal_open_auction).
-    
-    In Python test:
-    - Orders during open_auction phase
-    - Stock and future position checks
-    """
-    print("=== Testing Signal Open Auction Simulation ===")
-    
-    var broker = create_signal_broker()
-    
-    var stock_order = create_order_with_id(
+def test_exercise_order_raises() raises:
+    """Test that EXERCISE orders raise an error."""
+    print("=== Testing Exercise Order Raises ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
+    var order = create_order_with_id(
         order_id=1,
         order_book_id="000001.XSHE",
-        side=SIDE_BUY,
-        quantity=1000,
+        side=SIDE.BUY,
+        quantity=100,
         style=MarketOrder(),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.EXERCISE
     )
-    
-    broker.submit_order(stock_order)
-    assert_equal(broker.get_order_count(), 1)
-    print("  Stock order submitted during open auction")
-    
-    var future_order = create_order_with_id(
-        order_id=2,
-        order_book_id="AU1512",
-        side=SIDE_BUY,
-        quantity=1,
+
+    with assert_raises():
+        broker.submit_order(order)
+    print("  Exercise order correctly raised error")
+
+    print("Test test_exercise_order_raises: PASSED")
+
+
+def test_sell_order_fills() raises:
+    """Test that sell orders are properly filled."""
+    print("=== Testing Sell Order Fills ===")
+    var env = create_environment(DateTime(TEST_START_DATE_YEAR, TEST_START_DATE_MONTH, TEST_START_DATE_DAY), DateTime(2016, 4, 10))
+    var broker = create_signal_broker(env^)
+
+    var order = create_order_with_id(
+        order_id=1,
+        order_book_id="000001.XSHE",
+        side=SIDE.SELL,
+        quantity=50,
         style=MarketOrder(),
-        position_effect=POSITION_EFFECT_OPEN
+        position_effect=POSITION_EFFECT.CLOSE
     )
-    
-    broker.submit_order(future_order)
-    assert_equal(broker.get_order_count(), 2)
-    print("  Future order submitted during open auction")
-    
-    print("Test test_signal_open_auction_simulation: PASSED")
+
+    broker.submit_order(order)
+    assert_true(order.is_filled(), "Sell order should be filled")
+    assert_equal(order.filled_quantity, 50)
+    print("  Sell order filled, qty: " + String(order.filled_quantity))
+
+    print("Test test_sell_order_fills: PASSED")
 
 
 def test_config_consistency() raises:
-    """
-    Test that config values are consistent with Python test.
-    """
+    """Test that config values are consistent with Python test."""
     print("=== Testing Config Consistency ===")
-    
     assert_equal(TEST_START_DATE_YEAR, 2015)
     assert_equal(TEST_START_DATE_MONTH, 4)
     assert_equal(TEST_START_DATE_DAY, 10)
     assert_true(is_close(INITIAL_CASH, 1000000.0))
     assert_equal(TEST_FREQUENCY, "1d")
-    
+
     print("Config values:")
     print("  Start date: " + String(TEST_START_DATE_YEAR) + "-" + String(TEST_START_DATE_MONTH) + "-" + String(TEST_START_DATE_DAY))
     print("  Initial cash: " + String(INITIAL_CASH))
     print("  Frequency: " + TEST_FREQUENCY)
-    
+
     print("Test test_config_consistency: PASSED")
 
 
-def run_all_tests() raises -> Dict[String, String]:
-    var results = Dict[String, String]()
-    var passed = 0
-    var failed = 0
-    
-    print("=" * 60)
-    print("Running test_signal_broker.mojo")
-    print("=" * 60)
-    print("")
-    
-    var tests = List[String]()
-    tests.append("test_config_consistency")
-    tests.append("test_signal_broker_creation")
-    tests.append("test_signal_broker_submit_order")
-    tests.append("test_signal_broker_cancel_order")
-    tests.append("test_signal_broker_get_open_orders")
-    tests.append("test_price_limit_simulation")
-    tests.append("test_signal_open_auction_simulation")
-    
-    for test_name in tests:
-        try:
-            if test_name == "test_config_consistency":
-                test_config_consistency()
-            elif test_name == "test_signal_broker_creation":
-                test_signal_broker_creation()
-            elif test_name == "test_signal_broker_submit_order":
-                test_signal_broker_submit_order()
-            elif test_name == "test_signal_broker_cancel_order":
-                test_signal_broker_cancel_order()
-            elif test_name == "test_signal_broker_get_open_orders":
-                test_signal_broker_get_open_orders()
-            elif test_name == "test_price_limit_simulation":
-                test_price_limit_simulation()
-            elif test_name == "test_signal_open_auction_simulation":
-                test_signal_open_auction_simulation()
-            
-            results[test_name] = "PASS"
-            passed += 1
-        except e:
-            results[test_name] = "FAIL: " + String(e)
-            failed += 1
-    
-    print("")
-    print("=" * 60)
-    print("Test Summary")
-    print("=" * 60)
-    print("Total:  " + String(passed + failed))
-    print("Passed: " + String(passed))
-    print("Failed: " + String(failed))
-    print("")
-    
-    results["total"] = String(passed + failed)
-    results["passed"] = String(passed)
-    results["failed"] = String(failed)
-    
-    return results^
-
-
 def main() raises:
-    var results = run_all_tests()
-    
-    print("Final Results:")
-    var keys_list = List[String]()
-    for key in results.keys():
-        keys_list.append(key)
-    for key in keys_list:
-        var value = results[key]
-        print("  " + key + ": " + value)
+    TestSuite.discover_tests[__functions_in_module()]().run()

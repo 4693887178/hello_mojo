@@ -459,6 +459,17 @@ def _correct_cjk_punctuation(token: String) -> String:
     return result
 
 
+
+# ── Low-level C getchar wrapper (avoids external_call "read" conflict) ────────
+def _c_getchar() -> Int:
+    """Wrapper around POSIX getchar(3) for byte-by-byte stdin reads.
+
+    Uses getchar() instead of read(2) to avoid FFI signature conflict
+    with Mojo's existing read() declaration.
+    """
+    return external_call["getchar", Int]()
+
+
 # ── Terminal echo control (POSIX) ────────────────────────────────────────────
 # Used by .password() to suppress typed characters during interactive
 # prompting.  These wrap tcgetattr(3) / tcsetattr(3) via external_call.
@@ -637,18 +648,16 @@ def _read_password_asterisk(msg: String) raises -> String:
 
     # ── Read one byte at a time ──────────────────────────────────
     var password = List[UInt8]()
-    var one = List[UInt8](length=1, fill=0)
     var cancelled = False
     var cancel_reason = String()
 
     while True:
-        var one_ptr = one.unsafe_ptr()
-        var n = external_call["read", Int, Int, Int, Int](0, Int(one_ptr), 1)
-        if n <= 0:
+        var ch_int = _c_getchar()
+        if ch_int == -1 or ch_int == 0:
             cancelled = True
             cancel_reason = "password input read error"
             break  # EOF or error
-        var ch = one[0]
+        var ch = UInt8(ch_int & 0xFF)
         if ch == 10 or ch == 13:  # Enter (LF / CR)
             break
         elif ch == 127 or ch == 8:  # Backspace / Delete
@@ -670,14 +679,11 @@ def _read_password_asterisk(msg: String) raises -> String:
             # 2-3 bytes (e.g. ESC [ A), but we read up to 8 to be safe.
             var discard_count = 0
             while discard_count < 8:
-                var esc_ptr = one.unsafe_ptr()
-                var n2 = external_call["read", Int, Int, Int, Int](
-                    0, Int(esc_ptr), 1
-                )
-                if n2 <= 0:
+                var esc_ch_int = _c_getchar()
+                if esc_ch_int == -1 or esc_ch_int == 0:
                     break
                 # Stop after the terminating letter of a CSI sequence.
-                var esc_ch = one[0]
+                var esc_ch = UInt8(esc_ch_int & 0xFF)
                 discard_count += 1
                 if esc_ch >= 64 and esc_ch <= 126:  # '@' .. '~'
                     break

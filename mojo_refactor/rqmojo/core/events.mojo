@@ -21,7 +21,7 @@ comptime EventValue = Variant[String, Int, Float64, Bool]
 
 
 @fieldwise_init
-struct Event(Writable, Movable):
+struct Event(Copyable, Writable, Movable):
     var event_type: String
     var attributes: Dict[String, EventValue]
 

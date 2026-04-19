@@ -8,18 +8,14 @@ from rqmojo.const import ORDER_TYPE, POSITION_EFFECT
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidatorInterface
 from rqmojo.portfolio.account import Account
-from rqmojo.utils.i18n import gettext as `_`
 from rqmojo.data.data_proxy import DataProxy
 
 
-struct PriceValidator(FrontendValidatorInterface):
+struct PriceValidator(FrontendValidatorInterface, Movable, Writable):
     var _data_proxy: DataProxy
 
     def __init__(out self, var data_proxy: DataProxy):
         self._data_proxy = data_proxy^
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("PriceValidator")
 
     def validate_order(self, order: Order) -> Bool:
         return True
@@ -46,6 +42,9 @@ struct PriceValidator(FrontendValidatorInterface):
 
     def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
         return None
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("PriceValidator")
 
 
 def _format_float(value: Float64) -> String:

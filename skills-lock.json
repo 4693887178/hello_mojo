@@ -51,6 +51,11 @@
       "sourceType": "github",
       "computedHash": "a270cc0e6ed0c0431e5bbcae794965f3af3a344e6309dbe299e8fd99739500f1"
     },
+    "karpathy-guidelines": {
+      "source": "forrestchang/andrej-karpathy-skills",
+      "sourceType": "github",
+      "computedHash": "41e8ca055bbde13d240776a14a076a59614057200340c243130a76ba4e64cac8"
+    },
     "memory-safety-patterns": {
       "source": "wshobson/agents",
       "sourceType": "github",
@@ -85,6 +90,11 @@
       "source": "adisinghstudent/easyclaw",
       "sourceType": "github",
       "computedHash": "8511022469f59d2540ba78ee7bf59b318a7a992ea2dd70caa57bd7d18ddb679c"
+    },
+    "pua": {
+      "source": "tanweai/pua",
+      "sourceType": "github",
+      "computedHash": "20477e1d541f9a5596fa8660d95d2032505b927ccd1d945a8c487ab0d07ee2a3"
     },
     "ralph-loop": {
       "source": "andrelandgraf/fullstackrecipes",
