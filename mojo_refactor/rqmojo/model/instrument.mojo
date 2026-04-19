@@ -3,9 +3,10 @@ RQAlpha Mojo - Instrument Model
 Ported from rqalpha/model/instrument.py
 """
 
+from std.collections import Dict, List as StdList
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, DEFAULT_ACCOUNT_TYPE, MARKET, POSITION_DIRECTION
 from rqmojo.utils.typing import DateTime
-from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
+from rqmojo.utils.datetime_func import TimeRange, TimeOfDay, convert_dt_to_int, convert_date_to_int
 
 
 def is_instrument_type_in_stock_account(ins_type: INSTRUMENT_TYPE) -> Bool:
@@ -28,7 +29,7 @@ def fix_date(ds: String, dflt: DateTime) raises -> DateTime:
 
 
 @fieldwise_init
-struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Hashable):
+struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable):
     var order_book_id_val: String
     var symbol_val: String
     var type_val: INSTRUMENT_TYPE
@@ -51,12 +52,11 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     var board_type_val: String
     var status_val: String
     var special_type_val: String
+    var settlement_method_val: String
+    var trading_code_val: String
     
     def write_to(self, mut writer: Some[Writer]):
         writer.write("Instrument(", self.order_book_id(), ", ", self.symbol(), ")")
-    
-    def __hash__(self) -> Int:
-        return Int(hash(self.order_book_id()))
     
     def order_book_id(self) -> String:
         return self.order_book_id_val
@@ -65,6 +65,8 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         return self.symbol_val
     
     def round_lot(self) -> Int:
+        if self.type_val == INSTRUMENT_TYPE.CS and self.board_type() == "KSH":
+            return 1
         return self.round_lot_val
     
     def listed_date(self) -> DateTime:
@@ -72,9 +74,16 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
             return fix_date(self.listed_date_str, DateTime(1990, 1, 1, 0, 0, 0, 0))
         except:
             return DateTime(1990, 1, 1, 0, 0, 0, 0)
-
+    
     def tick_size(self) -> Float64:
-        return 0.01
+        if self.type_val == INSTRUMENT_TYPE.CS or self.type_val == INSTRUMENT_TYPE.INDX:
+            return 0.01
+        elif self.type_val == INSTRUMENT_TYPE.ETF or self.type_val == INSTRUMENT_TYPE.LOF:
+            return 0.001
+        elif self.type_val == INSTRUMENT_TYPE.FUTURE:
+            return 0.001
+        else:
+            return 0.01
     
     def de_listed_date(self) -> DateTime:
         try:
@@ -92,7 +101,9 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         return self.market_val
     
     def contract_multiplier(self) -> Float64:
-        return self.contract_multiplier_val
+        if self.contract_multiplier_val != 0.0:
+            return self.contract_multiplier_val
+        return 1.0
     
     def underlying_symbol(self) -> String:
         return self.underlying_symbol_val
@@ -140,13 +151,42 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
     def special_type(self) -> String:
         return self.special_type_val
     
+    def settlement_method(self) -> String:
+        return self.settlement_method_val
+    
+    def trading_code(self) -> String:
+        return self.trading_code_val
+    
     def account_type(self) -> DEFAULT_ACCOUNT_TYPE:
         if is_instrument_type_in_stock_account(self.type_val):
             return DEFAULT_ACCOUNT_TYPE.STOCK
-        return DEFAULT_ACCOUNT_TYPE.FUTURE
+        elif self.type_val == INSTRUMENT_TYPE.FUTURE:
+            return DEFAULT_ACCOUNT_TYPE.FUTURE
+        else:
+            return DEFAULT_ACCOUNT_TYPE.STOCK
     
     def is_future(self) -> Bool:
-        return self.type_val == INSTRUMENT_TYPE_FUTURE
+        return self.type_val == INSTRUMENT_TYPE.FUTURE
+
+    def min_order_quantity(self) -> Int:
+        return self.round_lot_val
+
+    def order_step_size(self) -> Int:
+        var bt = self.board_type()
+        if bt == "KSH" or bt == "BJS":
+            return 1
+        return self.round_lot()
+
+    def listed_at(self, dt: DateTime) -> Bool:
+        return convert_dt_to_int(self.listed_date()) <= convert_dt_to_int(dt)
+
+    def de_listed_at(self, dt: DateTime) -> Bool:
+        if self.type_val == INSTRUMENT_TYPE.FUTURE or self.type_val == INSTRUMENT_TYPE.OPTION:
+            return convert_date_to_int(dt) > convert_date_to_int(self.de_listed_date())
+        return convert_dt_to_int(dt) >= convert_dt_to_int(self.de_listed_date())
+
+    def active_at(self, dt: DateTime) -> Bool:
+        return self.listed_at(dt) and not self.de_listed_at(dt)
     
     def trading_hours(self) -> List[TimeRange]:
         if len(self.trading_hours_str) > 0:
@@ -183,7 +223,18 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
         result.append(TimeRange(TimeOfDay(9, 31), TimeOfDay(11, 30)))
         result.append(TimeRange(TimeOfDay(13, 1), TimeOfDay(15, 0)))
         return result^
-    
+
+    def during_continuous_auction(self, hour: Int, minute: Int) -> Bool:
+        var hours = self.trading_hours()
+        for i in range(len(hours)):
+            var r = hours[i]
+            var start_min = r.start.hour * 60 + r.start.minute
+            var end_min = r.end.hour * 60 + r.end.minute
+            var cur_min = hour * 60 + minute
+            if start_min <= cur_min <= end_min:
+                return True
+        return False
+
     def trade_at_night(self) -> Bool:
         var hours = self.trading_hours()
         for i in range(len(hours)):
@@ -192,6 +243,30 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable, Equatable, Ha
                 return True
         return False
 
+    def during_call_auction(self, hour: Int, minute: Int) -> Bool:
+        var _minute = hour * 60 + minute
+        if self.type_val == INSTRUMENT_TYPE.CS or self.type_val == INSTRUMENT_TYPE.ETF:
+            return _minute < 570 or _minute >= 897
+        elif self.type_val == INSTRUMENT_TYPE.FUTURE:
+            var hours = self.trading_hours()
+            if len(hours) > 0:
+                var start_time = hours[0].start
+                var start_minute = start_time.hour * 60 + start_time.minute - 1
+                return (start_minute - 5) <= _minute < start_minute
+            return False
+        else:
+            return False
+
+
+def _pad2(n: Int) -> String:
+    if n < 10:
+        return "0" + String(n)
+    return String(n)
+
+
+def _format_date(dt: DateTime) -> String:
+    return String(dt.year) + "-" + _pad2(dt.month) + "-" + _pad2(dt.day)
+
 
 def create_stock_instrument(order_book_id: String, symbol: String, listed_date: DateTime, exchange: EXCHANGE) -> Instrument:
     return Instrument(
@@ -199,7 +274,7 @@ def create_stock_instrument(order_book_id: String, symbol: String, listed_date: 
         symbol_val=symbol,
         type_val=INSTRUMENT_TYPE.CS,
         exchange_val=exchange,
-        listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
+        listed_date_str=_format_date(listed_date),
         de_listed_date_str="2999-12-31",
         maturity_date_str="2999-12-31",
         round_lot_val=100,
@@ -216,7 +291,9 @@ def create_stock_instrument(order_book_id: String, symbol: String, listed_date: 
         concept_names_val="",
         board_type_val="",
         status_val="Active",
-        special_type_val="Normal"
+        special_type_val="Normal",
+        settlement_method_val="",
+        trading_code_val=""
     )
 
 
@@ -226,9 +303,9 @@ def create_future_instrument(order_book_id: String, symbol: String, listed_date:
         symbol_val=symbol,
         type_val=INSTRUMENT_TYPE.FUTURE,
         exchange_val=exchange,
-        listed_date_str=String(listed_date.year) + "-" + String(listed_date.month) + "-" + String(listed_date.day),
-        de_listed_date_str=String(de_listed_date.year) + "-" + String(de_listed_date.month) + "-" + String(de_listed_date.day),
-        maturity_date_str=String(maturity_date.year) + "-" + String(maturity_date.month) + "-" + String(maturity_date.day),
+        listed_date_str=_format_date(listed_date),
+        de_listed_date_str=_format_date(de_listed_date),
+        maturity_date_str=_format_date(maturity_date),
         round_lot_val=1,
         contract_multiplier_val=contract_multiplier,
         underlying_symbol_val=underlying_symbol,
@@ -243,5 +320,36 @@ def create_future_instrument(order_book_id: String, symbol: String, listed_date:
         concept_names_val="",
         board_type_val="",
         status_val="Active",
-        special_type_val="Normal"
+        special_type_val="Normal",
+        settlement_method_val="PhysicalSettlementRequired",
+        trading_code_val=""
+    )
+
+
+def create_etf_instrument(order_book_id: String, symbol: String, listed_date: DateTime, exchange: EXCHANGE) -> Instrument:
+    return Instrument(
+        order_book_id_val=order_book_id,
+        symbol_val=symbol,
+        type_val=INSTRUMENT_TYPE.ETF,
+        exchange_val=exchange,
+        listed_date_str=_format_date(listed_date),
+        de_listed_date_str="2999-12-31",
+        maturity_date_str="2999-12-31",
+        round_lot_val=100,
+        contract_multiplier_val=1.0,
+        underlying_symbol_val="",
+        underlying_order_book_id_val="",
+        market_val=MARKET.CN,
+        trading_hours_str="",
+        market_tplus_val=0,
+        sector_code_val="",
+        sector_code_name_val="",
+        industry_code_val="",
+        industry_name_val="",
+        concept_names_val="",
+        board_type_val="",
+        status_val="Active",
+        special_type_val="Normal",
+        settlement_method_val="",
+        trading_code_val=""
     )
