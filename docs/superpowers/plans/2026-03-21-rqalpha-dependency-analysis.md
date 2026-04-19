@@ -161,7 +161,7 @@
 
 | 序号 | 文件路径                                                          | 状态    | 依赖数量 | 依赖模块                                                                                                                                   | 人工复盘时间           |
 | -- | ------------------------------------------------------------- | ----- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| 1  | `mod/rqalpha_mod_sys_analyser/report/report.py`               | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils.datetime_func`, `rqalpha.utils.logger`                                           | <br />           |
+| 1  | `mod/rqalpha_mod_sys_analyser/report/report.py`               | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils.datetime_func`, `rqalpha.utils.logger`                                           | 2026-04-19 13:36 |
 | 2  | `mod/rqalpha_mod_sys_risk/validators/price_validator.py`      | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           | 2026-04-19 07:10 |
 | 3  | `mod/rqalpha_mod_sys_risk/validators/self_trade_validator.py` | ✅ 已完成 | 4    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`                                           | 2026-04-19 07:22 |
 | 4  | `mod/rqalpha_mod_sys_scheduler/scheduler.py`                  | ✅ 已完成 | 4    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.core.events`, `rqalpha.utils.logger`                                                   | 2026-04-19 07:53 |
