@@ -117,7 +117,7 @@ struct SlippageDecider(Movable):
             return result
         elif self._model_name == "LimitPriceSlippage":
             if order.order_type() == ORDER_TYPE.LIMIT:
-                return order.price
+                return order.price()
             else:
                 return price
         else:
