@@ -1,12 +1,35 @@
 """
 RQAlpha Mojo - Simulation Testing Utilities
+Ported from rqalpha/mod/rqalpha_mod_sys_simulation/testing.py
 """
 
+from std.collections import Dict, List as StdList
 from rqmojo.const import SIDE, POSITION_EFFECT, ORDER_STATUS, EXCHANGE
 from rqmojo.model.order import Order, create_order_with_id, OrderStyle, MarketOrder
 from rqmojo.model.bar import BarObject, create_bar_object
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
+from rqmojo.utils.testing.fixtures import EnvironmentFixture
+from rqmojo.utils import RqAttrDict
+from rqmojo.environment import Environment
+from rqmojo.mod.rqmojo_mod_sys_simulation.simulation_event_source import SimulationEventSource, create_simulation_event_source
+
+
+struct SimulationEventSourceFixture:
+    var env_config: RqAttrDict
+    var env: Optional[Environment]
+    var simulation_event_source: Optional[SimulationEventSource]
+
+    def __init__(out self):
+        self.env_config = RqAttrDict()
+        self.env = None
+        self.simulation_event_source = None
+
+    def init_fixture(mut self) -> None:
+        var parent = EnvironmentFixture()
+        parent.init_fixture()
+        if self.env != None:
+            self.simulation_event_source = create_simulation_event_source()
 
 
 def create_test_order(order_book_id: String = "000001.XSHE", quantity: Int = 100, price: Float64 = 10.0, side: SIDE = SIDE.BUY) -> Order:
