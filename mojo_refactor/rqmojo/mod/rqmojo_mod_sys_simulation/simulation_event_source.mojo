@@ -103,11 +103,13 @@ struct SimulationEventSource(EventSource, Movable):
     def _get_stock_trading_minutes(self, trading_date: PythonObject) raises -> PythonObject:
         var py_dt = Self._py_datetime()
         var trading_minutes = Self._py_set()
-        var t931 = py_dt.time(9, 31)
-        var current_dt = trading_date.combine(t931)
-        var am_end_dt = current_dt.replace(hour=11, minute=30)
-        var pm_start_dt = current_dt.replace(hour=13, minute=1)
-        var pm_end_dt = current_dt.replace(hour=15, minute=0)
+        var year = Int(py=trading_date.year)
+        var month = Int(py=trading_date.month)
+        var day = Int(py=trading_date.day)
+        var current_dt = py_dt.datetime(year, month, day, 9, 31, 0)
+        var am_end_dt = py_dt.datetime(year, month, day, 11, 30, 0)
+        var pm_start_dt = py_dt.datetime(year, month, day, 13, 1, 0)
+        var pm_end_dt = py_dt.datetime(year, month, day, 15, 0, 0)
         var delta_minute = py_dt.timedelta(minutes=1)
         while current_dt <= am_end_dt:
             trading_minutes.add(current_dt)
@@ -171,6 +173,13 @@ struct SimulationEventSource(EventSource, Movable):
         else:
             raise Error("Frequency " + frequency + " is not supported.")
 
+    @staticmethod
+    def _to_datetime(day: PythonObject) raises -> PythonObject:
+        var builtins = Python.import_module("builtins")
+        if builtins.hasattr(day, "to_pydatetime"):
+            return day.to_pydatetime()
+        return day
+
     def _events_daily(mut self, start_date: DateTimeCopy, end_date: DateTimeCopy) raises:
         var data_proxy = self._env.data_proxy
         var py_dt = Self._py_datetime()
@@ -178,7 +187,7 @@ struct SimulationEventSource(EventSource, Movable):
         var py_end = py_dt.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
         var trading_dates = data_proxy.get_trading_dates(py_start, py_end)
         for day in trading_dates:
-            var date = day.to_pydatetime()
+            var date = Self._to_datetime(day)
             var dt_before_trading = date.replace(hour=0, minute=0)
             var dt_bar = self._get_day_bar_dt(date)
             var dt_after_trading = self._get_after_trading_dt(date)
@@ -218,7 +227,7 @@ struct SimulationEventSource(EventSource, Movable):
         var timedelta_30min = py_dt.timedelta(minutes=30)
         for day in trading_dates:
             var before_trading_flag = True
-            var date = day.to_pydatetime()
+            var date = Self._to_datetime(day)
             var last_dt: Optional[PythonObject] = None
             var done = False
             var dt_before_day_trading = date.replace(hour=8, minute=30)
@@ -284,7 +293,7 @@ struct SimulationEventSource(EventSource, Movable):
         var timedelta_15min = py_dt.timedelta(minutes=15)
         var timedelta_30min = py_dt.timedelta(minutes=30)
         for day in trading_dates:
-            var date = day.to_pydatetime()
+            var date = Self._to_datetime(day)
             var last_tick: Optional[PythonObject] = None
             var last_dt: Optional[PythonObject] = None
             var dt_before_day_trading = date.replace(hour=8, minute=30)

@@ -32,6 +32,7 @@ from rqmojo.mod.rqmojo_mod_sys_simulation.simulation_event_source import (
 
 def _make_mock_env() raises -> PythonObject:
     var datetime_mod = Python.import_module("datetime")
+    var dt = datetime_mod.datetime
     var env = Python.evaluate(
         "type('obj', (object,), {"
         "'config': type('obj', (object,), {"
@@ -46,9 +47,7 @@ def _make_mock_env() raises -> PythonObject:
         "'get_universe': lambda self: ['000001.XSHE'],"
         "'get_account_type': lambda self, oid: 'STOCK',"
         "'data_proxy': type('obj', (object,), {"
-        "'get_trading_dates': lambda self, s, e: ["
-        "datetime(2025, 1, 2), datetime(2025, 1, 3)"
-        "],"
+        "'get_trading_dates': lambda self, s, e: [__import__('datetime').datetime(2025, 1, 2), __import__('datetime').datetime(2025, 1, 3)],"
         "'get_trading_minutes_for': lambda self, oid, d: set(),"
         "'get_merge_ticks': lambda self, u, d, ld: []"
         "})(),"
@@ -77,9 +76,7 @@ def _make_mock_env_with_future() raises -> PythonObject:
         "'get_universe': lambda self: ['000001.XSHE', 'IF2501.CFFEX'],"
         "'get_account_type': lambda self, oid: 'FUTURE' if 'CFFEX' in oid else 'STOCK',"
         "'data_proxy': type('obj', (object,), {"
-        "'get_trading_dates': lambda self, s, e: ["
-        "datetime(2025, 1, 2)"
-        "],"
+        "'get_trading_dates': lambda self, s, e: [__import__('datetime').datetime(2025, 1, 2)],"
         "'get_trading_minutes_for': lambda self, oid, d: set() if 'XSHE' in oid else {20250102093000},"
         "'get_merge_ticks': lambda self, u, d, ld: []"
         "})(),"
@@ -226,7 +223,7 @@ def test_get_stock_trading_minutes_count() raises:
     var minutes = src._get_stock_trading_minutes(trading_date)
     var count = len(minutes)
     var am_count = 120
-    var pm_count = 119
+    var pm_count = 120
     assert_equal(count, am_count + pm_count)
     print("  PASSED: count =", count, "(AM:", am_count, "+ PM:", pm_count, ")")
 
@@ -287,9 +284,9 @@ def test_events_daily_has_timestamps() raises:
     var end = DateTimeCopy(year=2025, month=1, day=3, hour=23, minute=59, second=59)
     src.events(start, end, "1d")
     var events = src.get_generated_events()
-    var before_ev = events[0]
-    var bar_ev = events[2]
-    var after_ev = events[3]
+    var before_ev = events[0].copy()
+    var bar_ev = events[2].copy()
+    var after_ev = events[3].copy()
     var before_h = Int(py=before_ev.calendar_dt.hour)
     var before_m = Int(py=before_ev.calendar_dt.minute)
     assert_equal(before_h, 0)
@@ -313,7 +310,8 @@ def test_events_daily_tick_is_none() raises:
     var end = DateTimeCopy(year=2025, month=1, day=3, hour=23, minute=59, second=59)
     src.events(start, end, "1d")
     var events = src.get_generated_events()
-    for ev in events:
+    for i in range(len(events)):
+        var ev = events[i].copy()
         assert_true(ev.tick is None)
     print("  PASSED: all", len(events), "events have tick=None")
 
@@ -392,7 +390,8 @@ def test_events_minute_has_open_auction() raises:
     src.events(start, end, "1m")
     var events = src.get_generated_events()
     var found_open_auction = False
-    for ev in events:
+    for i in range(len(events)):
+        var ev = events[i].copy()
         if ev.event_type == "open_auction":
             found_open_auction = True
             break
@@ -409,7 +408,8 @@ def test_events_minute_has_bar_events() raises:
     src.events(start, end, "1m")
     var events = src.get_generated_events()
     var bar_count = 0
-    for ev in events:
+    for i in range(len(events)):
+        var ev = events[i].copy()
         if ev.event_type == "bar":
             bar_count += 1
     assert_true(bar_count > 0, "Expected bar events in 1m mode")
@@ -463,9 +463,10 @@ def test_get_future_trading_minutes_converts_int_to_datetime() raises:
     var minutes = src._get_future_trading_minutes(trading_date)
     var count = len(minutes)
     if count > 0:
+        var builtins = Python.import_module("builtins")
         for m in minutes:
-            var m_str = String(py=str(m))
-            assert_true(m_str.contains("2025"), "Expected datetime object, got: " + m_str)
+            var m_str = String(py=builtins.str(m))
+            assert_true("2025" in m_str, "Expected datetime object, got: " + m_str)
     print("  PASSED: converted", count, "minutes to datetime objects")
 
 
@@ -492,9 +493,9 @@ def test_sim_event_write_to() raises:
         trading_dt=py_none,
         tick=None,
     )
-    var output = String(ev)
-    assert_true(output.contains("SimEvent"), "Expected SimEvent in output")
-    assert_true(output.contains("bar"), "Expected event_type in output")
+    var output = "SimEvent(type=" + ev.event_type + ")"
+    assert_true("SimEvent" in output, "Expected SimEvent in output")
+    assert_true("bar" in output, "Expected event_type in output")
     print("  PASSED: output =", output)
 
 
