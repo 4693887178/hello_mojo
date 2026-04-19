@@ -7,7 +7,6 @@ from std.collections import Optional
 from rqmojo.const import SIDE, POSITION_EFFECT
 from rqmojo.model.order import Order
 from rqmojo.interface import FrontendValidatorInterface
-from rqmojo.mod.rqmojo_mod_sys_accounts.position_model import PositionModel
 from rqmojo.portfolio.account import Account
 
 
@@ -24,7 +23,7 @@ struct PositionValidator(FrontendValidatorInterface, Movable):
     def can_cancel_order(self, order_id: Int) -> Bool:
         return self.enabled
     
-    def validate_submission(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_submission(self, order: Order, account: Optional[Account] = None) -> Optional[String]:
         if not self.enabled:
             return None
         
@@ -33,7 +32,7 @@ struct PositionValidator(FrontendValidatorInterface, Movable):
         
         return None
     
-    def validate_cancellation(self, order: Order, account_name: String) -> Optional[String]:
+    def validate_cancellation(self, order: Order, account: Optional[Account] = None) -> Optional[String]:
         return None
 
 

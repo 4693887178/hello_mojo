@@ -6,6 +6,7 @@ Design Notes:
   - Uses composition instead of inheritance (Mojo limitation)
   - Data generation functions use Python interop for rqdatac/h5py
   - AutomaticUpdateBundle maintains same interface as original
+  - Task system uses Python objects to avoid type conversion issues
 """
 
 from std.collections import Dict, List
@@ -154,178 +155,110 @@ def gen_suspended_days(d: String) raises:
     h5.close()
 
 
-struct GenerateDividendBundle(Writable, Movable):
-    var _d: String
+def gen_dividend(d: String) raises:
+    var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
+    var h5py = Python.import_module("h5py")
+    var order_book_ids = _get_oids_with_corporate_action_exclusions()
+    var dividend = rqdatac.get_dividend(order_book_ids)
+    if dividend is None:
+        raise Error("Got no dividend data")
+    var need_cols = Python.list(
+        "dividend_cash_before_tax", "book_closure_date",
+        "ex_dividend_date", "payable_date", "round_lot"
+    )
+    dividend = dividend[need_cols]
+    dividend.reset_index(inplace=True)
+    dividend.rename(columns={"declaration_announcement_date": "announcement_date"}, inplace=True)
 
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("GenerateDividendBundle(path=", self._d, ")")
+    dividend["book_closure_date"] = _convert_dates_to_python(dividend["book_closure_date"], False)
+    dividend["ex_dividend_date"] = _convert_dates_to_python(dividend["ex_dividend_date"], False)
+    dividend["payable_date"] = _convert_dates_to_python(dividend["payable_date"], False)
+    dividend["announcement_date"] = _convert_dates_to_python(dividend["announcement_date"], False)
 
-    def __init__(out self, d: String):
-        self._d = d
-
-    def _get_dividend(self) raises -> PythonObject:
-        var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
-        var order_book_ids = _get_oids_with_corporate_action_exclusions()
-        return rqdatac.get_dividend(order_book_ids)
-
-    def _write(self, data_iter: PythonObject) raises:
-        var h5py = Python.import_module("h5py")
-        var file_path = os_path.join(self._d, "dividends.h5")
-        var h5 = h5py.File(file_path, "w")
-        for item in data_iter:
-            var order_book_id = item[0]
-            var data = item[1]
-            h5.create_dataset(order_book_id, data=data)
-        h5.close()
-
-    def __call__(self) raises:
-        var dividend = self._get_dividend()
-        if dividend is None:
-            raise Error("Got no dividend data")
-        var need_cols = Python.list(
-            "dividend_cash_before_tax", "book_closure_date",
-            "ex_dividend_date", "payable_date", "round_lot"
-        )
-        dividend = dividend[need_cols]
-        dividend.reset_index(inplace=True)
-        dividend.rename(columns={"declaration_announcement_date": "announcement_date"}, inplace=True)
-
-        dividend["book_closure_date"] = self._convert_dates(dividend["book_closure_date"], False)
-        dividend["ex_dividend_date"] = self._convert_dates(dividend["ex_dividend_date"], False)
-        dividend["payable_date"] = self._convert_dates(dividend["payable_date"], False)
-        dividend["announcement_date"] = self._convert_dates(dividend["announcement_date"], False)
-
-        dividend.set_index(Python.list("order_book_id", "book_closure_date"), inplace=True)
-        var items: List[PythonObject] = []
-        for order_book_id in dividend.index.levels[0]:
-            items.append(Python.tuple(order_book_id, dividend.loc[order_book_id].to_records()))
-        self._write(items)
-
-    def _convert_dates(self, date_col: PythonObject, is_datetime: Bool) -> List[Int]:
-        var result: List[Int] = []
-        for dv in date_col:
-            var year = Int(py=dv.year)
-            var month = Int(py=dv.month)
-            var day = Int(py=dv.day)
-            if is_datetime:
-                result.append(year * 10000000000 + month * 100000000 + day * 1000000)
-            else:
-                result.append(year * 10000 + month * 100 + day)
-        return result^
+    dividend.set_index(Python.list("order_book_id", "book_closure_date"), inplace=True)
+    var items: PythonObject = []
+    for order_book_id in dividend.index.levels[0]:
+        items.append(Python.tuple(order_book_id, dividend.loc[order_book_id].to_records()))
+    var file_path = os_path.join(d, "dividends.h5")
+    var h5 = h5py.File(file_path, "w")
+    for item in items:
+        var order_book_id = item[0]
+        var data = item[1]
+        h5.create_dataset(order_book_id, data=data)
+    h5.close()
 
 
-struct GenerateSplitBundle(Writable, Movable):
-    var _d: String
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("GenerateSplitBundle(path=", self._d, ")")
-
-    def __init__(out self, d: String):
-        self._d = d
-
-    def _get_split(self) raises -> PythonObject:
-        var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
-        var order_book_ids = _get_oids_with_corporate_action_exclusions()
-        return rqdatac.get_split(order_book_ids)
-
-    def _write(self, data_iter: PythonObject) raises:
-        var h5py = Python.import_module("h5py")
-        var file_path = os_path.join(self._d, "split_factor.h5")
-        var h5 = h5py.File(file_path, "w")
-        for item in data_iter:
-            var order_book_id = item[0]
-            var data = item[1]
-            h5.create_dataset(order_book_id, data=data)
-        h5.close()
-
-    def __call__(self) raises:
-        var split = self._get_split()
-        if split is None:
-            raise Error("Got no split data")
-        split["split_factor"] = split["split_coefficient_to"] / split["split_coefficient_from"]
-        var cols = Python.list("split_factor", "split_coefficient_to", "split_coefficient_from")
-        split = split[cols]
-        split.reset_index(inplace=True)
-        split.rename(columns={"ex_dividend_date": "ex_date"}, inplace=True)
-        split["ex_date"] = self._convert_dates(split["ex_date"], True)
-        split.set_index(Python.list("order_book_id", "ex_date"), inplace=True)
-        var items: List[PythonObject] = []
-        for order_book_id in split.index.levels[0]:
-            items.append(Python.tuple(order_book_id, split.loc[order_book_id].to_records()))
-        self._write(items)
-
-    def _convert_dates(self, date_col: PythonObject, is_datetime: Bool) -> List[Int]:
-        var result: List[Int] = []
-        for dv in date_col:
-            var year = Int(py=dv.year)
-            var month = Int(py=dv.month)
-            var day = Int(py=dv.day)
-            if is_datetime:
-                result.append(year * 10000000000 + month * 100000000 + day * 1000000)
-            else:
-                result.append(year * 10000 + month * 100 + day)
-        return result^
+def gen_split(d: String) raises:
+    var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
+    var h5py = Python.import_module("h5py")
+    var order_book_ids = _get_oids_with_corporate_action_exclusions()
+    var split = rqdatac.get_split(order_book_ids)
+    if split is None:
+        raise Error("Got no split data")
+    split["split_factor"] = split["split_coefficient_to"] / split["split_coefficient_from"]
+    var cols = Python.list("split_factor", "split_coefficient_to", "split_coefficient_from")
+    split = split[cols]
+    split.reset_index(inplace=True)
+    split.rename(columns={"ex_dividend_date": "ex_date"}, inplace=True)
+    split["ex_date"] = _convert_dates_to_python(split["ex_date"], True)
+    split.set_index(Python.list("order_book_id", "ex_date"), inplace=True)
+    var items: PythonObject = []
+    for order_book_id in split.index.levels[0]:
+        items.append(Python.tuple(order_book_id, split.loc[order_book_id].to_records()))
+    var file_path = os_path.join(d, "split_factor.h5")
+    var h5 = h5py.File(file_path, "w")
+    for item in items:
+        var order_book_id = item[0]
+        var data = item[1]
+        h5.create_dataset(order_book_id, data=data)
+    h5.close()
 
 
-struct GenerateExFactorBundle(Writable, Movable):
-    var _d: String
+def gen_ex_factor(d: String) raises:
+    var numpy = Python.import_module("numpy")
+    var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
+    var h5py = Python.import_module("h5py")
+    var order_book_ids = _get_oids_with_corporate_action_exclusions()
+    var ex_factor = rqdatac.get_ex_factor(order_book_ids)
+    if ex_factor is None:
+        raise Error("Got no ex factor data")
+    ex_factor.reset_index(inplace=True)
+    ex_factor["ex_date"] = _convert_dates_to_python(ex_factor["ex_date"], True)
+    ex_factor.rename(columns={"ex_date": "start_date"}, inplace=True)
+    ex_factor.set_index(Python.list("order_book_id", "start_date"), inplace=True)
+    ex_factor = ex_factor[Python.list("ex_cum_factor")]
 
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("GenerateExFactorBundle(path=", self._d, ")")
+    var first_key = ex_factor.index.levels[0][0]
+    var dtype = ex_factor.loc[first_key].to_records().dtype
+    var initial = numpy.empty(Python.tuple(1), dtype=dtype)
+    initial["start_date"] = 0
+    initial["ex_cum_factor"] = 1.0
 
-    def __init__(out self, d: String):
-        self._d = d
+    var items: PythonObject = []
+    for order_book_id in ex_factor.index.levels[0]:
+        var loc_data = ex_factor.loc[order_book_id].to_records()
+        var concatenated = numpy.concatenate(Python.tuple(initial, loc_data))
+        items.append(Python.tuple(order_book_id, concatenated))
+    var file_path = os_path.join(d, "ex_cum_factor.h5")
+    var h5 = h5py.File(file_path, "w")
+    for item in items:
+        var order_book_id = item[0]
+        var data = item[1]
+        h5.create_dataset(order_book_id, data=data)
+    h5.close()
 
-    def _get_ex_factor(self) raises -> PythonObject:
-        var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
-        var order_book_ids = _get_oids_with_corporate_action_exclusions()
-        return rqdatac.get_ex_factor(order_book_ids)
 
-    def _write(self, data_iter: PythonObject) raises:
-        var h5py = Python.import_module("h5py")
-        var file_path = os_path.join(self._d, "ex_cum_factor.h5")
-        var h5 = h5py.File(file_path, "w")
-        for item in data_iter:
-            var order_book_id = item[0]
-            var data = item[1]
-            h5.create_dataset(order_book_id, data=data)
-        h5.close()
-
-    def __call__(self) raises:
-        var numpy = Python.import_module("numpy")
-        var ex_factor = self._get_ex_factor()
-        if ex_factor is None:
-            raise Error("Got no ex factor data")
-        ex_factor.reset_index(inplace=True)
-        ex_factor["ex_date"] = self._convert_dates(ex_factor["ex_date"], True)
-        ex_factor.rename(columns={"ex_date": "start_date"}, inplace=True)
-        ex_factor.set_index(Python.list("order_book_id", "start_date"), inplace=True)
-        ex_factor = ex_factor[Python.list("ex_cum_factor")]
-
-        var first_key = ex_factor.index.levels[0][0]
-        var dtype = ex_factor.loc[first_key].to_records().dtype
-        var initial = numpy.empty(Python.tuple(1), dtype=dtype)
-        initial["start_date"] = 0
-        initial["ex_cum_factor"] = 1.0
-
-        var items: List[PythonObject] = []
-        for order_book_id in ex_factor.index.levels[0]:
-            var loc_data = ex_factor.loc[order_book_id].to_records()
-            var concatenated = numpy.concatenate(Python.tuple(initial, loc_data))
-            items.append(Python.tuple(order_book_id, concatenated))
-        self._write(items)
-
-    def _convert_dates(self, date_col: PythonObject, is_datetime: Bool) -> List[Int]:
-        var result: List[Int] = []
-        for dv in date_col:
-            var year = Int(py=dv.year)
-            var month = Int(py=dv.month)
-            var day = Int(py=dv.day)
-            if is_datetime:
-                result.append(year * 10000000000 + month * 100000000 + day * 1000000)
-            else:
-                result.append(year * 10000 + month * 100 + day)
-        return result^
+def _convert_dates_to_python(date_col: PythonObject, is_datetime: Bool) raises -> PythonObject:
+    var result: PythonObject = []
+    for dv in date_col:
+        var year = Int(py=dv.year)
+        var month = Int(py=dv.month)
+        var day = Int(py=dv.day)
+        if is_datetime:
+            result.append(year * 10000000000 + month * 100000000 + day * 1000000)
+        else:
+            result.append(year * 10000 + month * 100 + day)
+    return result
 
 
 def gen_share_transformation(d: String) raises:
@@ -467,13 +400,18 @@ def gen_future_info(d: String) raises:
 
     for i in all_futures_info:
         if i.get("order_book_id"):
-            future_list.append(String(py=i.get("order_book_id")))
+            future_list.append(i.get("order_book_id"))
         else:
-            symbol_list.append(String(py=i.get("underlying_symbol")))
+            symbol_list.append(i.get("underlying_symbol"))
 
     for info in hard_code:
-        var usym = String(py=info["underlying_symbol"])
-        if usym not in symbol_list:
+        var usym = info["underlying_symbol"]
+        var found_sym: Bool = False
+        for s in symbol_list:
+            if s == usym:
+                found_sym = True
+                break
+        if not found_sym:
             all_futures_info.append(info)
             symbol_list.append(usym)
 
@@ -481,11 +419,17 @@ def gen_future_info(d: String) raises:
     var commission_df = rqdatac.futures.get_commission_margin()
 
     for future in futures_order_book_id:
-        var future_str = String(py=future)
-        var match_result = re_mod.match(r"^[a-zA-Z]*", future_str)
+        var match_result = re_mod.match(r"^[a-zA-Z]*", future)
         var underlying_symbol = match_result.group()
-        if future_str in future_list:
+
+        var found_obid: Bool = False
+        for fl in future_list:
+            if fl == future:
+                found_obid = True
+                break
+        if found_obid:
             continue
+
         var future_dict = Python.dict()
         var commission = commission_df[commission_df["order_book_id"] == future]
         var is_empty_val = commission.empty
@@ -497,18 +441,20 @@ def gen_future_info(d: String) raises:
             var instruments_data = rqdatac.instruments(future)
             future_dict["margin_rate"] = instruments_data.margin_rate
             future_dict["tick_size"] = instruments_data.tick_size()
-        var is_in_symbol_list: Bool = False
-        for s in symbol_list:
-            if s == underlying_symbol:
-                is_in_symbol_list = True
-                break
-        if is_in_symbol_list:
-            continue
         else:
+            var found_usym: Bool = False
+            for sl in symbol_list:
+                if sl == underlying_symbol:
+                    found_usym = True
+                    break
+            if found_usym:
+                continue
+
             symbol_list.append(underlying_symbol)
             future_dict["underlying_symbol"] = underlying_symbol
+            var dominant: PythonObject
             try:
-                var dominant = rqdatac.futures.get_dominant(underlying_symbol).iloc[-1]
+                dominant = rqdatac.futures.get_dominant(underlying_symbol).iloc[-1]
             except AttributeError:
                 continue
 
@@ -528,286 +474,15 @@ def gen_future_info(d: String) raises:
     var output_file = os_path.join(d, "future_info.json")
     var builtins_out = Python.import_module("builtins")
     var f_out = builtins_out.open(output_file, "w")
-    json_mod.dump(all_futures_info, f_out, separators=(",", ":"), indent=2)
+    json_mod.dump(all_futures_info, f_out)
     f_out.close()
 
 
-struct GenerateFileTask(Writable, Movable):
-    var _func: PythonObject
-    var _args: PythonObject
-    var _kwargs: PythonObject
-    var _step: Int
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("GenerateFileTask(step=", String(self._step), ")")
-
-    def __init__(out self, func: PythonObject, args: PythonObject, kwargs: PythonObject):
-        self._func = func
-        self._args = args
-        self._kwargs = kwargs
-        self._step = 100
-
-    def total_steps(self) -> Int:
-        return self._step
-
-    def __call__(mut self) raises -> Int:
-        self._func(self._args, self._kwargs)
-        return self._step
-
-
-struct DayBarTask(Writable, Movable):
-    var _order_book_ids: PythonObject
-    var _file_path: String
-    var _fields: PythonObject
-    var _h5_kwargs: PythonObject
-    var _market: String
-    var _task_type: String
-
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("DayBarTask(file=", self._file_path, ", type=", self._task_type, ")")
-
-    def __init__(
-        out self,
-        order_book_ids: PythonObject,
-        file_path: String,
-        fields: PythonObject,
-        market: String = "cn",
-        h5_kwargs: Optional[PythonObject] = None,
-        task_type: String = "base"
-    ):
-        self._order_book_ids = order_book_ids
-        self._file_path = file_path
-        self._fields = fields
-        if h5_kwargs is None:
-            self._h5_kwargs = Python.dict()
-        else:
-            self._h5_kwargs = h5_kwargs
-        self._market = market
-        self._task_type = task_type
-
-    def total_steps(self) -> Int:
-        return len(self._order_book_ids)
-
-    def execute_generate(mut self) raises -> List[Int]:
-        var results: List[Int] = []
-        var datetime_mod = Python.import_module("datetime")
-        var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
-        var h5py = Python.import_module("h5py")
-
-        try:
-            var h5 = h5py.File(self._file_path, "w")
-        except OSError:
-            print("Error: File update failed - " + self._file_path)
-            results.append(1)
-            return results^
-
-        var i = 0
-        var step = 300
-        while True:
-            var end_idx = min(i + step, len(self._order_book_ids))
-            var batch_ids = self._order_book_ids[i:end_idx]
-            var py_batch_ids = Python.list(batch_ids[0])
-            for j in range(1, len(batch_ids)):
-                py_batch_ids.append(batch_ids[j])
-
-            var df = rqdatac.get_price(
-                py_batch_ids, START_DATE, datetime_mod.date.today(), "1d",
-                adjust_type="none", fields=self._fields,
-                expect_df=True, market=self._market
-            )
-            var df_is_none = df is None
-            var df_empty = False
-            if not df_is_none:
-                df_empty = bool(df.empty)
-            if not (df_is_none or df_empty):
-                df.reset_index(inplace=True)
-                var datetime_values: List[Int] = []
-                for dv in df["date"]:
-                    var year = Int(py=dv.year)
-                    var month = Int(py=dv.month)
-                    var day = Int(py=dv.day)
-                    datetime_values.append(year * 10000000000 + month * 100000000 + day * 1000000)
-                df["datetime"] = datetime_values
-                del df["date"]
-                df.set_index(Python.list("order_book_id", "datetime"), inplace=True)
-                df.sort_index(inplace=True)
-                for order_book_id in df.index.levels[0]:
-                    h5.create_dataset(
-                        order_book_id,
-                        data=df.loc[order_book_id].to_records(),
-                        **self._h5_kwargs
-                    )
-            results.append(len(batch_ids))
-            i += step
-            if i >= len(self._order_book_ids):
-                break
-        h5.close()
-        return results^
-
-    def execute_update(mut self) raises -> List[Int]:
-        var results: List[Int] = []
-        var datetime_mod = Python.import_module("datetime")
-        var os_mod = Python.import_module("os")
-        var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
-        var h5py = Python.import_module("h5py")
-        var numpy = Python.import_module("numpy")
-
-        var need_recreate_h5: Bool = False
-        try:
-            var h5_check = h5py.File(self._file_path, "r")
-            need_recreate_h5 = not self._h5_has_valid_fields(h5_check, self._fields)
-            h5_check.close()
-        except OSError:
-            need_recreate_h5 = True
-        except RuntimeError:
-            need_recreate_h5 = True
-
-        if need_recreate_h5:
-            return self.execute_generate()
-
-        var h5: Optional[PythonObject] = None
-        try:
-            h5 = h5py.File(self._file_path, "a")
-        except OSError:
-            print("Error: File update failed - " + self._file_path)
-            results.append(1)
-            return results^
-
-        var basename = os_mod.path.basename(self._file_path)
-        var parts = basename.split(".")
-        var is_futures = parts[0] == "futures"
-
-        for order_book_id in self._order_book_ids:
-            var is_pre = is_futures and "888" in order_book_id
-            var start_date: Int = START_DATE
-
-            if order_book_id in h5 and not is_pre:
-                try:
-                    var last_date_val = h5[order_book_id]["datetime"][-1]
-                    var last_date = Int(py=last_date_val) // 1000000
-                except OSError:
-                    print("Error: File update failed - " + self._file_path)
-                    results.append(1)
-                    break
-                except ValueError:
-                    h5.pop(order_book_id)
-                    start_date = START_DATE
-                else:
-                    var next_dt = rqdatac.get_next_trading_date(last_date)
-                    start_date = Int(py=next_dt.year) * 10000000000 + Int(py=next_dt.month) * 100000000 + Int(py=next_dt.day) * 1000000
-            else:
-                start_date = START_DATE
-
-            var df = rqdatac.get_price(
-                order_book_id, start_date, END_DATE, "1d",
-                adjust_type="none", fields=self._fields,
-                expect_df=True, market=self._market
-            )
-            var df_is_none = df is None
-            var df_empty = False
-            if not df_is_none:
-                df_empty = bool(df.empty)
-            if not (df_is_none or df_empty):
-                var fields_py = Python.list(self._fields[0])
-                for fi in range(1, len(self._fields)):
-                    fields_py.append(self._fields[fi])
-                df = df[fields_py]
-                df = df.loc[order_book_id]
-                df.reset_index(inplace=True)
-                var dt_vals: List[Int] = []
-                for dv in df["date"]:
-                    var year = Int(py=dv.year)
-                    var month = Int(py=dv.month)
-                    var day = Int(py=dv.day)
-                    dt_vals.append(year * 10000000000 + month * 100000000 + day * 1000000)
-                df["datetime"] = dt_vals
-                del df["date"]
-                df.set_index("datetime", inplace=True)
-
-                if order_book_id in h5:
-                    var existing_data = h5[order_book_id][:]
-                    var new_records = df.to_records()
-                    var combined: List[PythonObject] = []
-                    for ed in existing_data:
-                        combined.append(ed)
-                    for nr in new_records:
-                        combined.append(nr)
-                    var data = numpy.array(combined, dtype=h5[order_book_id].dtype)
-                    h5.pop(order_book_id)
-                    h5.create_dataset(order_book_id, data=data, **self._h5_kwargs)
-                else:
-                    h5.create_dataset(order_book_id, data=df.to_records(), **self._h5_kwargs)
-            results.append(1)
-        finally:
-            if h5 is not None:
-                h5.close()
-        return results^
-
-    def _h5_has_valid_fields(self, h5: PythonObject, wanted_fields: List[String]) -> Bool:
-        var keys_iter = h5.keys()
-        var wanted_fields_set: Dict[String, Bool] = {}
-        for wf in wanted_fields:
-            wanted_fields_set[wf] = True
-        wanted_fields_set["datetime"] = True
-        try:
-            var first_key = next(keys_iter)
-            var h5_fields = h5[first_key].dtype.fields.keys()
-            var result: Bool = True
-            for key in wanted_fields_set.keys():
-                var found: Bool = False
-                for hf in h5_fields:
-                    if String(py=key) == String(py=hf):
-                        found = True
-                        break
-                if not found:
-                    result = False
-                    break
-            return result
-        except StopIteration:
-            pass
-        return False
-
-    def __call__(mut self) raises -> List[Int]:
-        if self._task_type == "generate":
-            return self.execute_generate()
-        else:
-            return self.execute_update()
-
-
-fn create_day_bar_task_generate(
-    order_book_ids: List[String],
-    file_path: String,
-    fields: List[String],
-    market: String = "cn",
-    h5_kwargs: Optional[PythonObject] = None
-) raises -> DayBarTask:
-    var final_h5_kwargs = h5_kwargs
-    if final_h5_kwargs is None:
-        final_h5_kwargs = Python.dict()
-    return DayBarTask(order_book_ids, file_path, fields, market, final_h5_kwargs, "generate")
-
-
-fn create_day_bar_task_update(
-    order_book_ids: List[String],
-    file_path: String,
-    fields: List[String],
-    market: String = "cn",
-    h5_kwargs: Optional[PythonObject] = None
-) raises -> DayBarTask:
-    var final_h5_kwargs = h5_kwargs
-    if final_h5_kwargs is None:
-        final_h5_kwargs = Python.dict()
-    return DayBarTask(order_book_ids, file_path, fields, market, final_h5_kwargs, "update")
-
-
-def process_init(args: Optional[PythonObject] = None, kwargs: Optional[PythonObject] = None) raises:
-    var kwargs_final: PythonObject = Python.dict()
-    if kwargs is not None:
-        kwargs_final = kwargs
+def process_init(args: PythonObject = Python.none(), kwargs: PythonObject = Python.dict()) raises:
     var warnings = Python.import_module("warnings")
     var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
     warnings.catch_warnings(record=True)
-    rqdatac.init(kwargs_final)
+    rqdatac.init(kwargs)
     from rqmojo.utils.logger import init_logger
     init_logger()
 
@@ -816,9 +491,9 @@ def gather_tasks(
     path: String,
     create: Bool,
     enable_compression: Bool,
-    h5_kwargs: Optional[PythonObject] = None
-) raises -> List[PythonObject]:
-    var tasks: List[PythonObject] = []
+    h5_kwargs: PythonObject = Python.dict()
+) raises -> PythonObject:
+    var tasks: PythonObject = []
 
     from rqmojo.utils.logger import init_logger
     init_logger()
@@ -830,10 +505,9 @@ def gather_tasks(
     var fund_stocks = rqdatac.all_instruments("FUND").order_book_id.tolist()
 
     var final_h5_kwargs = h5_kwargs
-    if final_h5_kwargs is None:
-        final_h5_kwargs = Python.dict()
     if enable_compression:
-        final_h5_kwargs = Python.dict(compression=9)
+        final_h5_kwargs = Python.dict()
+        final_h5_kwargs["compression"] = 9
 
     var stocks_fields_py = _get_stock_fields()
     var indexes_fields_py = _get_index_fields()
@@ -841,48 +515,332 @@ def gather_tasks(
     var fund_fields_py = _get_stock_fields()
 
     if create:
-        tasks.append(create_day_bar_task_generate(cs_stocks, os_path.join(path, "stocks.h5"), stocks_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_generate(indx_stocks, os_path.join(path, "indexes.h5"), indexes_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_generate(future_stocks, os_path.join(path, "futures.h5"), futures_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_generate(fund_stocks, os_path.join(path, "funds.h5"), fund_fields_py, "cn", final_h5_kwargs))
+        var task1 = Python.dict()
+        task1["type"] = "day_bar_generate"
+        task1["order_book_ids"] = cs_stocks
+        task1["file_path"] = os_path.join(path, "stocks.h5")
+        task1["fields"] = stocks_fields_py
+        task1["market"] = "cn"
+        task1["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task1)
+
+        var task2 = Python.dict()
+        task2["type"] = "day_bar_generate"
+        task2["order_book_ids"] = indx_stocks
+        task2["file_path"] = os_path.join(path, "indexes.h5")
+        task2["fields"] = indexes_fields_py
+        task2["market"] = "cn"
+        task2["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task2)
+
+        var task3 = Python.dict()
+        task3["type"] = "day_bar_generate"
+        task3["order_book_ids"] = future_stocks
+        task3["file_path"] = os_path.join(path, "futures.h5")
+        task3["fields"] = futures_fields_py
+        task3["market"] = "cn"
+        task3["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task3)
+
+        var task4 = Python.dict()
+        task4["type"] = "day_bar_generate"
+        task4["order_book_ids"] = fund_stocks
+        task4["file_path"] = os_path.join(path, "funds.h5")
+        task4["fields"] = fund_fields_py
+        task4["market"] = "cn"
+        task4["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task4)
     else:
-        tasks.append(create_day_bar_task_update(cs_stocks, os_path.join(path, "stocks.h5"), stocks_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_update(indx_stocks, os_path.join(path, "indexes.h5"), indexes_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_update(future_stocks, os_path.join(path, "futures.h5"), futures_fields_py, "cn", final_h5_kwargs))
-        tasks.append(create_day_bar_task_update(fund_stocks, os_path.join(path, "funds.h5"), fund_fields_py, "cn", final_h5_kwargs))
+        var task5 = Python.dict()
+        task5["type"] = "day_bar_update"
+        task5["order_book_ids"] = cs_stocks
+        task5["file_path"] = os_path.join(path, "stocks.h5")
+        task5["fields"] = stocks_fields_py
+        task5["market"] = "cn"
+        task5["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task5)
 
-    var path_arg = Python.tuple(path)
-    var empty_kwargs = Python.dict()
+        var task6 = Python.dict()
+        task6["type"] = "day_bar_update"
+        task6["order_book_ids"] = indx_stocks
+        task6["file_path"] = os_path.join(path, "indexes.h5")
+        task6["fields"] = indexes_fields_py
+        task6["market"] = "cn"
+        task6["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task6)
 
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_instruments, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_trading_dates, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_st_days, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_suspended_days, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_yield_curve, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_share_transformation, path_arg, empty_kwargs))
-    tasks.append(GenerateFileTask(Python.import_module("rqmojo.data.bundle").gen_future_info, path_arg, empty_kwargs))
+        var task7 = Python.dict()
+        task7["type"] = "day_bar_update"
+        task7["order_book_ids"] = future_stocks
+        task7["file_path"] = os_path.join(path, "futures.h5")
+        task7["fields"] = futures_fields_py
+        task7["market"] = "cn"
+        task7["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task7)
 
-    return tasks^
+        var task8 = Python.dict()
+        task8["type"] = "day_bar_update"
+        task8["order_book_ids"] = fund_stocks
+        task8["file_path"] = os_path.join(path, "funds.h5")
+        task8["fields"] = fund_fields_py
+        task8["market"] = "cn"
+        task8["h5_kwargs"] = final_h5_kwargs
+        tasks.append(task8)
+
+    var gen_task1 = Python.dict()
+    gen_task1["type"] = "gen_func"
+    gen_task1["func_name"] = "gen_instruments"
+    gen_task1["path"] = path
+    tasks.append(gen_task1)
+
+    var gen_task2 = Python.dict()
+    gen_task2["type"] = "gen_func"
+    gen_task2["func_name"] = "gen_trading_dates"
+    gen_task2["path"] = path
+    tasks.append(gen_task2)
+
+    var gen_task3 = Python.dict()
+    gen_task3["type"] = "gen_func"
+    gen_task3["func_name"] = "gen_st_days"
+    gen_task3["path"] = path
+    tasks.append(gen_task3)
+
+    var gen_task4 = Python.dict()
+    gen_task4["type"] = "gen_func"
+    gen_task4["func_name"] = "gen_suspended_days"
+    gen_task4["path"] = path
+    tasks.append(gen_task4)
+
+    var gen_task5 = Python.dict()
+    gen_task5["type"] = "gen_func"
+    gen_task5["func_name"] = "gen_yield_curve"
+    gen_task5["path"] = path
+    tasks.append(gen_task5)
+
+    var gen_task6 = Python.dict()
+    gen_task6["type"] = "gen_func"
+    gen_task6["func_name"] = "gen_share_transformation"
+    gen_task6["path"] = path
+    tasks.append(gen_task6)
+
+    var gen_task7 = Python.dict()
+    gen_task7["type"] = "gen_func"
+    gen_task7["func_name"] = "gen_future_info"
+    gen_task7["path"] = path
+    tasks.append(gen_task7)
+
+    var gen_task8 = Python.dict()
+    gen_task8["type"] = "gen_func"
+    gen_task8["func_name"] = "gen_dividend"
+    gen_task8["path"] = path
+    tasks.append(gen_task8)
+
+    var gen_task9 = Python.dict()
+    gen_task9["type"] = "gen_func"
+    gen_task9["func_name"] = "gen_split"
+    gen_task9["path"] = path
+    tasks.append(gen_task9)
+
+    var gen_task10 = Python.dict()
+    gen_task10["type"] = "gen_func"
+    gen_task10["func_name"] = "gen_ex_factor"
+    gen_task10["path"] = path
+    tasks.append(gen_task10)
+
+    return tasks
 
 
-def run_tasks(tasks: List[PythonObject], concurrency: Int = 1, rqdatac_kwargs: Optional[PythonObject] = None) raises -> Bool:
+def run_tasks(tasks: PythonObject, concurrency: Int = 1, rqdatac_kwargs: PythonObject = Python.dict()) raises -> Bool:
     var multiprocessing = Python.import_module("multiprocessing")
-    var ctypes = Python.import_module("ctypes")
-    from rqmojo.utils.concurrent import ProgressedProcessPoolExecutor
+    var ctypes_mod = Python.import_module("ctypes")
 
-    var final_rqdatac_kwargs = rqdatac_kwargs
-    if final_rqdatac_kwargs is None:
-        final_rqdatac_kwargs = Python.dict()
+    var succeed = multiprocessing.Value(ctypes_mod.c_bool, True)
 
-    var succeed = multiprocessing.Value(ctypes.c_bool, True)
-    var executor = ProgressedProcessPoolExecutor(
-        max_workers=concurrency,
-        initializer=process_init,
-        initargs=Python.tuple(succeed, final_rqdatac_kwargs)
-    )
     for task in tasks:
-        executor.submit(task)
-    return bool(succeed.value)
+        var task_type = task["type"]
+        if task_type == "day_bar_generate":
+            _execute_day_bar_generate(task)
+        elif task_type == "day_bar_update":
+            _execute_day_bar_update(task)
+        elif task_type == "gen_func":
+            var func_name = task["func_name"]
+            var path = task["path"]
+            if func_name == "gen_instruments":
+                gen_instruments(path)
+            elif func_name == "gen_trading_dates":
+                gen_trading_dates(path)
+            elif func_name == "gen_st_days":
+                gen_st_days(path)
+            elif func_name == "gen_suspended_days":
+                gen_suspended_days(path)
+            elif func_name == "gen_yield_curve":
+                gen_yield_curve(path)
+            elif func_name == "gen_share_transformation":
+                gen_share_transformation(path)
+            elif func_name == "gen_future_info":
+                gen_future_info(path)
+            elif func_name == "gen_dividend":
+                gen_dividend(path)
+            elif func_name == "gen_split":
+                gen_split(path)
+            elif func_name == "gen_ex_factor":
+                gen_ex_factor(path)
+
+    return succeed.value != 0
+
+
+def _execute_day_bar_generate(task: PythonObject) raises:
+    var datetime_mod = Python.import_module("datetime")
+    var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
+    var h5py = Python.import_module("h5py")
+
+    var order_book_ids = task["order_book_ids"]
+    var file_path = task["file_path"]
+    var fields = task["fields"]
+    var market = task["market"]
+    var h5_kwargs = task["h5_kwargs"]
+
+    var h5 = h5py.File(file_path, "w")
+
+    var i = 0
+    var step = 300
+    while True:
+        var end_idx = min(i + step, len(order_book_ids))
+        var batch_ids = order_book_ids[i:end_idx]
+
+        var df = rqdatac.get_price(
+            batch_ids, START_DATE, datetime_mod.date.today(), "1d",
+            adjust_type="none", fields=fields,
+            expect_df=True, market=market
+        )
+        var df_is_none = df is None
+        var df_empty = False
+        if not df_is_none:
+            df_empty = bool(df.empty)
+        if not (df_is_none or df_empty):
+            df.reset_index(inplace=True)
+            df["datetime"] = _convert_dates_to_python(df["date"], True)
+            del df["date"]
+            df.set_index(Python.list("order_book_id", "datetime"), inplace=True)
+            df.sort_index(inplace=True)
+            for order_book_id in df.index.levels[0]:
+                h5.create_dataset(order_book_id, data=df.loc[order_book_id].to_records(), **h5_kwargs)
+        i += step
+        if i >= len(order_book_ids):
+            break
+    h5.close()
+
+
+def _execute_day_bar_update(task: PythonObject) raises:
+    var datetime_mod = Python.import_module("datetime")
+    var os_mod = Python.import_module("os")
+    var rqdatac = Python.import_module("rqalpha.apis.api_rqdatac").rqdatac
+    var h5py = Python.import_module("h5py")
+    var numpy = Python.import_module("numpy")
+
+    var order_book_ids = task["order_book_ids"]
+    var file_path = task["file_path"]
+    var fields = task["fields"]
+    var market = task["market"]
+    var h5_kwargs = task["h5_kwargs"]
+
+    var need_recreate_h5: Bool = False
+    try:
+        var h5_check = h5py.File(file_path, "r")
+        need_recreate_h5 = not _h5_has_valid_fields(h5_check, fields)
+        h5_check.close()
+    except OSError:
+        need_recreate_h5 = True
+    except RuntimeError:
+        need_recreate_h5 = True
+
+    if need_recreate_h5:
+        _execute_day_bar_generate(task)
+        return
+
+    var h5 = h5py.File(file_path, "a")
+
+    var basename = os_mod.path.basename(file_path)
+    var parts = basename.split(".")
+    var is_futures = parts[0] == "futures"
+
+    for order_book_id in order_book_ids:
+        var is_pre = is_futures and "888" in order_book_id
+        var start_date: Int = START_DATE
+
+        if order_book_id in h5 and not is_pre:
+            try:
+                var last_date_val = h5[order_book_id]["datetime"][-1]
+                var last_date = Int(py=last_date_val) // 1000000
+            except OSError:
+                print("Error: File update failed - " + file_path)
+                h5.pop(order_book_id)
+                start_date = START_DATE
+            except ValueError:
+                h5.pop(order_book_id)
+                start_date = START_DATE
+            else:
+                var next_dt = rqdatac.get_next_trading_date(last_date)
+                start_date = Int(py=next_dt.year) * 10000000000 + Int(py=next_dt.month) * 100000000 + Int(py=next_dt.day) * 1000000
+        else:
+            start_date = START_DATE
+
+        var df = rqdatac.get_price(
+            order_book_id, start_date, END_DATE, "1d",
+            adjust_type="none", fields=fields,
+            expect_df=True, market=market
+        )
+        var df_is_none = df is None
+        var df_empty = False
+        if not df_is_none:
+            df_empty = bool(df.empty)
+        if not (df_is_none or df_empty):
+            df = df[fields]
+            df = df.loc[order_book_id]
+            df.reset_index(inplace=True)
+            df["datetime"] = _convert_dates_to_python(df["date"], True)
+            del df["date"]
+            df.set_index("datetime", inplace=True)
+
+            if order_book_id in h5:
+                var existing_data = h5[order_book_id][:]
+                var new_records = df.to_records()
+                var combined: PythonObject = []
+                for ed in existing_data:
+                    combined.append(ed)
+                for nr in new_records:
+                    combined.append(nr)
+                var data = numpy.array(combined, dtype=h5[order_book_id].dtype)
+                h5.pop(order_book_id)
+                h5.create_dataset(order_book_id, data=data, **h5_kwargs)
+            else:
+                h5.create_dataset(order_book_id, data=df.to_records(), **h5_kwargs)
+    h5.close()
+
+
+def _h5_has_valid_fields(h5: PythonObject, wanted_fields: PythonObject) -> Bool:
+    var keys_iter = h5.keys()
+    var wanted_fields_set: PythonObject = Python.dict()
+    for wf in wanted_fields:
+        wanted_fields_set[wf] = True
+    wanted_fields_set["datetime"] = True
+    try:
+        var first_key = next(keys_iter)
+        var h5_fields = h5[first_key].dtype.fields.keys()
+        var result: Bool = True
+        for key in wanted_fields_set.keys():
+            var found: Bool = False
+            for hf in h5_fields:
+                if key == hf:
+                    found = True
+                    break
+            if not found:
+                result = False
+                break
+        return result
+    except StopIteration:
+        pass
+    return False
 
 
 def update_bundle(
@@ -890,8 +848,8 @@ def update_bundle(
     create: Bool,
     enable_compression: Bool = False,
     concurrency: Int = 1,
-    rqdata_kwargs: Optional[PythonObject] = None,
-    h5_kwargs: Optional[PythonObject] = None
+    rqdata_kwargs: PythonObject = Python.dict(),
+    h5_kwargs: PythonObject = Python.dict()
 ) raises -> Bool:
     var tasks = gather_tasks(path, create, enable_compression, h5_kwargs)
     return run_tasks(tasks, concurrency, rqdata_kwargs)
@@ -1152,7 +1110,7 @@ struct AutomaticUpdateBundle(Writable, Movable):
                         break
                 if arr_key_exists2:
                     var existing_data = h5[order_book_id][:]
-                    var combined: List[PythonObject] = []
+                    var combined: PythonObject = []
                     for ed in existing_data:
                         combined.append(ed)
                     for ar in arr:
@@ -1189,7 +1147,7 @@ struct AutomaticUpdateBundle(Writable, Movable):
             for field in self._fields:
                 dtype_list.append(Python.tuple(field, record.dtype[field]))
             var trading_dt = self._env.data_proxy._data_source.batch_get_trading_date(df.index)
-            var trading_dt_converted: List[Int] = []
+            var trading_dt_converted: PythonObject = []
             for td in trading_dt:
                 var year = Int(py=td.year)
                 var month = Int(py=td.month)

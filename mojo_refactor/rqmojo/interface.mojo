@@ -280,7 +280,7 @@ trait Broker:
 
 
 trait ModInterface:
-    def start_up(mut self, env_name: PythonObject, mod_config: PythonObject):
+    def start_up(mut self, env_name: PythonObject, mod_config: PythonObject) raises:
         ...
     def tear_down(
         mut self,
