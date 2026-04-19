@@ -20,7 +20,7 @@ struct SimulationEventSource(EventSource, Movable, Writable):
     def write_to(self, mut writer: Some[Writer]):
         writer.write("SimulationEventSource(frequency=", self._frequency, ")")
     
-    def events(mut self):
+    def events(mut self, start_date: DateTime, end_date: DateTime, frequency: String) raises:
         """生成事件"""
         pass
     

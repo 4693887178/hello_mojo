@@ -104,14 +104,14 @@ struct Account(ImplicitlyCopyable):
             self.positions_count += 1
 
     def apply_trade(mut self, trade: Trade, commission: Float64 = 0.0) -> None:
-        var pos = self.get_or_create_position(trade.order_book_id, trade.position_direction)
+        var pos = self.get_or_create_position(trade.order_book_id, trade.position_direction_val)
         var delta_cash = pos.apply_trade(trade)
-        self.update_position(trade.order_book_id, trade.position_direction, pos)
+        self.update_position(trade.order_book_id, trade.position_direction_val, pos)
         
         if trade.side == SIDE.BUY:
-            self.total_cash -= trade.price * Float64(trade.quantity)
+            self.total_cash -= trade.last_price * Float64(trade.quantity)
         else:
-            self.total_cash += trade.price * Float64(trade.quantity)
+            self.total_cash += trade.last_price * Float64(trade.quantity)
         
         self.total_cash -= commission
         self.total_cash += delta_cash

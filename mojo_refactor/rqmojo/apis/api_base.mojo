@@ -11,7 +11,7 @@ from rqmojo.model.bar import BarObject
 from rqmojo.model.tick import TickObject
 from rqmojo.core.strategy_context import StrategyContext
 from rqmojo.portfolio.position import Position
-from rqmojo.portfolio.portfolio_manager import Portfolio, create_portfolio
+from rqmojo.portfolio_manager import Portfolio
 from rqmojo.data.data_proxy import DataProxy, Snapshot
 from rqmojo.utils.typing import DateTime
 from rqmojo.core.events import EVENT

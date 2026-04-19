@@ -97,7 +97,7 @@ struct TransactionCostArgs(Writable, Copyable, Movable, ImplicitlyCopyable):
 
 
 @fieldwise_init
-struct Portfolio(ImplicitlyCopyable, Movable):
+struct EnvPortfolio(ImplicitlyCopyable, Movable):
     var _stock_account: Account
     var _future_account: Account
     var total_value: Float64
@@ -106,10 +106,9 @@ struct Portfolio(ImplicitlyCopyable, Movable):
     var units: Float64
     
     def write_to(self, mut writer: Some[Writer]):
-        writer.write("Portfolio(value=", String(self.total_value), ", cash=", String(self.total_cash), ")")
+        writer.write("EnvPortfolio(value=", String(self.total_value), ", cash=", String(self.total_cash), ")")
     
     def get_account(self, order_book_id: String) -> Account:
-        # 根据 order_book_id 判断账户类型
         if order_book_id.find(".XSHG") != -1 or order_book_id.find(".XSHE") != -1:
             return self._stock_account
         return self._future_account
@@ -128,7 +127,7 @@ struct Portfolio(ImplicitlyCopyable, Movable):
             if pos.quantity > 0:
                 result.append(pos)
         return result^
-    
+
     def get_stock_position(self, order_book_id: String) -> Position:
         return self._stock_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
 
@@ -162,8 +161,8 @@ struct Portfolio(ImplicitlyCopyable, Movable):
         return self.unit_net_value()
 
 
-def create_portfolio(total_value: Float64 = 100000.0) -> Portfolio:
-    return Portfolio(
+def create_env_portfolio(total_value: Float64 = 100000.0) -> EnvPortfolio:
+    return EnvPortfolio(
         _stock_account=create_stock_account(total_value),
         _future_account=create_future_account(0.0),
         total_value=total_value,
@@ -202,7 +201,7 @@ struct Environment(Movable):
     var _universe: Set[String]
     var _data_proxy: DataProxy
     var _order_id_generator: OrderIdGenerator
-    var portfolio: Portfolio
+    var portfolio: EnvPortfolio
     var _execution_phase: EXECUTION_PHASE
     var _trading_days_a_year: Optional[Int]
     var _broker: SimulationBroker
@@ -326,14 +325,15 @@ struct Environment(Movable):
     # 订单相关方法
     # ============================================================
     
-    def submit_order(mut self, order: Order) -> Optional[Order]:
+    def submit_order(mut self, mut order: Order) raises -> Optional[Order]:
         if self.can_submit_order(order):
             var account = self.get_account(order.order_book_id)
-            self._broker.submit_order(order, account)
-            return order
+            self._broker.set_account(account)
+            self._broker.submit_order(order)
+            return order.copy()
         return None
 
-    def can_submit_order(mut self, order: Order) -> Bool:
+    def can_submit_order(mut self, order: Order) raises -> Bool:
         var instrument = self.get_instrument(order.order_book_id)
         var instrument_type = instrument.type()
         var account = self.portfolio.get_account(order.order_book_id)
@@ -357,9 +357,9 @@ struct Environment(Movable):
                 return False
         return True
 
-    def order_creation_failed(mut self, order_book_id: String, reason: String) -> None:
+    def order_creation_failed(mut self, order_book_id: String, reason: String) raises -> None:
         print("WARNING: Order creation failed for " + order_book_id + ": " + reason)
-        var evt = EVENT.ORDER_CREATION_REJECT()
+        var evt = EVENT.ORDER_CREATION_REJECT
         var event = Event(evt.value)
         _ = self._event_bus.publish_event(event)
 
@@ -448,7 +448,7 @@ struct Environment(Movable):
     def get_future_account(self) -> Account:
         return self.portfolio._future_account
 
-    def get_portfolio(self) -> Portfolio:
+    def get_portfolio(self) -> EnvPortfolio:
         return self.portfolio
 
     def get_positions(self) -> List[Position]:
@@ -492,9 +492,9 @@ struct Environment(Movable):
     def set_data_proxy(mut self, var data_proxy: DataProxy) -> None:
         self._data_proxy = data_proxy^
 
-    def set_broker(mut self, broker: SimulationBroker) -> None:
+    def set_broker(mut self, var broker: SimulationBroker) -> None:
         self._broker_name = "simulation"
-        self._broker = broker
+        self._broker = broker^
 
     def set_event_source(mut self, event_source: SimulationEventSource) -> None:
         self._event_source = event_source
@@ -644,12 +644,14 @@ struct EnvironmentSingleton:
         self._ptr = UnsafePointer[Environment, MutExternalOrigin]()
         self._initialized = False
 
-    def get_instance(self) raises -> ref[Self] Environment:
+    def get_instance(self) raises -> Environment:
         if not self._initialized:
             raise Error("Environment has not been created. Please create Environment first.")
-        return self._ptr[]
+        return self._ptr[].copy()
 
     def set_instance(mut self, env: Environment) -> None:
+        if self._initialized:
+            self._ptr.free()
         self._ptr = UnsafePointer[Environment, MutExternalOrigin].allocate()
         self._ptr.store(env)
         self._initialized = True
@@ -667,32 +669,41 @@ struct EnvironmentSingleton:
 from std.python import Python, PythonObject
 
 
+def _get_env_store() raises -> PythonObject:
+    """Get or create the environment storage dict via Python."""
+    var store = Python.evaluate("_env_store", file=True)
+    if Bool(py=store is None):
+        store = Python.evaluate("_env_store = {}", file=True)
+    return store
+
+
 def get_environment() raises -> Environment:
     """获取Environment实例，与Python版本的get_instance()类似"""
-    if not _ensure_singleton().has_instance():
+    var store = _get_env_store()
+    var py_env = store.get("_env", Python.none())
+    if Bool(py=py_env is None):
         raise Error("Environment has not been created. Please create Environment first.")
-    return _ensure_singleton().get_instance()^
+    var ptr = py_env.downcast_value_ptr[Environment]()
+    return ptr[].copy()
 
 
-def set_environment(env: Environment) -> None:
+def set_environment(var env: Environment) raises -> None:
     """设置Environment实例"""
-    _ensure_singleton().set_instance(env)
+    var store = _get_env_store()
+    store["_env"] = PythonObject(alloc=env^)
 
 
-def clear_environment() -> None:
+def clear_environment() raises -> None:
     """清理Environment实例"""
-    try:
-        _ensure_singleton().clear_instance()
-    except:
-        pass
+    var store = _get_env_store()
+    if Bool(py="_env" in store):
+        _ = store.pop("_env", Python.none())
 
 
-def has_environment() -> Bool:
+def has_environment() raises -> Bool:
     """检查Environment实例是否存在"""
-    try:
-        return _ensure_singleton().has_instance()
-    except:
-        return False
+    var store = _get_env_store()
+    return Bool(py="_env" in store)
 
 
 # ============================================================
@@ -724,7 +735,7 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _universe=Set[String](),
         _data_proxy=create_data_proxy(),
         _order_id_generator=create_order_id_generator(),
-        portfolio=create_portfolio(config.base.initial_cash),
+        portfolio=create_env_portfolio(config.base.initial_cash),
         _execution_phase=EXECUTION_PHASE.GLOBAL,
         _trading_days_a_year=Optional[Int](None),
         _broker=create_broker(),
@@ -762,7 +773,7 @@ def create_environment(start_date: DateTime, end_date: DateTime, run_type: RUN_T
         _universe=Set[String](),
         _data_proxy=create_data_proxy(),
         _order_id_generator=create_order_id_generator(),
-        portfolio=create_portfolio(100000.0),
+        portfolio=create_env_portfolio(100000.0),
         _execution_phase=EXECUTION_PHASE.GLOBAL,
         _trading_days_a_year=Optional[Int](None),
         _broker=create_broker(),

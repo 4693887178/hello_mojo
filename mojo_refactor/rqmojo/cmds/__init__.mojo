@@ -33,7 +33,7 @@ from rqmojo.cmds.bundle import (
     register_bundle_commands,
     dispatch_bundle_command,
 )
-from rqmojo.cmds.misc import print_version, print_help, examples, generate_config
+from rqmojo.cmds.misc import print_version, examples, generate_config
 from rqmojo.cmds.mod import (
     ModStatusEntry,
     get_builtin_mods,

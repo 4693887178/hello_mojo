@@ -773,11 +773,12 @@ def _execute_day_bar_update(task: PythonObject) raises:
     for order_book_id in order_book_ids:
         var is_pre = is_futures and "888" in order_book_id
         var start_date: Int = START_DATE
+        var last_date: Int = START_DATE
 
         if order_book_id in h5 and not is_pre:
             try:
                 var last_date_val = h5[order_book_id]["datetime"][-1]
-                var last_date = Int(py=last_date_val) // 1000000
+                last_date = Int(py=last_date_val) // 1000000
             except OSError:
                 print("Error: File update failed - " + file_path)
                 if order_book_id in h5:
@@ -804,7 +805,7 @@ def _execute_day_bar_update(task: PythonObject) raises:
             df = df.loc[order_book_id]
             df.reset_index(inplace=True)
             df["datetime"] = _convert_dates_to_python(df["date"], True)
-            df.pop("date", None)
+            df.pop("date")
             df.set_index("datetime", inplace=True)
 
             if order_book_id in h5:
@@ -816,10 +817,10 @@ def _execute_day_bar_update(task: PythonObject) raises:
                 for nr in new_records:
                     combined.append(nr)
                 var data = numpy.array(combined, dtype=h5[order_book_id].dtype)
-                h5.pop(order_book_id, None)
-                h5.create_dataset(order_book_id, data=data, **h5_kwargs)
+                h5.pop(order_book_id)
+                h5.create_dataset(order_book_id, data=data)
             else:
-                h5.create_dataset(order_book_id, data=df.to_records(), **h5_kwargs)
+                h5.create_dataset(order_book_id, data=df.to_records())
     h5.close()
 
 
@@ -1034,21 +1035,18 @@ struct AutomaticUpdateBundle(Writable, Movable):
     def get_data(mut self, instrument: Instrument, dt: DateTimeDate) raises -> Optional[PythonObject]:
         var dt_int = Int(py=dt.year) * 10000 + Int(py=dt.month) * 100 + Int(py=dt.day)
         var data = self._get_data_all_time(instrument)
-        if data is None:
+        if data is None or data is Python.none():
             return None
         else:
-            if data is None:
-                return None
             var numpy = Python.import_module("numpy")
-            var data_for_search = data
-            var searchsorted_result = numpy.searchsorted(data_for_search, dt_int)
+            var searchsorted_result = numpy.searchsorted(data, dt_int)
             var idx_int = Int(py=searchsorted_result)
             var data_len: Int = len(data)
             if idx_int >= data_len:
                 return None
             return data[idx_int]
 
-    def _get_data_all_time(mut self, instrument: Instrument) raises -> Optional[PythonObject]:
+    def _get_data_all_time(mut self, instrument: Instrument) raises -> PythonObject:
         var obid = instrument.order_book_id()
         var found: Bool = False
         for u in self._updated:
@@ -1061,10 +1059,16 @@ struct AutomaticUpdateBundle(Writable, Movable):
 
         var h5py = Python.import_module("h5py")
         var h5 = h5py.File(self._filename, "r")
-        var data = h5[instrument.order_book_id()][:]
+        var data: PythonObject
+        try:
+            data = h5[instrument.order_book_id()][:]
+        except:
+            h5.close()
+            return Python.none()
         h5.close()
-        if len(data) == 0:
-            return None
+        var data_len = len(data)
+        if data_len == 0:
+            return Python.none()
         return data
 
     def _auto_update_task(mut self, instrument: Instrument) raises -> None:
@@ -1122,7 +1126,8 @@ struct AutomaticUpdateBundle(Writable, Movable):
                         arr_key_exists = True
                         break
                 if not arr_key_exists:
-                    arr = numpy.array([])
+                    var empty_list: PythonObject = Python.list()
+                    arr = numpy.array(empty_list)
                     h5.create_dataset(order_book_id, data=arr)
             else:
                 var arr_key_exists2 = False
@@ -1144,11 +1149,11 @@ struct AutomaticUpdateBundle(Writable, Movable):
                     h5.create_dataset(order_book_id, data=arr)
         except OSError:
             var error_msg = "File " + self._filename + " update failed, if it is using, please update later, or you can delete then update again"
-            raise OSError(error_msg)
+            raise Error(error_msg)
         finally:
             h5.close()
 
-    def _get_array(self, instrument: Instrument, start_date: Int) raises -> Optional[PythonObject]:
+    def _get_array(self, instrument: Instrument, start_date: Int) raises -> PythonObject:
         var numpy = Python.import_module("numpy")
         var config_base = self._env.config.base
         var end_date = config_base.end_date
@@ -1157,27 +1162,28 @@ struct AutomaticUpdateBundle(Writable, Movable):
             fields_py.append(self._fields[fi])
 
         var df = self._api(instrument.order_book_id(), start_date, end_date, fields_py)
-        var df_is_none = df is None
-        var df_empty = False
-        if not df_is_none:
-            df_empty = bool(df.empty)
-        if not (df_is_none or df_empty):
-            df = df[fields_py]
-            df = df.loc[instrument.order_book_id()]
-            var record = df.iloc[0:1].to_records()
-            var dtype_list = Python.list(Python.tuple("trading_dt", "int"))
-            for field in self._fields:
-                dtype_list.append(Python.tuple(field, record.dtype[field]))
-            var trading_dt = self._env.data_proxy._data_source.batch_get_trading_date(df.index)
-            var trading_dt_converted: PythonObject = []
-            for td in trading_dt:
-                var year = Int(py=td.year)
-                var month = Int(py=td.month)
-                var day = Int(py=td.day)
-                trading_dt_converted.append(year * 10000 + month * 100 + day)
-            var arr = numpy.ones(Python.tuple(len(trading_dt_converted)), dtype=dtype_list)
-            arr["trading_dt"] = trading_dt_converted
-            for field in self._fields:
-                arr[field] = df[field].values
-            return arr
-        return None
+        if df is None:
+            return Python.none()
+        var df_empty_val = df.empty
+        var df_empty = Bool(py=df_empty_val)
+        if df_empty:
+            return Python.none()
+        df = df[fields_py]
+        df = df.loc[instrument.order_book_id()]
+        var record = df.iloc[0:1].to_records()
+        var dtype_list = Python.list(Python.tuple("trading_dt", "int"))
+        for field in self._fields:
+            dtype_list.append(Python.tuple(field, record.dtype[field]))
+        var trading_dt = self._env.data_proxy._data_source.batch_get_trading_date(df.index)
+        var trading_dt_converted: PythonObject = []
+        for td in trading_dt:
+            var year = Int(py=td.year)
+            var month = Int(py=td.month)
+            var day = Int(py=td.day)
+            trading_dt_converted.append(year * 10000 + month * 100 + day)
+        var arr = numpy.ones(Python.tuple(len(trading_dt_converted)), dtype=dtype_list)
+        arr["trading_dt"] = trading_dt_converted
+        for field in self._fields:
+            arr[field] = df[field].values
+        return arr
+        return Python.none()

@@ -40,7 +40,7 @@ def order_target_portfolio(
     target_portfolio: Dict[String, Float64],
     open_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle](),
     close_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle]()
-) -> List[Order]:
+) raises -> List[Order]:
     var target = List[TargetPortfolioItem]()
     
     for order_book_id in target_portfolio.keys():
@@ -121,7 +121,8 @@ def order_target_portfolio(
                 POSITION_EFFECT.OPEN
             )
             var result = env.submit_order(order)
-            orders.append(result)
+            if result is not None:
+                orders.append(result.value().copy())
         else:
             var order = create_order_with_id(
                 env.next_order_id(),
@@ -132,7 +133,8 @@ def order_target_portfolio(
                 POSITION_EFFECT.CLOSE
             )
             var result = env.submit_order(order)
-            orders.append(result)
+            if result is not None:
+                orders.append(result.value().copy())
     
     return orders^
 

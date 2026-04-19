@@ -121,15 +121,15 @@ struct Position(Movable, ImplicitlyCopyable):
 
     def apply_trade(mut self, trade: Trade) -> Float64:
         var delta_cash: Float64 = 0.0
-        var trade_amount = trade.price * Float64(trade.quantity) * self._contract_multiplier
-        
+        var trade_amount = trade.last_price * Float64(trade.quantity) * self._contract_multiplier
+
         if trade.position_effect == POSITION_EFFECT.OPEN:
             var old_total = self.avg_price * Float64(self.quantity)
             self.quantity += trade.quantity
             self.today_quantity += trade.quantity
             if self.quantity > 0:
-                self.avg_price = (old_total + trade.price * Float64(trade.quantity)) / Float64(self.quantity)
-            self._trade_cost += trade.price * Float64(trade.quantity)
+                self.avg_price = (old_total + trade.last_price * Float64(trade.quantity)) / Float64(self.quantity)
+            self._trade_cost += trade.last_price * Float64(trade.quantity)
             delta_cash = -trade_amount
         elif trade.position_effect == POSITION_EFFECT.CLOSE:
             self.quantity -= trade.quantity
@@ -140,7 +140,7 @@ struct Position(Movable, ImplicitlyCopyable):
                 self.old_quantity = 0
             if self.quantity < 0:
                 self.quantity = 0
-            self._trade_cost -= trade.price * Float64(trade.quantity)
+            self._trade_cost -= trade.last_price * Float64(trade.quantity)
             delta_cash = trade_amount
         elif trade.position_effect == POSITION_EFFECT.CLOSE_TODAY:
             self.quantity -= trade.quantity
@@ -149,7 +149,7 @@ struct Position(Movable, ImplicitlyCopyable):
                 self.today_quantity = 0
             if self.quantity < 0:
                 self.quantity = 0
-            self._trade_cost -= trade.price * Float64(trade.quantity)
+            self._trade_cost -= trade.last_price * Float64(trade.quantity)
             delta_cash = trade_amount
         
         self._update_market_value()

@@ -165,11 +165,15 @@ struct RqAttrDict(ImplicitlyCopyable, Movable, Writable, Iterable):
     def update(mut self, other: RqAttrDict) raises:
         for ck in other.child_keys():
             var other_child = other._children[ck][].copy()
+            if ck in self._values:
+                _ = self._values.pop(ck)
             if ck in self._children:
                 self._children[ck][].update(other_child)
             else:
                 self._children[ck] = ArcPointer[RqAttrDict](other_child^)
         for vk in other.value_keys():
+            if vk in self._children:
+                _ = self._children.pop(vk)
             self._values[vk] = other._values[vk]
 
     def items(self) raises -> Dict[String, String]:
@@ -187,6 +191,7 @@ struct RqAttrDict(ImplicitlyCopyable, Movable, Writable, Iterable):
             elif v.isa[NullValue]():
                 result[vk] = "None"
         for ck in self.child_keys():
+            result[ck] = String.write(self._children[ck][])
             var child_items = self._children[ck][].items()
             var child_keys_list = StdList[String]()
             for chk in child_items.keys():

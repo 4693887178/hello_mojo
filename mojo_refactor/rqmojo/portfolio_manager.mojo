@@ -3,7 +3,7 @@ RQAlpha Mojo - Portfolio Management
 Ported from rqalpha/portfolio/__init__.py
 """
 
-from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE
+from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION
 from rqmojo.model.trade import Trade
 from rqmojo.portfolio.position import Position, create_position, PositionProxy, create_position_proxy
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
@@ -34,6 +34,9 @@ struct Portfolio(Copyable, Movable, ImplicitlyCopyable):
     
     def cal_daily_pnl(mut self, prev_total_value: Float64) -> None:
         self.daily_pnl = self.total_value - prev_total_value
+
+    def get_position(self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> Position:
+        return create_position(order_book_id)
 
 
 def create_portfolio(start_cash: Float64 = 100000.0) -> Portfolio:

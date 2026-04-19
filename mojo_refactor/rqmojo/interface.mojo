@@ -121,7 +121,7 @@ trait StrategyLoader:
 
 
 trait EventSource:
-    def events(mut self, start_date: DateTime, end_date: DateTime, frequency: String):
+    def events(mut self, start_date: DateTime, end_date: DateTime, frequency: String) raises:
         ...
 
 

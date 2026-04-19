@@ -17,45 +17,49 @@ struct SimulationBroker(Broker, Movable, Writable):
     var _open_orders: Dict[Int, Order]
     var _order_id_generator: OrderIdGenerator
     var _current_datetime: DateTime
+    var _account: Optional[Account]
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write("SimulationBroker(orders=", String(len(self._open_orders)), ")")
 
-    def submit_order(mut self, mut order: Order, mut account: Account):
+    def submit_order(mut self, mut order: Order):
         if order.order_id == 0:
             order.order_id = self._order_id_generator.next()
         order.status = ORDER_STATUS.PENDING_NEW
         self._open_orders[order.order_id] = order.copy()
-        self._process_order(order, account)
+        if self._account is not None:
+            var acc = self._account.value().copy()
+            self._process_order(order, acc)
 
-    def cancel_order(mut self, order_id: Int):
-        if order_id in self._open_orders:
+    def cancel_order(mut self, order: Order):
+        if order.order_id in self._open_orders:
             try:
-                var order = self._open_orders[order_id]
-                if order.status == ORDER_STATUS.PENDING_NEW or order.status == ORDER_STATUS.ACTIVE:
-                    _ = self._open_orders.pop(order_id)
+                if self._open_orders[order.order_id].status == ORDER_STATUS.PENDING_NEW or self._open_orders[order.order_id].status == ORDER_STATUS.ACTIVE:
+                    _ = self._open_orders.pop(order.order_id)
             except:
                 pass
 
-    def get_open_orders(self) -> List[Order]:
+    def get_open_orders(self, order_book_id: Optional[String] = None) -> List[Order]:
         var orders = List[Order]()
         for order in self._open_orders.values():
-            orders.append(order)
+            if order_book_id is not None:
+                if order.order_book_id != order_book_id.value():
+                    continue
+            orders.append(order.copy())
         return orders^
 
     def get_open_orders_by_instrument(self, order_book_id: String) -> List[Order]:
-        var orders = List[Order]()
-        for order in self._open_orders.values():
-            if order.order_book_id == order_book_id:
-                orders.append(order)
-        return orders^
+        return self.get_open_orders(order_book_id)
+
+    def set_account(mut self, account: Account):
+        self._account = account
 
     def _process_order(mut self, mut order: Order, mut account: Account):
         order.status = ORDER_STATUS.FILLED
         var trade = create_trade(
             order,
             order.quantity,
-            order.price
+            order.price()
         )
         account.apply_trade(trade)
         if order.order_id in self._open_orders:
@@ -72,7 +76,8 @@ def create_simulation_broker() -> SimulationBroker:
     return SimulationBroker(
         _open_orders=Dict[Int, Order](),
         _order_id_generator=create_order_id_generator(),
-        _current_datetime=DateTime(2020, 1, 1, 0, 0, 0, 0)
+        _current_datetime=DateTime(2020, 1, 1, 0, 0, 0, 0),
+        _account=None
     )
 
 

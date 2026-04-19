@@ -221,7 +221,7 @@ def create_run_config_from_dict(params: Dict[String, String]) raises -> RunConfi
     )
 
 
-def run_backtest(config: RunConfig) -> Int:
+def run_backtest(config: RunConfig) raises -> Int:
     var env = create_environment(
         start_date=config.start_date,
         end_date=config.end_date,
@@ -251,7 +251,7 @@ def run_strategy(
     end_date: DateTime,
     frequency: String = "1d",
     init_cash: Float64 = 100000.0
-) -> Int:
+) raises -> Int:
     var config = RunConfig(
         strategy_file=strategy_file,
         start_date=start_date,
@@ -278,7 +278,7 @@ def run_strategy(
     return run_backtest(config)
 
 
-def run_with_config(config: RunConfig) -> Optional[Dict[String, String]]:
+def run_with_config(config: RunConfig) raises -> Optional[Dict[String, String]]:
     var result_code = run_backtest(config)
     if result_code == 0:
         var results = Dict[String, String]()
