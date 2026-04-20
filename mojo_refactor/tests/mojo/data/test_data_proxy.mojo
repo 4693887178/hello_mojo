@@ -11,22 +11,26 @@ from rqmojo.utils.typing import DateTime
 
 
 def test_create_data_proxy() raises:
+    """Test default DataProxy creation."""
     var dp = create_data_proxy()
     assert_true(dp._data_source_name == "default")
 
 
 def test_create_data_proxy_with_name() raises:
+    """Test named DataProxy creation."""
     var dp = create_data_proxy_with_name("test_source")
     assert_true(dp._data_source_name == "test_source")
 
 
 def test_get_instrument_stock() raises:
+    """Test get_instrument returns stock instrument."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     assert_true(ins.order_book_id() == "000001.XSHE")
 
 
 def test_get_instrument_future() raises:
+    """Test get_instrument returns future instrument."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("IF2401.XSHG")
     assert_true(ins.order_book_id() == "IF2401.XSHG")
@@ -34,6 +38,7 @@ def test_get_instrument_future() raises:
 
 
 def test_get_instrument_not_found() raises:
+    """Test get_instrument raises for unknown ID."""
     var dp = create_data_proxy()
     var raised = False
     try:
@@ -44,6 +49,7 @@ def test_get_instrument_not_found() raises:
 
 
 def test_is_stock() raises:
+    """Test is_stock identifies stocks correctly."""
     var dp = create_data_proxy()
     assert_true(dp.is_stock("000001.XSHE"))
     assert_true(dp.is_stock("600000.XSHG"))
@@ -51,6 +57,7 @@ def test_is_stock() raises:
 
 
 def test_is_future() raises:
+    """Test is_future identifies futures correctly."""
     var dp = create_data_proxy()
     assert_true(dp.is_future("IF2401.XSHG"))
     assert_true(dp.is_future("IC2401.XSHG"))
@@ -58,6 +65,7 @@ def test_is_future() raises:
 
 
 def test_settle_date() raises:
+    """Test settle_date returns correct date string."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 15, 10, 30, 0)
     var result = dp.settle_date(dt)
@@ -65,6 +73,7 @@ def test_settle_date() raises:
 
 
 def test_get_previous_trading_date() raises:
+    """Test get_previous_trading_date returns earlier date."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 17, 10, 0, 0)
     var prev = dp.get_previous_trading_date(dt)
@@ -72,6 +81,7 @@ def test_get_previous_trading_date() raises:
 
 
 def test_get_next_trading_date() raises:
+    """Test get_next_trading_date returns later date."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 14, 10, 0, 0)
     var next_dt = dp.get_next_trading_date(dt)
@@ -79,6 +89,7 @@ def test_get_next_trading_date() raises:
 
 
 def test_get_trading_dates() raises:
+    """Test get_trading_dates returns list of dates."""
     var dp = create_data_proxy()
     var start = DateTime(2024, 6, 10, 0, 0, 0)
     var end = DateTime(2024, 6, 17, 0, 0, 0)
@@ -87,17 +98,20 @@ def test_get_trading_dates() raises:
 
 
 def test_is_trading_date() raises:
+    """Test is_trading_date correctly identifies trading days."""
     var dp = create_data_proxy()
     var weekday = DateTime(2024, 6, 12, 0, 0, 0)
     assert_true(dp.is_trading_date(weekday))
 
 
 def test_is_suspended_default() raises:
+    """Test is_suspended returns false by default."""
     var dp = create_data_proxy()
     assert_false(dp.is_suspended("000001.XSHE", DateTime(2024, 6, 12)))
 
 
 def test_get_price() raises:
+    """Test get_price returns BarObject with expected fields."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -107,18 +121,22 @@ def test_get_price() raises:
 
 
 def test_get_price_with_adjustment() raises:
+    """Test get_price with different adjustment types."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
+
     var bar_none = dp.get_price(ins, dt, "none", dt)
     var bar_pre = dp.get_price(ins, dt, "pre", dt)
     var bar_post = dp.get_price(ins, dt, "post", dt)
+
     assert_true(bar_none.close() > 0.0)
     assert_true(bar_pre.close() > 0.0)
     assert_true(bar_post.close() > 0.0)
 
 
 def test_history_bars_count() raises:
+    """Test history_bars returns requested count of bars."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -127,6 +145,7 @@ def test_history_bars_count() raises:
 
 
 def test_history_bars_fields() raises:
+    """Test history_bars bars have correct field values."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -137,6 +156,7 @@ def test_history_bars_fields() raises:
 
 
 def test_get_tick() raises:
+    """Test get_tick returns TickObject."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12, 10, 30, 0)
     var tick = dp.get_tick("000001.XSHE", dt)
@@ -145,6 +165,7 @@ def test_get_tick() raises:
 
 
 def test_history_ticks_count() raises:
+    """Test history_ticks returns requested count."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 10, 30, 0)
@@ -153,6 +174,7 @@ def test_history_ticks_count() raises:
 
 
 def test_get_dividend_for_stock() raises:
+    """Test get_dividend returns info for CS type."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var div = dp.get_dividend(ins)
@@ -162,6 +184,7 @@ def test_get_dividend_for_stock() raises:
 
 
 def test_get_dividend_for_future() raises:
+    """Test get_dividend returns None for futures."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("IF2401.XSHG")
     var div = dp.get_dividend(ins)
@@ -169,6 +192,7 @@ def test_get_dividend_for_future() raises:
 
 
 def test_get_split_for_stock() raises:
+    """Test get_split returns info for CS type."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var split = dp.get_split(ins)
@@ -178,6 +202,7 @@ def test_get_split_for_stock() raises:
 
 
 def test_get_settle_price_for_future() raises:
+    """Test get_settle_price returns value for futures."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("IF2401.XSHG")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -186,6 +211,7 @@ def test_get_settle_price_for_future() raises:
 
 
 def test_get_settle_price_for_stock() raises:
+    """Test get_settle_price returns 0 for non-futures."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -194,6 +220,7 @@ def test_get_settle_price_for_stock() raises:
 
 
 def test_current_snapshot() raises:
+    """Test current_snapshot returns valid snapshot."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -205,6 +232,7 @@ def test_current_snapshot() raises:
 
 
 def test_open_auction_bar() raises:
+    """Test get_open_auction_bar returns valid bar."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 9, 25, 0)
@@ -215,6 +243,7 @@ def test_open_auction_bar() raises:
 
 
 def test_yield_curve() raises:
+    """Test get_yield_curve returns yield curve points."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
     var curve = dp.get_yield_curve(dt)
@@ -222,6 +251,7 @@ def test_yield_curve() raises:
 
 
 def test_yield_curve_points_have_rate() raises:
+    """Test yield curve points have valid rates."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
     var curve = dp.get_yield_curve(dt)
@@ -230,6 +260,7 @@ def test_yield_curve_points_have_rate() raises:
 
 
 def test_get_trading_minutes_for_stock() raises:
+    """Test get_trading_minutes_for returns minutes for CS."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 9, 30, 0)
@@ -238,6 +269,7 @@ def test_get_trading_minutes_for_stock() raises:
 
 
 def test_get_trading_minutes_for_future() raises:
+    """Test get_trading_minutes_for returns minutes for futures."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("IF2401.XSHG")
     var dt = DateTime(2024, 6, 12, 9, 30, 0)
@@ -246,6 +278,7 @@ def test_get_trading_minutes_for_future() raises:
 
 
 def test_night_trading_true() raises:
+    """Test is_night_trading returns true for night-trading instruments."""
     var dp = create_data_proxy()
     var ids = List[String]()
     ids.append("IF2401.XSHG")
@@ -253,6 +286,7 @@ def test_night_trading_true() raises:
 
 
 def test_night_trading_false() raises:
+    """Test is_night_trading returns false for stocks."""
     var dp = create_data_proxy()
     var ids = List[String]()
     ids.append("000001.XSHE")
@@ -260,12 +294,14 @@ def test_night_trading_false() raises:
 
 
 def test_available_data_range() raises:
+    """Test available_data_range returns tuple."""
     var dp = create_data_proxy()
     var range_val = dp.available_data_range("1d")
     assert_true(range_val[0].toordinal() <= range_val[1].toordinal())
 
 
 def test_get_future_contracts_if() raises:
+    """Test get_future_contracts for IF."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12)
     var contracts = dp.get_future_contracts("IF", dt)
@@ -275,6 +311,7 @@ def test_get_future_contracts_if() raises:
 
 
 def test_get_future_contracts_ic() raises:
+    """Test get_future_contracts for IC."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12)
     var contracts = dp.get_future_contracts("IC", dt)
@@ -282,6 +319,7 @@ def test_get_future_contracts_ic() raises:
 
 
 def test_get_future_contracts_ih() raises:
+    """Test get_future_contracts for IH."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12)
     var contracts = dp.get_future_contracts("IH", dt)
@@ -289,6 +327,7 @@ def test_get_future_contracts_ih() raises:
 
 
 def test_get_future_contracts_im() raises:
+    """Test get_future_contracts for IM."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12)
     var contracts = dp.get_future_contracts("IM", dt)
@@ -296,6 +335,7 @@ def test_get_future_contracts_im() raises:
 
 
 def test_get_future_contracts_empty() raises:
+    """Test get_future_contracts returns empty for unknown symbol."""
     var dp = create_data_proxy()
     var dt = DateTime(2024, 6, 12)
     var contracts = dp.get_future_contracts("UNKNOWN", dt)
@@ -303,6 +343,7 @@ def test_get_future_contracts_empty() raises:
 
 
 def test_create_dividend_info() raises:
+    """Test create_dividend_info helper function."""
     var di = create_dividend_info(
         book_closure_date=20231215,
         announcement_date=20231210,
@@ -317,12 +358,14 @@ def test_create_dividend_info() raises:
 
 
 def test_create_split_info() raises:
+    """Test create_split_info helper function."""
     var si = create_split_info(ex_date=20231201, split_factor=2.0)
     assert_equal(si.ex_date, 20231201)
     assert_equal(si.split_factor, 2.0)
 
 
 def test_snapshot_str() raises:
+    """Test Snapshot __str__ method."""
     var dp = create_data_proxy()
     var ins = dp.get_instrument("000001.XSHE")
     var dt = DateTime(2024, 6, 12, 15, 0, 0)
@@ -333,6 +376,7 @@ def test_snapshot_str() raises:
 
 
 def test_split_info_str() raises:
+    """Test SplitInfo __str__ method."""
     var si = create_split_info(ex_date=20231201, split_factor=1.5)
     var s = si.__str__()
     assert_true(s.find("SplitInfo") >= 0)
@@ -340,13 +384,29 @@ def test_split_info_str() raises:
 
 
 def test_yield_curve_point_str() raises:
+    """Test YieldCurvePoint __str__ method."""
     var ycp = YieldCurvePoint(date=20240612, tenor="3Y", rate=0.025)
     var s = ycp.__str__()
     assert_true(s.find("YieldCurvePoint") >= 0)
     assert_true(s.find("3Y") >= 0)
 
 
+def test_dividend_info_write_to() raises:
+    """Test DividendInfo write_to method."""
+    var di = create_dividend_info(
+        book_closure_date=20231215,
+        announcement_date=20231210,
+        dividend_cash_before_tax=0.5,
+        ex_dividend_date=20231220,
+        payable_date=20231225,
+        round_lot=100
+    )
+    var s = di.__str__()
+    assert_true(s.find("DividendInfo") >= 0)
+
+
 def test_merge_trading_period_no_overlap() raises:
+    """Test merge_trading_period with non-overlapping ranges."""
     from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
     var ranges = List[TimeRange]()
     ranges.append(TimeRange(TimeOfDay(9, 30), TimeOfDay(11, 30)))
@@ -356,6 +416,7 @@ def test_merge_trading_period_no_overlap() raises:
 
 
 def test_merge_trading_period_overlap() raises:
+    """Test merge_trading_period with overlapping ranges."""
     from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
     var ranges = List[TimeRange]()
     ranges.append(TimeRange(TimeOfDay(9, 0), TimeOfDay(11, 0)))
@@ -365,12 +426,14 @@ def test_merge_trading_period_overlap() raises:
 
 
 def test_get_available_data_range_function() raises:
+    """Test module-level get_available_data_range function."""
     var dp = create_data_proxy()
     var range_val = get_available_data_range(dp, "1d")
     assert_true(range_val[0].toordinal() <= range_val[1].toordinal())
 
 
 def test_create_data_proxy_from_source() raises:
+    """Test create_data_proxy_from_source creates proxy with same name."""
     var source = create_data_proxy_with_name("source_test")
     var dp = create_data_proxy_from_source(source, create_data_proxy())
     assert_true(dp._data_source_name == "source_test")
