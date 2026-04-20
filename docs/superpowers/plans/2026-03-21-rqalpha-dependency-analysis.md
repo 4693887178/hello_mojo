@@ -83,7 +83,7 @@
 | 5  | `utils/arg_checker.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | **2026-04-20 12:40** (重构: 完整验证框架+9个验证方法+22个Mojo单元测试+15个Python集成测试全部通过) |
 | 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | **2026-04-20 13:13** (重构: 完全重写deprecated_property访问时warn+CachedProperty PythonObject泛型per-instance懒计算缓存+25个Mojo单元测试全部通过) |
 | 7  | `utils/functools.py`                       | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`                                   | **2026-04-20 13:54** (重构: 移除非原版LazyProperty/lazy_property+__all__精简至8项+LRU缓存结构体+InstypeSingleDispatch分发+52个Mojo单元测试全部通过) |
-| 8  | `model/tick.py`                            | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.repr`                              | 2026-04-06       |
+| 8  | `model/tick.py`                            | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.repr`                              | **2026-04-20 14:25** (重构: 修复isnan仅检查last+last fallback到prev_close+open/high/low默认0.0+移除7个非原版API+25个Mojo单元测试全部通过) |
 | 9  | `mod/rqalpha_mod_sys_progress/__init__.py` | ✅ 已完成 | 2    | 内部相对导入                                                                  | 2026-04-18 10:08 |
 | 10 | `mod/rqalpha_mod_sys_progress/mod.py`      | ✅ 已完成 | 2    | `rqalpha.interface`, `rqalpha.utils.logger`                             | 2026-04-18 10:08 |
 
