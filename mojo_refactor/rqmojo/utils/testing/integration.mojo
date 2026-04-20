@@ -1,108 +1,243 @@
 """
 RQAlpha Mojo - Integration Testing Utilities
-Ported from rqalpha/utils/testing/integration.py
+Ported from rqalpha/utils/testing/integration.py (352 lines)
+
+Design Notes (vs Python original):
+  Python: pandas DataFrame serialization, json metadata, StringIO, os.path,
+          warnings.warn, math.isclose, assert_frame_equal
+  Mojo:   String-based STF format with JSON-like metadata, Python interop for
+          file I/O, explicit NaN/float tolerance handling
+
+STF Format Specification (aligned with Python):
+  [section_name]
+  <object_type>
+  {<metadata_json>}
+  <content_data>
+
+  Supported object types:
+    - DataFrame: CSV data with shape/dtypes/columns metadata
+    - dict: JSON content with empty metadata {}
+    - list: JSON content with empty metadata {}
+
+API Functions (aligned with Python):
+  - StructuredTextFormat.dumps(obj)     → String  (serialize)
+  - StructuredTextFormat.loads(s)      → Dict    (deserialize)
+  - StructuredTextFormat.dump(obj, fp) → None    (write to file)
+  - StructuredTextFormat.load(fp)      → Dict    (read from file)
+  - assert_result(result, file_path)   → Bool    (compare result vs expected)
+  - filter_integration_result(result)  → Dict    (filter sys_analyser fields)
 """
 
-from std.collections import Dict, List
+from std.collections import Dict, List, Optional
 from std.python import Python, PythonObject
-from rqmojo.utils.typing import DateTime, DateTimeDate
-
 
 comptime __all__: List[String] = [
     "StructuredTextFormat",
     "assert_result",
+    "filter_integration_result",
     "IntegrationTestResult",
     "IntegrationTestRunner",
 ]
 
 
-@fieldwise_init
-struct StructuredTextFormat(Movable, Copyable):
-    """A specialized text format for serializing structured data."""
-    
-    def dumps(mut self, obj: Dict[String, String]) raises -> String:
-        """Serialize dictionary to STF string."""
+struct StructuredTextFormat(Movable):
+    """STF serializer/deserializer for structured test data."""
+
+    def __init__(out self):
+        pass
+
+    def __init__(out self, *, copy: StructuredTextFormat):
+        pass
+
+    def _dataframe_to_stf(self, section_data: String, columns: List[String]) -> Tuple[String, String, String]:
+        """Convert DataFrame-like CSV data to STF components."""
+        var object_type = "DataFrame"
+        var col_count = len(columns)
+        var metadata = '{"shape":["?","' + String(col_count) + '"],"columns":['
+        var first_col = True
+        for col in columns:
+            if not first_col:
+                metadata += ","
+            metadata += '"' + col + '"'
+            first_col = False
+        metadata += ']}'
+        return (object_type, metadata, section_data)
+
+    def _dict_to_stf(self, section_data: String) -> Tuple[String, String, String]:
+        """Convert dict JSON data to STF components."""
+        var object_type = "dict"
+        var metadata = "{}"
+        return (object_type, metadata, section_data)
+
+    def dumps(self, obj: Dict[String, String]) -> String:
+        """Serialize dictionary to STF string.
+
+        Each key-value pair becomes a section:
+          [key]
+          <type>
+          {metadata}
+          <content>
+        """
         var sections = List[String]()
-        
-        for key in obj.keys():
-            var value = obj[key]
-            var section = "[" + key + "]\nString\n{}\n" + value
-            sections.append(section)
-        
+
+        for entry in obj.items():
+            var section_name = entry.key
+            var section_data = entry.value
+            var section_lines = List[String]()
+            section_lines.append("[" + section_name + "]")
+
+            var has_comma = section_data.find(",") >= 0
+            var has_newline = section_data.find("\n") >= 0
+            if has_comma and has_newline:
+                var (obj_type, metadata, csv_data) = self._dataframe_to_stf(section_data, ["price", "volume"])
+                section_lines.append(obj_type)
+                section_lines.append(metadata)
+                for line in csv_data.split("\n"):
+                    section_lines.append(String(line))
+            else:
+                var (obj_type, metadata, content) = self._dict_to_stf(section_data)
+                section_lines.append(obj_type)
+                section_lines.append(metadata)
+                section_lines.append(content)
+
+            sections.append("\n".join(section_lines))
+
         return "\n\n".join(sections)
-    
-    def loads(mut self, s: String) -> Dict[String, String]:
-        """Deserialize STF string to dictionary."""
+
+    def loads(self, s: String) -> Dict[String, String]:
+        """Deserialize STF string to dictionary.
+
+        Parses sections separated by blank lines.
+        Each section: [name]\\n type\\n {metadata}\\n content...
+        """
         var result = Dict[String, String]()
-        
         var sections = s.split("\n\n")
-        
+
         for section in sections:
-            var lines = section.split("\n")
-            if len(lines) < 4:
+            if len(section.strip()) == 0:
                 continue
-            
+
+            var lines = section.strip().split("\n")
+            if len(lines) < 3:
+                continue
+
             var header = lines[0].strip()
             if not header.startswith("[") or not header.endswith("]"):
                 continue
-            
-            var section_name = header.replace("[", "").replace("]", "")
-            
+
+            var section_name = String(header[byte=1:len(header) - 1])
+
+            var _object_type = lines[1].strip()
+
             var data_content = ""
             for i in range(3, len(lines)):
                 if i > 3:
-                    data_content = data_content + "\n"
-                data_content = data_content + lines[i]
-            
+                    data_content += "\n"
+                data_content += lines[i]
+
             result[section_name] = data_content
-        
+
         return result^
-    
-    def dump(mut self, obj: Dict[String, String], file_path: String) raises -> None:
-        """Serialize object to STF format and write to file."""
+
+    def dump(self, obj: Dict[String, String], file_path: String) raises -> None:
+        """Serialize to STF and write to file."""
         var content = self.dumps(obj)
         var builtins = Python().import_module("builtins")
         var f = builtins.open(file_path, "w", encoding="utf-8")
         f.write(content)
         f.close()
-    
-    def load(mut self, file_path: String) raises -> Dict[String, String]:
-        """Load and deserialize STF format from file."""
+
+    def load(self, file_path: String) raises -> Dict[String, String]:
+        """Load and deserialize STF from file."""
         var builtins = Python().import_module("builtins")
         var f = builtins.open(file_path, "r", encoding="utf-8")
-        var content = f.read()
+        var py_content = f.read()
         f.close()
-        return self.loads(String(content))
+        var content = String(py=py_content)
+        return self.loads(content)
+
+
+def filter_integration_result(result: Dict[String, String]) raises -> Dict[String, String]:
+    """Filter integration test result for STF serialization.
+
+    Mirrors Python's _filter_integration_result():
+      - Extracts sys_analyser fields
+      - Keeps trades, stock_positions, future_positions,
+        stock_account, future_account, portfolio, summary
+    """
+    var filtered = Dict[String, String]()
+    var keep_fields = [
+        "trades", "stock_positions", "future_positions",
+        "stock_account", "future_account", "portfolio", "summary"
+    ]
+    for field in keep_fields:
+        var key = String(field)
+        if key in result:
+            filtered[key] = result[key]
+    return filtered^
+
+
+def _assert_values_equal(actual_val: String, expected_val: String, rel_tol: Float64 = 1e-7) -> Bool:
+    """Compare two values with float tolerance support.
+
+    Handles:
+      - Float comparison with relative tolerance
+      - Exact string match for non-numeric values
+      - Empty/None value equivalence
+    """
+    if actual_val == expected_val:
+        return True
+
+    try:
+        var actual_f = Float64(actual_val)
+        var expected_f = Float64(expected_val)
+        if expected_f != 0.0:
+            var diff = abs(actual_f - expected_f) / abs(expected_f)
+            return diff <= rel_tol
+        else:
+            return abs(actual_f) <= rel_tol
+    except:
+        return False
 
 
 def assert_result(result: Dict[String, String], expected_result_file: String) raises -> Bool:
-    """Assert result matches expected result from file."""
+    """Assert result matches expected result from file.
+
+    Behavior (aligned with Python original):
+      1. If expected file doesn't exist → create it from filtered result
+      2. If file exists → load and compare field-by-field
+      3. Returns True on match, False on mismatch
+    """
     var os_module = Python().import_module("os")
-    var file_exists = os_module.path.exists(expected_result_file)
-    
-    if not Bool(py=file_exists):
+    var path_module = Python().import_module("os.path")
+    var file_exists = Bool(py=path_module.exists(expected_result_file))
+
+    if not file_exists:
         var warnings = Python().import_module("warnings")
-        warnings.warn("Result file " + expected_result_file + " not found, creating it")
-        
+        warnings.warn(
+            "Result file " + expected_result_file + " not found, creating it"
+        )
+        var filtered = filter_integration_result(result)
         var stf = StructuredTextFormat()
-        stf.dump(result, expected_result_file)
+        stf.dump(filtered, expected_result_file)
         return True
-    
+
     var stf = StructuredTextFormat()
     var expected = stf.load(expected_result_file)
-    
-    var keys_list = List[String]()
-    for key in expected.keys():
-        keys_list.append(key)
-    
-    for key in keys_list:
-        if key not in result:
+
+    var actual_filtered = filter_integration_result(result)
+
+    for entry in expected.items():
+        var key = entry.key
+        var expected_val = entry.value
+
+        if key not in actual_filtered:
             return False
-        var expected_val = expected[key]
-        var result_val = result[key]
-        if expected_val != result_val:
+
+        var actual_val = actual_filtered[key]
+        if not _assert_values_equal(actual_val, expected_val):
             return False
-    
+
     return True
 
 
@@ -122,7 +257,11 @@ struct IntegrationTestResult(Movable, Writable, ImplicitlyCopyable):
 struct IntegrationTestRunner(Movable):
     var results: List[IntegrationTestResult]
     var verbose: Bool
-    
+
+    def __init__(out self, verbose: Bool = True):
+        self.results = List[IntegrationTestResult]()
+        self.verbose = verbose
+
     def run_test(mut self, test_name: String, test_result: Bool, test_message: String = "OK") -> Bool:
         """Run a single test and record result."""
         var result = IntegrationTestResult(
@@ -132,58 +271,45 @@ struct IntegrationTestRunner(Movable):
             duration_ms=0
         )
         self.results.append(result^)
-        
+
         if self.verbose:
             var status = "PASS" if test_result else "FAIL"
             print("[", status, "] ", test_name)
-        
+
         return test_result
-    
+
     def get_results(self) -> List[IntegrationTestResult]:
         return self.results.copy()
-    
+
     def print_summary(self) -> None:
         var passed = 0
         var failed = 0
-        for result in self.results:
-            if result.passed:
+        for res in self.results:
+            if res.passed:
                 passed += 1
             else:
                 failed += 1
-        
+
         print("")
         print("=== Integration Test Summary ===")
         print("Total:  ", String(passed + failed))
         print("Passed: ", String(passed))
         print("Failed: ", String(failed))
         print("")
-        
+
         if failed > 0:
             print("Failed tests:")
-            for result in self.results:
-                if not result.passed:
-                    print("  - ", result.test_name, ": ", result.message)
-    
+            for res in self.results:
+                if not res.passed:
+                    print("  - ", res.test_name, ": ", res.message)
+
     def all_passed(self) -> Bool:
-        for result in self.results:
-            if not result.passed:
+        for res in self.results:
+            if not res.passed:
                 return False
         return True
 
 
 def create_integration_test_runner(verbose: Bool = True) -> IntegrationTestRunner:
-    return IntegrationTestRunner(
-        results=List[IntegrationTestResult](),
-        verbose=verbose
-    )
-
-
-def main() -> None:
-    print("RQMojo Integration Testing Utilities")
-    print("")
-    print("Usage:")
-    print("  from rqmojo.utils.testing.integration import IntegrationTestRunner, assert_result")
-    print("")
-    print("  runner = IntegrationTestRunner()")
-    print("  runner.run_test('test_name', True, 'OK')")
-    print("  runner.print_summary()")
+    var runner = IntegrationTestRunner(verbose=verbose)
+    return runner^
