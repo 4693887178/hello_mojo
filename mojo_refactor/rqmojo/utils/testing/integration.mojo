@@ -191,11 +191,11 @@ def _assert_values_equal(actual_val: String, expected_val: String, rel_tol: Floa
     try:
         var actual_f = Float64(actual_val)
         var expected_f = Float64(expected_val)
-        if expected_f != 0.0:
+        if abs(expected_f) < 1e-10:
+            return abs(actual_f) <= 1e-6
+        else:
             var diff = abs(actual_f - expected_f) / abs(expected_f)
             return diff <= rel_tol
-        else:
-            return abs(actual_f) <= rel_tol
     except:
         return False
 
