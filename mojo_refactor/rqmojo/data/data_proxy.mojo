@@ -10,6 +10,7 @@ from rqmojo.model.tick import TickObject, create_tick_object
 from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018, create_trading_dates_mixin_with_november_2024, create_trading_dates_mixin_with_multiple_months
+from rqmojo.utils.exception import InstrumentNotFound
 
 
 @fieldwise_init
@@ -159,7 +160,13 @@ struct DataProxy(Movable):
     
     def get_instrument(self, order_book_id: String) -> Instrument:
         return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
-    
+
+    def get_active_instrument(self, order_book_id: String, dt: DateTime) raises -> Instrument:
+        var instrument = self.get_instrument(order_book_id)
+        if not instrument.active_at(dt):
+            raise Error(InstrumentNotFound("No instrument found at " + String(dt) + ": " + order_book_id).message)
+        return instrument
+
     def get_last_price(self, order_book_id: String) -> Float64:
         return 10.0
 

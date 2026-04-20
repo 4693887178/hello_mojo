@@ -6,6 +6,7 @@ Ported from rqalpha/portfolio/account.py
 from std.collections import List
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION, POSITION_EFFECT
 from rqmojo.model.trade import Trade
+from rqmojo.model.instrument import Instrument
 from rqmojo.portfolio.position import Position, create_position, create_future_position
 from rqmojo.utils.typing import DateTime
 
@@ -63,6 +64,9 @@ struct Account(ImplicitlyCopyable):
 
     def available_cash(self) -> Float64:
         return self.total_cash - self.frozen_cash - self.margin_val
+
+    def available_cash_for(self, instrument: Instrument) -> Float64:
+        return self.available_cash()
 
     def add_cash(mut self, amount: Float64) -> None:
         self.total_cash += amount

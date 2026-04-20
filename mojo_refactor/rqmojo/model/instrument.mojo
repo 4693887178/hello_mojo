@@ -168,6 +168,17 @@ struct Instrument(Writable, Movable, Copyable, ImplicitlyCopyable):
     def is_future(self) -> Bool:
         return self.type_val == INSTRUMENT_TYPE.FUTURE
 
+    def calc_cash_occupation(self, price: Float64, quantity: Int, direction: POSITION_DIRECTION, dt: DateTime) -> Float64:
+        if is_instrument_type_in_stock_account(self.type_val):
+            return price * Float64(quantity)
+        elif self.type_val == INSTRUMENT_TYPE.FUTURE:
+            var margin_rate: Float64 = 0.1
+            if direction == POSITION_DIRECTION.SHORT:
+                margin_rate = 0.1
+            return price * Float64(quantity) * self.contract_multiplier() * margin_rate
+        else:
+            return price * Float64(quantity)
+
     def min_order_quantity(self) -> Int:
         return self.round_lot_val
 

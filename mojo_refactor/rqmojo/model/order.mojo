@@ -138,6 +138,7 @@ struct Order(Writable, Movable, Copyable):
     var order_type_val: ORDER_TYPE
     var avg_price: Float64
     var transaction_cost: Float64
+    var estimated_transaction_cost_val: Float64
     var message: String
     var calendar_dt: DateTime
     var trading_dt: DateTime
@@ -172,6 +173,7 @@ struct Order(Writable, Movable, Copyable):
         self.order_type_val = order_type_val
         self.avg_price = 0.0
         self.transaction_cost = 0.0
+        self.estimated_transaction_cost_val = 0.0
         self.message = ""
         self.calendar_dt = calendar_dt
         self.trading_dt = trading_dt
@@ -193,6 +195,7 @@ struct Order(Writable, Movable, Copyable):
         self.order_type_val = copy.order_type_val
         self.avg_price = copy.avg_price
         self.transaction_cost = copy.transaction_cost
+        self.estimated_transaction_cost_val = copy.estimated_transaction_cost_val
         self.message = copy.message
         self.calendar_dt = copy.calendar_dt
         self.trading_dt = copy.trading_dt
@@ -214,6 +217,7 @@ struct Order(Writable, Movable, Copyable):
         self.order_type_val = take.order_type_val
         self.avg_price = take.avg_price
         self.transaction_cost = take.transaction_cost
+        self.estimated_transaction_cost_val = take.estimated_transaction_cost_val
         self.message = take.message^
         self.calendar_dt = take.calendar_dt
         self.trading_dt = take.trading_dt
@@ -270,6 +274,12 @@ struct Order(Writable, Movable, Copyable):
             if pe == POSITION_EFFECT.OPEN:
                 return POSITION_DIRECTION.SHORT
             return POSITION_DIRECTION.LONG
+
+    def estimated_transaction_cost(self) -> Float64:
+        return self.estimated_transaction_cost_val
+
+    def set_estimated_transaction_cost(mut self, value: Float64) -> None:
+        self.estimated_transaction_cost_val = value
 
     def get_state(self) -> Dict[String, String]:
         var state = Dict[String, String]()
