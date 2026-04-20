@@ -81,7 +81,7 @@
 | 3  | `utils/strategy_loader_help.py`            | ✅ 已完成 | 2    | `rqalpha.utils.logger`, `rqalpha.utils.exception`                       | **2026-04-20 11:30** (重构: PythonObject布尔转换修复+全面测试26/27通过) |
 | 4  | `utils/testing/__init__.py`                | ✅ 已完成 | 2    | `.mocking`, `.fixtures`, `.integration`                                 | **2026-04-20 12:07** (重构: 完全重写以匹配Python原版+13个Mojo单元测试+8个Python集成测试全部通过) |
 | 5  | `utils/arg_checker.py`                     | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | **2026-04-20 12:40** (重构: 完整验证框架+9个验证方法+22个Mojo单元测试+15个Python集成测试全部通过) |
-| 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | 2026-04-06       |
+| 6  | `utils/class_helper.py`                    | ✅ 已完成 | 2    | `rqalpha.utils.i18n`                                                    | **2026-04-20 13:13** (重构: 完全重写deprecated_property访问时warn+CachedProperty PythonObject泛型per-instance懒计算缓存+25个Mojo单元测试全部通过) |
 | 7  | `utils/functools.py`                       | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.const`                                   | 2026-04-06       |
 | 8  | `model/tick.py`                            | ✅ 已完成 | 2    | `rqalpha.utils.i18n`, `rqalpha.utils.repr`                              | 2026-04-06       |
 | 9  | `mod/rqalpha_mod_sys_progress/__init__.py` | ✅ 已完成 | 2    | 内部相对导入                                                                  | 2026-04-18 10:08 |
