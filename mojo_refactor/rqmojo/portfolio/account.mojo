@@ -4,6 +4,7 @@ Ported from rqalpha/portfolio/account.py
 """
 
 from std.collections import List
+from std.python import Python, PythonObject
 from rqmojo.const import DEFAULT_ACCOUNT_TYPE, SIDE, POSITION_DIRECTION, POSITION_EFFECT
 from rqmojo.model.trade import Trade
 from rqmojo.model.instrument import Instrument
@@ -164,6 +165,67 @@ struct Account(ImplicitlyCopyable):
         if position_effect == POSITION_EFFECT.CLOSE_TODAY:
             return quantity
         return 0
+
+    def has_position(self, order_book_id: String) -> Bool:
+        for i in range(len(self._positions)):
+            if self._positions[i].order_book_id == order_book_id:
+                return True
+        return False
+
+    def get_position_opt(self, order_book_id: String) -> Optional[Position]:
+        for i in range(len(self._positions)):
+            if self._positions[i].order_book_id == order_book_id:
+                return Optional[Position](self._positions[i])
+        return None
+
+    def get_positions_count(self) -> Int:
+        return len(self._positions)
+
+    def position_keys(self) -> List[String]:
+        var result = List[String]()
+        for i in range(len(self._positions)):
+            result.append(self._positions[i].order_book_id)
+        return result^
+
+    def market_value(self) -> Float64:
+        var total = 0.0
+        for i in range(len(self._positions)):
+            total += self._positions[i].market_value
+        return total
+
+    def transaction_cost(self) -> Float64:
+        var total = 0.0
+        for i in range(len(self._positions)):
+            total += self._positions[i]._trade_cost
+        return total
+
+    def deposit_withdraw(mut self, amount: Float64, receiving_days: Int = 0) -> None:
+        self.total_cash += amount
+        self.total_value += amount
+
+    def finance_repay(mut self, amount: Float64) -> None:
+        self.total_cash -= amount
+        self.total_value -= amount
+
+    def get_state_py(self) raises -> PythonObject:
+        var state = Python.dict()
+        state["account_type"] = PythonObject(self.account_type.value)
+        state["total_cash"] = PythonObject(self.total_cash)
+        state["total_value"] = PythonObject(self.total_value)
+        state["frozen_cash"] = PythonObject(self.frozen_cash)
+        state["margin_val"] = PythonObject(self.margin_val)
+        state["daily_pnl"] = PythonObject(self.daily_pnl)
+        state["cash_liabilities"] = PythonObject(self.cash_liabilities)
+        state["positions_count"] = PythonObject(self.get_positions_count())
+        return state
+
+    def set_state_py(mut self, state: PythonObject) raises -> None:
+        self.total_cash = Float64(py=state["total_cash"])
+        self.total_value = Float64(py=state["total_value"])
+        self.frozen_cash = Float64(py=state["frozen_cash"])
+        self.margin_val = Float64(py=state["margin_val"])
+        self.daily_pnl = Float64(py=state["daily_pnl"])
+        self.cash_liabilities = Float64(py=state["cash_liabilities"])
 
 
 def create_account(account_type: DEFAULT_ACCOUNT_TYPE, total_cash: Float64) -> Account:
