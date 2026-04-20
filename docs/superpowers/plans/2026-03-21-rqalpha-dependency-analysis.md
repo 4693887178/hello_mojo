@@ -204,7 +204,7 @@
 | 7  | `mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py`  | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    | **2026-04-20 08:54** |
 | 8  | `mod/rqalpha_mod_sys_accounts/api/api_future.py`              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    | **2026-04-20 09:57** |
 | 9  | `model/bar.py`                                                | ✅ 已完成 | 6    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`, `rqalpha.utils.datetime_func`, `rqalpha.model.instrument`             | 2026-04-20 15:00     |
-| 10 | `data/base_data_source/storages.py`                           | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` | <br />               |
+| 10 | `data/base_data_source/storages.py`                           | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` | **2026-04-20 16:30** |
 
 ***
 
