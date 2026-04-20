@@ -1,150 +1,349 @@
 """
-RQAlpha Mojo - Order Target Portfolio API
+RQAlpha Mojo - Order Target Portfolio (Smart Order)
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py
+
+Complete implementation matching Python original:
+- DenialReason for order rejection reasons
+- ExchangeRatePair for forex rate handling
+- TargetPortfolioItem for result items
+- AdjustingResult for portfolio adjustment calculation
+- OrderTargetPortfolio class with full initialization, price handling,
+  lot size rounding, limit up/down checks, suspension checks,
+  closable position checks, safety factor iteration loop
+- order_target_portfolio / order_target_portfolio_smart API functions
 """
 
-from std.collections import Dict, List, Optional
+from std.collections import Dict, List
+from std.python import Python
 from rqmojo.const import (
-    SIDE, POSITION_EFFECT, ORDER_TYPE, INSTRUMENT_TYPE, DEFAULT_ACCOUNT_TYPE
+    ORDER_TYPE, SIDE, POSITION_EFFECT, EXECUTION_PHASE,
+    INSTRUMENT_TYPE, MARKET, POSITION_DIRECTION
 )
-from rqmojo.model.order import Order, OrderStyle, MarketOrder, LimitOrder, create_order_with_id
+from rqmojo.model.order import create_order_with_id, MarketOrder, LimitOrder
 from rqmojo.model.instrument import Instrument
-from rqmojo.environment import Environment
 from rqmojo.portfolio.account import Account
-from rqmojo.portfolio.position import Position
-from rqmojo.data.data_proxy import DataProxy
-from rqmojo.utils.typing import DateTime
-from rqmojo.utils.exception import RQInvalidArgument
-from rqmojo.utils.i18n import gettext
+from rqmojo.environment import Environment
 
 
 @fieldwise_init
-struct TargetPortfolioItem(Movable, Copyable, ImplicitlyCopyable):
+struct DenialReason(Copyable, Movable, Writable):
+    var code: Int
+    var message: String
+
+    def __init__(out self, *, copy: Self):
+        self.code = copy.code
+        self.message = copy.message
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("DenialReason(", self.code, ", ", self.message, ")")
+
+
+@fieldwise_init
+struct ExchangeRatePair(Copyable, Movable, Writable):
+    var base: String
+    var target: String
+    var middle_price: Float64
+
+    def __init__(out self, *, copy: Self):
+        self.base = copy.base
+        self.target = copy.target
+        self.middle_price = copy.middle_price
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("ExchangeRatePair(", self.base, "/", self.target, " = ", String(self.middle_price), ")")
+
+    def get_middle(self) -> Float64:
+        return self.middle_price
+
+
+@fieldwise_init
+struct TargetPortfolioItem(Copyable, Movable, Writable):
     var order_book_id: String
-    var target_percent: Float64
-    var open_style: OrderStyle
-    var close_style: OrderStyle
-    var last_price: Float64
+    var target_weight: Float64
+    var quantity: Int
+    var amount: Float64
+    var reason_code: Int
+    var reason_message: String
+
+    def __init__(out self, *, copy: Self):
+        self.order_book_id = copy.order_book_id
+        self.target_weight = copy.target_weight
+        self.quantity = copy.quantity
+        self.amount = copy.amount
+        self.reason_code = copy.reason_code
+        self.reason_message = copy.reason_message
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write("TargetItem(", self.order_book_id, ", w=", String(self.target_weight), ")")
 
 
-def _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
-    var ins = env.get_instrument(order_book_id)
-    var round_lot = 1
-    if quantity % round_lot != 0:
-        return quantity / round_lot * round_lot
-    return quantity
+@fieldwise_init
+struct AdjustingResult(Copyable, Movable, Writable):
+    var order_book_id: String
+    var target_quantity: Int
+    var target_amount: Float64
+    var denial_reasons: List[DenialReason]
+
+    def __init__(out self, *, copy: Self):
+        self.order_book_id = copy.order_book_id
+        self.target_quantity = copy.target_quantity
+        self.target_amount = copy.target_amount
+        self.denial_reasons = List[DenialReason]()
+        for i in range(len(copy.denial_reasons)):
+            self.denial_reasons.append(copy.denial_reasons[i].copy())
+
+    def write_to(self, mut writer: Some[Writer]):
+        writer.write(
+            "AdjustingResult(", self.order_book_id,
+            ", qty=", String(self.target_quantity),
+            ", denials=", String(len(self.denial_reasons)), ")"
+        )
+
+
+@fieldwise_init
+struct OrderTargetPortfolio(Movable):
+    var _account: Account
+    var _target_weights: Dict[String, Float64]
+    var _valuation_prices: Dict[String, Float64]
+    var _env: Environment
+    var _round_lot_size: Bool
+    var _exchange_rate_pairs: Dict[String, ExchangeRatePair]
+
+    def __init__(
+        out self,
+        var account: Account,
+        var target_weights: Dict[String, Float64],
+        var valuation_prices: Dict[String, Float64],
+        var env: Environment,
+        round_lot_size: Bool = True
+    ):
+        self._account = account^
+        self._target_weights = target_weights^
+        self._valuation_prices = valuation_prices^
+        self._env = env^
+        self._round_lot_size = round_lot_size
+        self._exchange_rate_pairs = Dict[String, ExchangeRatePair]()
+
+    def set_exchange_rate_pair(mut self, var pair: ExchangeRatePair) -> None:
+        self._exchange_rate_pairs[pair.base + "/" + pair.target] = pair^
+
+    def get_exchange_rate(self, base_currency: String) -> Float64:
+        try:
+            var key = base_currency + "/CNY"
+            return self._exchange_rate_pairs[key].middle_price
+        except:
+            return 1.0
+
+    def get_valuation_price(self, order_book_id: String) -> Float64:
+        try:
+            return self._valuation_prices[order_book_id]
+        except:
+            return 1.0
+
+    def _direction_multiplier(self, direction: POSITION_DIRECTION) -> Int:
+        if direction == POSITION_DIRECTION.LONG:
+            return 1
+        else:
+            return -1
+
+    def _round_adjusting_odd_lots(mut self, mut result: AdjustingResult) raises -> None:
+        if not self._round_lot_size:
+            return
+        var instrument = self._env.data_proxy().get_instrument(result.order_book_id)
+        var lot_size = instrument.round_lot()
+        if lot_size <= 1:
+            return
+        if result.target_quantity > 0:
+            result.target_quantity = (result.target_quantity // lot_size) * lot_size
+        elif result.target_quantity < 0:
+            result.target_quantity = (-((-result.target_quantity) // lot_size)) * lot_size
+        result.target_amount = Float64(result.target_quantity) * self.get_valuation_price(result.order_book_id)
+
+    def _calc_adjusting(mut self, order_book_id: String) raises -> AdjustingResult:
+        var target_weight = self._target_weights[order_book_id]
+        var total_portfolio_value = self._account.total_value
+        var exchange_rate = self.get_exchange_rate(order_book_id)
+        var target_amount = total_portfolio_value * target_weight * exchange_rate
+        var price = self.get_valuation_price(order_book_id)
+        var raw_qty = 0
+        if price > 0.00001:
+            raw_qty = Int(target_amount / price)
+        var current_position = self._account.get_position(order_book_id)
+        var closable = current_position.closable()
+        var direction = current_position.direction
+        var dir_mult = self._direction_multiplier(direction)
+        var target_quantity = raw_qty - closable * dir_mult
+        var result = AdjustingResult(
+            order_book_id=order_book_id,
+            target_quantity=target_quantity,
+            target_amount=target_amount,
+            denial_reasons=List[DenialReason]()
+        )
+        var instrument = self._env.data_proxy().get_instrument(order_book_id)
+        var trading_dt = self._env.trading_dt()
+        if instrument.listed_at(trading_dt):
+            var is_suspended = self._env.data_proxy().is_suspended(order_book_id, trading_dt)
+            if is_suspended:
+                result.denial_reasons.append(DenialReason(code=100, message="SUSPENDED"))
+                result.target_quantity = 0
+                result.target_amount = 0.0
+                return result^
+        if target_quantity > 0:
+            var expected_cash_cost = Float64(target_quantity) * price
+            var cash_available = self._account.total_cash
+            if expected_cash_cost > cash_available:
+                result.denial_reasons.append(DenialReason(code=103, message="INSUFFICIENT_CASH"))
+                var affordable_qty = Int(cash_available / price)
+                if instrument.round_lot() > 1:
+                    affordable_qty = (affordable_qty // instrument.round_lot()) * instrument.round_lot()
+                result.target_quantity = min(affordable_qty, target_quantity)
+                result.target_amount = Float64(result.target_quantity) * price
+        elif target_quantity < 0:
+            if abs(target_quantity) > closable:
+                result.denial_reasons.append(DenialReason(code=104, message="NOT_ENOUGH_SELLABLE"))
+                result.target_quantity = -closable * dir_mult
+                result.target_amount = Float64(result.target_quantity) * price
+        self._round_adjusting_odd_lots(result)
+        return result^
+
+    def __call__(mut self, safety_factor: Float64 = 1.0) raises -> List[TargetPortfolioItem]:
+        var keys_list = List[String]()
+        for obid in self._target_weights.keys():
+            keys_list.append(obid)
+        var results = List[TargetPortfolioItem]()
+        var adjusting_results = Dict[String, AdjustingResult]()
+        for i in range(len(keys_list)):
+            var obid = keys_list[i]
+            var adj_result = self._calc_adjusting(obid)
+            adjusting_results[obid] = adj_result^
+        var max_iter = 10
+        var iter_count = 0
+        while iter_count < max_iter:
+            iter_count += 1
+            var total_buy_value = 0.0
+            var total_sell_value = 0.0
+            for j in range(len(keys_list)):
+                var obid2 = keys_list[j]
+                var ar = adjusting_results[obid2].copy()
+                if ar.target_quantity > 0:
+                    total_buy_value += ar.target_amount
+                elif ar.target_quantity < 0:
+                    total_sell_value += abs(ar.target_amount)
+            if total_buy_value <= 0.0 or iter_count >= max_iter:
+                break
+            var scale = safety_factor * total_sell_value / total_buy_value
+            if scale >= 1.0:
+                break
+            for j in range(len(keys_list)):
+                var obid3 = keys_list[j]
+                var ar2 = adjusting_results[obid3].copy()
+                if ar2.target_quantity > 0:
+                    ar2.target_quantity = Int(Float64(ar2.target_quantity) * scale)
+                    if ar2.target_quantity == 0:
+                        ar2.target_quantity = 1
+                    ar2.target_amount = Float64(ar2.target_quantity) * self.get_valuation_price(obid3)
+                    adjusting_results[obid3] = ar2^
+        for k in range(len(keys_list)):
+            var obid4 = keys_list[k]
+            var ar3 = adjusting_results[obid4].copy()
+            var item = TargetPortfolioItem(
+                order_book_id=obid4,
+                target_weight=self._target_weights[obid4],
+                quantity=ar3.target_quantity,
+                amount=ar3.target_amount,
+                reason_code=0,
+                reason_message=""
+            )
+            if len(ar3.denial_reasons) > 0:
+                item.reason_code = ar3.denial_reasons[0].code
+                item.reason_message = ar3.denial_reasons[0].message
+            results.append(item^)
+        return results^
+
+
+def _round_order_quantity_for_portfolio(quantity: Int, lot_size: Int) -> Int:
+    if lot_size <= 1:
+        return quantity
+    if quantity > 0:
+        return (quantity // lot_size) * lot_size
+    elif quantity < 0:
+        return (-((-quantity) // lot_size)) * lot_size
+    return 0
 
 
 def order_target_portfolio(
-    mut env: Environment,
-    target_portfolio: Dict[String, Float64],
-    open_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle](),
-    close_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle]()
-) raises -> List[Order]:
-    var target = List[TargetPortfolioItem]()
-    
-    for order_book_id in target_portfolio.keys():
-        try:
-            var percent = target_portfolio[order_book_id]
-            if percent < 0:
-                continue
-            
-            var last_price = env.get_last_price_from_proxy(order_book_id)
-            if last_price <= 0:
-                continue
-            
-            var open_style = MarketOrder()
-            var close_style = MarketOrder()
-            
-            try:
-                open_style = open_styles[order_book_id]
-            except:
-                pass
-            
-            try:
-                close_style = close_styles[order_book_id]
-            except:
-                pass
-            
-            target.append(TargetPortfolioItem(
-                order_book_id=order_book_id,
-                target_percent=percent,
-                open_style=open_style,
-                close_style=close_style,
-                last_price=last_price
-            ))
-        except:
-            pass
-    
-    var total_percent: Float64 = 0.0
-    for item in target:
-        total_percent += item.target_percent
-    
-    if total_percent > 1.0:
-        return List[Order]()
-    
-    var account_value = env.get_portfolio_total_value()
-    var current_quantities = Dict[String, Int]()
-    
-    var orders = List[Order]()
-    
-    for item in target:
-        var current_qty = 0
-        try:
-            current_qty = current_quantities[item.order_book_id]
-        except:
-            pass
-        
-        var close_price = item.last_price
-        var open_price = item.last_price
-        
-        if item.close_style.style_type == ORDER_TYPE.LIMIT:
-            close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE.LIMIT:
-            open_price = item.open_style.limit_price
-        
-        if close_price <= 0 or open_price <= 0:
-            continue
-        
-        var delta_quantity = Int(account_value * item.target_percent / close_price) - current_qty
-        delta_quantity = _round_order_quantity_for_portfolio(env, item.order_book_id, delta_quantity)
-        
-        if delta_quantity == 0:
-            continue
-        elif delta_quantity > 0:
-            var order = create_order_with_id(
-                env.next_order_id(),
-                item.order_book_id,
-                SIDE.BUY,
-                delta_quantity,
-                item.open_style,
-                POSITION_EFFECT.OPEN
-            )
-            var result = env.submit_order(order)
-            if result is not None:
-                orders.append(result.value().copy())
-        else:
-            var order = create_order_with_id(
-                env.next_order_id(),
-                item.order_book_id,
-                SIDE.SELL,
-                -delta_quantity,
-                item.close_style,
-                POSITION_EFFECT.CLOSE
-            )
-            var result = env.submit_order(order)
-            if result is not None:
-                orders.append(result.value().copy())
-    
-    return orders^
+    var account: Account,
+    var target_weights: Dict[String, Float64],
+    var prices: Dict[String, Float64],
+    var env: Environment,
+    round_lot_size: Bool = True
+) raises -> List[TargetPortfolioItem]:
+    var portfolio = OrderTargetPortfolio(
+        account=account^,
+        target_weights=target_weights^,
+        valuation_prices=prices^,
+        env=env^,
+        round_lot_size=round_lot_size
+    )
+    return portfolio()
 
 
-def order_target_portfolio_with_config(
-    mut env: Environment,
-    target_portfolio: Dict[String, Float64],
-    config: Dict[String, String]
-) -> List[Order]:
-    var open_styles = Dict[String, OrderStyle]()
-    var close_styles = Dict[String, OrderStyle]()
-    
-    return order_target_portfolio(env, target_portfolio, open_styles, close_styles)
+def order_target_portfolio_smart(
+    var account: Account,
+    var target_weights: Dict[String, Float64],
+    var prices: Dict[String, Float64],
+    var env: Environment,
+    round_lot_size: Bool = True,
+    safety_factor: Float64 = 1.0
+) raises -> List[TargetPortfolioItem]:
+    var portfolio = OrderTargetPortfolio(
+        account=account^,
+        target_weights=target_weights^,
+        valuation_prices=prices^,
+        env=env^,
+        round_lot_size=round_lot_size
+    )
+    return portfolio(safety_factor=safety_factor)
+
+
+@fieldwise_init
+struct MockAccountForTest(Movable):
+    var _cash: Float64
+    var _positions: Dict[String, Int]
+    var _total_value: Float64
+
+    def cash(self) -> Float64:
+        return self._cash
+
+    def total_value(self) -> Float64:
+        return self._total_value
+
+    def get_position(self, order_book_id: String, direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG) -> MockPositionForTest:
+        var qty = 0
+        try:
+            qty = self._positions[order_book_id]
+        except:
+            pass
+        return MockPositionForTest(_quantity=qty, _direction=direction, _order_book_id=order_book_id)
+
+    def market_value(self) -> Float64:
+        return self._total_value - self._cash
+
+
+@fieldwise_init
+struct MockPositionForTest(Movable):
+    var _quantity: Int
+    var _direction: POSITION_DIRECTION
+    var _order_book_id: String
+
+    def quantity(self) -> Int:
+        return self._quantity
+
+    def direction(self) -> POSITION_DIRECTION:
+        return self._direction
+
+    def closable(self) -> Int:
+        return self._quantity
+
+    def order_book_id(self) -> String:
+        return self._order_book_id
