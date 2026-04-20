@@ -30,7 +30,7 @@
 | 3  | `user_module.py`           | ✅ 已完成 | 无    | 2026-04-05 07:08                    |
 | 4  | `utils/click_helper.py`    | ✅ 已完成 | 无    | 2026-04-05 08:04                    |
 | 5  | `utils/concurrent.py`      | ✅ 已完成 | 无    | 2026-04-05 08:42                    |
-| 6  | `utils/log_capture.py`     | ✅ 已完成 | 无    | 2026-04-05 (重构: handler替换机制+上下文管理器) |
+| 6  | `utils/log_capture.py`     | ✅ 已完成 | 无    | **2026-04-20 10:11** (重构: handler替换机制+上下文管理器) |
 | 7  | `utils/package_helper.py`  | ✅ 已完成 | 无    | 2026-04-05 18:48                    |
 | 8  | `utils/persisit_helper.py` | ✅ 已完成 | 无    | 2026-04-05 18:52                    |
 | 9  | `utils/repr.py`            | ✅ 已完成 | 无    | 2026-04-05 07:15                    |
@@ -193,18 +193,18 @@
 
 ## 第十一组：依赖数量 6（共10个文件）
 
-| 序号 | 文件路径                                                          | 状态    | 依赖数量 | 依赖模块                                                                                                                                                | 人工复盘时间 |
-| -- | ------------------------------------------------------------- | ----- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 1  | `apis/api_abstract.py`                                        | ✅ 已完成 | 6    | `rqalpha.api`, `rqalpha.core.execution_context`, `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.utils.arg_checker`    | 2026-04-19 23:26 |
-| 2  | `cmds/__init__.py`                                            | ✅ 已完成 | 6    | `.bundle`, `.mod`, `.run`, `.misc`, `.entry`, `.run`                                                                                                | 2026-04-20 01:30 |
-| 3  | `environment.py`                                              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`, `rqalpha.utils.exception`                | 2026-04-20 01:55 |
-| 4  | `mod/rqalpha_mod_sys_risk/validators/cash_validator.py`       | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.const`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.environment`, `rqalpha.utils.i18n`               | 2026-04-20 08:48 |
-| 5  | `mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py` | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.environment`, `rqalpha.utils.exception`     | 2026-04-20 08:48 |
+| 序号 | 文件路径                                                          | 状态    | 依赖数量 | 依赖模块                                                                                                                                                | 人工复盘时间               |
+| -- | ------------------------------------------------------------- | ----- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| 1  | `apis/api_abstract.py`                                        | ✅ 已完成 | 6    | `rqalpha.api`, `rqalpha.core.execution_context`, `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.utils.arg_checker`    | 2026-04-19 23:26     |
+| 2  | `cmds/__init__.py`                                            | ✅ 已完成 | 6    | `.bundle`, `.mod`, `.run`, `.misc`, `.entry`, `.run`                                                                                                | 2026-04-20 01:30     |
+| 3  | `environment.py`                                              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.core.events`, `rqalpha.interface`, `rqalpha.utils.i18n`, `rqalpha.utils.logger`, `rqalpha.utils.exception`                | 2026-04-20 01:55     |
+| 4  | `mod/rqalpha_mod_sys_risk/validators/cash_validator.py`       | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.const`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.environment`, `rqalpha.utils.i18n`               | 2026-04-20 08:48     |
+| 5  | `mod/rqalpha_mod_sys_risk/validators/is_trading_validator.py` | ✅ 已完成 | 6    | `rqalpha.interface`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.environment`, `rqalpha.utils.exception`     | 2026-04-20 08:48     |
 | 6  | `mod/rqalpha_mod_sys_simulation/simulation_broker.py`         | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.interface`, `rqalpha.environment`, `rqalpha.model.order`, `rqalpha.model.trade`, `rqalpha.core.events`                    | **2026-04-20 08:18** |
 | 7  | `mod/rqalpha_mod_sys_accounts/api/order_target_portfolio.py`  | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    | **2026-04-20 08:54** |
 | 8  | `mod/rqalpha_mod_sys_accounts/api/api_future.py`              | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.model.order`, `rqalpha.portfolio.account`, `rqalpha.utils.i18n`, `rqalpha.utils.exception`    | **2026-04-20 09:57** |
-| 9  | `model/bar.py`                                                | ✅ 已完成 | 6    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`, `rqalpha.utils.datetime_func`, `rqalpha.model.instrument`             | 2026-04-20 15:00 |
-| 10 | `data/base_data_source/storages.py`                           | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` | <br /> |
+| 9  | `model/bar.py`                                                | ✅ 已完成 | 6    | `rqalpha.utils.i18n`, `rqalpha.const`, `rqalpha.utils`, `rqalpha.utils.repr`, `rqalpha.utils.datetime_func`, `rqalpha.model.instrument`             | 2026-04-20 15:00     |
+| 10 | `data/base_data_source/storages.py`                           | ✅ 已完成 | 6    | `rqalpha.const`, `rqalpha.model.instrument`, `rqalpha.utils.datetime_func`, `rqalpha.utils.i18n`, `rqalpha.utils.functools`, `rqalpha.utils.logger` | <br />               |
 
 ***
 

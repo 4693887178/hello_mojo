@@ -114,16 +114,6 @@ struct FutureInfoStore(Movable):
             result["commission_type"] = COMMISSION_TYPE.BY_MONEY.value
         return result
 
-    def _resolve_info(self, store: PythonObject, order_book_id: String, underlying_symbol: String) raises -> PythonObject:
-        """Helper: look up key in dict by order_book_id then underlying_symbol. Raises if neither found."""
-        var result = store.get(order_book_id)
-        if result is not None:
-            return result
-        result = store.get(underlying_symbol)
-        if result is not None:
-            return result
-        raise "not found: " + order_book_id
-
     def get_future_info(mut self, order_book_id: String, underlying_symbol: String) raises -> FuturesTradingParameters:
         """
         Port of Python FutureInfoStore.get_future_info(order_book_id, underlying_string).
@@ -150,9 +140,12 @@ struct FutureInfoStore(Movable):
 
         var info: PythonObject
         try:
-            info = self._resolve_info(self._default_data, order_book_id, underlying_symbol)
+            info = self._default_data[order_book_id]
         except:
-            raise "unsupported future instrument " + order_book_id
+            try:
+                info = self._default_data[underlying_symbol]
+            except:
+                raise "unsupported future instrument " + order_book_id
 
         if has_custom:
             var copy_mod = self._py.import_module("copy")
@@ -244,25 +237,44 @@ struct FutureInfoStore(Movable):
         except:
             pass
 
-        var custom_info = self._custom_data.get(order_book_id)
-        if custom_info is None:
-            custom_info = self._custom_data.get(underlying_symbol)
-
-        var info = self._default_data.get(order_book_id)
-        if info is None:
-            info = self._default_data.get(underlying_symbol)
-
-        if custom_info is not None:
-            var copy_mod = self._py.import_module("copy")
-            if info is not None:
-                info = copy_mod.deepcopy(info^)
+        var has_custom = False
+        try:
+            var _c1 = self._custom_data.get(order_book_id)
+            if _c1 is not None:
+                has_custom = True
             else:
-                info = self._py.dict()
-            info.update(custom_info^)
-        elif info is None:
-            raise "unsupported future instrument " + order_book_id
+                var _c2 = self._custom_data.get(underlying_symbol)
+                if _c2 is not None:
+                    has_custom = True
+        except:
+            pass
 
-        var tick_size_val = info^.get("tick_size")
+        var info: PythonObject
+        try:
+            info = self._default_data[order_book_id]
+        except:
+            try:
+                info = self._default_data[underlying_symbol]
+            except:
+                raise "unsupported future instrument " + order_book_id
+
+        if has_custom:
+            var copy_mod = self._py.import_module("copy")
+            var custom_dict = self._py.dict()
+            try:
+                var c1 = self._custom_data.get(order_book_id)
+                if c1 is not None:
+                    custom_dict = copy_mod.deepcopy(c1)
+                else:
+                    var c2 = self._custom_data.get(underlying_symbol)
+                    if c2 is not None:
+                        custom_dict = copy_mod.deepcopy(c2)
+            except:
+                pass
+            info = copy_mod.deepcopy(info)
+            info.update(custom_dict)
+
+        var tick_size_val = info.get("tick_size")
         var tick_size: Float64 = 1.0
         if tick_size_val is not None:
             tick_size = Float64(py=tick_size_val)
