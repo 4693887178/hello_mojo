@@ -4,9 +4,9 @@ Ported from rqalpha/data/data_proxy.py
 """
 
 from rqmojo.const import INSTRUMENT_TYPE, EXCHANGE, MARKET
+from rqmojo.model.tick import TickObject
 from rqmojo.model.instrument import Instrument, create_stock_instrument, create_future_instrument
 from rqmojo.model.bar import BarObject, create_bar_object
-from rqmojo.model.tick import TickObject, create_tick_object
 from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.utils.datetime_func import TimeRange, TimeOfDay
 from rqmojo.data.trading_dates_mixin import TradingDatesMixin, create_trading_dates_mixin_with_november_2018, create_trading_dates_mixin_with_november_2024, create_trading_dates_mixin_with_multiple_months
@@ -21,24 +21,24 @@ struct DividendInfo(Copyable, Movable, Writable, ImplicitlyCopyable):
     var ex_dividend_date: Int
     var payable_date: Int
     var round_lot: Int
-    
+
     def write_to(self, mut writer: Some[Writer]):
         writer.write("DividendInfo(ex_date=", String(self.ex_dividend_date), ", cash=", String(self.dividend_cash_before_tax), ")")
 
 
 @fieldwise_init
-struct SplitInfo(Copyable, Movable, Stringable, ImplicitlyCopyable):
+struct SplitInfo(Copyable, Movable, Writable, ImplicitlyCopyable):
     var ex_date: Int
     var split_factor: Float64
-    
+
     def __str__(self) -> String:
         return "SplitInfo(ex_date=" + String(self.ex_date) + ", factor=" + String(self.split_factor) + ")"
 
 
 @fieldwise_init
-struct Snapshot(Copyable, Movable, Stringable, ImplicitlyCopyable):
+struct Snapshot(Copyable, Movable, Writable, ImplicitlyCopyable):
     var instrument: Instrument
-    var datetime: DateTime
+    var datetime_val: DateTime
     var open: Float64
     var high: Float64
     var low: Float64
@@ -50,31 +50,31 @@ struct Snapshot(Copyable, Movable, Stringable, ImplicitlyCopyable):
     var limit_down: Float64
     var open_interest: Float64
     var prev_settlement: Float64
-    
+
     def __str__(self) -> String:
-        return "Snapshot(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ", last=" + String(self.last) + ")"
+        return "Snapshot(" + self.instrument.order_book_id() + ", last=" + String(self.last) + ")"
 
 
 @fieldwise_init
-struct OpenAuctionBar(Copyable, Movable, Stringable, ImplicitlyCopyable):
+struct OpenAuctionBar(Copyable, Movable, Writable, ImplicitlyCopyable):
     var instrument: Instrument
-    var datetime: DateTime
+    var datetime_val: DateTime
     var open: Float64
     var limit_up: Float64
     var limit_down: Float64
     var volume: Float64
     var total_turnover: Float64
-    
+
     def __str__(self) -> String:
-        return "OpenAuctionBar(" + self.instrument.order_book_id + ", " + self.datetime.__str__() + ")"
+        return "OpenAuctionBar(" + self.instrument.order_book_id() + ")"
 
 
 @fieldwise_init
-struct YieldCurvePoint(Copyable, Movable, Stringable, ImplicitlyCopyable):
+struct YieldCurvePoint(Copyable, Movable, Writable, ImplicitlyCopyable):
     var date: Int
     var tenor: String
     var rate: Float64
-    
+
     def __str__(self) -> String:
         return "YieldCurvePoint(date=" + String(self.date) + ", tenor=" + self.tenor + ", rate=" + String(self.rate) + ")"
 
@@ -103,8 +103,8 @@ def create_split_info(ex_date: Int, split_factor: Float64) -> SplitInfo:
 
 def create_snapshot(
     instrument: Instrument,
-    datetime: DateTime,
-    open: Float64,
+    dt: DateTime,
+    open_val: Float64,
     high: Float64,
     low: Float64,
     last: Float64,
@@ -118,8 +118,8 @@ def create_snapshot(
 ) -> Snapshot:
     return Snapshot(
         instrument=instrument,
-        datetime=datetime,
-        open=open,
+        datetime_val=dt,
+        open=open_val,
         high=high,
         low=low,
         last=last,
@@ -135,8 +135,8 @@ def create_snapshot(
 
 def create_open_auction_bar(
     instrument: Instrument,
-    datetime: DateTime,
-    open: Float64,
+    dt: DateTime,
+    open_val: Float64,
     limit_up: Float64,
     limit_down: Float64,
     volume: Float64,
@@ -144,8 +144,8 @@ def create_open_auction_bar(
 ) -> OpenAuctionBar:
     return OpenAuctionBar(
         instrument=instrument,
-        datetime=datetime,
-        open=open,
+        datetime_val=dt,
+        open=open_val,
         limit_up=limit_up,
         limit_down=limit_down,
         volume=volume,
@@ -206,15 +206,19 @@ struct DataProxy(Movable):
             total_turnover=10200000.0
         )
     
-    def get_tick(self, order_book_id: String, dt: DateTime) -> TickObject:
+    def get_tick(self, order_book_id: String, dt: DateTime) raises -> TickObject:
         var ins = self.get_instrument(order_book_id)
-        return create_tick_object(
-            instrument=ins^,
-            dt=dt,
-            last=10.2,
-            volume=1000000.0,
-            total_turnover=10200000.0
-        )
+        var tick_dict = Dict[String, Float64]()
+        tick_dict["last"] = 10.2
+        tick_dict["volume"] = 1000000.0
+        tick_dict["total_turnover"] = 10200000.0
+        tick_dict["open"] = 10.1
+        tick_dict["high"] = 10.5
+        tick_dict["low"] = 9.9
+        tick_dict["prev_close"] = 10.0
+        tick_dict["limit_up"] = 11.1
+        tick_dict["limit_down"] = 9.0
+        return TickObject(ins, tick_dict^)
     
     def is_suspended(self, order_book_id: String, dt: DateTime) raises -> Bool:
         if order_book_id in self._suspended_ids:
@@ -326,20 +330,18 @@ struct DataProxy(Movable):
     def _calculate_post_adjustment_factor(self, instrument: Instrument, dt: DateTime) -> Float64:
         return 1.0
     
-    def history_ticks(self, instrument: Instrument, count: Int, dt: DateTime) -> List[TickObject]:
+    def history_ticks(self, instrument: Instrument, count: Int, dt: DateTime) raises -> List[TickObject]:
         var result = List[TickObject]()
         var current_dt = dt
         var tick_count = 0
         
         while tick_count < count:
-            var tick = create_tick_object(
-                instrument=instrument,
-                dt=current_dt,
-                last=10.0 + Float64(tick_count) * 0.01,
-                volume=1000.0,
-                total_turnover=10000.0
-            )
-            result.append(tick)
+            var tick_dict2 = Dict[String, Float64]()
+            tick_dict2["last"] = 10.0 + Float64(tick_count) * 0.01
+            tick_dict2["volume"] = 1000.0
+            tick_dict2["total_turnover"] = 10000.0
+            var tick = TickObject(instrument, tick_dict2^)
+            result.append(tick^)
             tick_count += 1
             current_dt = DateTime(
                 current_dt.year, current_dt.month, current_dt.day,
@@ -356,18 +358,19 @@ struct DataProxy(Movable):
     def current_snapshot(self, instrument: Instrument, frequency: String, dt: DateTime) -> Snapshot:
         var bar = self._create_mock_bar_with_adjustment(instrument, dt, "none", dt)
         var prev_close = self._get_prev_close(instrument, dt)
-        var limit_up = bar.close * 1.1
-        var limit_down = bar.close * 0.9
-        
+        var close_val = bar.close()
+        var limit_up = close_val * 1.1
+        var limit_down = close_val * 0.9
+
         return create_snapshot(
             instrument=instrument,
-            datetime=dt,
-            open=bar.open,
-            high=bar.high,
-            low=bar.low,
-            last=bar.close,
-            volume=bar.volume,
-            total_turnover=bar.total_turnover,
+            dt=dt,
+            open_val=bar.open(),
+            high=bar.high(),
+            low=bar.low(),
+            last=close_val,
+            volume=bar.volume(),
+            total_turnover=bar.total_turnover(),
             prev_close=prev_close,
             limit_up=limit_up,
             limit_down=limit_down
@@ -376,26 +379,27 @@ struct DataProxy(Movable):
     def _get_prev_close(self, instrument: Instrument, dt: DateTime) -> Float64:
         var prev_dt = self.get_previous_trading_date(dt)
         var prev_bar = self._create_mock_bar_with_adjustment(instrument, prev_dt, "pre", dt)
-        return prev_bar.close
+        return prev_bar.close()
     
     def get_trading_minutes_for(self, instrument: Instrument, trading_dt: DateTime) -> List[DateTime]:
         var result = List[DateTime]()
-        
-        if instrument.type == INSTRUMENT_TYPE_CS or instrument.type == INSTRUMENT_TYPE_ETF or instrument.type == INSTRUMENT_TYPE_LOF:
+        var ins_type = instrument.type()
+
+        if ins_type == INSTRUMENT_TYPE.CS or ins_type == INSTRUMENT_TYPE.ETF or ins_type == INSTRUMENT_TYPE.LOF:
             for hour in range(9, 12):
                 for minute in range(31, 60):
                     result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
                 if hour == 9:
                     for minute in range(0, 31):
                         result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
-            
+
             for hour in range(13, 15):
                 for minute in range(0, 60):
                     result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
                 if hour == 14:
                     for minute in range(0, 1):
                         result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
-        elif instrument.type == INSTRUMENT_TYPE.FUTURE:
+        elif ins_type == INSTRUMENT_TYPE.FUTURE:
             for hour in range(9, 12):
                 for minute in range(0, 60):
                     result.append(DateTime(trading_dt.year, trading_dt.month, trading_dt.day, hour, minute, 0, 0))
@@ -420,7 +424,7 @@ struct DataProxy(Movable):
         return Optional[DividendInfo](dividend)
     
     def get_split(self, instrument: Instrument) -> Optional[SplitInfo]:
-        if instrument.type != INSTRUMENT_TYPE.CS:
+        if instrument.type() != INSTRUMENT_TYPE.CS:
             return Optional[SplitInfo](None)
         
         var split = create_split_info(ex_date=20230515, split_factor=1.5)
@@ -462,7 +466,7 @@ struct DataProxy(Movable):
         return result^
     
     def get_settle_price(self, instrument: Instrument, trading_dt: DateTime) -> Float64:
-        if instrument.type != INSTRUMENT_TYPE.FUTURE:
+        if instrument.type() != INSTRUMENT_TYPE.FUTURE:
             return Float64(0.0)
         
         return 3500.0
@@ -476,8 +480,8 @@ struct DataProxy(Movable):
         
         return create_open_auction_bar(
             instrument=instrument,
-            datetime=dt,
-            open=open_price,
+            dt=dt,
+            open_val=open_price,
             limit_up=limit_up,
             limit_down=limit_down,
             volume=volume,
@@ -531,6 +535,30 @@ struct DataProxy(Movable):
             result.append(DateTime(tr.year, tr.month, tr.day, 0, 0, 0, 0))
         return result^
 
+    def get_future_contracts(self, underlying_symbol: String, dt: DateTime) -> List[String]:
+        var result = List[String]()
+        if underlying_symbol == "IF":
+            result.append("IF2401")
+            result.append("IF2402")
+            result.append("IF2403")
+            result.append("IF2406")
+        elif underlying_symbol == "IC":
+            result.append("IC2401")
+            result.append("IC2402")
+            result.append("IC2403")
+            result.append("IC2406")
+        elif underlying_symbol == "IH":
+            result.append("IH2401")
+            result.append("IH2402")
+            result.append("IH2403")
+            result.append("IH2406")
+        elif underlying_symbol == "IM":
+            result.append("IM2401")
+            result.append("IM2402")
+            result.append("IM2403")
+            result.append("IM2406")
+        return result^
+
 
 def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
     var result = List[TimeRange]()
@@ -568,31 +596,6 @@ def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
     
     return result^
 
-    def get_future_contracts(self, underlying_symbol: String, dt: DateTime) -> List[String]:
-        var result = List[String]()
-        if underlying_symbol == "IF":
-            result.append("IF2401")
-            result.append("IF2402")
-            result.append("IF2403")
-            result.append("IF2406")
-        elif underlying_symbol == "IC":
-            result.append("IC2401")
-            result.append("IC2402")
-            result.append("IC2403")
-            result.append("IC2406")
-        elif underlying_symbol == "IH":
-            result.append("IH2401")
-            result.append("IH2402")
-            result.append("IH2403")
-            result.append("IH2406")
-        elif underlying_symbol == "IM":
-            result.append("IM2401")
-            result.append("IM2402")
-            result.append("IM2403")
-            result.append("IM2406")
-        return result^
-
-
 def create_data_proxy() -> DataProxy:
     return DataProxy(
         _data_source_name="default",
@@ -611,13 +614,8 @@ def create_data_proxy_with_name(name: String) -> DataProxy:
     )
 
 
-def create_data_proxy_from_source(var data_source: DataProxy, var price_board: DataProxy) -> DataProxy:
-    return DataProxy(
-        _data_source_name=data_source._data_source_name,
-        _trading_dates_mixin=data_source._trading_dates_mixin,
-        _suspended_ids=data_source._suspended_ids.copy(),
-        _custom_instruments=data_source._custom_instruments.copy(),
-    )
+def create_data_proxy_from_source(data_source: DataProxy, price_board: DataProxy) -> DataProxy:
+    return create_data_proxy_with_name(data_source._data_source_name)
 
 
 def get_available_data_range(data_proxy: DataProxy, frequency: String) -> Tuple[DateTime, DateTime]:
