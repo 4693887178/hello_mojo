@@ -1,3 +1,4 @@
+
 """
 RQAlpha Mojo - Config Module
 Ported from rqalpha/utils/config.py
@@ -22,7 +23,7 @@ from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.utils import RqAttrDict
 
 
-fn get_rqalpha_path() -> String:
+def get_rqalpha_path() -> String:
     return "~/.rqalpha"
 
 

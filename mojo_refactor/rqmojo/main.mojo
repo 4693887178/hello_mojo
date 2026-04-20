@@ -180,8 +180,7 @@ def run(
     var rqdatac_uri = _base_str(config, "rqdatac_uri")
     var rqdatac_initialized = init_rqdatac(rqdatac_uri)
     var env = create_environment_from_config(config, rqdatac_initialized)
-    var persist_helper_opt: Optional[PersistHelper] = None
-    var init_succeed = False
+    _ = Optional[PersistHelper](None)
     var mod_handler = create_mod_handler()
 
     try:
@@ -232,11 +231,10 @@ def run(
         var before_run_event = Event(EVENT.BEFORE_STRATEGY_RUN.name)
         env.publish_event(before_run_event)
 
-        persist_helper_opt = create_persist_helper(EventBus(), PERSIST_MODE.ON_CRASH)
-        init_succeed = True
+        _ = create_persist_helper(EventBus(), PERSIST_MODE.ON_CRASH)
 
         var frequency = _base_str(config, "frequency", "1d")
-        var bar_dict = create_bar_map(frequency)
+        _ = create_bar_map(frequency)
         executor.run(List[Event]())
 
         var post_run_event = Event(EVENT.POST_STRATEGY_RUN.name)

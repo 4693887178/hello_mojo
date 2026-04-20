@@ -25,10 +25,6 @@ from rqmojo.utils.config import (
     default_base_config,
     default_extra_config,
     default_mod_config,
-    RQAlphaConfig,
-    BaseConfig,
-    ExtraConfig,
-    ModConfig,
 )
 from rqmojo.utils.typing import DateTime
 from rqmojo.environment import Environment, create_environment, create_environment_from_config, set_environment, clear_environment
@@ -330,7 +326,7 @@ def run(kwargs: Dict[String, String], source_code: String = "") raises -> Int:
     return 0
 
 
-def _execute_run(cfg: RQAlphaConfig, source_code: String) raises -> Optional[Dict[String, String]]:
+def _execute_run(cfg: RqAttrDict, source_code: String) raises -> Optional[Dict[String, String]]:
     """Internal execution that creates the environment and runs the strategy.
 
     This replaces Python's main.run(cfg, source_code).

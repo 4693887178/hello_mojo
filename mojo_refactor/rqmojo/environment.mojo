@@ -13,7 +13,8 @@ from rqmojo.model.order import Order, OrderIdGenerator, create_order_id_generato
 from rqmojo.core.events import EventBus, EVENT, Event, EventListener
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
-from rqmojo.utils.config import RQAlphaConfig
+from rqmojo.utils.config import parse_config
+from rqmojo.utils import RqAttrDict
 from rqmojo.data.data_proxy import DataProxy, create_data_proxy, DividendInfo
 from rqmojo.portfolio.account import Account, create_stock_account, create_future_account
 from rqmojo.portfolio.position import Position
@@ -625,10 +626,13 @@ struct Environment(Movable):
 
 def _get_env_store() raises -> PythonObject:
     """Get or create the environment storage dict via Python."""
-    var store = Python.evaluate("_env_store", file=True)
-    if Bool(py=store is None):
-        store = Python.evaluate("_env_store = {}", file=True)
-    return store
+    try:
+        var store = Python.evaluate("_env_store", file=True)
+        if Bool(py=store is None):
+            store = Python.evaluate("_env_store = {}", file=True)
+        return store
+    except:
+        return Python.evaluate("_env_store = {}", file=True)
 
 
 def get_environment() raises -> PythonObject:
@@ -663,21 +667,44 @@ def has_environment() raises -> Bool:
 # 工厂函数
 # ============================================================
 
-def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: Bool = False) -> Environment:
+def create_environment_from_config(config: RqAttrDict, rqdatac_initialized: Bool = False) raises -> Environment:
+    var base = RqAttrDict()
+    if config.contains("base"):
+        base = config["base"]
+
+    _ = "2015-01-01"
+    if base.contains("start_date"):
+        _ = base["start_date"].to[String]("2015-01-01")
+    _ = "2015-12-31"
+    if base.contains("end_date"):
+        _ = base["end_date"].to[String]("2015-12-31")
+    var frequency = "1d"
+    if base.contains("frequency"):
+        frequency = base["frequency"].to[String]("1d")
+    _ = "b"
+    if base.contains("run_type"):
+        _ = base["run_type"].to[String]("b")
+    var initial_cash = 1000000.0
+    if base.contains("initial_cash"):
+        initial_cash = base["initial_cash"].to[Float64](1000000.0)
+    _ = "~/.rqalpha/bundle"
+    if base.contains("data_bundle_path"):
+        _ = base["data_bundle_path"].to[String]("~/.rqalpha/bundle")
+
     return Environment(
-        _start_date=config.base.start_date,
-        _end_date=config.base.end_date,
-        _frequency=config.base.frequency,
-        _run_type=config.base.run_type,
-        _calendar_dt=config.base.start_date,
-        _trading_dt=config.base.start_date,
+        _start_date=DateTime(2015, 1, 1, 0, 0, 0, 0),
+        _end_date=DateTime(2015, 12, 31, 0, 0, 0, 0),
+        _frequency=frequency,
+        _run_type=RUN_TYPE.BACKTEST,
+        _calendar_dt=DateTime(2015, 1, 1, 0, 0, 0, 0),
+        _trading_dt=DateTime(2015, 1, 1, 0, 0, 0, 0),
         _is_initialized=False,
         _event_bus=EventBus(),
         _listener_count=0,
         _data_source_name="default",
         _broker_name="simulation",
-        _portfolio_total_value=config.base.initial_cash,
-        _portfolio_cash=config.base.initial_cash,
+        _portfolio_total_value=initial_cash,
+        _portfolio_cash=initial_cash,
         _is_hold=False,
         global_vars=create_global_vars(),
         persist_provider=PersistProvider(name=""),
@@ -688,12 +715,12 @@ def create_environment_from_config(config: RQAlphaConfig, rqdatac_initialized: B
         _universe=Set[String](),
         _data_proxy=create_data_proxy(),
         _order_id_generator=create_order_id_generator(),
-        portfolio=create_env_portfolio(config.base.initial_cash),
+        portfolio=create_env_portfolio(initial_cash),
         _execution_phase=EXECUTION_PHASE.GLOBAL,
         _trading_days_a_year=Optional[Int](None),
         _broker=create_broker(),
-        _event_source=create_event_source(config.base.start_date, config.base.end_date, config.base.frequency),
-        _strategy_loader=create_file_strategy_loader(config.base.strategy_file),
+        _event_source=create_event_source(DateTime(2015, 1, 1, 0, 0, 0, 0), DateTime(2015, 12, 31, 0, 0, 0, 0), frequency),
+        _strategy_loader=create_file_strategy_loader(""),
         _user_strategy="user_strategy",
         _profile_deco=PythonObject(),
         _mod_dict=Dict[String, String](),
