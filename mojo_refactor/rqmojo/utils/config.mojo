@@ -22,7 +22,8 @@ from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.utils import RqAttrDict
 
 
-var rqalpha_path: String = "~/.rqalpha"
+fn get_rqalpha_path() -> String:
+    return "~/.rqalpha"
 
 
 def load_yaml(path: String) -> RqAttrDict:
@@ -35,7 +36,7 @@ def load_yaml(path: String) -> RqAttrDict:
     return RqAttrDict()
 
 
-def default_config() -> RqAttrDict:
+def default_config() raises -> RqAttrDict:
     """
     Get default RQAlpha configuration.
 
@@ -75,26 +76,26 @@ def default_config() -> RqAttrDict:
     conf["base"] = base
     conf["extra"] = extra
     conf["mod"] = mod
-    conf["whitelist"] = []
+    conf["whitelist"] = "[]"
 
     return conf^
 
 
-def user_config() -> RqAttrDict:
+def user_config() raises -> RqAttrDict:
     """Load user configuration from ~/.rqalpha/ directory."""
     var conf = default_config()
 
     return conf^
 
 
-def project_config() -> RqAttrDict:
+def project_config() raises -> RqAttrDict:
     """Load project configuration from current working directory."""
     var conf = default_config()
 
     return conf^
 
 
-def code_config(config: RqAttrDict, source_code: String = "") -> RqAttrDict:
+def code_config(config: RqAttrDict, source_code: String = "") raises -> RqAttrDict:
     """
     Extract __config__ from strategy source code.
     
@@ -110,7 +111,7 @@ def dump_config(config_path: String, config: RqAttrDict) raises:
     pass
 
 
-def parse_run_type(rt_str: String) -> RUN_TYPE:
+def parse_run_type(rt_str: String) raises -> RUN_TYPE:
     """
     Parse run type string to RUN_TYPE enum.
 
@@ -131,7 +132,7 @@ def parse_run_type(rt_str: String) -> RUN_TYPE:
         raise Error("RuntimeError: unknown run type: " + rt_str)
 
 
-def parse_persist_mode(mode_str: String) -> PERSIST_MODE:
+def parse_persist_mode(mode_str: String) raises -> PERSIST_MODE:
     """
     Parse persist mode string to PERSIST_MODE enum.
 
@@ -152,7 +153,7 @@ def parse_persist_mode(mode_str: String) -> PERSIST_MODE:
         raise Error("RuntimeError: unknown persist mode: " + mode_str)
 
 
-def parse_accounts(accounts: RqAttrDict) -> RqAttrDict:
+def parse_accounts(accounts: RqAttrDict) raises -> RqAttrDict:
     """
     Parse account configurations into standardized format.
 
@@ -174,7 +175,7 @@ def parse_accounts(accounts: RqAttrDict) -> RqAttrDict:
     return result^
 
 
-def parse_init_positions(positions: String) -> List[(String, Float64)]:
+def parse_init_positions(positions: String) raises -> List[String]:
     """
     Parse initial positions string.
 
@@ -184,7 +185,7 @@ def parse_init_positions(positions: String) -> List[(String, Float64)]:
     Returns list of (order_book_id, quantity) tuples.
     Raises RuntimeError if format invalid.
     """
-    var result = List[(String, Float64)]()
+    var result = List[String]()
 
     if len(positions) == 0:
         return result^
@@ -203,7 +204,7 @@ def parse_init_positions(positions: String) -> List[(String, Float64)]:
         var order_book_id = kv[0].strip()
         try:
             var quantity = Float64(kv[1].strip())
-            result.append((order_book_id, quantity))
+            result.append(order_book_id + ":" + String(quantity))
         except e:
             raise Error("RuntimeError: invalid quantity for instrument " +
                         order_book_id + ": " + kv[1])
@@ -211,7 +212,7 @@ def parse_init_positions(positions: String) -> List[(String, Float64)]:
     return result^
 
 
-def parse_future_info(future_info: RqAttrDict) -> RqAttrDict:
+def parse_future_info(future_info: RqAttrDict) raises -> RqAttrDict:
     """
     Parse futures commission information.
 
@@ -241,7 +242,7 @@ def parse_future_info(future_info: RqAttrDict) -> RqAttrDict:
         for field_key in info.keys():
             var value = info[field_key]
 
-            if field_key in ["open_commission_ratio", "close_commission_ratio", "close_commission_today_ratio"]:
+            if field_key == "open_commission_ratio" or field_key == "close_commission_ratio" or field_key == "close_commission_today_ratio":
                 if not new_info.contains(underlying_symbol):
                     new_info[underlying_symbol] = RqAttrDict()
                 var sub_dict = new_info[underlying_symbol]
@@ -272,7 +273,7 @@ def parse_future_info(future_info: RqAttrDict) -> RqAttrDict:
     return new_info^
 
 
-def deep_update(source: RqAttrDict, target: RqAttrDict) raises:
+def deep_update(source: RqAttrDict, mut target: RqAttrDict) raises:
     """
     Deep update target dict with source dict values.
 
@@ -348,15 +349,15 @@ def parse_config(
                 continue
 
             var key_parts = key.split("__")
-            var mut current = conf
+            var current = conf
             var i = 0
             while i < len(key_parts) - 1:
-                var p = key_parts[i]
+                var p = String(key_parts[i])
                 if not current.contains(p):
                     current[p] = RqAttrDict()
                 current = current[p]
                 i += 1
-            current[key_parts[len(key_parts) - 1]] = v
+            current[String(key_parts[len(key_parts) - 1])] = v
     else:
         deep_update(config_args, conf)
 
