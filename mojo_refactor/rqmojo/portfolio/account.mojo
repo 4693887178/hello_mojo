@@ -133,7 +133,7 @@ struct Account(ImplicitlyCopyable):
     def update_positions_value(mut self) -> None:
         var positions_value: Float64 = 0.0
         for i in range(len(self._positions)):
-            positions_value += self._positions[i].market_value
+            positions_value += self._positions[i].market_value()
         self.total_value = self.total_cash + positions_value
 
     def update_last_price(mut self, order_book_id: String, price: Float64) -> None:

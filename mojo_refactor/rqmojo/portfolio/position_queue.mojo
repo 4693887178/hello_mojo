@@ -29,12 +29,15 @@ struct PositionQueueItem(Copyable, Movable, ImplicitlyCopyable, Writable):
         writer.write("PositionQueueItem(date=, qty=", String(self.quantity), ")")
 
 
-struct PositionQueue(Movable):
+struct PositionQueue(Copyable, Movable):
     """FIFO queue for tracking position openings"""
     var _items: List[PositionQueueItem]
 
     def __init__(out self):
         self._items = List[PositionQueueItem]()
+
+    def __init__(out self, *, copy: Self):
+        self._items = copy._items.copy()
 
     def __init__(out self, *, deinit take: Self):
         self._items = take._items^
@@ -83,7 +86,7 @@ struct PositionQueue(Movable):
         self._items.append(PositionQueueItem(date=d, quantity=quantity))
 
     def handle_trade_open(mut self, quantity: Int) -> None:
-        """Handle an OPEN trade - append to queue (merge same-day if possible)"""
+        """Handle an OPEN trade - append/merge to queue"""
         if quantity == 0:
             return
         if len(self._items) > 0:
@@ -94,7 +97,7 @@ struct PositionQueue(Movable):
             self._items.append(PositionQueueItem(date=d, quantity=quantity))
 
     def handle_trade_close(mut self, quantity: Int) -> None:
-        """Handle a CLOSE trade - remove from queue FIFO (close old first, then today)"""
+        """Handle a CLOSE trade - remove from queue FIFO"""
         if quantity <= 0 or len(self._items) == 0:
             return
         var remaining = quantity
@@ -105,12 +108,9 @@ struct PositionQueue(Movable):
             elif abs(item.quantity) <= abs(remaining):
                 remaining += item.quantity
             else:
-                self._items[0] = PositionQueueItem(date=item.date, quantity=item.quantity + remaining)
+                new_items.append(PositionQueueItem(date=item.date, quantity=item.quantity - remaining))
                 remaining = 0
         self._items = new_items^
-        if remaining != 0 and remaining != quantity:
-            var d = DateTimeDate(1970, 1, 1)
-            self._items.append(PositionQueueItem(date=d, quantity=remaining))
 
     def get_items(self) -> List[PositionQueueItem]:
         """Get all items in the queue"""
@@ -139,7 +139,7 @@ struct PositionQueue(Movable):
         var q = PositionQueue()
         for item in self._items:
             q._items.append(item)
-        return q
+        return q^
 
 
 def create_position_queue() -> PositionQueue:

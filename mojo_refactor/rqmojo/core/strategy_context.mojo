@@ -246,19 +246,19 @@ struct StrategyContext(Movable):
                 var val_str = String(parts[1])
                 self._state_data[key_str] = val_str
     
-    def get_instrument(self, order_book_id: String) -> Instrument:
+    def get_instrument(self, order_book_id: String) raises -> Instrument:
         """获取合约信息."""
         return self._data_proxy.get_instrument(order_book_id)
-    
+
     def get_bar(self, order_book_id: String) -> BarObject:
         """获取Bar数据."""
         return self._data_proxy.get_bar(order_book_id, self.now())
-    
-    def get_tick(self, order_book_id: String) -> TickObject:
+
+    def get_tick(self, order_book_id: String) raises -> TickObject:
         """获取Tick数据."""
         return self._data_proxy.get_tick(order_book_id, self.now())
-    
-    def is_suspended(self, order_book_id: String) -> Bool:
+
+    def is_suspended(self, order_book_id: String) raises -> Bool:
         """判断是否停牌."""
         return self._data_proxy.is_suspended(order_book_id, self.now())
     

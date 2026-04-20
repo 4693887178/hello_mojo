@@ -17,7 +17,7 @@ from rqmojo.utils.typing import DateTime, DateTimeDate
 from rqmojo.portfolio.position_queue import PositionQueue, PositionQueueItem, create_position_queue
 
 
-struct Position(Movable):
+struct Position(Copyable, Movable, ImplicitlyCopyable):
     var order_book_id: String
     var direction: POSITION_DIRECTION
     var quantity: Int
@@ -45,19 +45,19 @@ struct Position(Movable):
         self.direction_factor = 1
         self.queue = create_position_queue()
 
-    def __init__(out self, *, deinit take: Self):
-        self.order_book_id = take.order_book_id^
-        self.direction = take.direction
-        self.quantity = take.quantity
-        self.old_quantity = take.old_quantity
-        self.logical_old_quantity = take.logical_old_quantity
-        self.avg_price = take.avg_price
-        self.trade_cost = take.trade_cost
-        self.transaction_cost = take.transaction_cost
-        self.prev_close = take.prev_close
-        self.last_price = take.last_price
-        self.direction_factor = take.direction_factor
-        self.queue = take.queue^
+    def __init__(out self, *, copy: Self):
+        self.order_book_id = copy.order_book_id
+        self.direction = copy.direction
+        self.quantity = copy.quantity
+        self.old_quantity = copy.old_quantity
+        self.logical_old_quantity = copy.logical_old_quantity
+        self.avg_price = copy.avg_price
+        self.trade_cost = copy.trade_cost
+        self.transaction_cost = copy.transaction_cost
+        self.prev_close = copy.prev_close
+        self.last_price = copy.last_price
+        self.direction_factor = copy.direction_factor
+        self.queue = copy.queue.copy()
 
     def __str__(self) -> String:
         return "Position(" + self.order_book_id + ", qty=" + String(self.quantity) + ", avg=" + String(self.avg_price) + ")"
@@ -91,6 +91,9 @@ struct Position(Movable):
         if self.quantity == 0:
             return 0.0
         return self.last_price * Float64(self.quantity)
+
+    def margin(self) -> Float64:
+        return 0.0
 
     def transaction_cost_val(self) -> Float64:
         return self.transaction_cost
@@ -134,23 +137,22 @@ struct Position(Movable):
         return state^
 
     def set_state(mut self, state: Dict[String, String]) -> None:
-        self.old_quantity = _get_int(state, "old_quantity", 0)
-        self.logical_old_quantity = _get_int(state, "logical_old_quantity", self.old_quantity)
+        self.old_quantity = _state_get_int(state, "old_quantity", 0)
+        self.logical_old_quantity = _state_get_int(state, "logical_old_quantity", self.old_quantity)
         if "quantity" in state:
-            self.quantity = _get_int(state, "quantity", 0)
+            self.quantity = _state_get_int(state, "quantity", 0)
         else:
-            self.quantity = self.old_quantity + _get_int(state, "today_quantity", 0)
-        self.avg_price = _get_float(state, "avg_price", 0.0)
-        self.trade_cost = _get_float(state, "trade_cost", 0.0)
-        self.transaction_cost = _get_float(state, "transaction_cost", 0.0)
-        self.prev_close = _get_float(state, "prev_close", 0.0)
+            self.quantity = self.old_quantity + _state_get_int(state, "today_quantity", 0)
+        self.avg_price = _state_get_float(state, "avg_price", 0.0)
+        self.trade_cost = _state_get_float(state, "trade_cost", 0.0)
+        self.transaction_cost = _state_get_float(state, "transaction_cost", 0.0)
+        self.prev_close = _state_get_float(state, "prev_close", 0.0)
 
     def before_trading(mut self) -> Float64:
         self.old_quantity = self.quantity
         self.logical_old_quantity = self.old_quantity
         self.trade_cost = 0.0
         self.transaction_cost = 0.0
-        self.prev_close = 0.0
         return 0.0
 
     def _update_costs(mut self, trade: Trade) -> None:
@@ -196,15 +198,31 @@ struct Position(Movable):
         return 0
 
 
-fn _get_int(state: Dict[String, String], key: String, default: Int) -> Int:
-    if key in state:
-        return Int(state[key])
-    return default
+def _state_get_int(state: Dict[String, String], key: String, default: Int) -> Int:
+    var result = default
+    try:
+        if key in state:
+            var val = state[key]
+            try:
+                result = Int(val)
+            except:
+                pass
+    except:
+        pass
+    return result
 
-fn _get_float(state: Dict[String, String], key: String, default: Float64) -> Float64:
-    if key in state:
-        return Float64(state[key])
-    return default
+def _state_get_float(state: Dict[String, String], key: String, default: Float64) -> Float64:
+    var result = default
+    try:
+        if key in state:
+            var val = state[key]
+            try:
+                result = Float64(val)
+            except:
+                pass
+    except:
+        pass
+    return result
 
 
 def create_position(
@@ -227,7 +245,7 @@ def create_position(
     pos.direction_factor = 1 if direction == POSITION_DIRECTION.LONG else -1
     if quantity > 0:
         pos.queue.handle_trade_init(quantity)
-    return pos
+    return pos^
 
 
 def create_stock_position(order_book_id: String, quantity: Int = 0, avg_price: Float64 = 0.0) -> Position:
@@ -243,13 +261,17 @@ def create_future_position(
     return create_position(order_book_id, direction, quantity, avg_price)
 
 
-struct PositionProxy(Movable):
+struct PositionProxy(Copyable, Movable, ImplicitlyCopyable):
     var long_pos: Position
     var short_pos: Position
 
-    def __init__(out self, *, deinit long_pos: Position, deinit short_pos: Position):
-        self.long_pos = long_pos^
-        self.short_pos = short_pos^
+    def __init__(out self, long_pos: Position, short_pos: Position):
+        self.long_pos = long_pos
+        self.short_pos = short_pos
+
+    def __init__(out self, *, copy: Self):
+        self.long_pos = copy.long_pos
+        self.short_pos = copy.short_pos
 
     def __str__(self) -> String:
         return "PositionProxy(" + self.long_pos.order_book_id + ")"
@@ -290,51 +312,89 @@ struct PositionProxy(Movable):
 
 
 def create_position_proxy(long_pos: Position, short_pos: Position) -> PositionProxy:
-    return PositionProxy(long_pos=long_pos^, short_pos=short_pos^)
+    return PositionProxy(long_pos=long_pos, short_pos=short_pos)
 
 
-struct PositionProxyDict:
-    var _data: Dict[String, Tuple[Position, Position]]
+def _hash_key(key: String) -> Int:
+    var h = 0
+    for c in key.codepoints():
+        h = h * 31 + Int(c)
+    return h
+
+
+struct PositionProxyDict(Copyable, Movable, ImplicitlyCopyable):
+    var _keys: List[String]
+    var _long_positions: Dict[Int, Position]
+    var _short_positions: Dict[Int, Position]
 
     def __init__(out self):
-        self._data = Dict[String, Tuple[Position, Position]]()
+        self._keys = List[String]()
+        self._long_positions = Dict[Int, Position]()
+        self._short_positions = Dict[Int, Position]()
 
-    def __init__(out self, *, deinit take: Self):
-        self._data = take._data^
+    def __init__(out self, *, copy: Self):
+        self._keys = copy._keys.copy()
+        self._long_positions = copy._long_positions.copy()
+        self._short_positions = copy._short_positions.copy()
 
     def keys(self) -> List[String]:
-        var result = List[String]()
-        for key in self._data.keys():
-            result.append(key)
-        return result^
+        return self._keys.copy()
 
     def len(self) -> Int:
-        return len(self._data)
+        return len(self._keys)
 
     def contains(self, order_book_id: String) -> Bool:
-        return order_book_id in self._data
+        return order_book_id in self._keys
 
     def get_proxy(mut self, order_book_id: String) -> PositionProxy:
-        if order_book_id not in self._data:
+        var h = _hash_key(order_book_id)
+        var is_new = True
+        for kh in self._long_positions.keys():
+            if kh == h:
+                is_new = False
+                break
+        if is_new:
             var long_pos = create_position(order_book_id, POSITION_DIRECTION.LONG)
             var short_pos = create_position(order_book_id, POSITION_DIRECTION.SHORT)
-            self._data[order_book_id] = (long_pos^, short_pos^)
-        var entry = self._data.remove(order_book_id)
-        var long_pos = entry.get[0, Position]()
-        var short_pos = entry.get[1, Position]()
-        self._data[order_book_id] = (long_pos^, short_pos^)
-        return create_position_proxy(long_pos^, short_pos^)
+            self._long_positions[h] = long_pos^
+            self._short_positions[h] = short_pos^
+            self._keys.append(order_book_id)
+            return create_position_proxy(
+                create_position(order_book_id, POSITION_DIRECTION.LONG),
+                create_position(order_book_id, POSITION_DIRECTION.SHORT)
+            )
+        else:
+            var lp = Position()
+            var sp = Position()
+            try:
+                lp = self._long_positions[h]
+                sp = self._short_positions[h]
+            except:
+                pass
+            return PositionProxy(long_pos=lp, short_pos=sp)
 
     def set_positions(mut self, order_book_id: String, long_pos: Position, short_pos: Position) -> None:
-        self._data[order_book_id] = (long_pos^, short_pos^)
+        var h = _hash_key(order_book_id)
+        self._long_positions[h] = long_pos
+        self._short_positions[h] = short_pos
+        if order_book_id not in self._keys:
+            self._keys.append(order_book_id)
 
     def items(self) -> List[Tuple[String, PositionProxy]]:
         var result = List[Tuple[String, PositionProxy]]()
-        for key in self._data.keys():
-            var entry = self._data.remove(key)
-            var long_pos = entry.get[0, Position]()
-            var short_pos = entry.get[1, Position]()
-            var proxy = create_position_proxy(long_pos^, short_pos^__)
-            result.append((key, proxy^))
-            self._data[key] = (entry.get[0, Position](), entry.get[1, Position]())
+        for key in self._keys:
+            var h = _hash_key(key)
+            var long_pos = Position()
+            var short_pos = Position()
+            try:
+                long_pos = self._long_positions[h]
+                short_pos = self._short_positions[h]
+            except:
+                pass
+            var proxy = PositionProxy(long_pos=long_pos, short_pos=short_pos)
+            result.append((key, proxy))
         return result^
+
+
+def create_position_proxy_dict() -> PositionProxyDict:
+    return PositionProxyDict()
