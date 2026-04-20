@@ -42,15 +42,24 @@ struct IsTradingValidator(FrontendValidatorInterface, Movable, Writable):
             reason = reason.replace("{order_book_id}", order.order_book_id)
             return reason
 
-        if self._data_proxy.is_suspended(order.order_book_id, trading_dt):
-            var instrument = self._data_proxy.get_instrument(order.order_book_id)
-            if instrument.type() == INSTRUMENT_TYPE.CS:
-                var reason = gettext(
-                    "Order Creation Failed: security {order_book_id} is suspended on {date}"
-                )
-                reason = reason.replace("{order_book_id}", order.order_book_id)
-                reason = reason.replace("{date}", _format_date(trading_dt))
-                return reason
+        var is_suspended: Bool
+        try:
+            is_suspended = self._data_proxy.is_suspended(order.order_book_id, trading_dt)
+        except:
+            is_suspended = False
+
+        if is_suspended:
+            try:
+                var instrument = self._data_proxy.get_instrument(order.order_book_id)
+                if instrument.type() == INSTRUMENT_TYPE.CS:
+                    var reason = gettext(
+                        "Order Creation Failed: security {order_book_id} is suspended on {date}"
+                    )
+                    reason = reason.replace("{order_book_id}", order.order_book_id)
+                    reason = reason.replace("{date}", _format_date(trading_dt))
+                    return reason
+            except:
+                pass
 
         return None
 

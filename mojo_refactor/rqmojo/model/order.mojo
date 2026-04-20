@@ -392,11 +392,14 @@ def create_order_with_id(
     style: OrderStyle,
     position_effect: Optional[POSITION_EFFECT] = None,
     frozen_price: Float64 = 0.0,
+    trading_dt: Optional[DateTime] = None,
 ) -> Order:
     var actual_frozen_price = frozen_price
     if style.style_type == ORDER_TYPE.LIMIT:
         actual_frozen_price = style.limit_price
     var now = DateTime(1970, 1, 1, 0, 0, 0, 0)
+    if trading_dt is not None:
+        now = trading_dt.value()
     return Order(
         order_id=order_id,
         order_book_id=order_book_id,

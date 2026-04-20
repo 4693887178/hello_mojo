@@ -31,7 +31,7 @@ def validate_cash(
     order: Order,
     cash: Float64,
     data_proxy: DataProxy,
-) -> Optional[String]:
+) raises -> Optional[String]:
     var instrument = data_proxy.get_instrument(order.order_book_id)
     var cost_money = instrument.calc_cash_occupation(
         order.frozen_price,
@@ -79,13 +79,16 @@ struct CashValidator(FrontendValidatorInterface, Movable, Writable):
             return None
 
         var acc = account.value()
-        var instrument = self._data_proxy.get_instrument(order.order_book_id)
-        var available_cash = acc.available_cash_for(instrument)
-        return validate_cash(
-            order=order,
-            cash=available_cash,
-            data_proxy=self._data_proxy,
-        )
+        try:
+            var instrument = self._data_proxy.get_instrument(order.order_book_id)
+            var available_cash = acc.available_cash_for(instrument)
+            return validate_cash(
+                order=order,
+                cash=available_cash,
+                data_proxy=self._data_proxy,
+            )
+        except:
+            return None
 
     def validate_cancellation(self, order: Order, account: Optional[Account]) -> Optional[String]:
         return None

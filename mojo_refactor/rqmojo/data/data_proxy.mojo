@@ -157,8 +157,12 @@ def create_open_auction_bar(
 struct DataProxy(Movable):
     var _data_source_name: String
     var _trading_dates_mixin: TradingDatesMixin
-    
-    def get_instrument(self, order_book_id: String) -> Instrument:
+    var _suspended_ids: Dict[String, Bool]
+    var _custom_instruments: Dict[String, Instrument]
+
+    def get_instrument(self, order_book_id: String) raises -> Instrument:
+        if order_book_id in self._custom_instruments:
+            return self._custom_instruments[order_book_id]
         return create_stock_instrument(order_book_id, order_book_id, DateTime(1990, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
 
     def get_active_instrument(self, order_book_id: String, dt: DateTime) raises -> Instrument:
@@ -212,7 +216,9 @@ struct DataProxy(Movable):
             total_turnover=10200000.0
         )
     
-    def is_suspended(self, order_book_id: String, dt: DateTime) -> Bool:
+    def is_suspended(self, order_book_id: String, dt: DateTime) raises -> Bool:
+        if order_book_id in self._suspended_ids:
+            return self._suspended_ids[order_book_id]
         return False
     
     def count_trading_dates(self, start_date: DateTimeDate, end_date: DateTimeDate) -> Int:
@@ -566,21 +572,27 @@ def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
 def create_data_proxy() -> DataProxy:
     return DataProxy(
         _data_source_name="default",
-        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months()
+        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months(),
+        _suspended_ids=Dict[String, Bool](),
+        _custom_instruments=Dict[String, Instrument](),
     )
 
 
 def create_data_proxy_with_name(name: String) -> DataProxy:
     return DataProxy(
         _data_source_name=name,
-        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months()
+        _trading_dates_mixin=create_trading_dates_mixin_with_multiple_months(),
+        _suspended_ids=Dict[String, Bool](),
+        _custom_instruments=Dict[String, Instrument](),
     )
 
 
 def create_data_proxy_from_source(var data_source: DataProxy, var price_board: DataProxy) -> DataProxy:
     return DataProxy(
         _data_source_name=data_source._data_source_name,
-        _trading_dates_mixin=data_source._trading_dates_mixin
+        _trading_dates_mixin=data_source._trading_dates_mixin,
+        _suspended_ids=data_source._suspended_ids.copy(),
+        _custom_instruments=data_source._custom_instruments.copy(),
     )
 
 
