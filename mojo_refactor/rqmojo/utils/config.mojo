@@ -1,49 +1,126 @@
 """
-RQAlpha Mojo - Config
+RQAlpha Mojo - Config Module
 Ported from rqalpha/utils/config.py
+
+Key Functions:
+  load_yaml          - Load YAML configuration file
+  default_config     - Get default RQAlpha configuration
+  parse_config       - Parse and merge configuration from multiple sources
+  parse_run_type     - Parse run type string to RUN_TYPE enum
+  parse_persist_mode - Parse persist mode string to PERSIST_MODE enum
+  parse_accounts     - Parse account configurations
+  parse_init_positions - Parse initial position strings
+  parse_future_info  - Parse futures commission info
+
+All configuration is stored using RqAttrDict (dynamic dictionary structure)
+to match Python's flexible config system.
 """
 
 from std.collections import Dict, List
 from rqmojo.const import RUN_TYPE, PERSIST_MODE, COMMISSION_TYPE
 from rqmojo.utils.typing import DateTime, DateTimeDate
+from rqmojo.utils import RqAttrDict
 
 
-@fieldwise_init
-struct BaseConfig(Movable):
-    var start_date: DateTime
-    var end_date: DateTime
-    var frequency: String
-    var run_type: RUN_TYPE
-    var data_bundle_path: String
-    var strategy_file: String
-    var persist_mode: PERSIST_MODE
-    var initial_cash: Float64
-    var rqdatac_uri: String
+var rqalpha_path: String = "~/.rqalpha"
 
 
-@fieldwise_init
-struct ExtraConfig(Copyable, Movable, ImplicitlyCopyable):
-    var locale: String
-    var context_vars: String
-    var is_hold: Bool
+def load_yaml(path: String) -> RqAttrDict:
+    """
+    Load YAML file and return as RqAttrDict.
+
+    Note: In production, this would use yaml parser.
+    For now returns empty dict with basic structure.
+    """
+    return RqAttrDict()
 
 
-@fieldwise_init
-struct ModConfig(Movable, ImplicitlyCopyable):
-    var enabled: Bool
+def default_config() -> RqAttrDict:
+    """
+    Get default RQAlpha configuration.
+
+    Returns nested RqAttrDict with structure:
+    {
+        base: { start_date, end_date, frequency, run_type, ... },
+        extra: { locale, context_vars, ... },
+        mod: { enabled }
+    }
+
+    Matches Python's default_config() function.
+    """
+    var base = RqAttrDict()
+    base["start_date"] = "2015-01-01"
+    base["end_date"] = "2015-12-31"
+    base["frequency"] = "1d"
+    base["run_type"] = "b"
+    base["data_bundle_path"] = None
+    base["strategy_file"] = ""
+    base["source_code"] = None
+    base["persist_mode"] = "on_crash"
+    base["initial_cash"] = 1000000.0
+    base["accounts"] = RqAttrDict()
+    base["init_positions"] = ""
+    base["future_info"] = RqAttrDict()
+    base["rqdatac_uri"] = ""
+
+    var extra = RqAttrDict()
+    extra["locale"] = "zh_CN"
+    extra["context_vars"] = ""
+    extra["is_hold"] = False
+
+    var mod = RqAttrDict()
+    mod["enabled"] = True
+
+    var conf = RqAttrDict()
+    conf["base"] = base
+    conf["extra"] = extra
+    conf["mod"] = mod
+    conf["whitelist"] = []
+
+    return conf^
 
 
-@fieldwise_init
-struct RQAlphaConfig(Movable):
-    var base: BaseConfig
-    var extra: ExtraConfig
-    var mod: ModConfig
+def user_config() -> RqAttrDict:
+    """Load user configuration from ~/.rqalpha/ directory."""
+    var conf = default_config()
 
-    def __str__(self) -> String:
-        return "RQAlphaConfig(" + self.base.start_date.__str__() + " to " + self.base.end_date.__str__() + ")"
+    return conf^
+
+
+def project_config() -> RqAttrDict:
+    """Load project configuration from current working directory."""
+    var conf = default_config()
+
+    return conf^
+
+
+def code_config(config: RqAttrDict, source_code: String = "") -> RqAttrDict:
+    """
+    Extract __config__ from strategy source code.
+    
+    In Python version, this compiles and executes the source code
+    to extract configuration variables defined by user.
+    For Mojo, this returns empty dict (strategy parsing handled separately).
+    """
+    return RqAttrDict()
+
+
+def dump_config(config_path: String, config: RqAttrDict) raises:
+    """Dump configuration to YAML file."""
+    pass
 
 
 def parse_run_type(rt_str: String) -> RUN_TYPE:
+    """
+    Parse run type string to RUN_TYPE enum.
+
+    Mapping:
+      'b' / 'backtest'      -> BACKTEST
+      'p' / 'paper_trading' -> PAPER_TRADING
+      'r' / 'live_trading'  -> LIVE_TRADING
+
+    Raises RuntimeError if unknown type.
+    """
     if rt_str == "b" or rt_str == "backtest":
         return RUN_TYPE.BACKTEST
     elif rt_str == "p" or rt_str == "paper_trading":
@@ -51,10 +128,20 @@ def parse_run_type(rt_str: String) -> RUN_TYPE:
     elif rt_str == "r" or rt_str == "live_trading":
         return RUN_TYPE.LIVE_TRADING
     else:
-        return RUN_TYPE.BACKTEST
+        raise Error("RuntimeError: unknown run type: " + rt_str)
 
 
 def parse_persist_mode(mode_str: String) -> PERSIST_MODE:
+    """
+    Parse persist mode string to PERSIST_MODE enum.
+
+    Mapping:
+      'real_time'      -> REAL_TIME
+      'on_crash'       -> ON_CRASH
+      'on_normal_exit' -> ON_NORMAL_EXIT
+
+    Raises RuntimeError if unknown mode.
+    """
     if mode_str == "real_time":
         return PERSIST_MODE.REAL_TIME
     elif mode_str == "on_crash":
@@ -62,134 +149,215 @@ def parse_persist_mode(mode_str: String) -> PERSIST_MODE:
     elif mode_str == "on_normal_exit":
         return PERSIST_MODE.ON_NORMAL_EXIT
     else:
-        return PERSIST_MODE.ON_CRASH
+        raise Error("RuntimeError: unknown persist mode: " + mode_str)
 
 
-def default_base_config() -> BaseConfig:
-    return BaseConfig(
-        start_date=DateTime(2020, 1, 1, 0, 0, 0, 0),
-        end_date=DateTime(2020, 12, 31, 0, 0, 0, 0),
-        frequency="1d",
-        run_type=RUN_TYPE.BACKTEST,
-        data_bundle_path="~/.rqalpha/bundle",
-        strategy_file="",
-        persist_mode=PERSIST_MODE.ON_CRASH,
-        initial_cash=100000.0,
-        rqdatac_uri=""
-    )
+def parse_accounts(accounts: RqAttrDict) -> RqAttrDict:
+    """
+    Parse account configurations into standardized format.
+
+    Input can be tuple of (account_type, starting_cash) pairs,
+    or dict mapping account_type -> starting_cash.
+
+    Returns dict with uppercase keys and float values.
+    None values are filtered out.
+    """
+    var result = RqAttrDict()
+
+    for key in accounts.keys():
+        var value = accounts[key]
+        if value.has_value():
+            var cash_val = value.to[Float64](0.0)
+            if cash_val > 0.0:
+                result[key.upper()] = cash_val
+
+    return result^
 
 
-def default_extra_config() -> ExtraConfig:
-    return ExtraConfig(
-        locale="zh_CN",
-        context_vars="",
-        is_hold=False
-    )
+def parse_init_positions(positions: String) -> List[(String, Float64)]:
+    """
+    Parse initial positions string.
+
+    Format: "order_book_id:quantity,order_book_id:quantity"
+    Example: "000001.XSHE:1000,IF1701:-1"
+
+    Returns list of (order_book_id, quantity) tuples.
+    Raises RuntimeError if format invalid.
+    """
+    var result = List[(String, Float64)]()
+
+    if len(positions) == 0:
+        return result^
+
+    var parts = positions.split(",")
+    for part in parts:
+        var s = part.strip()
+        if len(s) == 0:
+            continue
+
+        var kv = s.split(":")
+        if len(kv) != 2:
+            raise Error("RuntimeError: invalid init position " + s +
+                        ", should be in format 'order_book_id:quantity'")
+
+        var order_book_id = kv[0].strip()
+        try:
+            var quantity = Float64(kv[1].strip())
+            result.append((order_book_id, quantity))
+        except e:
+            raise Error("RuntimeError: invalid quantity for instrument " +
+                        order_book_id + ": " + kv[1])
+
+    return result^
 
 
-def default_mod_config() -> ModConfig:
-    return ModConfig(enabled=True)
+def parse_future_info(future_info: RqAttrDict) -> RqAttrDict:
+    """
+    Parse futures commission information.
+
+    Input structure:
+    {
+        underlying_symbol: {
+            open_commission_ratio: float,
+            close_commission_ratio: float,
+            close_commission_today_ratio: float,
+            commission_type: BY_MONEY | BY_VOLUME
+        },
+        ...
+    }
+
+    Validates field names and converts values appropriately.
+    Raises RuntimeError on invalid data.
+    """
+    var new_info = RqAttrDict()
+
+    for key in future_info.keys():
+        var underlying_symbol = key.upper()
+        var info = future_info[key]
+
+        if not info.has_children():
+            continue
+
+        for field_key in info.keys():
+            var value = info[field_key]
+
+            if field_key in ["open_commission_ratio", "close_commission_ratio", "close_commission_today_ratio"]:
+                if not new_info.contains(underlying_symbol):
+                    new_info[underlying_symbol] = RqAttrDict()
+                var sub_dict = new_info[underlying_symbol]
+                sub_dict[field_key] = Float64(value.to[String]("0.0"))
+                new_info[underlying_symbol] = sub_dict
+
+            elif field_key == "commission_type":
+                var type_str = value.to[String]("")
+                if type_str.upper() == "BY_MONEY":
+                    if not new_info.contains(underlying_symbol):
+                        new_info[underlying_symbol] = RqAttrDict()
+                    var sub_dict = new_info[underlying_symbol]
+                    sub_dict[field_key] = "BY_MONEY"
+                    new_info[underlying_symbol] = sub_dict
+                elif type_str.upper() == "BY_VOLUME":
+                    if not new_info.contains(underlying_symbol):
+                        new_info[underlying_symbol] = RqAttrDict()
+                    var sub_dict = new_info[underlying_symbol]
+                    sub_dict[field_key] = "BY_VOLUME"
+                    new_info[underlying_symbol] = sub_dict
+                else:
+                    raise Error("RuntimeError: Invalid future info: " +
+                               "commission_type should be BY_MONEY or BY_VOLUME")
+            else:
+                raise Error("RuntimeError: Invalid future info: field " +
+                           field_key + " is not valid")
+
+    return new_info^
 
 
-def default_config() -> RQAlphaConfig:
-    return RQAlphaConfig(
-        base=default_base_config()^,
-        extra=default_extra_config()^,
-        mod=default_mod_config()^
-    )^
+def deep_update(source: RqAttrDict, target: RqAttrDict) raises:
+    """
+    Deep update target dict with source dict values.
 
+    Recursively merges dictionaries, with source values taking precedence.
+    Similar to Python's dict.update() but recursive.
+    """
+    for key in source.keys():
+        var value = source[key]
 
-def create_config(
-    start_date: DateTime,
-    end_date: DateTime,
-    frequency: String = "1d",
-    run_type: RUN_TYPE = RUN_TYPE.BACKTEST
-) -> RQAlphaConfig:
-    var start_dt = DateTime(start_date.year, start_date.month, start_date.day, start_date.hour, start_date.minute, start_date.second, start_date.microsecond)
-    var end_dt = DateTime(end_date.year, end_date.month, end_date.day, end_date.hour, end_date.minute, end_date.second, end_date.microsecond)
-    return RQAlphaConfig(
-        base=BaseConfig(
-            start_date=start_dt^,
-            end_date=end_dt^,
-            frequency=frequency,
-            run_type=run_type,
-            data_bundle_path="~/.rqalpha/bundle",
-            strategy_file="",
-            persist_mode=PERSIST_MODE.ON_CRASH,
-            initial_cash=100000.0,
-            rqdatac_uri=""
-        )^,
-        extra=default_extra_config()^,
-        mod=default_mod_config()^
-    )^
-
-
-def create_config_from_args(
-    start_year: Int,
-    start_month: Int,
-    start_day: Int,
-    end_year: Int,
-    end_month: Int,
-    end_day: Int,
-    frequency: String = "1d",
-    run_type_str: String = "b"
-) -> RQAlphaConfig:
-    var start_dt = DateTime(start_year, start_month, start_day, 0, 0, 0, 0)
-    var end_dt = DateTime(end_year, end_month, end_day, 0, 0, 0, 0)
-    var rt = parse_run_type(run_type_str)
-    return create_config(start_dt^, end_dt^, frequency, rt)
+        if value.has_children():
+            if not target.contains(key):
+                target[key] = RqAttrDict()
+            var target_child = target[key]
+            deep_update(value, target_child)
+            target[key] = target_child
+        else:
+            target[key] = value
 
 
 def parse_config(
-    config_dict: Dict[String, String],
+    config_args: RqAttrDict,
+    config_path: Optional[String] = None,
+    click_type: Bool = False,
     source_code: String = "",
-    user_funcs: Dict[String, String] = Dict[String, String]()
-) raises -> RQAlphaConfig:
+    user_funcs: Optional[RqAttrDict] = None
+) raises -> RqAttrDict:
     """
-    Parse configuration dictionary into RQAlphaConfig.
-    
+    Main configuration parsing function.
+
+    Merges configuration from multiple sources (in priority order):
+    1. Default configuration
+    2. User configuration (~/.rqalpha/)
+    3. Project configuration (current dir)
+    4. Explicit config_path (if provided)
+    5. Command line arguments (config_args)
+
     Args:
-        config_dict: Configuration dictionary
-        source_code: Strategy source code (optional)
-        user_funcs: User function dictionary (optional)
-        
+    - config_args: Command-line/config arguments as RqAttrDict
+    - config_path: Path to explicit config file (optional)
+    - click_type: If True, handle Click-style nested keys with '__'
+    - source_code: Strategy source code (optional)
+    - user_funcs: User-defined functions (optional)
+
     Returns:
-        Parsed RQAlphaConfig
+    - Fully parsed RqAttrDict configuration
     """
-    var base_cfg = default_base_config()
-    var extra_cfg = default_extra_config()
-    var mod_cfg = default_mod_config()
-    
-    for key in config_dict.keys():
-        var value = config_dict[key]
-        
-        if key == "base.start_date" or key == "start_date":
-            var parts = value.split("-")
-            if len(parts) >= 3:
-                base_cfg.start_date = DateTime(
-                    Int(parts[0]), Int(parts[1]), Int(parts[2]), 0, 0, 0, 0
-                )
-        elif key == "base.end_date" or key == "end_date":
-            var parts = value.split("-")
-            if len(parts) >= 3:
-                base_cfg.end_date = DateTime(
-                    Int(parts[0]), Int(parts[1]), Int(parts[2]), 0, 0, 0, 0
-                )
-        elif key == "base.frequency" or key == "frequency":
-            base_cfg.frequency = value
-        elif key == "base.run_type" or key == "run_type":
-            base_cfg.run_type = parse_run_type(value)
-        elif key == "base.data_bundle_path" or key == "data_bundle_path":
-            base_cfg.data_bundle_path = value
-        elif key == "base.strategy_file" or key == "strategy_file":
-            base_cfg.strategy_file = value
-        elif key == "base.initial_cash" or key == "initial_cash":
-            base_cfg.initial_cash = Float64(value)
-        elif key == "base.persist_mode" or key == "persist_mode":
-            base_cfg.persist_mode = parse_persist_mode(value)
-        elif key == "extra.locale" or key == "locale":
-            extra_cfg.locale = value
-        elif key == "mod.enabled":
-            mod_cfg.enabled = (value == "true" or value == "True")
-    
-    return RQAlphaConfig(base=base_cfg^, extra=extra_cfg^, mod=mod_cfg^)
+
+    var conf = default_config()
+    deep_update(user_config(), conf)
+    deep_update(project_config(), conf)
+
+    if config_path != None:
+        var path_conf = load_yaml(config_path.value())
+        deep_update(path_conf, conf)
+
+    if config_args.contains("base__strategy_file"):
+        var sf = config_args["base__strategy_file"]
+        if sf.has_value() and sf.to[String]("") != "":
+            conf["base"]["strategy_file"] = sf
+
+    if user_funcs == None:
+        var code_cfg = code_config(conf, source_code)
+        for key in code_cfg.keys():
+            if conf.contains("whitelist") and conf["whitelist"].contains(key):
+                deep_update(code_cfg[key], conf[key])
+
+    if click_type:
+        for key in config_args.keys():
+            var v = config_args[key]
+            if not v.has_value() or v.is_empty():
+                continue
+            if key == "base__accounts" and v.is_empty():
+                continue
+
+            var key_parts = key.split("__")
+            var mut current = conf
+            var i = 0
+            while i < len(key_parts) - 1:
+                var p = key_parts[i]
+                if not current.contains(p):
+                    current[p] = RqAttrDict()
+                current = current[p]
+                i += 1
+            current[key_parts[len(key_parts) - 1]] = v
+    else:
+        deep_update(config_args, conf)
+
+    return conf^

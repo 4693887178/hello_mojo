@@ -299,16 +299,16 @@ struct Environment(Movable):
     def get_last_price(self, order_book_id: String) -> Float64:
         return self._data_proxy.get_last_price(order_book_id)
 
-    def get_instrument(self, order_book_id: String) -> Instrument:
+    def get_instrument(self, order_book_id: String) raises -> Instrument:
         return self._data_proxy.get_instrument(order_book_id)
 
     def get_last_price_from_proxy(self, order_book_id: String) -> Float64:
         return self._data_proxy.get_last_price(order_book_id)
 
-    def get_all_instruments_from_proxy(self, type: String = "") -> List[Instrument]:
+    def get_all_instruments_from_proxy(self, type: String = "") raises -> List[Instrument]:
         return self._data_proxy.get_all_instruments(type)
     
-    def is_suspended_from_proxy(self, order_book_id: String, dt: DateTime) -> Bool:
+    def is_suspended_from_proxy(self, order_book_id: String, dt: DateTime) raises -> Bool:
         return self._data_proxy.is_suspended(order_book_id, dt)
     
     def get_previous_trading_date(self, dt: DateTime) -> DateTime:
