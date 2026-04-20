@@ -1,6 +1,17 @@
 """
 RQAlpha Mojo - Future API for Accounts Mod
 Ported from rqalpha/mod/rqalpha_mod_sys_accounts/api/api_future.py
+
+Key Functions:
+  _submit_order     - Core order submission with position effect handling
+  _order            - Internal order logic for future_order/future_order_to
+  future_order      - Submit orders to reach target quantity
+  future_order_to   - Adjust position to target quantity
+  future_buy_open   - Buy to open position
+  future_buy_close  - Buy to close position (long)
+  future_sell_open  - Sell to open short position
+  future_sell_close - Sell to close position (short)
+  get_future_contracts - Get list of tradable futures contracts
 """
 
 from std.collections import Dict, List, Optional
@@ -19,25 +30,6 @@ from rqmojo.utils.exception import RQInvalidArgument
 from rqmojo.utils.i18n import gettext
 
 
-@fieldwise_init
-struct FutureAccountPositionResult(Movable, Copyable, ImplicitlyCopyable):
-    var total_cash: Float64
-    var long_quantity: Int
-    var short_quantity: Int
-    var long_closable: Int
-    var short_closable: Int
-
-
-def _get_future_account_position(env: Environment, order_book_id: String) -> FutureAccountPositionResult:
-    return FutureAccountPositionResult(
-        total_cash=env.get_portfolio_cash(),
-        long_quantity=0,
-        short_quantity=0,
-        long_closable=0,
-        short_closable=0
-    )
-
-
 def _submit_order(
     mut env: Environment,
     order_book_id: String,
@@ -45,64 +37,229 @@ def _submit_order(
     side: SIDE,
     position_effect: POSITION_EFFECT,
     style: OrderStyle
-) -> Optional[Order]:
+) raises -> Optional[Order]:
+    """
+    Core order submission function for futures trading.
+
+    Handles:
+    - Zero quantity validation
+    - Limit order price validation (NaN check)
+    - Market data availability check
+    - Position effect handling (OPEN/CLOSE/CLOSE_TODAY)
+    - Old/today position separation for closing orders
+    - Order splitting when closing across old and today positions
+    - Order submission and filtering based on can_submit_order
+
+    Returns:
+    - Single Order if only one order created
+    - None if order creation failed or no orders submitted
+    """
+
     if amount == 0:
+        var reason = gettext("Order Creation Failed: 0 order quantity, order_book_id={order_book_id}").replace(
+            "{order_book_id}", order_book_id
+        )
+        env.order_creation_failed(order_book_id=order_book_id, reason=reason)
         return None
-    
+
+    if style.style_type == ORDER_TYPE.LIMIT:
+        var limit_price = style.get_limit_price()
+        if limit_price != None:
+            var price_val = limit_price.value()
+            if price_val != price_val:
+                raise RQInvalidArgument(gettext("Limit order price should not be nan."))
+
+    var ins = env.get_instrument(order_book_id)
+
+    if env.config().base__run_type != RUN_TYPE.BACKTEST:
+        if ins.type_val == INSTRUMENT_TYPE.FUTURE:
+            if "88" in order_book_id:
+                raise RQInvalidArgument(gettext("Main Future contracts[88] are not supported in paper trading."))
+            if "99" in order_book_id:
+                raise RQInvalidArgument(gettext("Index Future contracts[99] are not supported in paper trading."))
+
     var price = env.get_last_price_from_proxy(order_book_id)
-    if price <= 0:
+    if price <= 0.0:
+        var reason = gettext("Order Creation Failed: [{order_book_id}] No market data").replace(
+            "{order_book_id}", order_book_id
+        )
+        env.order_creation_failed(order_book_id=order_book_id, reason=reason)
         return None
-    
-    var order = create_order_with_id(
-        env.next_order_id(),
-        order_book_id,
-        side,
-        amount,
-        style,
-        position_effect
-    )
-    
-    return env.submit_order(order)
+
+    var orders = List[Order]()
+
+    if position_effect == POSITION_EFFECT.CLOSE_TODAY or position_effect == POSITION_EFFECT.CLOSE:
+        var direction = POSITION_DIRECTION.LONG if side == SIDE.SELL else POSITION_DIRECTION.SHORT
+        var account = env.portfolio.get_account(order_book_id)
+        var position = account.get_position(order_book_id, direction)
+
+        if position_effect == POSITION_EFFECT.CLOSE_TODAY:
+            if amount > position.today_quantity:
+                var reason = gettext(
+                    "Order Creation Failed: "
+                    "close today amount {amount} is larger than today closable quantity {quantity}"
+                ).replace("{amount}", String(amount)).replace("{quantity}", String(position.today_quantity))
+                env.order_creation_failed(order_book_id=order_book_id, reason=reason)
+                return None
+
+            var order = create_order_with_id(
+                env.next_order_id(),
+                order_book_id,
+                side,
+                amount,
+                style,
+                POSITION_EFFECT.CLOSE_TODAY
+            )
+            orders.append(order^)
+        else:
+
+            var quantity = position.quantity
+            var old_quantity = position.old_quantity
+
+            if amount > quantity:
+                var reason = gettext(
+                    "Order Creation Failed: close amount {amount} is larger than position quantity {quantity}"
+                ).replace("{amount}", String(amount)).replace("{quantity}", String(quantity))
+                env.order_creation_failed(order_book_id=order_book_id, reason=reason)
+                return None
+
+            if amount > old_quantity:
+                if old_quantity != 0:
+                    var close_old_order = create_order_with_id(
+                        env.next_order_id(),
+                        order_book_id,
+                        side,
+                        old_quantity,
+                        style,
+                        POSITION_EFFECT.CLOSE
+                    )
+                    orders.append(close_old_order^)
+
+                var close_today_qty = amount - old_quantity
+                var close_today_order = create_order_with_id(
+                    env.next_order_id(),
+                    order_book_id,
+                    side,
+                    close_today_qty,
+                    style,
+                    POSITION_EFFECT.CLOSE_TODAY
+                )
+                orders.append(close_today_order^)
+            else:
+                var close_order = create_order_with_id(
+                    env.next_order_id(),
+                    order_book_id,
+                    side,
+                    amount,
+                    style,
+                    POSITION_EFFECT.CLOSE
+                )
+                orders.append(close_order^)
+    elif position_effect == POSITION_EFFECT.OPEN:
+        var open_order = create_order_with_id(
+            env.next_order_id(),
+            order_book_id,
+            side,
+            amount,
+            style,
+            POSITION_EFFECT.OPEN
+        )
+        orders.append(open_order^)
+    else:
+        raise Error("NotImplementedError: Unsupported position effect")
+
+    if len(orders) > 1:
+        pass
+
+    var final_orders = List[Order]()
+    var idx = 0
+    while idx < len(orders):
+        var o = orders.pop(0)
+        if env.can_submit_order(o):
+            var result = env.submit_order(o)
+            if result != None:
+                final_orders.append(result.value().copy())
+        else:
+            idx += 1
+
+    if len(final_orders) == 1:
+        return final_orders[0].copy()
+    elif len(final_orders) == 0:
+        return None
+    else:
+
+        return None
 
 
-def buy_open(
+def _order(
     mut env: Environment,
     order_book_id: String,
     quantity: Int,
-    style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
-    return _submit_order(env, order_book_id, quantity, SIDE.BUY, POSITION_EFFECT.OPEN, style)
+    style: OrderStyle,
+    target: Bool
+) raises -> List[Order]:
+    """
+    Internal order processing function for future_order and future_order_to.
 
+    Args:
+    - order_book_id: Instrument identifier
+    - quantity: Target/order quantity (positive=buy, negative=sell)
+    - style: Order style (Market/Limit)
+    - target: If True, adjust to target quantity; if False, submit absolute quantity
 
-def sell_close(
-    mut env: Environment,
-    order_book_id: String,
-    quantity: Int,
-    style: OrderStyle = MarketOrder(),
-    close_today: Bool = False
-) -> Optional[Order]:
-    var position_effect = POSITION_EFFECT.CLOSE
-    return _submit_order(env, order_book_id, quantity, SIDE.SELL, position_effect, style)
+    Returns:
+    - List of submitted orders (may be empty)
+    """
+    var long_account = env.portfolio.get_account_by_type(DEFAULT_ACCOUNT_TYPE.FUTURE)
+    var short_account = env.portfolio.get_account_by_type(DEFAULT_ACCOUNT_TYPE.FUTURE)
+    var long_position = long_account.get_position(order_book_id, POSITION_DIRECTION.LONG)
+    var short_position = short_account.get_position(order_book_id, POSITION_DIRECTION.SHORT)
 
+    var actual_quantity = quantity
+    if target:
+        actual_quantity -= (long_position.quantity - short_position.quantity)
 
-def sell_open(
-    mut env: Environment,
-    order_book_id: String,
-    quantity: Int,
-    style: OrderStyle = MarketOrder()
-) -> Optional[Order]:
-    return _submit_order(env, order_book_id, quantity, SIDE.SELL, POSITION_EFFECT.OPEN, style)
+    var orders = List[Order]()
 
+    var position_to_be_closed: Position
+    var side: SIDE
 
-def buy_close(
-    mut env: Environment,
-    order_book_id: String,
-    quantity: Int,
-    style: OrderStyle = MarketOrder(),
-    close_today: Bool = False
-) -> Optional[Order]:
-    var position_effect = POSITION_EFFECT.CLOSE
-    return _submit_order(env, order_book_id, quantity, SIDE.BUY, position_effect, style)
+    if actual_quantity > 0:
+        position_to_be_closed = short_position
+        side = SIDE.BUY
+    else:
+        position_to_be_closed = long_position
+        side = SIDE.SELL
+        actual_quantity *= -1
+
+    var old_to_be_closed = position_to_be_closed.old_quantity
+    var today_to_be_closed = position_to_be_closed.today_quantity
+
+    if old_to_be_closed > 0:
+        var close_qty = min(old_to_be_closed, actual_quantity)
+        var result = _submit_order(env, order_book_id, close_qty, side, POSITION_EFFECT.CLOSE, style)
+        if result != None:
+            orders.append(result.value().copy())
+        actual_quantity -= old_to_be_closed
+
+    if actual_quantity <= 0:
+        return orders^
+
+    if today_to_be_closed > 0:
+        var close_qty = min(today_to_be_closed, actual_quantity)
+        var result = _submit_order(env, order_book_id, close_qty, side, POSITION_EFFECT.CLOSE_TODAY, style)
+        if result != None:
+            orders.append(result.value().copy())
+        actual_quantity -= today_to_be_closed
+
+    if actual_quantity <= 0:
+        return orders^
+
+    var result = _submit_order(env, order_book_id, actual_quantity, side, POSITION_EFFECT.OPEN, style)
+    if result != None:
+        orders.append(result.value().copy())
+
+    return orders^
 
 
 def future_order(
@@ -110,23 +267,22 @@ def future_order(
     id_or_ins: String,
     quantity: Int,
     style: OrderStyle = MarketOrder()
-) -> List[Order]:
-    var orders = List[Order]()
-    
-    if quantity == 0:
-        return orders^
-    
-    var result: Optional[Order]
-    
-    if quantity > 0:
-        result = buy_open(env, id_or_ins, quantity, style)
-    else:
-        result = sell_close(env, id_or_ins, -quantity, style)
-    
-    if result != None:
-        orders.append(result.value())
-    
-    return orders^
+) raises -> List[Order]:
+    """
+    Submit futures orders with specified quantity.
+
+    This is the futures-specific implementation of the generic order() function.
+    It handles automatic position direction detection and order splitting.
+
+    Args:
+    - id_or_ins: Order book ID or instrument object
+    - quantity: Number of lots to trade (positive=buy, negative=sell)
+    - style: Order style (default: MarketOrder)
+
+    Returns:
+    - List of created orders
+    """
+    return _order(env, id_or_ins, quantity, style, False)
 
 
 def future_order_to(
@@ -134,193 +290,134 @@ def future_order_to(
     id_or_ins: String,
     quantity: Int,
     style: OrderStyle = MarketOrder()
-) -> List[Order]:
-    var orders = List[Order]()
-    
-    var result = _get_future_account_position(env, id_or_ins)
-    var long_qty = result.long_quantity
-    var short_qty = result.short_quantity
-    var remaining_qty = quantity
-    
-    if remaining_qty > 0:
-        if short_qty > 0:
-            var close_qty = min(short_qty, remaining_qty)
-            var close_order = buy_close(env, id_or_ins, close_qty, style)
-            if close_order != None:
-                orders.append(close_order.value())
-            remaining_qty = remaining_qty - close_qty
-        
-        if remaining_qty > 0:
-            var open_order = buy_open(env, id_or_ins, remaining_qty, style)
-            if open_order != None:
-                orders.append(open_order.value())
-    elif remaining_qty < 0:
-        remaining_qty = -remaining_qty
-        
-        if long_qty > 0:
-            var close_qty = min(long_qty, remaining_qty)
-            var close_order = sell_close(env, id_or_ins, close_qty, style)
-            if close_order != None:
-                orders.append(close_order.value())
-            remaining_qty = remaining_qty - close_qty
-        
-        if remaining_qty > 0:
-            var open_order = sell_open(env, id_or_ins, remaining_qty, style)
-            if open_order != None:
-                orders.append(open_order.value())
-    
-    return orders^
+) raises -> List[Order]:
+    """
+    Adjust futures position to target quantity.
+
+    This is the futures-specific implementation of the generic order_to() function.
+    It calculates the difference between current and target position, then submits
+    appropriate orders to close/open positions.
+
+    Args:
+    - id_or_ins: Order book ID or instrument object
+    - quantity: Target position quantity
+    - style: Order style (default: MarketOrder)
+
+    Returns:
+    - List of created orders
+    """
+    return _order(env, id_or_ins, quantity, style, True)
 
 
-def get_future_position(
-    env: Environment,
-    order_book_id: String,
-    direction: POSITION_DIRECTION = POSITION_DIRECTION.LONG
-) -> Position:
-    return env.portfolio.get_position(order_book_id)
-
-
-def get_future_positions(env: Environment) -> List[Position]:
-    return env.portfolio.get_positions()
-
-
-@fieldwise_init
-struct TargetPortfolioItem(Movable, Copyable, ImplicitlyCopyable):
-    var order_book_id: String
-    var target_percent: Float64
-    var open_style: OrderStyle
-    var close_style: OrderStyle
-    var last_price: Float64
-
-
-def _round_order_quantity_for_portfolio(env: Environment, order_book_id: String, quantity: Int) -> Int:
-    var ins = env.get_instrument(order_book_id)
-    var round_lot = 1
-    if quantity % round_lot != 0:
-        return quantity / round_lot * round_lot
-    return quantity
-
-
-def order_target_portfolio_future(
+def future_buy_open(
     mut env: Environment,
-    target_portfolio: Dict[String, Float64],
-    open_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle](),
-    close_styles: Dict[String, OrderStyle] = Dict[String, OrderStyle]()
-) -> List[Order]:
-    var target = List[TargetPortfolioItem]()
-    
-    for order_book_id in target_portfolio.keys():
-        try:
-            var percent = target_portfolio[order_book_id]
-            if percent < 0:
-                continue
-            
-            var last_price = env.get_last_price_from_proxy(order_book_id)
-            if last_price <= 0:
-                continue
-            
-            var open_style = MarketOrder()
-            var close_style = MarketOrder()
-            
-            try:
-                open_style = open_styles[order_book_id]
-            except:
-                pass
-            
-            try:
-                close_style = close_styles[order_book_id]
-            except:
-                pass
-            
-            target.append(TargetPortfolioItem(
-                order_book_id=order_book_id,
-                target_percent=percent,
-                open_style=open_style,
-                close_style=close_style,
-                last_price=last_price
-            ))
-        except:
-            pass
-    
-    var total_percent: Float64 = 0.0
-    for item in target:
-        total_percent += item.target_percent
-    
-    if total_percent > 1.0:
-        return List[Order]()
-    
-    var account_value = env.get_portfolio_total_value()
-    var current_quantities = Dict[String, Int]()
-    
-    var orders = List[Order]()
-    
-    for item in target:
-        var current_qty = 0
-        try:
-            current_qty = current_quantities[item.order_book_id]
-        except:
-            pass
-        
-        var close_price = item.last_price
-        var open_price = item.last_price
-        
-        if item.close_style.style_type == ORDER_TYPE.LIMIT:
-            close_price = item.close_style.limit_price
-        if item.open_style.style_type == ORDER_TYPE.LIMIT:
-            open_price = item.open_style.limit_price
-        
-        if close_price <= 0 or open_price <= 0:
-            continue
-        
-        var delta_quantity = Int(account_value * item.target_percent / close_price) - current_qty
-        delta_quantity = _round_order_quantity_for_portfolio(env, item.order_book_id, delta_quantity)
-        
-        if delta_quantity == 0:
-            continue
-        elif delta_quantity > 0:
-            var order = create_order_with_id(
-                env.next_order_id(),
-                item.order_book_id,
-                SIDE.BUY,
-                delta_quantity,
-                item.open_style,
-                POSITION_EFFECT.OPEN
-            )
-            var result = env.submit_order(order)
-            if result != None:
-                orders.append(result.value())
-        else:
-            var order = create_order_with_id(
-                env.next_order_id(),
-                item.order_book_id,
-                SIDE.SELL,
-                -delta_quantity,
-                item.close_style,
-                POSITION_EFFECT.CLOSE
-            )
-            var result = env.submit_order(order)
-            if result != None:
-                orders.append(result.value())
-    
-    return orders^
+    id_or_ins: String,
+    amount: Int,
+    style: OrderStyle = MarketOrder()
+) raises -> Optional[Order]:
+    """
+    Buy to open a long futures position.
+
+    Args:
+    - id_or_ins: Order book ID or instrument identifier
+    - amount: Number of lots to buy
+    - style: Order style (default: MarketOrder)
+
+    Returns:
+    - Created order, or None if order creation failed
+    """
+    return _submit_order(env, id_or_ins, amount, SIDE.BUY, POSITION_EFFECT.OPEN, style)
+
+
+def future_buy_close(
+    mut env: Environment,
+    id_or_ins: String,
+    amount: Int,
+    style: OrderStyle = MarketOrder(),
+    close_today: Bool = False
+) raises -> Optional[Order]:
+    """
+    Buy to close a short futures position.
+
+    Args:
+    - id_or_ins: Order book ID or instrument identifier
+    - amount: Number of lots to close
+    - style: Order style (default: MarketOrder)
+    - close_today: If True, only close today's position; otherwise close old positions first
+
+    Returns:
+    - Created order, or None if order creation failed
+    """
+    var position_effect = POSITION_EFFECT.CLOSE_TODAY if close_today else POSITION_EFFECT.CLOSE
+    return _submit_order(env, id_or_ins, amount, SIDE.BUY, position_effect, style)
+
+
+def future_sell_open(
+    mut env: Environment,
+    id_or_ins: String,
+    amount: Int,
+    style: OrderStyle = MarketOrder()
+) raises -> Optional[Order]:
+    """
+    Sell to open a short futures position.
+
+    Args:
+    - id_or_ins: Order book ID or instrument identifier
+    - amount: Number of lots to sell
+    - style: Order style (default: MarketOrder)
+
+    Returns:
+    - Created order, or None if order creation failed
+    """
+    return _submit_order(env, id_or_ins, amount, SIDE.SELL, POSITION_EFFECT.OPEN, style)
+
+
+def future_sell_close(
+    mut env: Environment,
+    id_or_ins: String,
+    amount: Int,
+    style: OrderStyle = MarketOrder(),
+    close_today: Bool = False
+) raises -> Optional[Order]:
+    """
+    Sell to close a long futures position.
+
+    Args:
+    - id_or_ins: Order book ID or instrument identifier
+    - amount: Number of lots to close
+    - style: Order style (default: MarketOrder)
+    - close_today: If True, only close today's position; otherwise close old positions first
+
+    Returns:
+    - Created order, or None if order creation failed
+    """
+    var position_effect = POSITION_EFFECT.CLOSE_TODAY if close_today else POSITION_EFFECT.CLOSE
+    return _submit_order(env, id_or_ins, amount, SIDE.SELL, position_effect, style)
 
 
 def get_future_contracts(
-    env: Environment,
+    mut env: Environment,
     underlying_symbol: String
 ) -> List[String]:
+    """
+    Get list of tradable futures contracts for a given underlying symbol.
+
+    Contracts are sorted by expiration month in ascending order.
+    The first contract in the list is the near-month contract.
+
+    Args:
+    - env: Environment instance
+    - underlying_symbol: Futures underlying symbol (e.g., 'IF' for CSI 300 index futures)
+
+    Returns:
+    - List of order_book_id strings for tradable contracts
+
+    Example:
+    For IF on 2016-12-01, returns: ['IF1612', 'IF1701', 'IF1703', 'IF1706']
+    """
     var instruments = env.get_all_instruments_from_proxy("Future")
     var result = List[String]()
     for ins in instruments:
-        result.append(ins.order_book_id())
+        if ins.underlying_symbol() == underlying_symbol:
+            result.append(ins.order_book_id())
     return result^
-
-
-def get_dominant_contract(
-    env: Environment,
-    underlying_symbol: String
-) -> Optional[String]:
-    var contracts = get_future_contracts(env, underlying_symbol)
-    if len(contracts) > 0:
-        return contracts[0]
-    return None

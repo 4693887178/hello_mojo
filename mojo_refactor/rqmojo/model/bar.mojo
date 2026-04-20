@@ -1,17 +1,23 @@
 """
 RQAlpha Mojo - Bar Object Model
 Ported from rqalpha/model/bar.py
+
+Design Notes (vs Python original):
+  Python uses class inheritance: BarObject(PartialBarObject)
+  Mojo has no class inheritance -> BarObject contains all fields from both
+  Python uses cached_property decorator -> Mojo methods compute on each call
+  Python NANDict is {name: np.nan} -> Mojo BarData struct with NAN_VALUE
 """
 
 from std.collections import Dict, List, Set
+from std.python import Python, PythonObject
 from rqmojo.const import INSTRUMENT_TYPE, RUN_TYPE, EXECUTION_PHASE, EXCHANGE
 from rqmojo.model.instrument import Instrument, create_stock_instrument
 from rqmojo.utils.typing import DateTime
 from rqmojo.utils.datetime_func import convert_int_to_datetime
-from python import Python, PythonObject
 
 
-comptime BAR_NAMES: Int = 16
+comptime BAR_NAMES_COUNT: Int = 16
 comptime NAN_VALUE: Float64 = 0.0 / 0.0
 
 
@@ -62,12 +68,15 @@ def create_nan_bar_data() -> BarData:
 
 @fieldwise_init
 struct PartialBarObject(Writable, Movable):
+    """
+    Port of Python PartialBarObject.
+    Used for open_auction bars - has a subset of BarObject properties.
+    Python original does NOT have close, high, low (those are BarObject-only).
+    """
     var _order_book_id: String
     var _instrument: Instrument
     var _dt: DateTime
     var _data: BarData
-    var _limit_up: Float64
-    var _limit_down: Float64
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write("PartialBarObject(", self._order_book_id, ", dt=")
@@ -93,15 +102,6 @@ struct PartialBarObject(Writable, Movable):
     def open(self) -> Float64:
         return self._data.open
 
-    def close(self) -> Float64:
-        return self._data.close
-
-    def high(self) -> Float64:
-        return self._data.high
-
-    def low(self) -> Float64:
-        return self._data.low
-
     def last(self) -> Float64:
         return self._data.last
 
@@ -112,25 +112,39 @@ struct PartialBarObject(Writable, Movable):
         return self._data.total_turnover
 
     def limit_up(self) -> Float64:
-        if self._limit_up != 0.0:
-            return self._limit_up
+        """
+        Returns limit_up price, or NaN if value is 0 or missing.
+        Matches Python: try/except with v != 0 check.
+        """
         var v = self._data.limit_up
         if v != 0.0:
             return v
         return NAN_VALUE
 
     def limit_down(self) -> Float64:
-        if self._limit_down != 0.0:
-            return self._limit_down
+        """
+        Returns limit_down price, or NaN if value is 0 or missing.
+        Matches Python: try/except with v != 0 check.
+        """
         var v = self._data.limit_down
         if v != 0.0:
             return v
         return NAN_VALUE
 
     def prev_close(self) -> Float64:
+        """
+        Returns prev_close from data.
+        Note: Python version falls back to Environment.data_proxy.get_prev_close()
+        when KeyError, but Mojo standalone version returns data value directly.
+        """
         return self._data.prev_close
 
     def prev_settlement(self) -> Float64:
+        """
+        Returns prev_settlement from data.
+        Note: Python version falls back to Environment.data_proxy.get_prev_settlement()
+        when KeyError, but Mojo standalone version returns data value directly.
+        """
         return self._data.prev_settlement
 
     def isnan(self) -> Bool:
@@ -139,14 +153,17 @@ struct PartialBarObject(Writable, Movable):
 
 @fieldwise_init
 struct BarObject(Writable, Copyable, Movable, ImplicitlyCopyable):
+    """
+    Port of Python BarObject.
+    Contains all PartialBarObject fields plus: close, high, low, settlement,
+    open_interest, discount_rate, acc_net_value, unit_net_value, basis_spread,
+    is_trading, suspended.
+    """
     var _order_book_id: String
     var _instrument: Instrument
     var _dt: DateTime
     var _data: BarData
-    var _limit_up: Float64
-    var _limit_down: Float64
     var _suspended: Bool
-    var _trading: Bool
 
     def write_to(self, mut writer: Some[Writer]):
         writer.write("BarObject(", self._order_book_id, ", ")
@@ -182,6 +199,7 @@ struct BarObject(Writable, Copyable, Movable, ImplicitlyCopyable):
         return self._data.low
 
     def last(self) -> Float64:
+        """In BarObject, last always equals close (matches Python)."""
         return self._data.close
 
     def volume(self) -> Float64:
@@ -191,16 +209,12 @@ struct BarObject(Writable, Copyable, Movable, ImplicitlyCopyable):
         return self._data.total_turnover
 
     def limit_up(self) -> Float64:
-        if self._limit_up != 0.0:
-            return self._limit_up
         var v = self._data.limit_up
         if v != 0.0:
             return v
         return NAN_VALUE
 
     def limit_down(self) -> Float64:
-        if self._limit_down != 0.0:
-            return self._limit_down
         var v = self._data.limit_down
         if v != 0.0:
             return v
@@ -228,33 +242,57 @@ struct BarObject(Writable, Copyable, Movable, ImplicitlyCopyable):
         return self._data.unit_net_value
 
     def basis_spread(self) -> Float64:
+        """
+        Basis spread calculation.
+        Python original has complex INDEX_MAP logic for futures in PAPER_TRADING mode.
+        Mojo version returns stored data value (standalone mode without Environment).
+        For full parity with Python's paper trading mode, this would need Environment access.
+        """
         return self._data.basis_spread
 
     def is_trading(self) -> Bool:
+        """True if volume > 0."""
         return self._data.volume > 0
 
     def suspended(self) -> Bool:
+        """
+        Checks if bar is suspended.
+        Python: checks isnan first, then calls data_proxy.is_suspended().
+        Mojo: uses stored _suspended flag (set during construction).
+        """
+        if self.isnan():
+            return True
         return self._suspended
 
     def isnan(self) -> Bool:
         return self._data.close != self._data.close
 
-    def vwap(self) -> Float64:
-        if self._data.volume > 0:
-            return self._data.total_turnover / self._data.volume
-        else:
-            return 0.0
-
-    def mavg(self, n: Int, frequency: String = "1d") -> Float64:
-        return self._data.close
-
-    def vwap_avg(self, n: Int, frequency: String = "1d") -> Float64:
+    def vwap(self, intervals: Int, frequency: String = "1d") -> Float64:
+        """
+        Volume Weighted Average Price.
+        Python original uses data_proxy.fast_history() for multi-bar VWAP.
+        Mojo standalone: returns single-bar VWAP (total_turnover / volume).
+        Signature matches Python: vwap(intervals, frequency='1d').
+        """
         if self._data.volume > 0:
             return self._data.total_turnover / self._data.volume
         return 0.0
 
+    def mavg(self, intervals: Int, frequency: String = "1d") -> Float64:
+        """
+        Moving average of close prices over given intervals.
+        Python original uses data_proxy.fast_history() for historical data.
+        Mojo standalone: returns current close (stub for single-bar context).
+        Signature matches Python: mavg(intervals, frequency='1d').
+        """
+        return self._data.close
+
 
 struct BarMap(Movable):
+    """
+    Port of Python BarMap.
+    Dictionary-like container mapping order_book_id -> BarObject.
+    """
     var _dt: DateTime
     var _frequency: String
     var _cache: Dict[String, BarObject]
@@ -310,19 +348,22 @@ struct BarMap(Movable):
                 pass
         return result^
 
-    def __contains__(self, key: String) -> Bool:
+    def contains(self, key: String) -> Bool:
         return key in self._universe
 
     def len(self) -> Int:
         return len(self._universe)
 
-    def get(mut self, key: String) raises -> BarObject:
+    def get(mut self, key: String) -> BarObject:
         try:
             return self._cache[key]
         except:
             var nan_bar = create_nan_bar_object(key)
             self._cache[key] = nan_bar
             return nan_bar
+
+    def set(mut self, key: String, bar: BarObject) -> None:
+        self._cache[key] = bar
 
     def __str__(self) -> String:
         var keys_list = List[String]()
@@ -379,11 +420,9 @@ def create_bar_object(
     return BarObject(
         _order_book_id=order_book_id,
         _instrument=ins,
-        _dt=dt,        _data=data,
-        _limit_up=limit_up,
-        _limit_down=limit_down,
-        _suspended=suspended,
-        _trading=trading
+        _dt=dt,
+        _data=data,
+        _suspended=suspended
     )
 
 
@@ -398,10 +437,7 @@ def create_bar_object_with_instrument(
         _instrument=instrument,
         _dt=dt,
         _data=data,
-        _limit_up=data.limit_up,
-        _limit_down=data.limit_down,
-        _suspended=suspended,
-        _trading=data.volume > 0
+        _suspended=suspended
     )
 
 
@@ -426,6 +462,20 @@ def create_simple_bar(
     )
 
 
+def create_partial_bar_object(
+    order_book_id: String,
+    instrument: Instrument,
+    dt: DateTime,
+    data: BarData
+) -> PartialBarObject:
+    return PartialBarObject(
+        _order_book_id=order_book_id,
+        _instrument=instrument,
+        _dt=dt,
+        _data=data
+    )
+
+
 def create_nan_bar_object(order_book_id: String) -> BarObject:
     var nan_data = create_nan_bar_data()
     var ins = create_stock_instrument(order_book_id, order_book_id, DateTime(1970, 1, 1, 0, 0, 0, 0), EXCHANGE.XSHG)
@@ -434,10 +484,7 @@ def create_nan_bar_object(order_book_id: String) -> BarObject:
         _instrument=ins,
         _dt=DateTime(1970, 1, 1, 0, 0, 0, 0),
         _data=nan_data,
-        _limit_up=NAN_VALUE,
-        _limit_down=NAN_VALUE,
-        _suspended=True,
-        _trading=False
+        _suspended=True
     )
 
 

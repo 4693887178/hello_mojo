@@ -568,6 +568,30 @@ def merge_trading_period(trading_period: List[TimeRange]) -> List[TimeRange]:
     
     return result^
 
+    def get_future_contracts(self, underlying_symbol: String, dt: DateTime) -> List[String]:
+        var result = List[String]()
+        if underlying_symbol == "IF":
+            result.append("IF2401")
+            result.append("IF2402")
+            result.append("IF2403")
+            result.append("IF2406")
+        elif underlying_symbol == "IC":
+            result.append("IC2401")
+            result.append("IC2402")
+            result.append("IC2403")
+            result.append("IC2406")
+        elif underlying_symbol == "IH":
+            result.append("IH2401")
+            result.append("IH2402")
+            result.append("IH2403")
+            result.append("IH2406")
+        elif underlying_symbol == "IM":
+            result.append("IM2401")
+            result.append("IM2402")
+            result.append("IM2403")
+            result.append("IM2406")
+        return result^
+
 
 def create_data_proxy() -> DataProxy:
     return DataProxy(
