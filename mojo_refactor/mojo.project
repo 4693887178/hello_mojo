@@ -1,0 +1,13 @@
+[project]
+name = "rqmojo"
+version = "0.1.0"
+
+[paths]
+rqmojo = "rqmojo"
+morrow = "rqmojo/third_party/morrow.mojo/morrow"
+argmojo = "rqmojo/third_party/argmojo/src/argmojo"
+emberjson = "rqmojo/third_party/EmberJson/emberjson"
+numojo = "rqmojo/third_party/NuMojo/numojo"
+yaml = "rqmojo/third_party/mojo-yaml/src/yaml"
+bison = "rqmojo/third_party/bison/bison"
+
