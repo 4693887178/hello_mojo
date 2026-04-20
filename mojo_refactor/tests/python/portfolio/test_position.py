@@ -43,13 +43,13 @@ class TestPositionQueueStandalone:
     def test_pop_exact_quantity(self):
         q = PositionQueue()
         q.handle_trade(100, date(2024, 1, 15))
-        q.pop(100)
+        q.handle_trade(-100, date(2024, 1, 16), close_today=False)
         assert len(q.queue) == 0
 
     def test_pop_partial_quantity(self):
         q = PositionQueue()
         q.handle_trade(100, date(2024, 1, 15))
-        q.pop(70)
+        q.handle_trade(-70, date(2024, 1, 16), close_today=False)
         assert len(q.queue) == 1
         assert sum(item[1] for item in q.queue) == 30
 
@@ -57,20 +57,21 @@ class TestPositionQueueStandalone:
         q = PositionQueue()
         q.handle_trade(50, date(2024, 1, 15))
         q.handle_trade(30, date(2024, 1, 16))
-        q.pop(60)
+        q.handle_trade(-60, date(2024, 1, 17), close_today=False)
         assert len(q.queue) == 1
         assert sum(item[1] for item in q.queue) == 20
 
     def test_pop_more_than_available(self):
         q = PositionQueue()
         q.handle_trade(100, date(2024, 1, 15))
-        q.pop(150)
-        assert len(q.queue) == 0
+        q.handle_trade(-150, date(2024, 1, 16), close_today=False)
+        assert len(q.queue) == 1
+        assert q.queue[0][1] == -50
 
     def test_pop_zero(self):
         q = PositionQueue()
         q.handle_trade(100, date(2024, 1, 15))
-        q.pop(0)
+        q.handle_trade(0, date(2024, 1, 16), close_today=False)
         assert len(q.queue) == 1
 
     def test_clear(self):
